@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* سایت همیشه تیره است: کلاس‌های dark: کامپوننت‌های 21st.dev با کلاس .dark روی html فعال می‌شوند */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ───── توکن‌های طراحی: همهٔ رنگ‌ها فقط از این‌جا عوض می‌شوند ───── */
 @theme {
   --color-iron: #07090c;        /* پس‌زمینه — آهن */
@@ -14,6 +17,28 @@
   --font-sans: "Vazirmatn Variable", Tahoma, sans-serif;
 
   --ease-lift: cubic-bezier(.2, .8, .2, 1);
+
+  /* توکن‌های shadcn که کامپوننت‌های 21st.dev استفاده می‌کنند — به پالت برند نگاشت شده‌اند */
+  --color-background: var(--color-iron);
+  --color-foreground: var(--color-chalk);
+  --color-card: var(--color-steel);
+  --color-card-foreground: var(--color-chalk);
+  --color-popover: var(--color-steel);
+  --color-popover-foreground: var(--color-chalk);
+  --color-primary: var(--color-plate);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-steel-2);
+  --color-secondary-foreground: var(--color-chalk);
+  --color-muted: var(--color-steel-2);
+  --color-muted-foreground: var(--color-rubber);
+  --color-accent: var(--color-steel-2);
+  --color-accent-foreground: var(--color-chalk);
+  --color-destructive: #e5484d;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-steel-2);
+  --color-input: var(--color-steel-2);
+  --color-ring: var(--color-plate-hi);
+  --radius: 1rem;
 }
 
 @layer base {
@@ -25,30 +50,14 @@
   }
   section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5.5rem); }
   /* بخش‌های پایین صفحه تا نزدیک شدن به دید رندر نمی‌شوند */
-  main > section:not(#top), main > div > section { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+  
   ::selection { background: var(--color-plate); color: white; }
   :focus-visible { outline: 2px solid var(--color-plate-hi); outline-offset: 3px; border-radius: 4px; }
-  html.lenis, html.lenis body { height: auto; }
-  .lenis.lenis-smooth { scroll-behavior: auto !important; }
-}
-
-@layer components {
-  /* دکمهٔ اصلی با glow آبی ملایم */
-  .btn-plate {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-plate px-6 py-3 font-bold text-white
-           transition-[box-shadow,background-color] duration-300;
-    box-shadow: 0 0 0 0 rgb(76 143 217 / 0);
-  }
-  .btn-plate:hover { background: var(--color-plate-hi); box-shadow: 0 0 32px 2px rgb(76 143 217 / .45); }
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-steel-2 px-6 py-3 font-bold text-chalk
-           transition-colors duration-300 hover:border-plate-hi;
-  }
-  .section-title {
-    @apply font-black leading-[1.05] tracking-tight text-chalk;
-    font-size: clamp(2.25rem, 5.5vw, 4.5rem);
-  }
-  .lede { @apply text-lg leading-8 text-rubber max-w-[60ch]; }
+  html { scroll-behavior: smooth; }
+  /* فاصلهٔ حروف (tracking) اتصال حروف فارسی را می‌شکند؛ برای متن فارسیِ کامپوننت‌ها خنثی می‌شود */
+  :where([dir="rtl"]) * { letter-spacing: normal !important; }
+  /* uppercase روی فارسی بی‌اثر است؛ فونت فارسی برای همهٔ کامپوننت‌ها */
+  .font-dmSans, .font-mono { font-family: var(--font-sans) !important; }
 }
 
 /* کاهش حرکت */
@@ -73,4 +82,3 @@
 .maplibregl-ctrl-attrib { font-size: 10px; background: rgb(7 9 12 / .7) !important; color: var(--color-rubber); }
 .maplibregl-ctrl-attrib a { color: var(--color-rubber) !important; }
 
-@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(50%); } }

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test('هیرو شعار برند را نشان می‌دهد و صفحه RTL است', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('ورزش کن')
+  await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('ورزش کن')
 })
 
 test('نزدیک‌ترین شعبه با موقعیت کاربر پیدا می‌شود', async ({ page, context }) => {
@@ -24,8 +24,8 @@ test('فیلتر بانوان فقط شعبه‌های دارای سالن با�
 
 test('پکیج‌ها با تخفیف جشنواره نمایش داده می‌شوند', async ({ page }) => {
   await page.goto('/packages')
-  await expect(page.getByRole('heading', { name: 'دوازده‌ماهه' })).toBeVisible()
-  await expect(page.getByText('٪ جشنواره').first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: /دوازده‌ماهه/ })).toBeVisible()
+  await expect(page.getByText('٪ تخفیف جشنواره').first()).toBeVisible()
 })
 
 test('فرم مشاوره خطای شمارهٔ نامعتبر را نشان می‌دهد', async ({ page }) => {
@@ -33,7 +33,7 @@ test('فرم مشاوره خطای شمارهٔ نامعتبر را نشان م�
   await page.getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
   await page.getByLabel('شمارهٔ موبایل').fill('12345')
   await page.getByRole('button', { name: 'ثبت درخواست مشاوره' }).click()
-  await expect(page.getByText('شمارهٔ موبایل را مثل')).toBeVisible()
+  await expect(page.getByRole('alert').filter({ hasText: 'شمارهٔ موبایل را مثل' })).toBeVisible()
 })
 
 test('هدرهای امنیتی روی پاسخ‌ها هست', async ({ request }) => {

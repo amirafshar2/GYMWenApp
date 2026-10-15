@@ -1,11 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'node:path'
 
 // در توسعه، /api به بک‌اند ASP.NET پراکسی می‌شود.
 // در بیلد، خروجی مستقیم داخل wwwroot پروژهٔ Api قرار می‌گیرد.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      // کامپوننت‌های 21st که برای Next.js نوشته شده‌اند
+      'next/link': path.resolve(__dirname, './src/shims/next-link.tsx'),
+      'next/image': path.resolve(__dirname, './src/shims/next-image.tsx'),
+    },
+  },
   server: {
     port: 5173,
     proxy: {

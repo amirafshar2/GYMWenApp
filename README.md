@@ -81,6 +81,29 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 ```
 فریم‌ها و `manifest.json` ساخته می‌شوند و هیرو خودکار به حالت ویدیو می‌رود.
 
+## فرانت‌اند: کامپوننت‌های 21st.dev
+همهٔ بخش‌های ظاهری سایت از کامپوننت‌های 21st.dev ساخته شده‌اند (کد اصلی در `src/KhashayarGym.Web/src/components/ui/`):
+
+| بخش | کامپوننت 21st.dev |
+|---|---|
+| منو | Tubelight Navbar (@ayushmxxn) |
+| هیرو | Glass Refraction Hero (@dhileepkumargm) — با ویدیوی باشگاه: Hero Scrub (@jean.duthil13) |
+| نوار جشنواره | Promo Banner (@shadcndesign) |
+| آمار «چرا خشایار؟» | Stats Section (@shadcnui-blocks) + Count Up (@unlumen) |
+| تیترها | Text Reveal (@ddoemonn) |
+| رشته‌ها | Feature Velocity (@uilayout.contact) |
+| مربیان | Team Section with Glow Cards (@ncdai) |
+| پکیج‌ها | Pricing Section (@aymanch-03) |
+| سؤالات | FAQ Accordion (@scrollxui) |
+| فرم مشاوره | Contact Form (@kevingirelli) |
+| فوتر | Footer Section 5 (@solaceui) |
+| کارت‌ها، دکمه، Badge | اجزای shadcn همراه همین کامپوننت‌ها |
+
+تغییرات روی کد اصلی فقط این‌هاست: متن ثابت انگلیسی به props فارسی تبدیل شده، و چند سازگاری RTL (حذف letter-spacing روی فارسی، جهت فلش‌ها). هر فایل بالایش نوشته چه چیزی عوض شده.
+لایسنس این کامپوننت‌ها روی 21st.dev «unknown» است؛ پیش از تحویل تجاری بررسی شود.
+
+برای دیدن دموی اصلی هر کامپوننت در حالت توسعه: `npm run dev` و بعد `http://localhost:5173/lab`.
+
 ## برند دمو برای پرتفولیو
 با افزودن `?brand=demo` به آدرس، نام، لوگو، شعار و اطلاعات تماس با یک برند ساختگی عوض می‌شود (برای اسکرین‌شات‌های پرتفولیو). `?brand=khashayar` برمی‌گرداند.
 
