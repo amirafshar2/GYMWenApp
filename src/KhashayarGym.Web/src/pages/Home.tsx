@@ -1,23 +1,28 @@
 import SiteHero from '../site/SiteHero'
-import SiteStats from '../site/SiteStats'
+import SiteWhatWeDo from '../site/SiteWhatWeDo'
+import SiteWhy from '../site/SiteWhy'
+import SiteVideo from '../site/SiteVideo'
+import SiteOffer from '../site/SiteOffer'
 import SiteBranches from '../site/SiteBranches'
-import SiteDisciplines from '../site/SiteDisciplines'
-import SiteCoaches from '../site/SiteCoaches'
 import SitePricing from '../site/SitePricing'
+import SiteEvents from '../site/SiteEvents'
+import SiteCoaches from '../site/SiteCoaches'
 import SiteFaq from '../site/SiteFaq'
 import SiteContact from '../site/SiteContact'
-import SiteVideo from '../site/SiteVideo'
 
+/** ترتیب بخش‌ها از روی صفحهٔ مرجع (GYM Store / Sports Complex) + بخش‌های لازمِ پروژه */
 export default function Home() {
   return (
     <>
       <SiteHero />
-      <SiteStats />
-      <SiteBranches />
+      <SiteWhatWeDo />
+      <SiteWhy />
       <SiteVideo />
-      <SiteDisciplines />
-      <SiteCoaches />
+      <SiteOffer />
+      <SiteBranches />
       <SitePricing />
+      <SiteEvents />
+      <SiteCoaches />
       <SiteFaq />
       <SiteContact />
     </>

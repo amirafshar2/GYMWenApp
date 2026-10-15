@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "postbuild": "node -e \"require('fs').rmSync('../KhashayarGym.Api/wwwroot/media/video/gym.mp4',{force:true})\"",
     "lint": "oxlint",
     "preview": "vite preview"
   },

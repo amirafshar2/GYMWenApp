@@ -81,21 +81,23 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 - **رنگ‌ها:** فقط در بلوک `@theme` فایل `src/KhashayarGym.Web/src/index.css`.
 
 ## فرانت‌اند
-طراحی کل صفحه از هیروی بالای صفحه گرفته شده و با اسکیل ui-ux-pro-max تکمیل شده است. توکن‌ها و قواعد: `design-system/khashayar-gym/MASTER.md`.
+چیدمان و سبک صفحه از روی صفحهٔ مرجعی که کارفرما انتخاب کرد (قالب «GYM Store — Sports Complex») بازسازی شده؛ کد، متن و تصویرهای آن قالب کپی نشده و همه‌چیز از نو با React/Tailwind ساخته شده است. توکن‌ها و قواعد: `design-system/khashayar-gym/MASTER.md`.
 
-| بخش | منبع |
-|---|---|
-| هیرو | Liquid Sculpture Hero (21st.dev، guglielmogiannattasio) با مجسمهٔ دمبل |
-| ویدیوی اسکرولی وسط صفحه | Sunset Skyline Hero (21st.dev، guglielmogiannattasio) — ویدیو: `public/media/video/gym.mp4` → `scripts/make-scrub-video` |
-| نوار جشنواره | Promo Banner (21st.dev) |
-| منوی شناور | Tubelight Navbar (21st.dev) |
-| اعداد آمار | Count Up (21st.dev) |
-| مربیان | Glow Cards (21st.dev) |
-| پکیج‌ها | Pricing Section (21st.dev) |
-| سؤالات | FAQ Accordion (21st.dev) |
-| فرم مشاوره | Contact Form (21st.dev) |
-| فوتر | Footer Column — نسخهٔ خبرنامه (21st.dev) |
-| سرتیترها، رشته‌ها، شعبه‌ها، آمار | ساخته‌شده با سیستم طراحی بالا (`src/site/`) |
+| بخش | فایل | منبع |
+|---|---|---|
+| هدر سفید چسبان + پنل کناری | `site/SiteHeader.tsx` | چیدمان صفحهٔ مرجع |
+| هیروی اسلایدری (دمبل که بالا/پایین می‌رود) | `site/SiteHero.tsx` | چیدمان صفحهٔ مرجع؛ تصویر دمبل ساخت Canva AI |
+| چه می‌کنیم (۴ کارت تصویری) | `site/SiteWhatWeDo.tsx` | تصویرها فریم‌های ویدیوی خود باشگاه |
+| چرا خشایار + اعداد | `site/SiteWhy.tsx` | Count Up (21st.dev) |
+| ویدیوی اسکرولی وسط صفحه | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) — ویدیو: `public/media/video/gym.mp4` |
+| آنچه ارائه می‌دهیم (کاروسل آیکون) | `site/SiteOffer.tsx` | چیدمان صفحهٔ مرجع |
+| شعبه‌ها و نقشه | `site/SiteBranches.tsx` | MapLibre |
+| پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev) |
+| جشنواره (دو تصویر پارالاکس) | `site/SiteEvents.tsx` | چیدمان صفحهٔ مرجع |
+| مربیان | `site/SiteCoaches.tsx` | Glow Cards (21st.dev) |
+| سؤالات / فرم مشاوره | `site/SiteFaq.tsx`، `site/SiteContact.tsx` | FAQ Accordion و Contact Form (21st.dev) |
+| نوار جشنواره | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
+| فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |
 
 ### ویدیوی بخش وسط
 فایل ویدیو را با اسم `gym.mp4` در `src/KhashayarGym.Web/public/media/video/` بگذارید و اجرا کنید:

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { LocateFixed, Phone, Navigation } from 'lucide-react'
-import { SectionHead } from './ui/SectionHead'
+import { SectionHead, wrap } from './ui/SectionHead'
 import { api, type Branch } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
@@ -59,26 +59,35 @@ export default function SiteBranches() {
     )
   }
 
+  // دکمهٔ «نزدیک‌ترین شعبه» در هیرو همین تابع را صدا می‌زند
+  const locateRef = useRef(locate)
+  locateRef.current = locate
+  useEffect(() => {
+    const f = () => locateRef.current()
+    window.addEventListener('kg:locate', f)
+    return () => window.removeEventListener('kg:locate', f)
+  }, [])
+
   const [nearSlogan1, nearSlogan2] = brand.nearSlogan.split('،').map((x) => x.trim())
   return (
-    <section id="branches" aria-labelledby="branches-title" className="relative mx-auto max-w-[1440px] px-[clamp(20px,3.2vw,48px)] py-[clamp(72px,9vw,140px)]">
+    <section id="branches" aria-labelledby="branches-title" className="relative bg-steel py-[clamp(80px,9vw,130px)]">
+      <div className={wrap}>
       <SectionHead
         id="branches-title"
         eyebrow={`${faNum(branches.length || 12)} شعبه در ${brand.city}`}
-        title={`${nearSlogan1}،`}
-        accent={nearSlogan2}
+        title={`${nearSlogan1}، ${nearSlogan2}`}
         body="موقعیتت را بده تا نزدیک‌ترین سالن را نشانت بدهیم. موقعیت فقط در مرورگر خودت می‌ماند."
         aside={
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={locate} disabled={geo.status === 'locating'}
-              className="inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full bg-chalk px-6 text-[15px] font-medium text-iron transition-transform duration-300 hover:-translate-y-px disabled:opacity-60">
+              className="inline-flex h-[52px] cursor-pointer items-center gap-2.5 rounded-[3px] bg-plate px-7 text-[15px] font-bold text-white transition-colors duration-300 hover:bg-plate-hi disabled:opacity-60">
               <LocateFixed className="size-4" aria-hidden />
               {geo.status === 'locating' ? 'در حال پیدا کردن…' : 'نزدیک‌ترین شعبه به من'}
             </button>
-            <div role="radiogroup" aria-label="نوع سالن" className="flex rounded-full border border-chalk/20 p-1">
+            <div role="radiogroup" aria-label="نوع سالن" className="flex rounded-[3px] border-2 border-chalk/15 bg-white p-1">
               {FILTERS.map((f) => (
                 <button key={f.key} role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
-                  className={cn('h-10 min-w-11 cursor-pointer rounded-full px-4 text-sm transition-colors duration-200', filter === f.key ? 'bg-chalk text-iron' : 'text-rubber hover:text-chalk')}>
+                  className={cn('h-10 min-w-11 cursor-pointer rounded-[2px] px-4 text-sm font-bold transition-colors duration-200', filter === f.key ? 'bg-chalk text-white' : 'text-rubber hover:text-chalk')}>
                   {f.label}
                 </button>
               ))}
@@ -98,9 +107,9 @@ export default function SiteBranches() {
             const on = active === b.slug
             return (
               <li key={b.slug} id={`branch-${b.slug}`} className="border-b border-chalk/15">
-                <button className="flex w-full cursor-pointer items-start justify-between gap-4 py-5 text-right transition-colors duration-200 hover:bg-chalk/[.03]" onClick={() => setActive(b.slug)} aria-expanded={on}>
+                <button className="flex w-full cursor-pointer items-start justify-between gap-4 py-5 text-right transition-colors duration-200 hover:bg-white" onClick={() => setActive(b.slug)} aria-expanded={on}>
                   <span className="min-w-0">
-                    <span className={cn('block text-lg font-medium', on && 'text-plate')}>{b.name}</span>
+                    <span className={cn('block text-lg font-bold', on && 'text-plate')}>{b.name}</span>
                     <span className="mt-1 block text-sm text-rubber">{b.address}</span>
                     <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-rubber">
                       {b.hasMen && <span>آقایان</span>}
@@ -109,7 +118,7 @@ export default function SiteBranches() {
                     </span>
                   </span>
                   {d !== null && (
-                    <span className={cn('shrink-0 rounded-full px-3 py-1 text-xs', i === 0 ? 'bg-chalk text-iron' : 'border border-chalk/20 text-rubber')}>
+                    <span className={cn('shrink-0 rounded-full px-3 py-1 text-xs', i === 0 ? 'bg-plate text-white' : 'border border-chalk/20 text-rubber')}>
                       {i === 0 ? 'نزدیک‌ترین، ' : ''}{formatDistance(d)}
                     </span>
                   )}
@@ -120,9 +129,9 @@ export default function SiteBranches() {
                     {b.womenHours && <p><span className="text-rubber">سانس بانوان: </span>{b.womenHours}</p>}
                     {b.disciplines.length > 0 && <p><span className="text-rubber">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
                     <div className="flex flex-wrap gap-2 pt-2">
-                      {b.phone && <a href={`tel:${b.phone}`} className="inline-flex h-11 items-center gap-2 rounded-full bg-chalk px-4 text-iron"><Phone className="size-4" aria-hidden />{faDigits(b.phone)}</a>}
+                      {b.phone && <a href={`tel:${b.phone}`} className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-chalk px-4 text-white"><Phone className="size-4" aria-hidden />{faDigits(b.phone)}</a>}
                       {routes(b).map((r) => (
-                        <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full border border-chalk/20 px-4 transition-colors hover:border-chalk"><Navigation className="size-4" aria-hidden />{r.label}</a>
+                        <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-[3px] border-2 border-chalk/15 bg-white px-4 font-bold transition-colors hover:border-chalk"><Navigation className="size-4" aria-hidden />{r.label}</a>
                       ))}
                     </div>
                   </div>
@@ -131,13 +140,14 @@ export default function SiteBranches() {
             )
           })}
         </ol>
-        <div ref={mapBox} className="relative order-1 h-[420px] overflow-hidden rounded-[16px] bg-steel lg:order-2 lg:h-[640px]">
+        <div ref={mapBox} className="relative order-1 h-[420px] overflow-hidden bg-white lg:order-2 lg:h-[640px]">
           {mapOn && branches.length > 0 && (
             <Suspense fallback={null}>
               <BranchMap branches={branches} visibleCount={99} activeSlug={active} dimmed={dimmed} user={user} onSelect={(s) => { setActive(s); document.getElementById(`branch-${s}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }} />
             </Suspense>
           )}
         </div>
+      </div>
       </div>
     </section>
   )

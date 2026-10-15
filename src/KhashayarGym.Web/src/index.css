@@ -5,14 +5,16 @@
 
 /* ───── توکن‌های طراحی: همهٔ رنگ‌ها فقط از این‌جا عوض می‌شوند ───── */
 @theme {
-  /* پالت هیرو (Liquid Sculpture): کاغذی روشن، جوهر مشکی، آبی لوگو فقط برای تأکید */
-  --color-iron: #ebe9e5;        /* پس‌زمینهٔ صفحه — همان هیرو */
-  --color-steel: #f4f3f0;       /* کارت‌ها و سطح‌ها */
-  --color-steel-2: #d9d6cf;     /* خطوط مویی */
-  --color-plate: #2c6bae;       /* آبی برند خشایار (تأکید) */
-  --color-plate-hi: #1f5590;    /* آبی تیره‌تر برای hover روی زمینهٔ روشن */
-  --color-chalk: #151514;       /* متن اصلی — جوهر */
-  --color-rubber: #5c5a55;      /* متن ثانویه (کنتراست ۵٫۵:۱ روی پس‌زمینه) */
+  /* پالت صفحهٔ مرجع (GYM Store): سفید، خاکستری مه، جوهر زغالی، قرمز تأکید */
+  --color-iron: #ffffff;        /* پس‌زمینهٔ صفحه */
+  --color-steel: #f7f7f7;       /* بخش‌های خاکستری روشن و کارت‌ها */
+  --color-steel-2: #e5e5e5;     /* خطوط مویی */
+  --color-plate: #e8283c;       /* قرمز تأکید (دکمه‌ها؛ کنتراست متن سفید ۴٫۶:۱) */
+  --color-plate-hi: #c81c2f;    /* hover */
+  --color-chalk: #2c2c2c;       /* متن اصلی و تیترها */
+  --color-rubber: #6b6b6b;      /* متن ثانویه (۵٫۳:۱ روی سفید) */
+  --color-night: #181818;       /* فوتر */
+  --color-sun: #ffb400;         /* دکمهٔ زرد «شروع کن» */
   --color-women: #8e3f86;       /* برچسب سالن بانوان */
 
   --font-sans: "Vazirmatn Variable", Tahoma, sans-serif;
@@ -26,20 +28,20 @@
   --color-card-foreground: var(--color-chalk);
   --color-popover: var(--color-steel);
   --color-popover-foreground: var(--color-chalk);
-  --color-primary: var(--color-chalk);
-  --color-primary-foreground: var(--color-iron);
-  --color-secondary: #e2dfd9;
+  --color-primary: var(--color-plate);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #efefef;
   --color-secondary-foreground: var(--color-chalk);
-  --color-muted: #e2dfd9;
+  --color-muted: #efefef;
   --color-muted-foreground: var(--color-rubber);
-  --color-accent: #e2dfd9;
+  --color-accent: #efefef;
   --color-accent-foreground: var(--color-chalk);
   --color-destructive: #e5484d;
   --color-destructive-foreground: #ffffff;
   --color-border: var(--color-steel-2);
   --color-input: var(--color-steel-2);
   --color-ring: var(--color-plate);
-  --radius: 1rem;
+  --radius: .375rem;
 }
 
 @layer base {
@@ -49,7 +51,7 @@
     font-feature-settings: "ss01";
     text-rendering: optimizeLegibility;
   }
-  section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5.5rem); }
+  section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5rem); }
   /* بخش‌های پایین صفحه تا نزدیک شدن به دید رندر نمی‌شوند */
   
   ::selection { background: var(--color-chalk); color: var(--color-iron); }
@@ -69,8 +71,7 @@
 /* glass-effect که Footer Column از 21st.dev انتظار دارد، با پالت سایت */
 .glass-effect { background: color-mix(in srgb, var(--color-steel) 75%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgb(21 21 20 / .1); }
 
-/* روی موبایل منوی Tubelight پایین صفحه است؛ جا برای آن */
-@media (max-width: 639px) { body { padding-bottom: 88px; } }
+
 
 /* کاهش حرکت */
 @media (prefers-reduced-motion: reduce) {
@@ -94,3 +95,11 @@
 .maplibregl-ctrl-attrib { font-size: 10px; background: rgb(235 233 229 / .85) !important; color: var(--color-rubber); }
 .maplibregl-ctrl-attrib a { color: var(--color-rubber) !important; }
 
+
+/* شکل «حباب» پشت آیکون‌های بخش خدمات (مثل صفحهٔ مرجع) */
+.blob { border-radius: 58% 42% 55% 45% / 48% 58% 42% 52%; transition: border-radius .6s var(--ease-lift); }
+.group:hover .blob { border-radius: 44% 56% 41% 59% / 57% 43% 57% 43%; }
+
+/* هنگام پخش ویدیوی اسکرولی، هدر و نوار جشنواره بالا می‌روند تا ویدیو تمام‌صفحه دیده شود */
+.kg-chrome { transition: transform .5s var(--ease-lift); }
+html[data-video-lock] .kg-chrome { transform: translateY(calc(-100% - var(--festival-h, 0px) - 4px)); }

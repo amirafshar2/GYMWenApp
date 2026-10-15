@@ -152,6 +152,8 @@ export default function TokyoSkylineHero({
       b.left = "0"
       b.right = "0"
       b.width = "100%"
+      // سایت می‌تواند هدر و نوارها را هنگام پخش ویدیو کنار بزند
+      if (midPage) document.documentElement.dataset.videoLock = "1"
     }
 
     function releaseLock() {
@@ -164,7 +166,8 @@ export default function TokyoSkylineHero({
       b.left = ""
       b.right = ""
       b.width = ""
-      window.scrollTo(0, y)
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior })
+      if (midPage) delete document.documentElement.dataset.videoLock
     }
 
     if (!midPage && !reduceMotion) engageLock()
@@ -179,7 +182,7 @@ export default function TokyoSkylineHero({
     // وسط صفحه: قفل وقتی بخش به بالای صفحه رسید؛ آزادسازی در دو سر ویدیو
     function snapAndLock() {
       const top = section!.getBoundingClientRect().top + window.scrollY
-      window.scrollTo(0, top)
+      window.scrollTo({ top, behavior: "instant" as ScrollBehavior })
       engageLock()
     }
     /** true یعنی رویداد را این بخش مصرف کرد (اسکرول صفحه متوقف شود) */
@@ -224,9 +227,25 @@ export default function TokyoSkylineHero({
     window.addEventListener("touchstart", onTouchStart, { passive: true })
     window.addEventListener("touchmove", onTouchMove, { passive: false })
 
-    // اسکرول با کیبورد یا نوار اسکرول از روی بخش رد نشود
+    // اسکرول با کیبورد از روی بخش رد نشود؛ ولی پرش لینک‌های منو (اسکرول برنامه‌ای) آزاد است
+    let lastKey = 0
+    const SCROLL_KEYS = new Set(["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Spacebar", "Home", "End"])
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return
+      if (SCROLL_KEYS.has(e.key)) lastKey = Date.now()
+    }
+    if (midPage) window.addEventListener("keydown", onKey)
+    // کلیک روی لینک‌های منو وقتی ویدیو قفل است: قفل آزاد شود تا پرش انجام شود
+    const onLinkClick = (e: MouseEvent) => {
+      if (!locked) return
+      const a = (e.target as HTMLElement | null)?.closest?.("a[href]")
+      if (a) releaseLock()
+    }
+    if (midPage) document.addEventListener("click", onLinkClick, true)
     const onScroll = () => {
       if (!midPage || locked || reduceMotion) return
+      if (Date.now() - lastKey > 600) return
       const r = section!.getBoundingClientRect()
       if (targetProgress < 1 && r.top <= 0 && r.top > -window.innerHeight * 0.5) snapAndLock()
     }
@@ -278,6 +297,8 @@ export default function TokyoSkylineHero({
       window.removeEventListener("touchstart", onTouchStart)
       window.removeEventListener("touchmove", onTouchMove)
       window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("keydown", onKey)
+      document.removeEventListener("click", onLinkClick, true)
       cancelAnimationFrame(rafId)
       releaseLock()
     }

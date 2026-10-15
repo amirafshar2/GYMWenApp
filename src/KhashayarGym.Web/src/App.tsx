@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import SiteBanner from './site/SiteBanner'
-import SiteNav from './site/SiteNav'
+import SiteHeader from './site/SiteHeader'
 import SiteFooter from './site/SiteFooter'
 import Home from './pages/Home'
 
@@ -21,8 +21,8 @@ export default function App() {
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] rounded-full bg-primary px-4 py-2 text-primary-foreground">پرش به محتوا</a>
       <SiteBanner />
-      <SiteNav />
-      <main id="main">
+      <SiteHeader />
+      <main id="main" style={{ paddingTop: 'calc(78px + var(--festival-h, 0px))' }}>
         <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Home />} />

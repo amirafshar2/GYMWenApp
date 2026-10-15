@@ -23,12 +23,12 @@ export default function SiteBanner() {
 
   const d = Math.floor(ms / 86_400_000), h = Math.floor(ms / 3_600_000) % 24, m = Math.floor(ms / 60_000) % 60, s = Math.floor(ms / 1000) % 60
   return (
-    <div ref={box} className="fixed inset-x-0 top-0 z-[60]">
+    <div ref={box} className="kg-chrome fixed inset-x-0 top-0 z-[60]">
       <Banner1
         href="/#packages"
         label="جشنوارهٔ تخفیف"
         closeLabel="بستن نوار جشنواره"
-        className="!bg-[#151514] !pl-10 !pr-6"
+        className="!bg-[#181818] !pl-10 !pr-6"
         onClose={() => { setHidden(true); try { sessionStorage.setItem('festival-hidden', '1') } catch { /* */ } }}
       >
         <span className="font-semibold">{rebrand(c.title)}</span> · {faNum(c.discountPercent)}٪ تخفیف — <span className="tabular-nums">{faNum(d)} روز {faNum(h)} ساعت {faNum(m)} دقیقه <span className="hidden sm:inline">{faNum(s)} ثانیه</span></span>
