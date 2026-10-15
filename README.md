@@ -23,6 +23,12 @@ scripts/                    ساخت فریم ویدیوی هیرو، خروجی
 - SQL Server LocalDB (همراه Visual Studio) — یا بدون آن با SQLite (پایین‌تر)
 - ffmpeg (فقط برای ساخت فریم‌های ویدیوی هیرو)
 
+## اجرا در Visual Studio (یک کلیک)
+1. `KhashayarGym.slnx` را در Visual Studio باز کنید.
+2. پروژهٔ آغازین (Startup) را `KhashayarGym.Api` بگذارید.
+3. در نوار بالا، پروفایل **Demo (SQLite)** را انتخاب کنید و دکمهٔ ▶ را بزنید.
+مرورگر روی http://localhost:5180 باز می‌شود؛ دیتابیس دمو (فایل `khashayar-demo.db`) خودکار ساخته می‌شود و نیازی به SQL Server نیست.
+
 ## اجرا (سریع‌ترین راه برای دمو — SQLite)
 در PowerShell از ریشهٔ پروژه:
 
