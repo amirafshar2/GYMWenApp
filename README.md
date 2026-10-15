@@ -94,7 +94,7 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | پکیج‌ها | Pricing Section (21st.dev) |
 | سؤالات | FAQ Accordion (21st.dev) |
 | فرم مشاوره | Contact Form (21st.dev) |
-| فوتر | Footer Section 5 (21st.dev) |
+| فوتر | Footer Column — نسخهٔ خبرنامه (21st.dev) |
 | سرتیترها، رشته‌ها، شعبه‌ها، آمار | ساخته‌شده با سیستم طراحی بالا (`src/site/`) |
 
 ### ویدیوی بخش وسط

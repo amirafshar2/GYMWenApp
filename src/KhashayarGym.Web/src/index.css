@@ -66,6 +66,12 @@
 .sh-backdrop { direction: ltr; }
 .sh-accent { font-style: normal !important; }
 
+/* glass-effect که Footer Column از 21st.dev انتظار دارد، با پالت سایت */
+.glass-effect { background: color-mix(in srgb, var(--color-steel) 75%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgb(21 21 20 / .1); }
+
+/* روی موبایل منوی Tubelight پایین صفحه است؛ جا برای آن */
+@media (max-width: 639px) { body { padding-bottom: 88px; } }
+
 /* کاهش حرکت */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

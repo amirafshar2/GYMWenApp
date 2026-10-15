@@ -32,7 +32,7 @@ export default function SiteNav() {
   }, [])
   return (
     <div className={`transition-opacity duration-500 ${show ? 'opacity-100' : 'pointer-events-none opacity-0'}`} inert={!show}>
-      <NavBar items={ITEMS} active={active} className="sm:top-[var(--festival-h,0px)]" />
+      <NavBar items={ITEMS} active={active} className="sm:top-[var(--festival-h,0px)] sm:bottom-auto" />
     </div>
   )
 }
