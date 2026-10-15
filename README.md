@@ -86,7 +86,7 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | بخش | فایل | منبع |
 |---|---|---|
 | هدر سفید چسبان + پنل کناری | `site/SiteHeader.tsx` | چیدمان صفحهٔ مرجع |
-| هیروی اسلایدری (دمبل که بالا/پایین می‌رود) | `site/SiteHero.tsx` | چیدمان صفحهٔ مرجع؛ تصویر دمبل ساخت Canva AI |
+| هیرو: دمبل ذره‌ای که با ماوس مایع می‌شود | `site/SiteHero.tsx` | Liquid Sculpture Hero (21st.dev، guglielmogiannattasio)؛ تصویر دمبل ساخت Canva AI |
 | چه می‌کنیم (۴ کارت تصویری) | `site/SiteWhatWeDo.tsx` | تصویرها فریم‌های ویدیوی خود باشگاه |
 | چرا خشایار + اعداد | `site/SiteWhy.tsx` | Count Up (21st.dev) |
 | ویدیوی اسکرولی وسط صفحه | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) — ویدیو: `public/media/video/gym.mp4` |
