@@ -59,6 +59,10 @@ export interface FooterSection5Props {
   links?: { title: string; links: { name: string; href: string }[] }[];
   bottom?: React.ReactNode;
   copyright?: React.ReactNode;
+  /** تغییر برای پروژه: رنگ‌ها */
+  background?: string;
+  strokeColor?: string;
+  panelColor?: string;
 }
 
 export default function FooterSection5({
@@ -68,18 +72,21 @@ export default function FooterSection5({
   links: footerLinks = defaultFooterLinks,
   bottom,
   copyright,
+  background,
+  strokeColor,
+  panelColor,
 }: FooterSection5Props = {}) {
   return (
-    <footer className="w-full bg-black relative overflow-hidden antialiased [font-synthesis:none]">
+    <footer className="w-full bg-black relative overflow-hidden antialiased [font-synthesis:none]" style={background ? { background } : undefined}>
       {/* Large Stroke Text Section */}
       <div className="relative w-full flex justify-center items-end pt-24 md:pt-32 pb-0 z-0">
-        <h1 className="text-[120px] sm:text-[160px] md:text-[210px] font-semibold text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)] leading-[0.75] select-none -mb-4 md:-mb-6 opacity-50">
+        <h1 className="text-[120px] sm:text-[160px] md:text-[210px] font-semibold text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)] leading-[0.75] select-none -mb-4 md:-mb-6 opacity-50" style={strokeColor ? { WebkitTextStroke: `1px ${strokeColor}` } : undefined}>
           {companyName}
         </h1>
       </div>
 
       {/* Blue Panel Section */}
-      <div className="relative w-full [--color-primary:#1C76F8] bg-(--color-primary) z-10 min-h-[400px]">
+      <div className="relative w-full [--color-primary:#1C76F8] bg-(--color-primary) z-10 min-h-[400px]" style={panelColor ? ({ "--color-primary": panelColor } as React.CSSProperties) : undefined}>
         {/* Background Shader */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <FlutedGlass

@@ -1,9 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { LocateFixed, Phone, Navigation } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { TextReveal } from '@/components/ui/text-reveal'
+import { SectionHead } from './ui/SectionHead'
 import { api, type Branch } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
@@ -21,7 +18,7 @@ const routes = (b: Branch) => [
   { label: 'گوگل‌مپ', href: `https://www.google.com/maps/dir/?api=1&destination=${b.latitude},${b.longitude}` },
 ]
 
-/** «هرکجا هستی، خشایار نزدیکته» — کارت‌ها، Badge، Button و Text Reveal از 21st.dev + نقشهٔ زنده */
+/** «هرکجا هستی، خشایار نزدیکته» — نقشهٔ روشن + فهرست مویی شعبه‌ها، هم‌سبک هیرو */
 export default function SiteBranches() {
   const { data: branches = [], error } = useData('branches', api.branches)
   const [filter, setFilter] = useState<Filter>('all')
@@ -62,74 +59,79 @@ export default function SiteBranches() {
     )
   }
 
+  const [nearSlogan1, nearSlogan2] = brand.nearSlogan.split('،').map((x) => x.trim())
   return (
-    <section id="branches" className="relative mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-32">
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-        <div className="max-w-2xl">
-          <h2 className="text-4xl font-bold md:text-6xl"><TextReveal text={brand.nearSlogan} className="!text-foreground" /></h2>
-          <p className="mt-4 text-lg text-muted-foreground">{faNum(branches.length || 12)} شعبه در {brand.city}. موقعیتت را بده تا نزدیک‌ترین سالن را نشانت بدهیم.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div role="radiogroup" aria-label="نوع سالن" className="flex rounded-full bg-muted p-1">
-            {FILTERS.map((f) => (
-              <button key={f.key} role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
-                className={cn('rounded-full px-4 py-2 text-sm font-semibold transition-colors', filter === f.key ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
-                {f.label}
-              </button>
-            ))}
+    <section id="branches" aria-labelledby="branches-title" className="relative mx-auto max-w-[1440px] px-[clamp(20px,3.2vw,48px)] py-[clamp(72px,9vw,140px)]">
+      <SectionHead
+        id="branches-title"
+        eyebrow={`${faNum(branches.length || 12)} شعبه در ${brand.city}`}
+        title={`${nearSlogan1}،`}
+        accent={nearSlogan2}
+        body="موقعیتت را بده تا نزدیک‌ترین سالن را نشانت بدهیم. موقعیت فقط در مرورگر خودت می‌ماند."
+        aside={
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={locate} disabled={geo.status === 'locating'}
+              className="inline-flex h-12 cursor-pointer items-center gap-2.5 rounded-full bg-chalk px-6 text-[15px] font-medium text-iron transition-transform duration-300 hover:-translate-y-px disabled:opacity-60">
+              <LocateFixed className="size-4" aria-hidden />
+              {geo.status === 'locating' ? 'در حال پیدا کردن…' : 'نزدیک‌ترین شعبه به من'}
+            </button>
+            <div role="radiogroup" aria-label="نوع سالن" className="flex rounded-full border border-chalk/20 p-1">
+              {FILTERS.map((f) => (
+                <button key={f.key} role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
+                  className={cn('h-10 min-w-11 cursor-pointer rounded-full px-4 text-sm transition-colors duration-200', filter === f.key ? 'bg-chalk text-iron' : 'text-rubber hover:text-chalk')}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button size="lg" className="rounded-full shadow-[0_0_30px_rgba(3,103,254,0.45)]" onClick={locate} disabled={geo.status === 'locating'}>
-            <LocateFixed className="size-4" />
-            {geo.status === 'locating' ? 'در حال پیدا کردن…' : 'نزدیک‌ترین شعبه به من'}
-          </Button>
-        </div>
+        }
+      />
+
+      <div aria-live="polite" className="mt-6 min-h-6 text-sm">
+        {geo.msg && <p className={geo.status === 'error' ? 'text-[#a4361f]' : 'text-plate'}>{geo.msg}</p>}
+        {error && <p className="text-[#a4361f]">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
       </div>
 
-      <div aria-live="polite" className="min-h-6 text-sm">
-        {geo.msg && <p className={geo.status === 'error' ? 'text-amber-300' : 'text-blue-300'}>{geo.msg}</p>}
-        {error && <p className="text-amber-300">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
-      </div>
-
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
-        <ol className="order-2 max-h-[640px] space-y-3 overflow-y-auto overscroll-contain pl-1 lg:order-1" data-lenis-prevent>
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+        <ol className="order-2 max-h-[640px] overflow-y-auto overscroll-contain border-t border-chalk/15 lg:order-1" data-lenis-prevent>
           {shown.map(({ b, d }, i) => {
             const on = active === b.slug
             return (
-              <li key={b.slug} id={`branch-${b.slug}`}>
-                <Card className={cn('gap-0 p-5 transition-colors', on ? 'ring-2 ring-primary' : 'hover:bg-muted/60')}>
-                  <button className="block w-full text-right" onClick={() => setActive(b.slug)} aria-pressed={on}>
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-bold">{b.name}</h3>
-                      {d !== null && <Badge variant={i === 0 ? 'default' : 'secondary'}>{i === 0 ? 'نزدیک‌ترین، ' : ''}{formatDistance(d)}</Badge>}
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{b.address}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {b.hasMen && <Badge variant="outline" className="border-blue-500/50 text-blue-300">آقایان</Badge>}
-                      {b.hasWomen && <Badge variant="outline" className="border-fuchsia-400/50 text-fuchsia-300">بانوان</Badge>}
-                      {!b.addressConfirmed && <Badge variant="outline">آدرس دقیق به‌زودی</Badge>}
-                    </div>
-                  </button>
-                  {on && (
-                    <div className="mt-4 space-y-3 border-t pt-4 text-sm">
-                      {b.menHours && <p><span className="text-muted-foreground">سانس آقایان: </span>{b.menHours}</p>}
-                      {b.womenHours && <p><span className="text-muted-foreground">سانس بانوان: </span>{b.womenHours}</p>}
-                      {b.disciplines.length > 0 && <p><span className="text-muted-foreground">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {b.phone && <Button asChild size="sm" className="rounded-full"><a href={`tel:${b.phone}`}><Phone className="size-4" />{faDigits(b.phone)}</a></Button>}
-                        {routes(b).map((r) => (
-                          <Button key={r.label} asChild size="sm" variant="outline" className="rounded-full">
-                            <a href={r.href} target="_blank" rel="noopener noreferrer"><Navigation className="size-4" />{r.label}</a>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+              <li key={b.slug} id={`branch-${b.slug}`} className="border-b border-chalk/15">
+                <button className="flex w-full cursor-pointer items-start justify-between gap-4 py-5 text-right transition-colors duration-200 hover:bg-chalk/[.03]" onClick={() => setActive(b.slug)} aria-expanded={on}>
+                  <span className="min-w-0">
+                    <span className={cn('block text-lg font-medium', on && 'text-plate')}>{b.name}</span>
+                    <span className="mt-1 block text-sm text-rubber">{b.address}</span>
+                    <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-rubber">
+                      {b.hasMen && <span>آقایان</span>}
+                      {b.hasWomen && <span className="text-women">بانوان</span>}
+                      {!b.addressConfirmed && <span>آدرس دقیق به‌زودی</span>}
+                    </span>
+                  </span>
+                  {d !== null && (
+                    <span className={cn('shrink-0 rounded-full px-3 py-1 text-xs', i === 0 ? 'bg-chalk text-iron' : 'border border-chalk/20 text-rubber')}>
+                      {i === 0 ? 'نزدیک‌ترین، ' : ''}{formatDistance(d)}
+                    </span>
                   )}
-                </Card>
+                </button>
+                {on && (
+                  <div className="space-y-2.5 pb-6 text-sm">
+                    {b.menHours && <p><span className="text-rubber">سانس آقایان: </span>{b.menHours}</p>}
+                    {b.womenHours && <p><span className="text-rubber">سانس بانوان: </span>{b.womenHours}</p>}
+                    {b.disciplines.length > 0 && <p><span className="text-rubber">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {b.phone && <a href={`tel:${b.phone}`} className="inline-flex h-11 items-center gap-2 rounded-full bg-chalk px-4 text-iron"><Phone className="size-4" aria-hidden />{faDigits(b.phone)}</a>}
+                      {routes(b).map((r) => (
+                        <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full border border-chalk/20 px-4 transition-colors hover:border-chalk"><Navigation className="size-4" aria-hidden />{r.label}</a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </li>
             )
           })}
         </ol>
-        <div ref={mapBox} className="relative order-1 h-[420px] overflow-hidden rounded-xl border bg-card lg:order-2 lg:h-[640px]">
+        <div ref={mapBox} className="relative order-1 h-[420px] overflow-hidden rounded-[16px] bg-steel lg:order-2 lg:h-[640px]">
           {mapOn && branches.length > 0 && (
             <Suspense fallback={null}>
               <BranchMap branches={branches} visibleCount={99} activeSlug={active} dimmed={dimmed} user={user} onSelect={(s) => { setActive(s); document.getElementById(`branch-${s}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }} />

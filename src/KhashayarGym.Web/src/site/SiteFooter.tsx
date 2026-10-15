@@ -15,6 +15,9 @@ export default function SiteFooter() {
           { title: 'تماس', links: [{ name: faDigits(brand.phone), href: `tel:${brand.phone}` }, { name: 'مشاورهٔ رایگان', href: '/#consult' }, ...(brand.instagram ? [{ name: 'اینستاگرام', href: brand.instagram }] : [])] },
         ]}
         bottom={<span />}
+        background="#ebe9e5"
+        strokeColor="rgba(21,21,20,0.45)"
+        panelColor="#2c6bae"
         copyright={<span dir="rtl">© {new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric' }).format(new Date())} {brand.name}</span>}
       />
     </div>

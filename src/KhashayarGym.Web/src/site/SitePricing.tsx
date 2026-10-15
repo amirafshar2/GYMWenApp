@@ -4,6 +4,7 @@ import { api, type Pkg } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { faNum, tomanShort } from '@/lib/fa'
 import { rebrand } from '@/lib/brand'
+import { SectionHead } from './ui/SectionHead'
 
 const TOTAL = 'مبلغ کل'
 const MONTHLY = 'ماهانه'
@@ -25,7 +26,7 @@ const toTier = (p: Pkg): PricingTier & { id: string } => ({
 /** پکیج‌ها — Pricing Section از 21st.dev (قیمت‌ها از API، تخفیف جشنواره اعمال‌شده) */
 export default function SitePricing() {
   const { data: pkgs = [] } = useData('packages', api.packages)
-  if (!pkgs.length) return <div id="packages" className="h-[700px]" />
+  if (!pkgs.length) return <section id="packages" className="h-[900px] bg-steel" />
   const membership = pkgs.filter((p) => p.category === 'Gym' && p.slug !== 'month-12').map(toTier)
   const special = pkgs.filter((p) => p.category !== 'Gym' || p.slug === 'month-12').map(toTier)
   const cardProps = {
@@ -39,9 +40,13 @@ export default function SitePricing() {
     },
   }
   return (
-    <div className="px-4">
-      <PricingSection id="packages" title="پکیج‌های عضویت" subtitle="قیمت‌ها به تومان است؛ تخفیف جشنوارهٔ فعال خودکار اعمال شده." frequencies={[TOTAL, MONTHLY]} discountFrequency="" tiers={membership} cardProps={cardProps} />
-      <PricingSection title="پکیج‌های تخصصی" subtitle="مربی خصوصی، برنامهٔ تغذیه و صخره‌نوردی." frequencies={[TOTAL, MONTHLY]} discountFrequency="" tiers={special} cardProps={cardProps} />
-    </div>
+    <section id="packages" aria-labelledby="packages-title" className="border-y border-chalk/15 bg-steel">
+      <div className="mx-auto max-w-[1440px] px-[clamp(20px,3.2vw,48px)] py-[clamp(72px,9vw,140px)]">
+        <SectionHead id="packages-title" eyebrow="پکیج‌ها و قیمت‌ها" title="عضویتی که" accent="با برنامه‌ات جور است." body="قیمت‌ها به تومان است و تخفیف جشنوارهٔ فعال خودکار روی پکیج‌های مشمول اعمال شده." />
+        <div className="mt-10"><PricingSection frequencies={[TOTAL, MONTHLY]} discountFrequency="" tiers={membership} cardProps={cardProps} /></div>
+        <h3 className="mt-20 text-2xl font-medium">پکیج‌های تخصصی <span className="text-base text-rubber">— مربی خصوصی، تغذیه و صخره‌نوردی</span></h3>
+        <div className="mt-2"><PricingSection frequencies={[TOTAL, MONTHLY]} discountFrequency="" tiers={special} cardProps={cardProps} /></div>
+      </div>
+    </section>
   )
 }

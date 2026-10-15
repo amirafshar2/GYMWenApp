@@ -1,0 +1,45 @@
+import { useEffect, useState } from 'react'
+import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
+import { brand } from '@/lib/brand'
+
+/** ویدیوی خود باشگاه (scripts/make-scrub-video آن را برای اسکرول فریم‌به‌فریم بهینه می‌کند) */
+const GYM_VIDEO = '/media/video/gym-scrub.mp4'
+
+/**
+ * بخش ویدیویی وسط صفحه — Sunset Skyline Hero از 21st.dev (guglielmogiannattasio).
+ * با رسیدن بخش به بالای صفحه، اسکرول ویدیو را جلو/عقب می‌برد و در پایان «خشایار» ظاهر می‌شود.
+ */
+export default function SiteVideo() {
+  const [src, setSrc] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    fetch(GYM_VIDEO, { method: 'HEAD' })
+      .then((r) => setSrc(r.ok && r.headers.get('content-type')?.startsWith('video/') ? GYM_VIDEO : null))
+      .catch(() => setSrc(null))
+  }, [])
+
+  if (src === undefined) return <div className="h-[100dvh] bg-[#151514]" aria-hidden />
+  if (src === null) {
+    // تا ویدیوی باشگاه نرسیده: جای خالی با توضیح (ویدیوی نمونهٔ دیگری نمایش داده نمی‌شود)
+    return (
+      <section aria-label="ویدیوی باشگاه" className="grid h-[70dvh] place-items-center bg-[#151514] px-6 text-center text-[#fff4e8]/70">
+        <p className="max-w-md leading-8">[ویدیوی داخل سالن خشایار]<br />فایل را در <span dir="ltr">public/media/video/gym.mp4</span> بگذارید.</p>
+      </section>
+    )
+  }
+  return (
+    <section aria-label="داخل سالن‌های خشایار">
+      <TokyoSkylineHero
+        midPage
+        showNav={false}
+        videoSrc={src}
+        skylineSrc=""
+        title="هر روز، یک تکرار بیشتر."
+        brandMark={brand.shortName}
+        scrollHint="اسکرول کن"
+        signature={{ name: 'guglielmogiannattasio', url: 'https://www.guglielmogiannattasio.it' }}
+        fontFamily="'Vazirmatn Variable', Tahoma, sans-serif"
+        scrubDistance={2600}
+      />
+    </section>
+  )
+}

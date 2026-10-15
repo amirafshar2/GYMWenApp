@@ -80,30 +80,30 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 - **لوگو:** `src/KhashayarGym.Web/public/brand/logo.svg` را با فایل اصلی جایگزین کنید.
 - **رنگ‌ها:** فقط در بلوک `@theme` فایل `src/KhashayarGym.Web/src/index.css`.
 
-## ویدیوی هیرو (اختیاری)
-هیرو بدون ویدیو هم کار می‌کند (هالتری روی canvas رسم می‌شود). برای ویدیوی واقعی:
-```powershell
-.\scripts\make-hero-frames.ps1 -Video C:\path\gym.mp4
-```
-فریم‌ها و `manifest.json` ساخته می‌شوند و هیرو خودکار به حالت ویدیو می‌رود.
+## فرانت‌اند
+طراحی کل صفحه از هیروی بالای صفحه گرفته شده و با اسکیل ui-ux-pro-max تکمیل شده است. توکن‌ها و قواعد: `design-system/khashayar-gym/MASTER.md`.
 
-## فرانت‌اند: کامپوننت‌های 21st.dev
-همهٔ بخش‌های ظاهری سایت از کامپوننت‌های 21st.dev ساخته شده‌اند (کد اصلی در `src/KhashayarGym.Web/src/components/ui/`):
-
-| بخش | کامپوننت 21st.dev |
+| بخش | منبع |
 |---|---|
-| منو | Tubelight Navbar (@ayushmxxn) |
-| هیرو | Glass Refraction Hero (@dhileepkumargm) — با ویدیوی باشگاه: Hero Scrub (@jean.duthil13) |
-| نوار جشنواره | Promo Banner (@shadcndesign) |
-| آمار «چرا خشایار؟» | Stats Section (@shadcnui-blocks) + Count Up (@unlumen) |
-| تیترها | Text Reveal (@ddoemonn) |
-| رشته‌ها | Feature Velocity (@uilayout.contact) |
-| مربیان | Team Section with Glow Cards (@ncdai) |
-| پکیج‌ها | Pricing Section (@aymanch-03) |
-| سؤالات | FAQ Accordion (@scrollxui) |
-| فرم مشاوره | Contact Form (@kevingirelli) |
-| فوتر | Footer Section 5 (@solaceui) |
-| کارت‌ها، دکمه، Badge | اجزای shadcn همراه همین کامپوننت‌ها |
+| هیرو | Liquid Sculpture Hero (21st.dev، guglielmogiannattasio) با مجسمهٔ دمبل |
+| ویدیوی اسکرولی وسط صفحه | Sunset Skyline Hero (21st.dev، guglielmogiannattasio) — ویدیو: `public/media/video/gym.mp4` → `scripts/make-scrub-video` |
+| نوار جشنواره | Promo Banner (21st.dev) |
+| منوی شناور | Tubelight Navbar (21st.dev) |
+| اعداد آمار | Count Up (21st.dev) |
+| مربیان | Glow Cards (21st.dev) |
+| پکیج‌ها | Pricing Section (21st.dev) |
+| سؤالات | FAQ Accordion (21st.dev) |
+| فرم مشاوره | Contact Form (21st.dev) |
+| فوتر | Footer Section 5 (21st.dev) |
+| سرتیترها، رشته‌ها، شعبه‌ها، آمار | ساخته‌شده با سیستم طراحی بالا (`src/site/`) |
+
+### ویدیوی بخش وسط
+فایل ویدیو را با اسم `gym.mp4` در `src/KhashayarGym.Web/public/media/video/` بگذارید و اجرا کنید:
+```powershell
+.\scripts\make-scrub-video.ps1
+cd src\KhashayarGym.Web; npm run build
+```
+اسکریپت هر فریم را keyframe می‌کند تا جلو/عقب رفتن با اسکرول روان باشد.
 
 تغییرات روی کد اصلی فقط این‌هاست: متن ثابت انگلیسی به props فارسی تبدیل شده، و چند سازگاری RTL (حذف letter-spacing روی فارسی، جهت فلش‌ها). هر فایل بالایش نوشته چه چیزی عوض شده.
 لایسنس این کامپوننت‌ها روی 21st.dev «unknown» است؛ پیش از تحویل تجاری بررسی شود.

@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { Branch } from '../lib/api'
 
-const STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+const STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 const SHIRAZ: [number, number] = [52.505, 29.645]
 
 interface Props {
@@ -125,7 +125,7 @@ function SchematicMap({ branches, visibleCount, activeSlug, dimmed, user, onSele
     <div className="absolute inset-0 bg-steel">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full opacity-40" aria-hidden>
         {Array.from({ length: 11 }, (_, i) => (
-          <g key={i} stroke="#1b2129" strokeWidth="0.2">
+          <g key={i} stroke="#d9d6cf" strokeWidth="0.2">
             <line x1={i * 10} y1="0" x2={i * 10} y2="100" />
             <line x1="0" y1={i * 10} x2="100" y2={i * 10} />
           </g>
@@ -144,7 +144,7 @@ function SchematicMap({ branches, visibleCount, activeSlug, dimmed, user, onSele
         />
       ))}
       {user && <div className="you-pin absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${x(user.lng)}%`, top: `${y(user.lat)}%` }} />}
-      <p className="absolute bottom-3 right-3 rounded-full bg-iron/80 px-3 py-1 text-xs text-rubber">نمای شماتیک — نقشه در دسترس نیست</p>
+      <p className="absolute bottom-3 right-3 rounded-full bg-iron/90 px-3 py-1 text-xs text-rubber">نمای شماتیک — نقشه در دسترس نیست</p>
     </div>
   )
 }

@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
-/* سایت همیشه تیره است: کلاس‌های dark: کامپوننت‌های 21st.dev با کلاس .dark روی html فعال می‌شوند */
+/* حالت تیره فقط با کلاس .dark (سایت روشن است) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ───── توکن‌های طراحی: همهٔ رنگ‌ها فقط از این‌جا عوض می‌شوند ───── */
 @theme {
-  --color-iron: #07090c;        /* پس‌زمینه — آهن */
-  --color-steel: #12161c;       /* سطح‌ها */
-  --color-steel-2: #1b2129;     /* سطح بالاتر / خطوط */
-  --color-plate: #2c6bae;       /* آبی برند خشایار (از لوگو) */
-  --color-plate-hi: #4c8fd9;    /* آبی روشن برای glow و hover */
-  --color-chalk: #eef1f4;       /* متن اصلی — گچ/منیزیم */
-  --color-rubber: #8a94a3;      /* متن ثانویه */
-  --color-women: #c9a3d9;       /* برچسب سالن بانوان */
+  /* پالت هیرو (Liquid Sculpture): کاغذی روشن، جوهر مشکی، آبی لوگو فقط برای تأکید */
+  --color-iron: #ebe9e5;        /* پس‌زمینهٔ صفحه — همان هیرو */
+  --color-steel: #f4f3f0;       /* کارت‌ها و سطح‌ها */
+  --color-steel-2: #d9d6cf;     /* خطوط مویی */
+  --color-plate: #2c6bae;       /* آبی برند خشایار (تأکید) */
+  --color-plate-hi: #1f5590;    /* آبی تیره‌تر برای hover روی زمینهٔ روشن */
+  --color-chalk: #151514;       /* متن اصلی — جوهر */
+  --color-rubber: #5c5a55;      /* متن ثانویه (کنتراست ۵٫۵:۱ روی پس‌زمینه) */
+  --color-women: #8e3f86;       /* برچسب سالن بانوان */
 
   --font-sans: "Vazirmatn Variable", Tahoma, sans-serif;
 
@@ -25,24 +26,24 @@
   --color-card-foreground: var(--color-chalk);
   --color-popover: var(--color-steel);
   --color-popover-foreground: var(--color-chalk);
-  --color-primary: var(--color-plate);
-  --color-primary-foreground: #ffffff;
-  --color-secondary: var(--color-steel-2);
+  --color-primary: var(--color-chalk);
+  --color-primary-foreground: var(--color-iron);
+  --color-secondary: #e2dfd9;
   --color-secondary-foreground: var(--color-chalk);
-  --color-muted: var(--color-steel-2);
+  --color-muted: #e2dfd9;
   --color-muted-foreground: var(--color-rubber);
-  --color-accent: var(--color-steel-2);
+  --color-accent: #e2dfd9;
   --color-accent-foreground: var(--color-chalk);
   --color-destructive: #e5484d;
   --color-destructive-foreground: #ffffff;
   --color-border: var(--color-steel-2);
   --color-input: var(--color-steel-2);
-  --color-ring: var(--color-plate-hi);
+  --color-ring: var(--color-plate);
   --radius: 1rem;
 }
 
 @layer base {
-  html { background: var(--color-iron); color-scheme: dark; }
+  html { background: var(--color-iron); color-scheme: light; }
   body {
     @apply bg-iron text-chalk font-sans antialiased;
     font-feature-settings: "ss01";
@@ -51,8 +52,8 @@
   section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5.5rem); }
   /* بخش‌های پایین صفحه تا نزدیک شدن به دید رندر نمی‌شوند */
   
-  ::selection { background: var(--color-plate); color: white; }
-  :focus-visible { outline: 2px solid var(--color-plate-hi); outline-offset: 3px; border-radius: 4px; }
+  ::selection { background: var(--color-chalk); color: var(--color-iron); }
+  :focus-visible { outline: 2px solid var(--color-plate); outline-offset: 3px; border-radius: 4px; }
   html { scroll-behavior: smooth; }
   /* فاصلهٔ حروف (tracking) اتصال حروف فارسی را می‌شکند؛ برای متن فارسیِ کامپوننت‌ها خنثی می‌شود */
   :where([dir="rtl"]) * { letter-spacing: normal !important; }
@@ -74,16 +75,16 @@
 .plate-pin {
   width: 30px; height: 30px; border-radius: 50%;
   background: radial-gradient(circle at center, var(--color-iron) 0 4px, var(--color-plate) 5px 11px, #1f5490 12px 13px, var(--color-plate) 14px);
-  border: 2px solid rgb(255 255 255 / .85);
-  box-shadow: 0 0 18px 2px rgb(76 143 217 / .55);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgb(21 21 20 / .25);
   cursor: pointer; transition: transform .25s var(--ease-lift);
 }
-.plate-pin[data-active="true"] { transform: scale(1.35); box-shadow: 0 0 28px 6px rgb(76 143 217 / .8); }
+.plate-pin[data-active="true"] { transform: scale(1.35); box-shadow: 0 0 0 6px rgb(44 107 174 / .25); }
 .plate-pin[data-dim="true"] { opacity: .25; }
 .you-pin {
   width: 16px; height: 16px; border-radius: 50%; background: var(--color-chalk);
-  box-shadow: 0 0 0 6px rgb(238 241 244 / .2), 0 0 0 14px rgb(238 241 244 / .08);
+  box-shadow: 0 0 0 6px rgb(21 21 20 / .15), 0 0 0 14px rgb(21 21 20 / .06);
 }
-.maplibregl-ctrl-attrib { font-size: 10px; background: rgb(7 9 12 / .7) !important; color: var(--color-rubber); }
+.maplibregl-ctrl-attrib { font-size: 10px; background: rgb(235 233 229 / .85) !important; color: var(--color-rubber); }
 .maplibregl-ctrl-attrib a { color: var(--color-rubber) !important; }
 
