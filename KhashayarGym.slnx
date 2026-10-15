@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KhashayarGym.Api/KhashayarGym.Api.csproj" />
+    <Project Path="src/KhashayarGym.Business/KhashayarGym.Business.csproj" />
+    <Project Path="src/KhashayarGym.DataAccess/KhashayarGym.DataAccess.csproj" />
+    <Project Path="src/KhashayarGym.Domain/KhashayarGym.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/KhashayarGym.Tests/KhashayarGym.Tests.csproj" />
+  </Folder>
+</Solution>

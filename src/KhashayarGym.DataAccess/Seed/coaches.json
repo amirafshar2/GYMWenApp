@@ -1,0 +1,8 @@
+[
+  { "slug": "coach-1", "fullName": "آرش نیک‌منش", "specialty": "بدنسازی و حجم", "yearsOfExperience": 14, "section": "Men", "branchSlug": "ghoddousi-gharbi", "bio": "مربی بدنسازی با تمرکز بر حجم و قدرت.", "achievements": ["مقام اول کلاسیک فیزیک استان فارس (نمونه)", "مربی درجهٔ ۱ فدراسیون"] },
+  { "slug": "coach-2", "fullName": "مهسا کاظمی", "specialty": "پیلاتس و یوگا", "yearsOfExperience": 9, "section": "Women", "branchSlug": "farhangshahr-women", "bio": "مربی پیلاتس ماتی و یوگای هاتا.", "achievements": ["مدرک بین‌المللی پیلاتس (نمونه)", "مربی درجهٔ ۲ فدراسیون"] },
+  { "slug": "coach-3", "fullName": "سینا رحیمی", "specialty": "کراس‌فیت و فانکشنال", "yearsOfExperience": 8, "section": "Men", "branchSlug": "farhangshahr-kasaei", "bio": "تمرینات شدید، فانکشنال و آمادگی جسمانی.", "achievements": ["مربی لول ۲ کراس‌فیت (نمونه)"] },
+  { "slug": "coach-4", "fullName": "نگین فرهادی", "specialty": "تناسب اندام و تغذیه", "yearsOfExperience": 11, "section": "Women", "branchSlug": "shahrak-golestan-women", "bio": "کاهش وزن اصولی با تمرین و برنامهٔ غذایی.", "achievements": ["کارشناس ارشد تغذیهٔ ورزشی (نمونه)"] },
+  { "slug": "coach-5", "fullName": "کیان مرادی", "specialty": "صخره‌نوردی", "yearsOfExperience": 7, "section": "Men", "branchSlug": "maaliabad", "bio": "مربی سنگ‌نوردی سالنی و بولدرینگ.", "achievements": ["قهرمان بولدرینگ استانی (نمونه)"] },
+  { "slug": "coach-6", "fullName": "رضا صادقی", "specialty": "TRX و توانبخشی", "yearsOfExperience": 12, "section": "Men", "branchSlug": "farhangshahr-men", "bio": "تمرینات اصلاحی و بازگشت به تمرین بعد از آسیب.", "achievements": ["مربی رسمی TRX (نمونه)", "کارشناس حرکات اصلاحی"] }
+]

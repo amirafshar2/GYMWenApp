@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* ───── توکن‌های طراحی: همهٔ رنگ‌ها فقط از این‌جا عوض می‌شوند ───── */
+@theme {
+  --color-iron: #07090c;        /* پس‌زمینه — آهن */
+  --color-steel: #12161c;       /* سطح‌ها */
+  --color-steel-2: #1b2129;     /* سطح بالاتر / خطوط */
+  --color-plate: #2c6bae;       /* آبی برند خشایار (از لوگو) */
+  --color-plate-hi: #4c8fd9;    /* آبی روشن برای glow و hover */
+  --color-chalk: #eef1f4;       /* متن اصلی — گچ/منیزیم */
+  --color-rubber: #8a94a3;      /* متن ثانویه */
+  --color-women: #c9a3d9;       /* برچسب سالن بانوان */
+
+  --font-sans: "Vazirmatn Variable", Tahoma, sans-serif;
+
+  --ease-lift: cubic-bezier(.2, .8, .2, 1);
+}
+
+@layer base {
+  html { background: var(--color-iron); color-scheme: dark; }
+  body {
+    @apply bg-iron text-chalk font-sans antialiased;
+    font-feature-settings: "ss01";
+    text-rendering: optimizeLegibility;
+  }
+  section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5.5rem); }
+  /* بخش‌های پایین صفحه تا نزدیک شدن به دید رندر نمی‌شوند */
+  main > section:not(#top), main > div > section { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+  ::selection { background: var(--color-plate); color: white; }
+  :focus-visible { outline: 2px solid var(--color-plate-hi); outline-offset: 3px; border-radius: 4px; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+}
+
+@layer components {
+  /* دکمهٔ اصلی با glow آبی ملایم */
+  .btn-plate {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-plate px-6 py-3 font-bold text-white
+           transition-[box-shadow,background-color] duration-300;
+    box-shadow: 0 0 0 0 rgb(76 143 217 / 0);
+  }
+  .btn-plate:hover { background: var(--color-plate-hi); box-shadow: 0 0 32px 2px rgb(76 143 217 / .45); }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-steel-2 px-6 py-3 font-bold text-chalk
+           transition-colors duration-300 hover:border-plate-hi;
+  }
+  .section-title {
+    @apply font-black leading-[1.05] tracking-tight text-chalk;
+    font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  }
+  .lede { @apply text-lg leading-8 text-rubber max-w-[60ch]; }
+}
+
+/* کاهش حرکت */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* نشانگر نقشه به شکل صفحهٔ وزنه */
+.plate-pin {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle at center, var(--color-iron) 0 4px, var(--color-plate) 5px 11px, #1f5490 12px 13px, var(--color-plate) 14px);
+  border: 2px solid rgb(255 255 255 / .85);
+  box-shadow: 0 0 18px 2px rgb(76 143 217 / .55);
+  cursor: pointer; transition: transform .25s var(--ease-lift);
+}
+.plate-pin[data-active="true"] { transform: scale(1.35); box-shadow: 0 0 28px 6px rgb(76 143 217 / .8); }
+.plate-pin[data-dim="true"] { opacity: .25; }
+.you-pin {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--color-chalk);
+  box-shadow: 0 0 0 6px rgb(238 241 244 / .2), 0 0 0 14px rgb(238 241 244 / .08);
+}
+.maplibregl-ctrl-attrib { font-size: 10px; background: rgb(7 9 12 / .7) !important; color: var(--color-rubber); }
+.maplibregl-ctrl-attrib a { color: var(--color-rubber) !important; }
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(50%); } }
