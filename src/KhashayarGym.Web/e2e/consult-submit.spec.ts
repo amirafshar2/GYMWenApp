@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test'
 
 test('فرم مشاوره با CSRF ثبت می‌شود', async ({ page }) => {
   await page.goto('/#consult')
-  await page.getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
-  await page.getByLabel('شمارهٔ موبایل').fill(`0917${Math.floor(1000000 + Math.random() * 8999999)}`)
+  await page.locator('#consult').getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
+  await page.locator('#consult').getByLabel('شمارهٔ موبایل').fill(`0917${Math.floor(1000000 + Math.random() * 8999999)}`)
   await page.getByRole('button', { name: 'ثبت درخواست مشاوره' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'ثبت شد' })).toBeVisible()
 })

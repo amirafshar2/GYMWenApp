@@ -30,8 +30,8 @@ test('پکیج‌ها با تخفیف جشنواره نمایش داده می‌
 
 test('فرم مشاوره خطای شمارهٔ نامعتبر را نشان می‌دهد', async ({ page }) => {
   await page.goto('/#consult')
-  await page.getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
-  await page.getByLabel('شمارهٔ موبایل').fill('12345')
+  await page.locator('#consult').getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
+  await page.locator('#consult').getByLabel('شمارهٔ موبایل').fill('12345')
   await page.getByRole('button', { name: 'ثبت درخواست مشاوره' }).click()
   await expect(page.getByRole('alert').filter({ hasText: 'شمارهٔ موبایل را مثل' })).toBeVisible()
 })
