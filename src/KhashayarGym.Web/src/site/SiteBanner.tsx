@@ -28,7 +28,7 @@ export default function SiteBanner() {
         href="/#packages"
         label="جشنوارهٔ تخفیف"
         closeLabel="بستن نوار جشنواره"
-        className="!bg-blue-700 !pl-10 !pr-6"
+        className="!bg-[#151514] !pl-10 !pr-6"
         onClose={() => { setHidden(true); try { sessionStorage.setItem('festival-hidden', '1') } catch { /* */ } }}
       >
         <span className="font-semibold">{rebrand(c.title)}</span> · {faNum(c.discountPercent)}٪ تخفیف — <span className="tabular-nums">{faNum(d)} روز {faNum(h)} ساعت {faNum(m)} دقیقه <span className="hidden sm:inline">{faNum(s)} ثانیه</span></span>

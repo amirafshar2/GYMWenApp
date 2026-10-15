@@ -26,3 +26,6 @@ portfolio-export/
 # فریم‌های ویدیوی هیرو (حجیم؛ با scripts/make-hero-frames ساخته می‌شوند)
 src/KhashayarGym.Web/public/media/hero/frames/desktop/
 src/KhashayarGym.Web/public/media/hero/frames/mobile/
+
+# تصویر خام مجسمه (۱۱ مگابایت)؛ نسخه‌های وب dumbbell.webp و dumbbell-mobile.webp در گیت هستند
+src/KhashayarGym.Web/public/media/hero/dumbbell.png

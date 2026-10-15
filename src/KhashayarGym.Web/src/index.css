@@ -60,6 +60,11 @@
   .font-dmSans, .font-mono { font-family: var(--font-sans) !important; }
 }
 
+/* Liquid Sculpture Hero در RTL: فلش دکمه‌ها به چپ، بک‌دراپ لاتین چپ‌به‌راست */
+.sh-root[dir="rtl"] .sh-btn svg, .sh-root[dir="rtl"] .sh-txt svg, [dir="rtl"] .sh-btn svg, [dir="rtl"] .sh-txt svg { scale: -1 1; }
+.sh-backdrop { direction: ltr; }
+.sh-accent { font-style: normal !important; }
+
 /* کاهش حرکت */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

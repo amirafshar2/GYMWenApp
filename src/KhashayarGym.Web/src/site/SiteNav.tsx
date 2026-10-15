@@ -23,5 +23,16 @@ export default function SiteNav() {
     const t = setTimeout(() => ITEMS.forEach((i) => { const el = document.getElementById(i.id); if (el) io.observe(el) }), 500)
     return () => { clearTimeout(t); io.disconnect() }
   }, [])
-  return <NavBar items={ITEMS} active={active} className="sm:top-[var(--festival-h,0px)]" />
+  // منوی خود هیرو بالای صفحه است؛ Tubelight بعد از عبور از هیرو ظاهر می‌شود
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    const on = () => setShow(window.scrollY > window.innerHeight * 0.7)
+    on(); window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+  return (
+    <div className={`transition-opacity duration-500 ${show ? 'opacity-100' : 'pointer-events-none opacity-0'}`} inert={!show}>
+      <NavBar items={ITEMS} active={active} className="sm:top-[var(--festival-h,0px)]" />
+    </div>
+  )
 }
