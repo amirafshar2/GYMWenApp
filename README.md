@@ -34,14 +34,15 @@ npm run build            # خروجی داخل src\KhashayarGym.Api\wwwroot
 cd ..\KhashayarGym.Api
 $env:Database__Provider = "Sqlite"
 $env:ConnectionStrings__Default = "Data Source=khashayar-demo.db"
-dotnet run
+dotnet dev-certs https --trust     # فقط بار اول
+dotnet run --launch-profile https
 ```
 سپس https://localhost:7180 را باز کنید. دیتابیس و دادهٔ نمونه خودکار ساخته می‌شود.
 
 ## اجرا با SQL Server (LocalDB)
 ```powershell
 cd src\KhashayarGym.Api
-dotnet run               # Migrationها خودکار اعمال می‌شوند
+dotnet run --launch-profile https   # Migrationها خودکار اعمال می‌شوند
 ```
 رشتهٔ اتصال دیگر را با User Secrets بدهید (نه در appsettings):
 ```powershell
@@ -53,7 +54,7 @@ dotnet user-secrets set "ConnectionStrings:Default" "Server=...;Database=Khashay
 دو ترمینال:
 ```powershell
 # ترمینال ۱
-cd src\KhashayarGym.Api; dotnet run
+cd src\KhashayarGym.Api; dotnet run --launch-profile https
 # ترمینال ۲
 cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173 ، /api به https://localhost:7180 پراکسی می‌شود
 ```
