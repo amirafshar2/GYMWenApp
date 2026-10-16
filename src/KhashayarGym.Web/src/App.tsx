@@ -12,6 +12,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
 const JoinResultPage = lazy(() => import('./pages/JoinResultPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const LegalPage = lazy(() => import('./pages/LegalPage'))
 const Lab = import.meta.env.DEV ? lazy(() => import('./lab/Lab')) : () => null
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/join" element={<JoinPage />} />
             <Route path="/join/result" element={<JoinResultPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            {['/about', '/terms', '/privacy', '/refund'].map((p) => <Route key={p} path={p} element={<LegalPage />} />)}
             {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes>

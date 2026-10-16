@@ -6,6 +6,7 @@ import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
 import { Logo } from './SiteHeader'
+import { Link } from 'react-router-dom'
 import { wrap } from './ui/SectionHead'
 
 const toLatin = (s: string) => s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\s|-/g, '')
@@ -93,12 +94,33 @@ export default function SiteFooter() {
       <div className="border-t border-white/10">
         <div className={`${wrap} flex flex-wrap items-center justify-between gap-4 py-6`}>
           <Logo light />
+          <nav aria-label="قوانین" className="flex flex-wrap gap-x-5 gap-y-1 text-[13px]">
+            {[['/about', 'درباره ما'], ['/terms', 'قوانین و مقررات'], ['/privacy', 'حریم خصوصی'], ['/refund', 'لغو و بازگشت وجه']].map(([to, t]) => (
+              <Link key={to} to={to} className="text-white/55 transition-colors hover:text-white">{t}</Link>
+            ))}
+          </nav>
+          <Enamad />
           <p className="text-[14px] text-white/50">© {year} {brand.name}. همهٔ حقوق محفوظ است.</p>
         </div>
       </div>
       <BackToTop />
     </footer>
   )
+}
+
+/** نماد اعتماد الکترونیکی (کد رسمی enamad.ir). تا صادر نشده، فقط در حالت توسعه جای آن نشان داده می‌شود. */
+function Enamad() {
+  if (brand.enamad) {
+    const q = `id=${encodeURIComponent(brand.enamad.id)}&Code=${encodeURIComponent(brand.enamad.code)}`
+    return (
+      <a href={`https://trustseal.enamad.ir/?${q}`} target="_blank" rel="noopener" referrerPolicy="origin" aria-label="نماد اعتماد الکترونیکی"
+        className="grid size-[76px] place-items-center rounded-[6px] bg-white">
+        <img src={`https://trustseal.enamad.ir/logo.aspx?${q}`} alt="نماد اعتماد الکترونیکی" referrerPolicy="origin" width={70} height={70} />
+      </a>
+    )
+  }
+  if (!import.meta.env.DEV) return null
+  return <span className="grid size-[76px] place-items-center rounded-[6px] border border-dashed border-white/25 text-center text-[11px] leading-5 text-white/45">جای نماد<br />اینماد</span>
 }
 
 /** دکمهٔ برگشت به بالا (گوشهٔ پایین صفحهٔ مرجع) */

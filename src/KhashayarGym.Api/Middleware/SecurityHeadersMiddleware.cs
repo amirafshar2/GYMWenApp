@@ -7,7 +7,8 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
     public const string SandboxPath = "/payment-sandbox";
 
     // عکس‌های موقت مربیان تا رسیدن عکس واقعی؛ بعد از جایگزینی، این میزبان حذف شود
-    private const string ImageHosts = "https://images.unsplash.com";
+    // trustseal.enamad.ir: تصویر نماد اعتماد الکترونیکی در فوتر
+    private const string ImageHosts = "https://images.unsplash.com https://trustseal.enamad.ir";
 
     private string? _csp;
     private string Csp => _csp ??= BuildCsp(config);

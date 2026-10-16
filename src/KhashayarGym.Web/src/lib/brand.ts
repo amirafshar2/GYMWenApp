@@ -16,6 +16,8 @@ export interface Brand {
   phone: string
   instagram?: string
   city: string
+  /** کد نماد اعتماد الکترونیکی؛ بعد از صدور از enamad.ir پر شود */
+  enamad?: { id: string; code: string }
 }
 
 const khashayar: Brand = {
