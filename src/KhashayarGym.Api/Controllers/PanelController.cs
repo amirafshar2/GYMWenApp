@@ -138,26 +138,88 @@ public sealed class CoachPanelController(ICoachService coach) : ControllerBase
 [Route("api/v1/panel/admin")]
 [Produces("application/json")]
 [RequestSizeLimit(64 * 1024)]
-public sealed class AdminController(IAdminService admin, ISmsService sms) : ControllerBase
+public sealed class AdminController(IAdminService admin, ISmsService sms, PublicImageStore images, IWebHostEnvironment env,
+    Microsoft.AspNetCore.OutputCaching.IOutputCacheStore cache) : ControllerBase
 {
+    /// <summary>صفحه‌های عمومی (پکیج‌ها، جشنواره) ۶۰ ثانیه کش می‌شوند؛ بعد از تغییر، کش همان لحظه پاک می‌شود</summary>
+    private async Task<IActionResult> Fresh(IActionResult r, CancellationToken ct)
+    {
+        if (r is ObjectResult { StatusCode: null or < 300 } or NoContentResult or StatusCodeResult { StatusCode: < 300 }) await cache.EvictByTagAsync("public", ct);
+        return r;
+    }
+
+    // ---- عکس‌ها: کتابخانهٔ عکس‌های سایت + آپلود (فقط مدیر کل)
+    [HttpGet("images"), PanelAccess(R.Super)]
+    public IActionResult ImageLibrary()
+    {
+        static IReadOnlyList<string> List(string dir, string url, string pattern) =>
+            Directory.Exists(dir) ? Directory.GetFiles(dir, pattern).Select(f => $"{url}/{Path.GetFileName(f)}").Order().ToList() : [];
+        var web = env.WebRootPath ?? "";
+        return Ok(new ImageLibraryDto(List(Path.Combine(web, "media", "canteen"), "/media/canteen", "*.svg"),
+            List(Path.Combine(web, "media", "shop"), "/media/shop", "*.svg"),
+            Directory.GetFiles(images.Root).OrderByDescending(System.IO.File.GetCreationTimeUtc).Take(60).Select(f => $"{PublicImageStore.RequestPath}/{Path.GetFileName(f)}").ToList()));
+    }
+
+    [HttpPost("images"), PanelAccess(R.Super)]
+    [RequestSizeLimit(PublicImageStore.MaxBytes + 64 * 1024)]
+    [EnableRateLimiting("payment")]
+    public async Task<IActionResult> Upload(IFormFile? file, CancellationToken ct)
+    {
+        var (path, error) = await images.SaveAsync(file, ct);
+        return path is null ? Problem(statusCode: 400, title: error) : StatusCode(201, new { path });
+    }
+
+    // ---- ساخت/ویرایش/حذف (فقط مدیر کل)
+    [HttpPost("packages"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreatePackage([FromBody] SavePackageRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SavePackageAsync(null, r, User.UserId(), ct)).ToActionResult(this, p => StatusCode(201, p)), ct);
+
+    [HttpPut("packages/{id:int}/details"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditPackage(int id, [FromBody] SavePackageRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SavePackageAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    [HttpDelete("packages/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> DeletePackage(int id, CancellationToken ct) =>
+        await Fresh((await admin.DeletePackageAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
+
+    [HttpPost("products"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreateProduct([FromBody] SaveProductRequest r, CancellationToken ct) =>
+        (await admin.SaveProductAsync(null, r, this.Scope(), ct)).ToActionResult(this, p => StatusCode(201, p));
+
+    [HttpPut("products/{id:int}/details"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditProduct(int id, [FromBody] SaveProductRequest r, CancellationToken ct) =>
+        (await admin.SaveProductAsync(id, r, this.Scope(), ct)).ToActionResult(this);
+
+    [HttpPost("canteen-items"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreateCanteenItem([FromBody] SaveCanteenItemRequest r, CancellationToken ct) =>
+        (await admin.SaveCanteenItemAsync(null, r, User.UserId(), ct)).ToActionResult(this, i => StatusCode(201, i));
+
+    [HttpPut("canteen-items/{id:int}/details"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditCanteenItem(int id, [FromBody] SaveCanteenItemRequest r, CancellationToken ct) =>
+        (await admin.SaveCanteenItemAsync(id, r, User.UserId(), ct)).ToActionResult(this);
+
+    [HttpDelete("canteen-items/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> DeleteCanteenItem(int id, CancellationToken ct) =>
+        (await admin.DeleteCanteenItemAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent());
+
     // ---- فقط مدیر کل
     [HttpGet("packages"), PanelAccess(R.Super)]
     public async Task<IActionResult> Packages(CancellationToken ct) => Ok(await admin.PackagesAsync(ct));
 
     [HttpPut("packages/{id:int}"), PanelAccess(R.Super)]
     public async Task<IActionResult> UpdatePackage(int id, [FromBody] UpdatePackageRequest r, CancellationToken ct) =>
-        (await admin.UpdatePackageAsync(id, r, User.UserId(), ct)).ToActionResult(this);
+        await Fresh((await admin.UpdatePackageAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
 
     [HttpGet("campaigns"), PanelAccess(R.Super)]
     public async Task<IActionResult> Campaigns(CancellationToken ct) => Ok(await admin.CampaignsAsync(ct));
 
     [HttpPost("campaigns"), PanelAccess(R.Super)]
     public async Task<IActionResult> CreateCampaign([FromBody] SaveCampaignRequest r, CancellationToken ct) =>
-        (await admin.SaveCampaignAsync(null, r, User.UserId(), ct)).ToActionResult(this, c => StatusCode(201, c));
+        await Fresh((await admin.SaveCampaignAsync(null, r, User.UserId(), ct)).ToActionResult(this, c => StatusCode(201, c)), ct);
 
     [HttpPut("campaigns/{id:int}"), PanelAccess(R.Super)]
     public async Task<IActionResult> UpdateCampaign(int id, [FromBody] SaveCampaignRequest r, CancellationToken ct) =>
-        (await admin.SaveCampaignAsync(id, r, User.UserId(), ct)).ToActionResult(this);
+        await Fresh((await admin.SaveCampaignAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
 
     [HttpGet("campaigns/{id:int}/audience"), PanelAccess(R.Super)]
     public async Task<IActionResult> Audience(int id, CancellationToken ct) => (await sms.CampaignAudienceAsync(this.Scope(), id, ct)).ToActionResult(this);

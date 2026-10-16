@@ -41,8 +41,11 @@ services:
       Payment__CallbackBaseUrl: ${SITE_URL:-}
       Payment__ZarinPal__MerchantId: ${ZARINPAL_MERCHANT_ID:-}
       ReverseProxy__Enabled: ${BEHIND_PROXY:-true}
+      Storage__PublicUploads: /data/uploads
     volumes:
       - private:/data/private
+      # عکس‌هایی که مدیر برای منو، کالا و پکیج آپلود می‌کند
+      - uploads:/data/uploads
     read_only: true
     tmpfs:
       - /tmp
@@ -53,3 +56,4 @@ services:
 volumes:
   sqldata:
   private:
+  uploads:

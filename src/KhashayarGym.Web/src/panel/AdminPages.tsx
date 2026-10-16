@@ -11,6 +11,7 @@ import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { Btn, inputCls, Notice, Panel, toLatinDigits } from '@/member/ui'
 import { BranchSelect, PanelTitle, usePanel } from './PanelLayout'
+import { CANTEEN_CATS, CanteenItemForm, DeleteButton, PACKAGE_CATS, PackageForm, ProductForm } from './CatalogForms'
 
 const money = (s: string) => Number(toLatinDigits(s).replace(/[,٬\s]/g, ''))
 const sm = `${inputCls} h-11`
@@ -40,6 +41,7 @@ function Field({ label, children, className }: { label: string; children: ReactN
 export function PackagesAdmin() {
   const { data, err, setErr, reload } = useList(panelApi.packages)
   const [edit, setEdit] = useState<Record<number, string>>({})
+  const [form, setForm] = useState<AdminPackage | 'new' | null>(null)
   const save = async (p: AdminPackage, patch: Partial<AdminPackage>) => {
     setErr(null)
     try {
@@ -50,15 +52,20 @@ export function PackagesAdmin() {
   }
   return (
     <>
-      <PanelTitle title="پکیج‌ها و قیمت" sub="قیمت تازه فقط برای خریدهای بعدی اعمال می‌شود؛ پرداخت‌های قبلی و فاکتورها دست نمی‌خورند." />
+      <PanelTitle title="پکیج‌ها و قیمت" sub="قیمت تازه فقط برای خریدهای بعدی اعمال می‌شود؛ پرداخت‌های قبلی و فاکتورها دست نمی‌خورند.">
+        <Btn className="h-11" onClick={() => setForm('new')}><Plus className="size-4" aria-hidden />پکیج تازه</Btn>
+      </PanelTitle>
       {err && <Notice tone="err" className="mb-4">{err}</Notice>}
+      {form && <PackageForm pkg={form === 'new' ? null : form} onCancel={() => setForm(null)} onDone={() => { setForm(null); void reload() }} />}
       <div className="grid gap-3">
         {data?.map((p) => (
           <Panel key={p.id} className="flex flex-wrap items-center gap-4 p-4 sm:p-5">
             <div className="min-w-[200px] flex-1">
               <p className="text-[16px] font-black text-chalk">{p.name}</p>
-              <p className="text-[13px] text-rubber">{faNum(p.durationMonths)} ماه{p.sessions ? ` – ${faNum(p.sessions)} جلسه` : ' – نامحدود'}</p>
+              <p className="text-[13px] text-rubber">{PACKAGE_CATS.find(([k]) => k === p.category)?.[1]} – {faNum(p.durationMonths)} ماه{p.sessions ? ` – ${faNum(p.sessions)} جلسه` : ' – نامحدود'} – {faNum(p.memberships)} خرید</p>
             </div>
+            <button type="button" onClick={() => setForm(p)} className="inline-flex cursor-pointer items-center gap-1 text-[14px] font-bold text-plate hover:underline"><Pencil className="size-4" aria-hidden />ویرایش</button>
+            {p.memberships === 0 && <DeleteButton onDelete={async () => { try { await panelApi.deletePackage(p.id); void reload() } catch (x) { setErr((x as Error).message) } }} />}
             {edit[p.id] !== undefined ? (
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void save(p, { priceToman: money(edit[p.id]) }) }}>
                 <input value={edit[p.id]} onChange={(e) => setEdit({ ...edit, [p.id]: e.target.value })} inputMode="numeric" dir="ltr" aria-label="قیمت به تومان" autoFocus className={`${sm} w-40 text-left`} />
@@ -323,6 +330,7 @@ function Stock() {
   const [branch, setBranch] = useState(me.branches[0]?.slug ?? '')
   const [q, setQ] = useState('')
   const [price, setPrice] = useState<Record<number, string>>({})
+  const [form, setForm] = useState<AdminProduct | 'new' | null>(null)
   const setQty = async (variant: number, v: string) => {
     const n = money(v); if (Number.isNaN(n)) return
     try { await panelApi.setStock(variant, branch, n); void reload() } catch (x) { setErr((x as Error).message) }
@@ -337,7 +345,9 @@ function Stock() {
       <div className="mb-4 flex flex-wrap gap-2">
         <BranchSelect value={branch} onChange={setBranch} />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="جست‌وجوی کالا…" aria-label="جست‌وجوی کالا" className={`${sm} max-w-xs`} />
+        {superAdmin && <Btn className="ms-auto h-11" onClick={() => setForm('new')}><Plus className="size-4" aria-hidden />کالای تازه</Btn>}
       </div>
+      {form && <ProductForm product={form === 'new' ? null : form} onCancel={() => setForm(null)} onDone={() => { setForm(null); void reload() }} />}
       {err && <Notice tone="err" className="mb-4">{err}</Notice>}
       <div className="grid gap-3">
         {list.map((p) => (
@@ -350,6 +360,7 @@ function Stock() {
                     <input autoFocus dir="ltr" value={price[p.id]} onChange={(e) => setPrice({ [p.id]: e.target.value })} aria-label="قیمت" className={`${sm} w-36 text-left`} /><Btn type="submit" className="h-11">ذخیره</Btn></form>
                 : <button type="button" onClick={() => setPrice({ [p.id]: String(p.priceToman) })} className="inline-flex cursor-pointer items-center gap-1 font-black hover:text-plate">{toman(p.priceToman)}<Pencil className="size-3.5" aria-hidden /></button>)
                 : <span className="font-black">{toman(p.priceToman)}</span>}
+              {superAdmin && <button type="button" onClick={() => setForm(p)} className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-bold text-plate hover:underline"><Pencil className="size-3.5" aria-hidden />ویرایش</button>}
               {superAdmin && <span className="flex items-center gap-2 text-[12px] text-rubber">در سایت<Toggle on={p.isActive} onChange={(v) => savePrice(p, { isActive: v })} label="نمایش در سایت" /></span>}
             </div>
             <ul className="mt-3 flex flex-wrap gap-2">
@@ -378,6 +389,8 @@ export function CanteenMenuAdmin() {
   const me = usePanel()
   const { data, err, setErr, reload } = useList(panelApi.canteenItems)
   const [price, setPrice] = useState<Record<number, string>>({})
+  const [form, setForm] = useState<AdminCanteenItem | 'new' | null>(null)
+  const [cat, setCat] = useState('')
   const save = async (i: AdminCanteenItem, patch: { priceToman?: number; isAvailable?: boolean }) => {
     setErr(null)
     try { await panelApi.updateCanteenItem(i.id, { priceToman: patch.priceToman ?? i.priceToman, isAvailable: patch.isAvailable ?? i.isAvailable }); setPrice({}); void reload() } catch (x) { setErr((x as Error).message) }
@@ -385,10 +398,14 @@ export function CanteenMenuAdmin() {
   const superAdmin = me.roles.includes('SuperAdmin')
   return (
     <>
-      <PanelTitle title="منوی بوفه" sub={superAdmin ? 'قیمت و موجود بودن آیتم‌ها؛ منو برای همهٔ شعبه‌ها یکی است.' : 'آیتمی که تمام شد را خاموش کنید تا مشتری سفارشش ندهد. تغییر قیمت با مدیر کل است.'} />
+      <PanelTitle title="منوی بوفه" sub={superAdmin ? 'افزودن، ویرایش و حذف آیتم‌ها؛ منو و قیمت برای همهٔ شعبه‌ها یکی است.' : 'آیتمی که تمام شد را خاموش کنید تا مشتری سفارشش ندهد. افزودن آیتم و تغییر قیمت با مدیر کل است.'}>
+        {superAdmin && <Btn className="h-11" onClick={() => setForm('new')}><Plus className="size-4" aria-hidden />آیتم تازه</Btn>}
+      </PanelTitle>
       {err && <Notice tone="err" className="mb-4">{err}</Notice>}
+      {form && <CanteenItemForm item={form === 'new' ? null : form} onCancel={() => setForm(null)} onDone={() => { setForm(null); void reload() }} />}
+      <div className="mb-4 flex flex-wrap gap-2"><Chip on={!cat} onClick={() => setCat('')}>همه</Chip>{CANTEEN_CATS.map(([k, l]) => <Chip key={k} on={cat === k} onClick={() => setCat(k)}>{l}</Chip>)}</div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {data?.map((i) => (
+        {data?.filter((i) => !cat || i.category === cat).map((i) => (
           <Panel key={i.id} className={cn('flex items-center gap-3 p-3', !i.isAvailable && 'opacity-60')}>
             <img src={i.imagePath} alt="" className="size-14 rounded-[6px] bg-steel object-cover" />
             <div className="min-w-0 flex-1">
@@ -398,6 +415,7 @@ export function CanteenMenuAdmin() {
                     <input autoFocus dir="ltr" value={price[i.id]} onChange={(e) => setPrice({ [i.id]: e.target.value })} aria-label="قیمت" className="h-8 w-28 rounded-[3px] border border-steel-2 px-2 text-left" /><Btn type="submit" className="h-8 px-3 text-[13px]">ذخیره</Btn></form>
                 : <button type="button" disabled={!superAdmin} onClick={() => setPrice({ [i.id]: String(i.priceToman) })} className="text-[14px] text-rubber enabled:cursor-pointer enabled:hover:text-plate">{toman(i.priceToman)}</button>}
             </div>
+            {superAdmin && <button type="button" onClick={() => setForm(i)} aria-label={`ویرایش ${i.name}`} className="grid size-9 cursor-pointer place-items-center rounded-full text-rubber hover:bg-steel hover:text-plate"><Pencil className="size-4" /></button>}
             <Toggle on={i.isAvailable} onChange={(v) => save(i, { isAvailable: v })} label={`${i.name} موجود است`} />
           </Panel>
         ))}

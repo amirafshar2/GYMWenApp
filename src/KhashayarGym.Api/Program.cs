@@ -104,6 +104,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAccessTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IPrivateFileStore, PrivateFileStore>();
+builder.Services.AddSingleton<PublicImageStore>();
 
 // ---- پیامک: Log (دمو) یا Kavenegar ----
 builder.Services.Configure<KhashayarGym.Business.Services.Panel.SmsOptions>(builder.Configuration.GetSection(KhashayarGym.Business.Services.Panel.SmsOptions.Section));
@@ -276,6 +277,14 @@ app.UseResponseCompression();
 app.UseSerilogRequestLogging();
 
 app.UseMiddleware<PrecompressedStaticFilesMiddleware>();
+// عکس‌های آپلودی مدیر (بیرون از wwwroot)
+var uploads = app.Services.GetRequiredService<PublicImageStore>();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = uploads.FileProvider,
+    RequestPath = PublicImageStore.RequestPath,
+    OnPrepareResponse = ctx => ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable", // نام فایل تصادفی و تغییرناپذیر
+});
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {

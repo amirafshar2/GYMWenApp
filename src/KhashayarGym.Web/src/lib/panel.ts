@@ -1,4 +1,4 @@
-import { request, type Membership } from './api'
+import { currentAccessToken, refreshSession, request, type Membership } from './api'
 
 // ---------------- انواع (هم‌نام با DTOهای سرور)
 export interface BranchRef { id: number; slug: string; name: string }
@@ -31,7 +31,8 @@ export interface TraineeRow {
 export interface TraineeDetail { member: TraineeRow; active: Membership | null; metrics: BodyMetric[]; plan: TrainingPlan | null; checkIns30: number }
 export interface Preferences { birthDate: string | null; marketingSmsOptIn: boolean }
 
-export interface AdminPackage { id: number; slug: string; name: string; tagline: string | null; category: string; durationMonths: number; sessions: number | null; priceToman: number; isActive: boolean; isFeatured: boolean; sortOrder: number }
+export interface AdminPackage { id: number; slug: string; name: string; tagline: string | null; category: string; durationMonths: number; sessions: number | null; priceToman: number; isActive: boolean; isFeatured: boolean; sortOrder: number; features: string[]; memberships: number }
+export interface SavePackage { name: string; tagline: string | null; category: string; durationMonths: number; sessions: number | null; priceToman: number; features: string[]; isActive: boolean; isFeatured: boolean }
 export interface AdminCampaign {
   id: number; title: string; description: string | null; startsAtUtc: string; endsAtUtc: string; discountPercent: number; discountAmountToman: number | null
   eligiblePackageSlugs: string[]; eligibleBranchSlugs: string[]; maxRedemptions: number | null; redemptionCount: number; isActive: boolean; isRunning: boolean
@@ -42,12 +43,19 @@ export interface AdminCode { id: number; code: string; percent: number; maxUses:
 export interface AdminContract { id: number; version: number; title: string; clauses: string[]; healthQuestions: string[]; isActive: boolean; publishedAtUtc: string | null; signatures: number }
 export interface AdminStock { branchSlug: string; branchName: string; quantity: number }
 export interface AdminVariant { id: number; sku: string; label: string; priceToman: number | null; stock: AdminStock[] }
-export interface AdminProduct { id: number; slug: string; name: string; kind: string; category: string; imagePath: string; priceToman: number; isActive: boolean; variants: AdminVariant[] }
+export interface SaveVariant { id: number | null; size: string | null; color: string | null; colorHex: string | null; flavor: string | null; priceToman: number | null }
+export interface AdminProduct {
+  id: number; slug: string; name: string; kind: string; category: string; imagePath: string; priceToman: number; isActive: boolean; variants: AdminVariant[]
+  brandName: string; description: string | null; highlights: string[] | null; variantDetails: SaveVariant[] | null
+}
+export interface SaveProduct { name: string; brandName: string; kind: string; category: string; description: string | null; priceToman: number; imagePath: string; isActive: boolean; highlights: string[]; variants: SaveVariant[] }
 export interface AdminShopOrder {
   id: number; number: string | null; status: string; fulfillment: 'pickup' | 'delivery'; branchName: string; customerName: string | null; customerPhone: string
   address: string | null; totalToman: number; createdAtUtc: string; items: { productName: string; variantLabel: string | null; imagePath: string; unitPriceToman: number; quantity: number }[]
 }
-export interface AdminCanteenItem { id: number; name: string; category: string; priceToman: number; isAvailable: boolean; imagePath: string }
+export interface AdminCanteenItem { id: number; name: string; category: string; priceToman: number; isAvailable: boolean; imagePath: string; description: string | null; kcal: number | null; proteinG: number | null }
+export interface SaveCanteenItem { name: string; description: string | null; category: string; priceToman: number; kcal: number | null; proteinG: number | null; imagePath: string; isAvailable: boolean }
+export interface ImageLibrary { canteen: string[]; shop: string[]; uploads: string[] }
 export interface StaffRow { userId: number; fullName: string | null; phone: string; roles: string[]; branches: BranchRef[]; lastLoginAtUtc: string | null }
 export interface SmsRow { id: number; phone: string; kind: string; preview: string; status: 'queued' | 'sent' | 'failed'; createdAtUtc: string; sentAtUtc: string | null; error: string | null }
 export interface SmsStats { queued: number; sentToday: number; failed: number; recent: SmsRow[] }
@@ -100,6 +108,28 @@ export const panelApi = {
   setShopOrderStatus: (id: number, status: string) => send<AdminShopOrder>('POST', `${A}/shop-orders/${id}/status`, { status }),
   canteenItems: () => get<AdminCanteenItem[]>(`${A}/canteen-items`),
   updateCanteenItem: (id: number, body: { priceToman: number; isAvailable: boolean }) => send<AdminCanteenItem>('PUT', `${A}/canteen-items/${id}`, body),
+  createPackage: (body: SavePackage) => send<AdminPackage>('POST', `${A}/packages`, body),
+  editPackage: (id: number, body: SavePackage) => send<AdminPackage>('PUT', `${A}/packages/${id}/details`, body),
+  deletePackage: (id: number) => send<null>('DELETE', `${A}/packages/${id}`),
+  createProduct: (body: SaveProduct) => send<AdminProduct>('POST', `${A}/products`, body),
+  editProduct: (id: number, body: SaveProduct) => send<AdminProduct>('PUT', `${A}/products/${id}/details`, body),
+  createCanteenItem: (body: SaveCanteenItem) => send<AdminCanteenItem>('POST', `${A}/canteen-items`, body),
+  editCanteenItem: (id: number, body: SaveCanteenItem) => send<AdminCanteenItem>('PUT', `${A}/canteen-items/${id}/details`, body),
+  deleteCanteenItem: (id: number) => send<null>('DELETE', `${A}/canteen-items/${id}`),
+  images: () => get<ImageLibrary>(`${A}/images`),
+  /** آپلود عکس (JPG/PNG/WebP تا ۲ مگابایت)؛ مسیر عکس را برمی‌گرداند */
+  uploadImage: async (file: File): Promise<string> => {
+    const send = () => {
+      const fd = new FormData(); fd.append('file', file)
+      const t = currentAccessToken()
+      return fetch(`/api/v1${A}/images`, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-KG-Client': 'web', ...(t ? { Authorization: `Bearer ${t}` } : {}) } })
+    }
+    let res = await send()
+    if (res.status === 401 && await refreshSession()) res = await send()
+    const body = await res.json().catch(() => ({})) as { path?: string; title?: string }
+    if (!res.ok || !body.path) throw new Error(body.title ?? 'آپلود عکس انجام نشد.')
+    return body.path
+  },
   staff: () => get<StaffRow[]>(`${A}/staff`),
   saveStaff: (body: { phone: string; fullName: string | null; roles: string[]; branchSlugs: string[] }) => send<StaffRow>('PUT', `${A}/staff`, body),
   sms: (kind?: string) => get<SmsStats>(`${A}/sms${q({ kind })}`),

@@ -32,7 +32,7 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     DataProtection__KeysPath=/data/private/keys
 COPY --from=build /app ./
 # فایل‌های خصوصی (PDF قراردادها) در volume جدا، با مالکیت کاربر غیر root ایمیج (app، UID 1654)
-RUN mkdir -p /data/private && chown -R $APP_UID /data
+RUN mkdir -p /data/private /data/uploads && chown -R $APP_UID /data
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "KhashayarGym.Api.dll"]

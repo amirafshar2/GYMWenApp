@@ -27,20 +27,30 @@ public interface IAdminService
     Task<IReadOnlyList<AdminCanteenItemDto>> CanteenItemsAsync(CancellationToken ct);
     Task<Result<AdminCanteenItemDto>> UpdateCanteenItemAsync(int id, UpdateCanteenItemRequest r, StaffScope scope, CancellationToken ct);
     Task<IReadOnlyList<StaffRowDto>> StaffAsync(CancellationToken ct);
+    // ساخت و ویرایش کامل (فقط مدیر کل)
+    Task<Result<AdminPackageDto>> SavePackageAsync(int? id, SavePackageRequest r, int staffId, CancellationToken ct);
+    Task<Result<bool>> DeletePackageAsync(int id, int staffId, CancellationToken ct);
+    Task<Result<AdminProductDto>> SaveProductAsync(int? id, SaveProductRequest r, StaffScope scope, CancellationToken ct);
+    Task<Result<AdminCanteenItemDto>> SaveCanteenItemAsync(int? id, SaveCanteenItemRequest r, int staffId, CancellationToken ct);
+    Task<Result<bool>> DeleteCanteenItemAsync(int id, int staffId, CancellationToken ct);
     Task<Result<StaffRowDto>> SaveStaffAsync(SaveStaffRequest r, int byUserId, CancellationToken ct);
 }
 
 /// <summary>مدیریت محتوا و کارکنان. هر تغییر قیمت/نقش در لاگ ممیزی ثبت می‌شود.</summary>
-public sealed class AdminService(GymDbContext db, UserManager<AppUser> users, IClock clock) : IAdminService
+public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> users, IClock clock) : IAdminService
 {
     private void Audit(string action, string entity, object id, int by, string? data = null) =>
         db.AuditLogs.Add(new AuditLog { Action = action, EntityType = entity, EntityId = id.ToString(), UserId = by, Data = data });
 
     // ---------------- پکیج‌ها
-    public async Task<IReadOnlyList<AdminPackageDto>> PackagesAsync(CancellationToken ct) =>
-        (await db.Packages.AsNoTracking().OrderBy(p => p.SortOrder).ToListAsync(ct)).Select(ToDto).ToList();
+    public async Task<IReadOnlyList<AdminPackageDto>> PackagesAsync(CancellationToken ct)
+    {
+        var counts = await db.Memberships.GroupBy(m => m.PackageId).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N, ct);
+        return (await db.Packages.AsNoTracking().OrderBy(p => p.SortOrder).ToListAsync(ct)).Select(p => ToDto(p, counts.GetValueOrDefault(p.Id))).ToList();
+    }
 
-    private static AdminPackageDto ToDto(MembershipPackage p) => new(p.Id, p.Slug, p.Name, p.Tagline, p.Category.ToString(), p.DurationMonths, p.Sessions, p.PriceToman, p.IsActive, p.IsFeatured, p.SortOrder);
+    private static AdminPackageDto ToDto(MembershipPackage p, int memberships = 0) => new(p.Id, p.Slug, p.Name, p.Tagline, p.Category.ToString(), p.DurationMonths, p.Sessions,
+        p.PriceToman, p.IsActive, p.IsFeatured, p.SortOrder, p.Features, memberships);
 
     public async Task<Result<AdminPackageDto>> UpdatePackageAsync(int id, UpdatePackageRequest r, int staffId, CancellationToken ct)
     {
@@ -149,9 +159,7 @@ public sealed class AdminService(GymDbContext db, UserManager<AppUser> users, IC
     {
         var list = await db.Products.AsNoTracking().Include(p => p.Variants).ThenInclude(v => v.Stocks).ThenInclude(s => s.Branch)
             .OrderBy(p => p.SortOrder).AsSplitQuery().ToListAsync(ct);
-        return list.Select(p => new AdminProductDto(p.Id, p.Slug, p.Name, ShopService.KindName(p.Kind), p.Category, p.ImagePath, p.PriceToman, p.IsActive,
-            p.Variants.OrderBy(v => v.Id).Select(v => new AdminVariantDto(v.Id, v.Sku, v.Label, v.PriceToman,
-                v.Stocks.Where(s => scope.Can(s.BranchId)).OrderBy(s => s.Branch!.SortOrder).Select(s => new AdminStockDto(s.Branch!.Slug, s.Branch.Name, s.Quantity)).ToList())).ToList())).ToList();
+        return list.Select(p => ToDto(p, scope)).ToList();
     }
 
     public async Task<Result<AdminProductDto>> UpdateProductAsync(int id, UpdateProductRequest r, int staffId, CancellationToken ct)
@@ -220,7 +228,7 @@ public sealed class AdminService(GymDbContext db, UserManager<AppUser> users, IC
     // ---------------- بوفه
     public async Task<IReadOnlyList<AdminCanteenItemDto>> CanteenItemsAsync(CancellationToken ct) =>
         (await db.CanteenItems.AsNoTracking().OrderBy(i => i.SortOrder).ToListAsync(ct))
-            .Select(i => new AdminCanteenItemDto(i.Id, i.Name, CanteenService.CategoryName(i.Category), i.PriceToman, i.IsAvailable, i.ImagePath)).ToList();
+            .Select(ToDto).ToList();
 
     public async Task<Result<AdminCanteenItemDto>> UpdateCanteenItemAsync(int id, UpdateCanteenItemRequest r, StaffScope scope, CancellationToken ct)
     {
@@ -233,7 +241,7 @@ public sealed class AdminService(GymDbContext db, UserManager<AppUser> users, IC
         i.PriceToman = r.PriceToman; i.IsAvailable = r.IsAvailable;
         Audit("canteen.item_updated", "CanteenItem", i.Id, staffId);
         await db.SaveChangesAsync(ct);
-        return Result<AdminCanteenItemDto>.Ok(new AdminCanteenItemDto(i.Id, i.Name, CanteenService.CategoryName(i.Category), i.PriceToman, i.IsAvailable, i.ImagePath));
+        return Result<AdminCanteenItemDto>.Ok(ToDto(i));
     }
 
     // ---------------- کارکنان
