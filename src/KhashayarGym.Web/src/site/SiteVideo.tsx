@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
 
-/** ویدیوی خود باشگاه (scripts/make-scrub-video آن را برای اسکرول فریم‌به‌فریم بهینه می‌کند) */
-const GYM_VIDEO = '/media/video/gym-scrub.mp4'
+/** ویدیوی خود باشگاه: public/media/video/gym.mp4 (برای اسکرول نرم، فایل با scripts/make-scrub-video بهینه شده — همهٔ فریم‌ها کلیدی) */
+const GYM_VIDEO = '/media/video/gym.mp4'
 
 /**
  * بخش ویدیویی وسط صفحه — Sunset Skyline Hero از 21st.dev (guglielmogiannattasio).

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LocateFixed, Phone, Navigation } from 'lucide-react'
 import { SectionHead, wrap } from './ui/SectionHead'
 import { api, type Branch } from '@/lib/api'
@@ -7,7 +7,25 @@ import { brand } from '@/lib/brand'
 import { distanceKm, faDigits, faNum, formatDistance } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 
-const BranchMap = lazy(() => import('@/components/BranchMap'))
+import ShirazBranchPicker, { type PickerArea } from '@/components/ui/shiraz-branch-picker'
+
+/** چهار منطقهٔ شهر با رنگ‌های تم سایت */
+const AREAS: PickerArea[] = [
+  { id: 'nw', name: 'شمال‌غرب', sub: 'شهرک گلستان', color: '#2C2C2C' },
+  { id: 'w', name: 'غرب', sub: 'معالی‌آباد و قدوسی', color: '#E8283C' },
+  { id: 'c', name: 'مرکز', sub: 'فرهنگ‌شهر، نیایش، سروناز', color: '#FFB400' },
+  { id: 'e', name: 'شرق و جنوب', sub: 'شعبه‌های تازه', color: '#8A8A8A' },
+]
+const areaOf = (b: Branch) =>
+  b.latitude > 29.69 ? 'nw' : b.longitude < 52.495 ? 'w' : b.longitude < 52.515 && b.latitude > 29.62 ? 'c' : 'e'
+
+/** طرح کلی شماتیک شیراز [lat, lng] — دره‌ای کشیده از شمال‌غرب به جنوب‌شرق (مرز رسمی شهرداری نیست) */
+const SHIRAZ_OUTLINE: [number, number][] = [
+  [29.742, 52.418], [29.748, 52.447], [29.722, 52.462], [29.700, 52.478], [29.684, 52.500], [29.672, 52.530],
+  [29.660, 52.560], [29.643, 52.585], [29.618, 52.603], [29.590, 52.612], [29.567, 52.596], [29.566, 52.565],
+  [29.574, 52.534], [29.582, 52.505], [29.589, 52.478], [29.600, 52.455], [29.618, 52.443], [29.640, 52.444],
+  [29.660, 52.440], [29.684, 52.425], [29.708, 52.410], [29.728, 52.406],
+]
 type Filter = 'all' | 'men' | 'women'
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'همه' }, { key: 'men', label: 'آقایان' }, { key: 'women', label: 'بانوان' },
@@ -41,7 +59,7 @@ export default function SiteBranches() {
     return l
   }, [branches, user])
   const dimmed = useMemo(() => new Set(branches.filter((b) => !matches(b)).map((b) => b.slug)), [branches, filter]) // eslint-disable-line react-hooks/exhaustive-deps
-  const shown = ranked.filter(({ b }) => matches(b))
+  const nearest = user ? ranked.find(({ b }) => matches(b))?.b.slug ?? null : null
 
   const locate = () => {
     if (!('geolocation' in navigator)) return setGeo({ status: 'error', msg: 'مرورگر شما موقعیت‌یابی را پشتیبانی نمی‌کند. شعبه را از روی نقشه انتخاب کنید.' })
@@ -101,54 +119,49 @@ export default function SiteBranches() {
         {error && <p className="text-[#a4361f]">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
       </div>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
-        <ol className="order-2 max-h-[640px] overflow-y-auto overscroll-contain border-t border-chalk/15 lg:order-1" data-lenis-prevent>
-          {shown.map(({ b, d }, i) => {
-            const on = active === b.slug
-            return (
-              <li key={b.slug} id={`branch-${b.slug}`} className="border-b border-chalk/15">
-                <button className="flex w-full cursor-pointer items-start justify-between gap-4 py-5 text-right transition-colors duration-200 hover:bg-white" onClick={() => setActive(b.slug)} aria-expanded={on}>
-                  <span className="min-w-0">
-                    <span className={cn('block text-lg font-bold', on && 'text-plate')}>{b.name}</span>
-                    <span className="mt-1 block text-sm text-rubber">{b.address}</span>
-                    <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-rubber">
-                      {b.hasMen && <span>آقایان</span>}
-                      {b.hasWomen && <span className="text-women">بانوان</span>}
-                      {!b.addressConfirmed && <span>آدرس دقیق به‌زودی</span>}
-                    </span>
-                  </span>
-                  {d !== null && (
-                    <span className={cn('shrink-0 rounded-full px-3 py-1 text-xs', i === 0 ? 'bg-plate text-white' : 'border border-chalk/20 text-rubber')}>
-                      {i === 0 ? 'نزدیک‌ترین، ' : ''}{formatDistance(d)}
-                    </span>
-                  )}
-                </button>
-                {on && (
-                  <div className="space-y-2.5 pb-6 text-sm">
-                    {b.menHours && <p><span className="text-rubber">سانس آقایان: </span>{b.menHours}</p>}
-                    {b.womenHours && <p><span className="text-rubber">سانس بانوان: </span>{b.womenHours}</p>}
-                    {b.disciplines.length > 0 && <p><span className="text-rubber">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {b.phone && <a href={`tel:${b.phone}`} className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-chalk px-4 text-white"><Phone className="size-4" aria-hidden />{faDigits(b.phone)}</a>}
-                      {routes(b).map((r) => (
-                        <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-[3px] border-2 border-chalk/15 bg-white px-4 font-bold transition-colors hover:border-chalk"><Navigation className="size-4" aria-hidden />{r.label}</a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ol>
-        <div ref={mapBox} className="relative order-1 h-[420px] overflow-hidden bg-white lg:order-2 lg:h-[640px]">
-          {mapOn && branches.length > 0 && (
-            <Suspense fallback={null}>
-              <BranchMap branches={branches} visibleCount={99} activeSlug={active} dimmed={dimmed} user={user} onSelect={(s) => { setActive(s); document.getElementById(`branch-${s}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) }} />
-            </Suspense>
+      <div className="mt-4">
+        <ShirazBranchPicker
+          branches={branches}
+          areas={AREAS}
+          areaOf={areaOf}
+          outline={SHIRAZ_OUTLINE}
+          cityName={brand.city}
+          selected={active}
+          onSelect={setActive}
+          dimmed={dimmed}
+          user={user}
+          distanceOf={(b) => (user ? distanceKm(user, { lat: b.latitude, lng: b.longitude }) : null)}
+          nearestSlug={nearest}
+          formatDistance={formatDistance}
+          renderDetails={(b) => b ? <BranchDetails b={b} /> : (
+            <p className="text-[14px] text-rubber">یک منطقه را روی نقشه باز کن و شعبه را انتخاب کن؛ ساعت سانس‌ها، تلفن و مسیریابی همین‌جا می‌آید.</p>
           )}
-        </div>
+        />
       </div>
       </div>
     </section>
+  )
+}
+
+/** جزئیات شعبهٔ انتخاب‌شده در پایین کارت نقشه */
+function BranchDetails({ b }: { b: Branch }) {
+  return (
+    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+      <div className="min-w-0">
+        <p className="text-[17px] font-bold text-chalk">{b.name}</p>
+        <p className="mt-1 text-[14px] text-rubber">{b.address}{!b.addressConfirmed && ' — آدرس دقیق به‌زودی'}</p>
+        <div className="mt-3 grid gap-1 text-[14px]">
+          {b.menHours && <p><span className="text-rubber">سانس آقایان: </span>{faDigits(b.menHours)}</p>}
+          {b.womenHours && <p><span className="text-rubber">سانس بانوان: </span>{faDigits(b.womenHours)}</p>}
+          {b.disciplines.length > 0 && <p><span className="text-rubber">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {b.phone && <a href={`tel:${b.phone}`} className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-plate px-4 font-bold text-white transition-colors hover:bg-plate-hi"><Phone className="size-4" aria-hidden /><span dir="ltr">{faDigits(b.phone)}</span></a>}
+        {routes(b).map((r) => (
+          <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-[3px] border-2 border-chalk/15 bg-white px-4 font-bold transition-colors hover:border-chalk"><Navigation className="size-4" aria-hidden />{r.label}</a>
+        ))}
+      </div>
+    </div>
   )
 }

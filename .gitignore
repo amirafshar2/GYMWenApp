@@ -30,5 +30,5 @@ src/KhashayarGym.Web/public/media/hero/frames/mobile/
 # تصویر خام مجسمه (۱۱ مگابایت)؛ نسخه‌های وب dumbbell.webp و dumbbell-mobile.webp در گیت هستند
 src/KhashayarGym.Web/public/media/hero/dumbbell.png
 
-# ویدیوی خام باشگاه (نسخهٔ بهینهٔ gym-scrub.mp4 ساخته می‌شود)
-src/KhashayarGym.Web/public/media/video/gym.mp4
+# ویدیوی خام باشگاه (نسخهٔ بهینه‌اش gym.mp4 است که سایت پخش می‌کند)
+src/KhashayarGym.Web/public/media/video/gym-source.mp4

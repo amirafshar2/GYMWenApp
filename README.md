@@ -91,7 +91,7 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | چرا خشایار + اعداد | `site/SiteWhy.tsx` | Count Up (21st.dev) |
 | ویدیوی اسکرولی وسط صفحه | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) — ویدیو: `public/media/video/gym.mp4` |
 | آنچه ارائه می‌دهیم (کاروسل آیکون) | `site/SiteOffer.tsx` | چیدمان صفحهٔ مرجع |
-| شعبه‌ها و نقشه | `site/SiteBranches.tsx` | MapLibre |
+| شعبه‌ها و نقشه | `site/SiteBranches.tsx`، `components/ui/shiraz-branch-picker.tsx` | ساختار Nepal Address Picker (21st.dev) با رنگ‌های تم؛ نقشهٔ شماتیک شیراز + حوزهٔ هر شعبه |
 | پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev) |
 | جشنواره (دو تصویر پارالاکس) | `site/SiteEvents.tsx` | چیدمان صفحهٔ مرجع |
 | مربیان | `site/SiteCoaches.tsx` | Glow Cards (21st.dev) |
@@ -100,7 +100,8 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |
 
 ### ویدیوی بخش وسط
-فایل ویدیو را با اسم `gym.mp4` در `src/KhashayarGym.Web/public/media/video/` بگذارید و اجرا کنید:
+صفحهٔ اصلی مستقیم `src/KhashayarGym.Web/public/media/video/gym.mp4` را پخش می‌کند (الان: ادغام سکانس ۱ و ۲).
+برای ویدیوی تازه، فایل خام را با اسم `gym-source.mp4` همان‌جا بگذارید و اجرا کنید:
 ```powershell
 .\scripts\make-scrub-video.ps1
 cd src\KhashayarGym.Web; npm run build

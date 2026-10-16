@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postbuild": "node -e \"require('fs').rmSync('../KhashayarGym.Api/wwwroot/media/video/gym.mp4',{force:true})\"",
+    "postbuild": "node -e \"require('fs').rmSync('../KhashayarGym.Api/wwwroot/media/video/gym-source.mp4',{force:true})\"",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -21,7 +21,6 @@
     "framer-motion": "^14.2.0",
     "gsap": "^3.15.0",
     "lucide-react": "^1.57.0",
-    "maplibre-gl": "^6.14.0",
     "motion": "^14.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

@@ -78,24 +78,6 @@
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
-/* نشانگر نقشه به شکل صفحهٔ وزنه */
-.plate-pin {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: radial-gradient(circle at center, var(--color-iron) 0 4px, var(--color-plate) 5px 11px, #1f5490 12px 13px, var(--color-plate) 14px);
-  border: 2px solid #fff;
-  box-shadow: 0 2px 10px rgb(21 21 20 / .25);
-  cursor: pointer; transition: transform .25s var(--ease-lift);
-}
-.plate-pin[data-active="true"] { transform: scale(1.35); box-shadow: 0 0 0 6px rgb(44 107 174 / .25); }
-.plate-pin[data-dim="true"] { opacity: .25; }
-.you-pin {
-  width: 16px; height: 16px; border-radius: 50%; background: var(--color-chalk);
-  box-shadow: 0 0 0 6px rgb(21 21 20 / .15), 0 0 0 14px rgb(21 21 20 / .06);
-}
-.maplibregl-ctrl-attrib { font-size: 10px; background: rgb(235 233 229 / .85) !important; color: var(--color-rubber); }
-.maplibregl-ctrl-attrib a { color: var(--color-rubber) !important; }
-
-
 /* شکل «حباب» پشت آیکون‌های بخش خدمات (مثل صفحهٔ مرجع) */
 .blob { border-radius: 58% 42% 55% 45% / 48% 58% 42% 52%; transition: border-radius .6s var(--ease-lift); }
 .group:hover .blob { border-radius: 44% 56% 41% 59% / 57% 43% 57% 43%; }
