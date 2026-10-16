@@ -156,7 +156,8 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
             Directory.Exists(dir) ? Directory.GetFiles(dir, pattern).Select(f => $"{url}/{Path.GetFileName(f)}").Order().ToList() : [];
         var web = env.WebRootPath ?? "";
         return Ok(new ImageLibraryDto(List(Path.Combine(web, "media", "canteen"), "/media/canteen", "*.svg"),
-            List(Path.Combine(web, "media", "shop"), "/media/shop", "*.svg"),
+            List(Path.Combine(web, "media", "shop"), "/media/shop", "*.svg")
+                .Concat(List(Path.Combine(web, "media", "coaches"), "/media/coaches", "*.*")).ToList(),
             Directory.GetFiles(images.Root).OrderByDescending(System.IO.File.GetCreationTimeUtc).Take(60).Select(f => $"{PublicImageStore.RequestPath}/{Path.GetFileName(f)}").ToList()));
     }
 
@@ -189,6 +190,22 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     [HttpPut("products/{id:int}/details"), PanelAccess(R.Super)]
     public async Task<IActionResult> EditProduct(int id, [FromBody] SaveProductRequest r, CancellationToken ct) =>
         (await admin.SaveProductAsync(id, r, this.Scope(), ct)).ToActionResult(this);
+
+    // ---- مربیان (پروفایل سایت + حساب پنل مربی)
+    [HttpGet("coaches"), PanelAccess(R.Super)]
+    public async Task<IActionResult> Coaches(CancellationToken ct) => Ok(await admin.CoachesAsync(ct));
+
+    [HttpPost("coaches"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreateCoach([FromBody] SaveCoachRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveCoachAsync(null, r, User.UserId(), ct)).ToActionResult(this, c => StatusCode(201, c)), ct);
+
+    [HttpPut("coaches/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditCoach(int id, [FromBody] SaveCoachRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveCoachAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    [HttpDelete("coaches/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> DeleteCoach(int id, CancellationToken ct) =>
+        await Fresh((await admin.DeleteCoachAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
 
     [HttpPost("canteen-items"), PanelAccess(R.Super)]
     public async Task<IActionResult> CreateCanteenItem([FromBody] SaveCanteenItemRequest r, CancellationToken ct) =>

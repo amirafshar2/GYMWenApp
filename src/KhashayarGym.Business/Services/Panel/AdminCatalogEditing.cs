@@ -14,7 +14,7 @@ namespace KhashayarGym.Business.Services.Panel;
 /// </summary>
 public sealed partial class AdminService
 {
-    private static readonly string[] ImageFolders = ["/media/canteen/", "/media/shop/", "/media/uploads/"];
+    private static readonly string[] ImageFolders = ["/media/canteen/", "/media/shop/", "/media/coaches/", "/media/uploads/"];
 
     /// <summary>عکس فقط از کتابخانهٔ خود سایت یا آپلودهای بررسی‌شده (نه آدرس دلخواه)</summary>
     private static bool ValidImage(string? path) =>

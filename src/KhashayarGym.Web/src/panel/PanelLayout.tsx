@@ -1,6 +1,6 @@
 import { createContext, Suspense, useContext, useEffect, useState } from 'react'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, Coffee, Dumbbell, FileSignature, MessageSquareText, Package, Presentation, ScanLine, ShoppingBag, Tags, UsersRound, UtensilsCrossed, type LucideIcon } from 'lucide-react'
+import { BarChart3, Coffee, Dumbbell, FileSignature, MessageSquareText, Package, Presentation, UserCog, ScanLine, ShoppingBag, Tags, UsersRound, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 import { can, panelApi, ROLE_LABEL, type PanelMe } from '@/lib/panel'
 import { faNum } from '@/lib/fa'
 import { cn } from '@/lib/utils'
@@ -23,6 +23,7 @@ export const NAV: NavItem[] = [
   { to: '/panel/packages', label: 'پکیج‌ها و قیمت', icon: Package, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/campaigns', label: 'جشنواره و کد تخفیف', icon: Tags, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/contract', label: 'قرارداد عضویت', icon: FileSignature, roles: ['SuperAdmin'], group: 'مدیریت' },
+  { to: '/panel/coaches', label: 'مربیان', icon: UserCog, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/staff', label: 'کارکنان و دسترسی', icon: UsersRound, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/sms', label: 'پیامک‌ها', icon: MessageSquareText, roles: ['SuperAdmin'], group: 'مدیریت' },
 ]

@@ -13,6 +13,8 @@ public class Coach : BaseEntity
     public string? PhotoUrl { get; set; }
     public List<string> Achievements { get; set; } = [];
     public int SortOrder { get; set; }
+    /// <summary>false یعنی در سایت نمایش داده نمی‌شود (مربی رفته یا موقتاً نیست)؛ سابقهٔ شاگردها می‌ماند.</summary>
+    public bool IsActive { get; set; } = true;
 
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }

@@ -242,7 +242,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.SmsMessages.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
+        try { _ = await db.Coaches.AnyAsync(c => c.IsActive); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();

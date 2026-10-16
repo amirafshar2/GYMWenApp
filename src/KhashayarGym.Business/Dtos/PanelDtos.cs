@@ -85,3 +85,10 @@ public sealed record SaveStaffRequest(string Phone, string? FullName, IReadOnlyL
 // ---- پیامک ----
 public sealed record SmsRowDto(int Id, string Phone, string Kind, string Preview, string Status, DateTime CreatedAtUtc, DateTime? SentAtUtc, string? Error);
 public sealed record SmsStatsDto(int Queued, int SentToday, int Failed, IReadOnlyList<SmsRowDto> Recent);
+
+// ---- مربیان (مدیر کل) ----
+public sealed record AdminCoachDto(int Id, string Slug, string FullName, string Specialty, string? Bio, int YearsOfExperience, string Section,
+    string BranchSlug, string BranchName, string? PhotoUrl, IReadOnlyList<string> Achievements, bool IsActive, string? LinkedPhone, string? LinkedName, int Trainees);
+/// <summary>LinkedPhone: موبایل حساب ورود مربی به پنل مربی (خالی = هنوز حساب ندارد)</summary>
+public sealed record SaveCoachRequest(string FullName, string Specialty, string? Bio, int YearsOfExperience, string Section, string BranchSlug,
+    string? PhotoUrl, IReadOnlyList<string>? Achievements, bool IsActive, string? LinkedPhone);

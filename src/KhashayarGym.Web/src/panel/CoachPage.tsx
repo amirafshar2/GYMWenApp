@@ -26,7 +26,7 @@ export default function CoachPage() {
     catch (x) { setErr((x as Error).message) }
   }
 
-  if (!me.coachId) return <Notice tone="warn">حساب شما هنوز به پروفایل مربی وصل نشده است. مدیر کل باید در بخش کارکنان این کار را انجام دهد.</Notice>
+  if (!me.coachId) return <Notice tone="warn">حساب شما هنوز به پروفایل مربی وصل نشده است. مدیر کل باید در پنل، بخش «مربیان»، شمارهٔ موبایل شما را برای پروفایلتان ثبت کند.</Notice>
   if (open !== null) return <Trainee id={open} onBack={() => { setOpen(null); void load() }} />
 
   const list = (rows ?? []).filter((r) => !filter || (r.fullName ?? '').includes(filter) || r.phone.includes(toLatinDigits(filter)))

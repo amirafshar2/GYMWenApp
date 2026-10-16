@@ -55,6 +55,11 @@ export interface AdminShopOrder {
 }
 export interface AdminCanteenItem { id: number; name: string; category: string; priceToman: number; isAvailable: boolean; imagePath: string; description: string | null; kcal: number | null; proteinG: number | null }
 export interface SaveCanteenItem { name: string; description: string | null; category: string; priceToman: number; kcal: number | null; proteinG: number | null; imagePath: string; isAvailable: boolean }
+export interface AdminCoach {
+  id: number; slug: string; fullName: string; specialty: string; bio: string | null; yearsOfExperience: number; section: 'men' | 'women' | 'both'
+  branchSlug: string; branchName: string; photoUrl: string | null; achievements: string[]; isActive: boolean; linkedPhone: string | null; linkedName: string | null; trainees: number
+}
+export interface SaveCoach { fullName: string; specialty: string; bio: string | null; yearsOfExperience: number; section: string; branchSlug: string; photoUrl: string | null; achievements: string[]; isActive: boolean; linkedPhone: string | null }
 export interface ImageLibrary { canteen: string[]; shop: string[]; uploads: string[] }
 export interface StaffRow { userId: number; fullName: string | null; phone: string; roles: string[]; branches: BranchRef[]; lastLoginAtUtc: string | null }
 export interface SmsRow { id: number; phone: string; kind: string; preview: string; status: 'queued' | 'sent' | 'failed'; createdAtUtc: string; sentAtUtc: string | null; error: string | null }
@@ -116,6 +121,9 @@ export const panelApi = {
   createCanteenItem: (body: SaveCanteenItem) => send<AdminCanteenItem>('POST', `${A}/canteen-items`, body),
   editCanteenItem: (id: number, body: SaveCanteenItem) => send<AdminCanteenItem>('PUT', `${A}/canteen-items/${id}/details`, body),
   deleteCanteenItem: (id: number) => send<null>('DELETE', `${A}/canteen-items/${id}`),
+  coaches: () => get<AdminCoach[]>(`${A}/coaches`),
+  saveCoach: (id: number | null, body: SaveCoach) => send<AdminCoach>(id ? 'PUT' : 'POST', id ? `${A}/coaches/${id}` : `${A}/coaches`, body),
+  deleteCoach: (id: number) => send<null>('DELETE', `${A}/coaches/${id}`),
   images: () => get<ImageLibrary>(`${A}/images`),
   /** آپلود عکس (JPG/PNG/WebP تا ۲ مگابایت)؛ مسیر عکس را برمی‌گرداند */
   uploadImage: async (file: File): Promise<string> => {

@@ -143,4 +143,41 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         Assert.Contains(packages.EnumerateArray(), x => x.GetProperty("name").GetString() == "دوماهه — ۲۴ جلسه");
         Assert.Equal(HttpStatusCode.Conflict, delBought.StatusCode);
     }
+
+    [Fact]
+    public async Task Super_admin_adds_coach_with_login_phone_who_then_gets_coach_panel_and_hiding_removes_from_site()
+    {
+        var admin = await StaffAsync(Roles.SuperAdmin);
+        var coachPhone = "0913" + Random.Shared.Next(1_000_000, 9_999_999);
+        var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/coaches", new
+        {
+            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "farhangshahr-women",
+            photoUrl = (string?)null, achievements = new[] { "مربی درجهٔ ۲ فدراسیون" }, isActive = true, linkedPhone = coachPhone,
+        });
+        var coach = await admin.JsonAsync<JsonElement>(created);
+        Assert.True(created.StatusCode == HttpStatusCode.Created, coach.ToString());
+        var onSite = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/coaches"));
+
+        var c = new Browser(factory);
+        await c.LoginAsync(coachPhone);
+        var me = await c.JsonAsync<JsonElement>(await c.SendAsync(HttpMethod.Get, "/api/v1/panel/me"));
+        var trainees = await c.SendAsync(HttpMethod.Get, "/api/v1/panel/coach/trainees");
+
+        var hide = await admin.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/coaches/{coach.GetProperty("id").GetInt32()}", new
+        {
+            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "farhangshahr-women",
+            photoUrl = (string?)null, achievements = Array.Empty<string>(), isActive = false, linkedPhone = (string?)null,
+        });
+        var afterHide = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/coaches"));
+        var lostPanel = await c.SendAsync(HttpMethod.Get, "/api/v1/panel/coach/trainees");
+
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal(coachPhone, coach.GetProperty("linkedPhone").GetString());
+        Assert.Contains(onSite.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "نسترن کامیاب");
+        Assert.Equal(coach.GetProperty("id").GetInt32(), me.GetProperty("coachId").GetInt32());
+        Assert.Equal(HttpStatusCode.OK, trainees.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, hide.StatusCode);
+        Assert.DoesNotContain(afterHide.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "نسترن کامیاب");
+        Assert.Equal(HttpStatusCode.Forbidden, lostPanel.StatusCode); // شماره برداشته شد ← نقش مربی همان لحظه گرفته شد
+    }
 }

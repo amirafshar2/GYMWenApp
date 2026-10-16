@@ -28,10 +28,10 @@ const PanelLayout = lazy(() => import('./panel/PanelLayout'))
 const DashboardPage = lazy(() => import('./panel/DashboardPage'))
 const ReceptionPage = lazy(() => import('./panel/ReceptionPage'))
 const CoachPage = lazy(() => import('./panel/CoachPage'))
-const admin = (k: 'PackagesAdmin' | 'CampaignsAdmin' | 'ContractAdmin' | 'ShopAdmin' | 'CanteenMenuAdmin' | 'StaffAdmin' | 'SmsAdmin') =>
+const admin = (k: 'CoachesAdmin' | 'PackagesAdmin' | 'CampaignsAdmin' | 'ContractAdmin' | 'ShopAdmin' | 'CanteenMenuAdmin' | 'StaffAdmin' | 'SmsAdmin') =>
   lazy(() => import('./panel/AdminPages').then((m) => ({ default: m[k] })))
 const PackagesAdmin = admin('PackagesAdmin'), CampaignsAdmin = admin('CampaignsAdmin'), ContractAdmin = admin('ContractAdmin'), ShopAdmin = admin('ShopAdmin')
-const CanteenMenuAdmin = admin('CanteenMenuAdmin'), StaffAdmin = admin('StaffAdmin'), SmsAdmin = admin('SmsAdmin')
+const CoachesAdmin = admin('CoachesAdmin'), CanteenMenuAdmin = admin('CanteenMenuAdmin'), StaffAdmin = admin('StaffAdmin'), SmsAdmin = admin('SmsAdmin')
 const Lab = import.meta.env.DEV ? lazy(() => import('./lab/Lab')) : () => null
 
 export default function App() {
@@ -91,6 +91,7 @@ export default function App() {
               <Route path="contract" element={<ContractAdmin />} />
               <Route path="shop" element={<ShopAdmin />} />
               <Route path="menu" element={<CanteenMenuAdmin />} />
+              <Route path="coaches" element={<CoachesAdmin />} />
               <Route path="staff" element={<StaffAdmin />} />
               <Route path="sms" element={<SmsAdmin />} />
             </Route>

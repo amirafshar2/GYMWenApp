@@ -4,14 +4,14 @@ import { api } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import {
   panelApi, ROLE_LABEL, STAFF_ROLES, type AdminCampaign, type AdminCanteenItem, type AdminCode, type AdminContract, type AdminPackage,
-  type AdminProduct, type AdminShopOrder, type Audience, type SaveCampaign, type SmsStats, type StaffRow,
+  type AdminCoach, type AdminProduct, type AdminShopOrder, type Audience, type SaveCampaign, type SmsStats, type StaffRow,
 } from '@/lib/panel'
 import { rebrand } from '@/lib/brand'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { Btn, inputCls, Notice, Panel, toLatinDigits } from '@/member/ui'
 import { BranchSelect, PanelTitle, usePanel } from './PanelLayout'
-import { CANTEEN_CATS, CanteenItemForm, DeleteButton, PACKAGE_CATS, PackageForm, ProductForm } from './CatalogForms'
+import { CANTEEN_CATS, CanteenItemForm, CoachForm, DeleteButton, PACKAGE_CATS, PackageForm, ProductForm, SECTIONS } from './CatalogForms'
 
 const money = (s: string) => Number(toLatinDigits(s).replace(/[,٬\s]/g, ''))
 const sm = `${inputCls} h-11`
@@ -417,6 +417,42 @@ export function CanteenMenuAdmin() {
             </div>
             {superAdmin && <button type="button" onClick={() => setForm(i)} aria-label={`ویرایش ${i.name}`} className="grid size-9 cursor-pointer place-items-center rounded-full text-rubber hover:bg-steel hover:text-plate"><Pencil className="size-4" /></button>}
             <Toggle on={i.isAvailable} onChange={(v) => save(i, { isAvailable: v })} label={`${i.name} موجود است`} />
+          </Panel>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// ================================================================ مربیان
+export function CoachesAdmin() {
+  const { data, err, reload } = useList(panelApi.coaches)
+  const { data: branches = [] } = useData('branches', api.branches)
+  const [form, setForm] = useState<AdminCoach | 'new' | null>(null)
+  return (
+    <>
+      <PanelTitle title="مربیان" sub="پروفایلی که در بخش «مربیان» سایت دیده می‌شود، و حساب ورود هر مربی به پنل مربی.">
+        <Btn className="h-11" onClick={() => setForm('new')}><Plus className="size-4" aria-hidden />مربی تازه</Btn>
+      </PanelTitle>
+      {err && <Notice tone="err" className="mb-4">{err}</Notice>}
+      {form && <CoachForm coach={form === 'new' ? null : form} branches={branches} onCancel={() => setForm(null)} onDone={() => { setForm(null); void reload() }} />}
+      <div className="grid gap-3 md:grid-cols-2">
+        {data?.map((c) => (
+          <Panel key={c.id} className={cn('flex gap-4 p-4', !c.isActive && 'opacity-60')}>
+            <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-steel text-[18px] font-black text-rubber">
+              {c.photoUrl ? <img src={c.photoUrl} alt="" className="size-full object-cover" /> : c.fullName.split(' ').map((w) => w[0]).slice(0, 2).join('‌')}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="flex flex-wrap items-center gap-2 text-[16px] font-black text-chalk">{c.fullName}
+                {!c.isActive && <span className="rounded-full bg-steel px-2 py-0.5 text-[11px] text-rubber">در سایت نیست</span>}</p>
+              <p className="text-[13px] text-rubber">{c.specialty} – {c.branchName} – {SECTIONS.find(([k]) => k === c.section)?.[1]}</p>
+              <p className="mt-2 text-[13px]">
+                {c.linkedPhone
+                  ? <span className="text-[#1f7a46]">پنل مربی: <span dir="ltr">{faDigits(c.linkedPhone)}</span> – {faNum(c.trainees)} شاگرد</span>
+                  : <span className="text-[#7a5600]">حساب پنل مربی ندارد</span>}
+              </p>
+            </div>
+            <button type="button" onClick={() => setForm(c)} className="self-start inline-flex cursor-pointer items-center gap-1 text-[14px] font-bold text-plate hover:underline"><Pencil className="size-4" aria-hidden />ویرایش</button>
           </Panel>
         ))}
       </div>

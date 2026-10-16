@@ -1562,3 +1562,109 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    DROP INDEX [IX_ShopOrders_BranchId] ON [ShopOrders];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_ShopOrders_BranchId_PaidAtUtc] ON [ShopOrders] ([BranchId], [PaidAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_Payments_CampaignId] ON [Payments] ([CampaignId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_Payments_Purpose_Status_PaidAtUtc] ON [Payments] ([Purpose], [Status], [PaidAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_Memberships_BranchId_EndsAtUtc] ON [Memberships] ([BranchId], [EndsAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_Memberships_Status_EndsAtUtc] ON [Memberships] ([Status], [EndsAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_CheckIns_UserId_OccurredAtUtc] ON [CheckIns] ([UserId], [OccurredAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_CanteenOrders_BranchId_PaidAtUtc] ON [CanteenOrders] ([BranchId], [PaidAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    CREATE INDEX [IX_AuditLogs_CreatedAtUtc] ON [AuditLogs] ([CreatedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016143419_Phase5Scale'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261016143419_Phase5Scale', N'10.0.13');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016150828_CoachActive'
+)
+BEGIN
+    ALTER TABLE [Coaches] ADD [IsActive] bit NOT NULL DEFAULT CAST(1 AS bit);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261016150828_CoachActive'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261016150828_CoachActive', N'10.0.13');
+END;
+
+COMMIT;
+GO
+

@@ -33,6 +33,9 @@ public interface IAdminService
     Task<Result<AdminProductDto>> SaveProductAsync(int? id, SaveProductRequest r, StaffScope scope, CancellationToken ct);
     Task<Result<AdminCanteenItemDto>> SaveCanteenItemAsync(int? id, SaveCanteenItemRequest r, int staffId, CancellationToken ct);
     Task<Result<bool>> DeleteCanteenItemAsync(int id, int staffId, CancellationToken ct);
+    Task<IReadOnlyList<AdminCoachDto>> CoachesAsync(CancellationToken ct);
+    Task<Result<AdminCoachDto>> SaveCoachAsync(int? id, SaveCoachRequest r, int staffId, CancellationToken ct);
+    Task<Result<bool>> DeleteCoachAsync(int id, int staffId, CancellationToken ct);
     Task<Result<StaffRowDto>> SaveStaffAsync(SaveStaffRequest r, int byUserId, CancellationToken ct);
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { ImagePlus, Loader2, Plus, Trash2, X } from 'lucide-react'
-import { panelApi, type AdminCanteenItem, type AdminPackage, type AdminProduct, type ImageLibrary, type SaveVariant } from '@/lib/panel'
+import { panelApi, type AdminCanteenItem, type AdminCoach, type AdminPackage, type AdminProduct, type ImageLibrary, type SaveVariant } from '@/lib/panel'
+import type { Branch } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { Btn, inputCls, Notice, toLatinDigits } from '@/member/ui'
 
@@ -39,7 +40,7 @@ function Field({ label, hint, children, className }: { label: string; hint?: str
 }
 
 /** انتخاب عکس: آپلود (JPG/PNG/WebP تا ۲ مگابایت) یا از عکس‌های موجود سایت */
-export function ImagePicker({ value, onChange, prefer }: { value: string; onChange: (v: string) => void; prefer: 'canteen' | 'shop' }) {
+export function ImagePicker({ value, onChange, prefer }: { value: string; onChange: (v: string) => void; prefer: 'canteen' | 'shop' | 'uploads' }) {
   const [lib, setLib] = useState<ImageLibrary | null>(null)
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -52,7 +53,7 @@ export function ImagePicker({ value, onChange, prefer }: { value: string; onChan
     setBusy(true); setErr(null)
     try { onChange(await panelApi.uploadImage(f)); setLib(null) } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
-  const all = lib ? [...lib.uploads, ...(prefer === 'canteen' ? lib.canteen : lib.shop), ...(prefer === 'canteen' ? lib.shop : lib.canteen)] : []
+  const all = lib ? (prefer === 'uploads' ? lib.uploads : [...lib.uploads, ...(prefer === 'canteen' ? lib.canteen : lib.shop), ...(prefer === 'canteen' ? lib.shop : lib.canteen)]) : []
   return (
     <div className="grid gap-2">
       <div className="flex items-center gap-3">
@@ -261,6 +262,62 @@ export function ProductForm({ product, onDone, onCancel }: { product: AdminProdu
         <label className="flex cursor-pointer items-center gap-2 text-[14px] font-bold"><input type="checkbox" checked={f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} className="size-4 accent-[var(--color-plate)]" />در سایت نمایش داده شود</label>
         {err && <Notice tone="err">{err}</Notice>}
         <Actions busy={busy} onCancel={onCancel} />
+      </form>
+    </Drawer>
+  )
+}
+
+// ================================================================ مربی
+export const SECTIONS: [string, string][] = [['men', 'آقایان'], ['women', 'بانوان'], ['both', 'هر دو']]
+
+export function CoachForm({ coach, branches, onDone, onCancel }: { coach: AdminCoach | null; branches: Branch[]; onDone: () => void; onCancel: () => void }) {
+  const [f, setF] = useState({
+    name: coach?.fullName ?? '', specialty: coach?.specialty ?? '', bio: coach?.bio ?? '', years: String(coach?.yearsOfExperience ?? 1),
+    section: coach?.section ?? 'men', branch: coach?.branchSlug ?? branches[0]?.slug ?? '', photo: coach?.photoUrl ?? '',
+    achievements: (coach?.achievements ?? []).join('\n'), active: coach?.isActive ?? true, phone: coach?.linkedPhone ?? '',
+  })
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const submit = async (e: FormEvent) => {
+    e.preventDefault(); setBusy(true); setErr(null)
+    const body = { fullName: f.name, specialty: f.specialty, bio: f.bio || null, yearsOfExperience: num(f.years), section: f.section, branchSlug: f.branch,
+      photoUrl: f.photo || null, achievements: f.achievements.split('\n').map((x) => x.trim()).filter(Boolean), isActive: f.active, linkedPhone: f.phone.trim() ? toLatinDigits(f.phone) : null }
+    try { await panelApi.saveCoach(coach?.id ?? null, body); onDone() } catch (x) { setErr(errText(x)) } finally { setBusy(false) }
+  }
+  return (
+    <Drawer title={coach ? `ویرایش ${coach.fullName}` : 'مربی تازه'} onClose={onCancel}>
+      <form onSubmit={submit} className="grid gap-4">
+        <Field label="نام و نام خانوادگی"><input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} className={sm} /></Field>
+        <Field label="تخصص" hint="در سایت زیر نام نمایش داده می‌شود"><input required value={f.specialty} onChange={(e) => setF({ ...f, specialty: e.target.value })} className={sm} placeholder="مثلاً بدنسازی و حجم، پیلاتس" /></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="شعبه">
+            <select value={f.branch} onChange={(e) => setF({ ...f, branch: e.target.value })} className={`${sm} cursor-pointer`}>
+              {branches.map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
+            </select>
+          </Field>
+          <Field label="سالن">
+            <select value={f.section} onChange={(e) => setF({ ...f, section: e.target.value as 'men' | 'women' | 'both' })} className={`${sm} cursor-pointer`}>
+              {SECTIONS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            </select>
+          </Field>
+        </div>
+        <Field label="سال‌های سابقه"><input inputMode="numeric" dir="ltr" value={f.years} onChange={(e) => setF({ ...f, years: e.target.value })} className={`${sm} max-w-[140px] text-left`} /></Field>
+        <Field label="معرفی کوتاه (اختیاری)"><textarea rows={3} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} className={`${inputCls} h-auto py-3`} /></Field>
+        <Field label="افتخارات و مدارک (هر خط یکی، اختیاری)"><textarea rows={3} value={f.achievements} onChange={(e) => setF({ ...f, achievements: e.target.value })} className={`${inputCls} h-auto py-3`} /></Field>
+        <div className="grid gap-1 text-[13px] font-bold text-chalk">عکس (اختیاری؛ بدون عکس، حروف اول نام نمایش داده می‌شود)
+          <ImagePicker value={f.photo} onChange={(v) => setF({ ...f, photo: v })} prefer="uploads" />
+          {f.photo && <button type="button" onClick={() => setF({ ...f, photo: '' })} className="justify-self-start text-[12px] font-bold text-rubber hover:text-danger">برداشتن عکس</button>}
+        </div>
+        <div className="rounded-[8px] bg-steel p-3">
+          <Field label="موبایل مربی برای ورود به «پنل مربی» (اختیاری)" hint="با همین شماره و کد پیامکی وارد می‌شود و فقط شاگردهای خودش را می‌بیند. خالی = حساب ندارد.">
+            <input dir="ltr" inputMode="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="09…" className={`${sm} text-left`} />
+          </Field>
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-[14px] font-bold"><input type="checkbox" checked={f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} className="size-4 accent-[var(--color-plate)]" />در سایت نمایش داده شود</label>
+        {err && <Notice tone="err">{err}</Notice>}
+        <Actions busy={busy} onCancel={onCancel} extra={coach && <DeleteButton onDelete={async () => {
+          try { await panelApi.deleteCoach(coach.id); onDone() } catch (x) { setErr(errText(x)) }
+        }} />} />
       </form>
     </Drawer>
   )

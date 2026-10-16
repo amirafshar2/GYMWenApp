@@ -63,7 +63,7 @@ public sealed class CatalogService(
     public async Task<IReadOnlyList<CoachDto>> GetCoachesAsync(CancellationToken ct)
     {
         var branchNames = (await branches.ListAsync(null, null, ct)).ToDictionary(b => b.Id, b => b.Name);
-        var list = await coaches.ListAsync(null, q => q.OrderBy(c => c.SortOrder), ct);
+        var list = await coaches.ListAsync(c => c.IsActive, q => q.OrderBy(c => c.SortOrder), ct);
         return list.Select(c => new CoachDto(
             c.Id, c.Slug, c.FullName, c.Specialty, c.Bio, c.YearsOfExperience, c.Section.ToString(),
             branchNames.GetValueOrDefault(c.BranchId, ""), c.PhotoUrl, c.Achievements)).ToList();
@@ -89,7 +89,7 @@ public sealed class CatalogService(
     public async Task<SiteStatsDto> GetStatsAsync(CancellationToken ct)
     {
         var branchCount = (await branches.ListAsync(b => b.IsActive, null, ct)).Count;
-        var coachCount = (await coaches.ListAsync(null, null, ct)).Count;
+        var coachCount = (await coaches.ListAsync(c => c.IsActive, null, ct)).Count;
         // اعداد اعضا و سابقه تا دریافت آمار واقعی از باشگاه، مقدار نمونه هستند.
         return new SiteStatsDto(branchCount, Members: 8500, YearsActive: 15, InstagramFollowers: 52000, Coaches: coachCount);
     }
