@@ -41,14 +41,12 @@ public sealed class ContractsController(IContractService contracts) : Controller
             .ToActionResult(this, s => Created($"/api/v1/me/contracts/{s.Id}/pdf", s));
 }
 
-public sealed record GatewayRedirectDto(int PaymentId, bool AlreadyPaid, string? Method, string? Url, IDictionary<string, string>? Form);
-
 /// <summary>ثبت‌نام: قیمت‌گذاری سمت سرور، شروع پرداخت (idempotent) و بازگشت از درگاه با Verify سمت سرور.</summary>
 [ApiController]
 [Route("api/v1")]
 [Produces("application/json")]
 public sealed class CheckoutController(
-    ICheckoutService checkout, IPaymentService payments, IOnlinePayment onlinePayment, ILogger<CheckoutController> logger) : ControllerBase
+    ICheckoutService checkout, IPaymentService payments, IOnlinePayment onlinePayment, PaymentGateway gateway) : ControllerBase
 {
     [HttpPost("checkout/quote")]
     [ValidateCsrf]
@@ -71,25 +69,8 @@ public sealed class CheckoutController(
         var s = started.Value!;
         if (s.AlreadyPaid) return Ok(new GatewayRedirectDto(s.PaymentId, true, null, null, null));
 
-        var callback = $"{Request.Scheme}://{Request.Host}/api/v1/payments/callback";
-        var result = await onlinePayment.RequestAsync(invoice => invoice
-            .SetTrackingNumber(s.TrackingNumber)
-            .SetAmount(s.AmountToman * 10) // درگاه‌های ایرانی به ریال
-            .SetCallbackUrl(callback)
-            .UseParbadVirtual(), ct);
-
-        if (result.Status == PaymentRequestResultStatus.TrackingNumberAlreadyExists)
-            return Problem(statusCode: 409, title: "این پرداخت در حال انجام است؛ چند لحظه صبر کنید یا صفحه را تازه کنید.");
-        if (!result.IsSucceed)
-        {
-            logger.LogWarning("Gateway request failed: {Message}", result.Message);
-            await payments.CompleteAsync(s.TrackingNumber, false, null, result.Message, this.RequestContext(), ct);
-            return Problem(statusCode: 502, title: "اتصال به درگاه پرداخت برقرار نشد. دوباره امتحان کنید.");
-        }
-
-        var d = result.GatewayTransporter.Descriptor;
-        return Ok(new GatewayRedirectDto(s.PaymentId, false, d.Type.ToString().ToLowerInvariant(), d.Url,
-            d.Form?.ToDictionary(k => k.Key, v => v.Value)));
+        var (redirect, status, error) = await gateway.StartAsync(Request, s.PaymentId, s.TrackingNumber, s.AmountToman, ct);
+        return redirect is not null ? Ok(redirect) : Problem(statusCode: status, title: error);
     }
 
     /// <summary>بازگشت از درگاه. تأیید فقط سمت سرور (Fetch + Verify) و تطبیق مبلغ؛ کاربر به صفحهٔ نتیجه می‌رود.</summary>
@@ -102,14 +83,15 @@ public sealed class CheckoutController(
         var invoice = await onlinePayment.FetchAsync(ct);
         var payment = await payments.FindByTrackingAsync(invoice.TrackingNumber, ct);
         if (payment is null) return Redirect("/join/result?status=unknown");
+        var back = ResultPath(payment);
 
         if (invoice.Status == PaymentFetchResultStatus.AlreadyProcessed)
-            return Redirect($"/join/result?id={payment.Id}");
+            return Redirect(back);
 
         if (invoice.Status != PaymentFetchResultStatus.ReadyForVerifying)
         {
             await payments.CompleteAsync(payment.TrackingNumber, false, invoice.TransactionCode, invoice.Message, rc, ct);
-            return Redirect($"/join/result?id={payment.Id}");
+            return Redirect(back);
         }
 
         // مبلغ برگشتی درگاه باید دقیقاً با مبلغ ثبت‌شده برابر باشد
@@ -117,11 +99,20 @@ public sealed class CheckoutController(
         {
             await onlinePayment.CancelAsync(invoice, "مبلغ با سفارش مطابقت ندارد.", ct);
             await payments.CompleteAsync(payment.TrackingNumber, false, null, "amount-mismatch", rc, ct);
-            return Redirect($"/join/result?id={payment.Id}");
+            return Redirect(back);
         }
 
         var verify = await onlinePayment.VerifyAsync(invoice, ct);
         await payments.CompleteAsync(payment.TrackingNumber, verify.IsSucceed, verify.TransactionCode, verify.Message, rc, ct);
-        return Redirect($"/join/result?id={payment.Id}");
+        return Redirect(back);
     }
+
+    /// <summary>بعد از درگاه، کاربر به صفحهٔ نتیجهٔ همان نوع خرید برمی‌گردد</summary>
+    private static string ResultPath(KhashayarGym.Domain.Entities.Payment p) => p.Purpose switch
+    {
+        KhashayarGym.Domain.Enums.PaymentPurpose.ShopOrder => $"/shop/orders/{p.ShopOrderId}",
+        KhashayarGym.Domain.Enums.PaymentPurpose.CanteenOrder => $"/canteen/orders/{p.CanteenOrderId}",
+        KhashayarGym.Domain.Enums.PaymentPurpose.WalletTopUp => $"/wallet?payment={p.Id}",
+        _ => $"/join/result?id={p.Id}",
+    };
 }

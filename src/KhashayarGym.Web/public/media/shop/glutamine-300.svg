@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+<defs><radialGradient id="bg" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF3F9"/></radialGradient>
+<linearGradient id="gloss" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".22" stop-color="#fff" stop-opacity=".35"/><stop offset=".34" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect width="600" height="600" fill="url(#bg)"/><ellipse cx="300" cy="520" rx="170" ry="18" fill="#000" opacity=".08"/><rect x="200" y="246" width="200" height="46" rx="14" fill="#535b5c"/>
+<rect x="190" y="280" width="220" height="230" rx="26" fill="#7F8C8D"/>
+<rect x="190" y="344.4" width="220" height="101.2" fill="#fff" opacity=".96"/>
+<text x="300" y="326" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="18" letter-spacing="4" fill="#fff">IRONLAB</text>
+<text x="300" y="395" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="36" letter-spacing="1" fill="#5f696a">GLUTAMINE</text>
+<text x="300" y="427.20000000000005" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="15" letter-spacing="2" fill="#2C2C2C">300 G</text>
+<rect x="190" y="280" width="220" height="230" rx="26" fill="url(#gloss)"/></svg>

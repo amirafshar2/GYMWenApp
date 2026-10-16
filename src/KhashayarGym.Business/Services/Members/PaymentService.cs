@@ -1,5 +1,6 @@
 using KhashayarGym.Business.Common;
 using KhashayarGym.Business.Services.Access;
+using KhashayarGym.Business.Services.Commerce;
 using KhashayarGym.Business.Dtos;
 using KhashayarGym.DataAccess;
 using KhashayarGym.Domain.Entities;
@@ -17,7 +18,7 @@ public interface IPaymentService
     Task<PaymentResultDto?> GetForUserAsync(int userId, int paymentId, CancellationToken ct);
 }
 
-public sealed class PaymentService(GymDbContext db, IClock clock, ILogger<PaymentService> logger) : IPaymentService
+public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenService canteen, ILogger<PaymentService> logger) : IPaymentService
 {
     public Task<Payment?> FindByTrackingAsync(long trackingNumber, CancellationToken ct) =>
         db.Payments.AsNoTracking().FirstOrDefaultAsync(p => p.TrackingNumber == trackingNumber, ct);
@@ -30,9 +31,8 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ILogger<Paymen
     {
         db.ChangeTracker.Clear();
         await using var tx = await db.Database.BeginTransactionAsync(ct);
-        var payment = await db.Payments.Include(p => p.Membership).ThenInclude(m => m!.Package)
-            .FirstOrDefaultAsync(p => p.TrackingNumber == trackingNumber, ct);
-        if (payment?.Membership?.Package is null)
+        var payment = await db.Payments.FirstOrDefaultAsync(p => p.TrackingNumber == trackingNumber, ct);
+        if (payment is null)
             return Result<int>.Fail("payment", "پرداخت پیدا نشد.", ErrorType.NotFound);
 
         // idempotency: پرداختی که قبلاً نهایی شده دوباره پردازش نمی‌شود
@@ -42,49 +42,77 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ILogger<Paymen
         var now = clock.UtcNow;
         payment.TransactionCode = transactionCode;
         payment.GatewayMessage = message?.Length > 300 ? message[..300] : message;
-        var m = payment.Membership;
-
+        payment.Status = succeeded ? PaymentStatus.Succeeded : PaymentStatus.Failed;
         if (succeeded)
         {
-            payment.Status = PaymentStatus.Succeeded;
             payment.PaidAtUtc = now;
             payment.InvoiceNumber = $"KG-{Jalali.Year(now)}-{payment.Id:D6}";
-
-            // تمدید: اگر عضویت فعالی در همین شعبه دارد، عضویت تازه از پایان آن شروع می‌شود
-            var lastEnd = await db.Memberships.AsNoTracking()
-                .Where(x => x.UserId == payment.UserId && x.Id != m.Id && x.Status == MembershipStatus.Active && x.EndsAtUtc > now)
-                .MaxAsync(x => (DateTime?)x.EndsAtUtc, ct);
-            var start = lastEnd ?? now;
-            m.Status = MembershipStatus.Active;
-            m.StartsAtUtc = start;
-            m.EndsAtUtc = start.AddMonths(m.Package.DurationMonths);
-
-            // برای نرم‌افزار گیت/حسابداری: عضویت فعال شد (از صف خروجی ارسال می‌شود)
-            IntegrationEvents.Add(db, "membership.activated", new
-            {
-                memberId = payment.UserId, membershipId = m.Id, branchId = m.BranchId, section = m.Section.ToString().ToLowerInvariant(),
-                startsAtUtc = m.StartsAtUtc, endsAtUtc = m.EndsAtUtc, sessionsTotal = m.SessionsTotal, qr = AccessControlService.QrPrefix + m.CardToken,
-            });
-
-            if (payment.DiscountCode is not null)
-                await db.DiscountCodes.Where(d => d.Code == payment.DiscountCode)
-                    .ExecuteUpdateAsync(s => s.SetProperty(d => d.UsedCount, d => d.UsedCount + 1), ct);
         }
-        else
+
+        var notifyCanteen = false;
+        switch (payment.Purpose)
         {
-            payment.Status = PaymentStatus.Failed;
-            m.Status = MembershipStatus.Cancelled;
+            case PaymentPurpose.Membership:
+                await CompleteMembershipAsync(payment, succeeded, now, ct);
+                break;
+            case PaymentPurpose.ShopOrder:
+                await ShopService.OnPaymentCompletedAsync(db, payment, succeeded, now, ct);
+                break;
+            case PaymentPurpose.CanteenOrder:
+                notifyCanteen = await CanteenService.OnPaymentCompletedAsync(db, payment, succeeded, now, ct);
+                break;
+            case PaymentPurpose.WalletTopUp:
+                if (succeeded)
+                    await WalletLedger.CreditAsync(db, payment.UserId, payment.AmountToman, WalletTxType.TopUp, "شارژ کیف پول", $"payment:{payment.Id}", now, ct);
+                break;
         }
 
         db.AuditLogs.Add(new AuditLog
         {
             Action = succeeded ? "payment.succeeded" : "payment.failed", EntityType = "Payment", EntityId = payment.Id.ToString(),
-            UserId = payment.UserId, Ip = rc.Ip, Data = $"tracking={trackingNumber};tx={transactionCode};amount={payment.AmountToman}"
+            UserId = payment.UserId, Ip = rc.Ip, Data = $"purpose={payment.Purpose};tracking={trackingNumber};tx={transactionCode};amount={payment.AmountToman}"
         });
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
-        logger.LogInformation("Payment {Id} completed: {Status}", payment.Id, payment.Status);
+        logger.LogInformation("Payment {Id} ({Purpose}) completed: {Status}", payment.Id, payment.Purpose, payment.Status);
+
+        if (notifyCanteen && payment.CanteenOrderId is { } orderId)
+            await canteen.NotifyPaidAsync(orderId, ct);
         return Result<int>.Ok(payment.Id);
+    }
+
+    private async Task CompleteMembershipAsync(Payment payment, bool succeeded, DateTime now, CancellationToken ct)
+    {
+        var m = await db.Memberships.Include(x => x.Package).FirstAsync(x => x.Id == payment.MembershipId, ct);
+        if (!succeeded)
+        {
+            m.Status = MembershipStatus.Cancelled;
+            return;
+        }
+
+        // تمدید: اگر عضویت فعالی دارد، عضویت تازه از پایان آن شروع می‌شود
+        var lastEnd = await db.Memberships.AsNoTracking()
+            .Where(x => x.UserId == payment.UserId && x.Id != m.Id && x.Status == MembershipStatus.Active && x.EndsAtUtc > now)
+            .MaxAsync(x => (DateTime?)x.EndsAtUtc, ct);
+        var start = lastEnd ?? now;
+        m.Status = MembershipStatus.Active;
+        m.StartsAtUtc = start;
+        m.EndsAtUtc = start.AddMonths(m.Package!.DurationMonths);
+
+        // برای نرم‌افزار گیت/حسابداری: عضویت فعال شد (از صف خروجی ارسال می‌شود)
+        IntegrationEvents.Add(db, "membership.activated", new
+        {
+            memberId = payment.UserId, membershipId = m.Id, branchId = m.BranchId, section = m.Section.ToString().ToLowerInvariant(),
+            startsAtUtc = m.StartsAtUtc, endsAtUtc = m.EndsAtUtc, sessionsTotal = m.SessionsTotal, qr = AccessControlService.QrPrefix + m.CardToken,
+        });
+
+        if (payment.DiscountCode is not null)
+            await db.DiscountCodes.Where(d => d.Code == payment.DiscountCode)
+                .ExecuteUpdateAsync(s => s.SetProperty(d => d.UsedCount, d => d.UsedCount + 1), ct);
+        // سقف ثبت‌نام جشنواره
+        if (payment.CampaignId is { } campaignId)
+            await db.Campaigns.Where(c => c.Id == campaignId)
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.RedemptionCount, c => c.RedemptionCount + 1), ct);
     }
 
     public async Task<PaymentResultDto?> GetForUserAsync(int userId, int paymentId, CancellationToken ct)

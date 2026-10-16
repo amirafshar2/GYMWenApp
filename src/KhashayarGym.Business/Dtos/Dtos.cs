@@ -17,7 +17,8 @@ public sealed record CoachDto(
 
 public sealed record CampaignDto(
     int Id, string Title, string? Description, DateTime StartsAtUtc, DateTime EndsAtUtc,
-    int DiscountPercent, IReadOnlyList<string> EligiblePackageSlugs);
+    int DiscountPercent, IReadOnlyList<string> EligiblePackageSlugs,
+    long? DiscountAmountToman = null, IReadOnlyList<string>? EligibleBranchSlugs = null, int? RemainingSlots = null);
 
 public sealed record FaqDto(string Question, string Answer);
 

@@ -33,8 +33,15 @@ public class Payment : BaseEntity
 {
     public int UserId { get; set; }
     public AppUser? User { get; set; }
-    public int MembershipId { get; set; }
+    public PaymentPurpose Purpose { get; set; } = PaymentPurpose.Membership;
+    public int? MembershipId { get; set; }
     public Membership? Membership { get; set; }
+    public int? ShopOrderId { get; set; }
+    public ShopOrder? ShopOrder { get; set; }
+    public int? CanteenOrderId { get; set; }
+    public CanteenOrder? CanteenOrder { get; set; }
+    /// <summary>شرح خوانا برای فهرست پرداخت‌ها (نام پکیج، «سفارش فروشگاه KS-…»، «شارژ کیف پول»)</summary>
+    public string? Description { get; set; }
 
     public long BaseAmountToman { get; set; }
     public long CampaignDiscountToman { get; set; }
@@ -65,6 +72,11 @@ public class DiscountCode : BaseEntity
     public int UsedCount { get; set; }
     public DateTime? ExpiresAtUtc { get; set; }
     public bool IsActive { get; set; } = true;
+    public DiscountScope Scope { get; set; } = DiscountScope.Membership;
+    /// <summary>فقط اعضای دارای عضویت فعال</summary>
+    public bool MembersOnly { get; set; }
+
+    public bool AppliesTo(DiscountScope s) => Scope == DiscountScope.Any || Scope == s;
 
     public bool IsUsableAt(DateTime utcNow) =>
         IsActive && (ExpiresAtUtc is null || utcNow < ExpiresAtUtc) && (MaxUses is null || UsedCount < MaxUses);

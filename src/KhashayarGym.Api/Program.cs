@@ -47,7 +47,16 @@ builder.Services.Configure<KhashayarGym.Api.Integrations.WebhookOptions>(builder
 builder.Services.AddScoped<KhashayarGym.Api.Controllers.DeviceKeyFilter>();
 builder.Services.AddHttpClient<KhashayarGym.Api.Integrations.IIntegrationSink, KhashayarGym.Api.Integrations.WebhookSink>(c => c.Timeout = TimeSpan.FromSeconds(10));
 if (builder.Configuration.GetValue("Integrations:DispatcherEnabled", true))
+{
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.IntegrationDispatcher>();
+    builder.Services.AddHostedService<KhashayarGym.Api.Integrations.PendingOrderSweeper>();
+}
+
+// ---- فاز ۳: فروشگاه، بوفه (لحظه‌ای با SignalR)، کیف پول ----
+builder.Services.Configure<CommerceOptions>(builder.Configuration.GetSection(CommerceOptions.Section));
+builder.Services.AddScoped<PaymentGateway>();
+builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 4 * 1024; o.EnableDetailedErrors = builder.Environment.IsDevelopment(); });
+builder.Services.AddScoped<ICanteenNotifier, KhashayarGym.Api.Hubs.SignalRCanteenNotifier>();
 
 // ---- Identity (فقط هسته؛ ورود با OTP، نقش‌ها برای فاز ۴) + JWT ----
 builder.Services.AddIdentityCore<AppUser>(o =>
@@ -76,6 +85,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = "sub",
             RoleClaimType = ClaimTypes.Role,
+        };
+        // WebSocket هدر Authorization ندارد؛ فقط برای مسیر Hub توکن از کوئری خوانده می‌شود (لاگ درخواست‌ها کوئری را ثبت نمی‌کند)
+        o.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                if (ctx.HttpContext.Request.Path.StartsWithSegments("/hubs") && ctx.Request.Query["access_token"] is { Count: > 0 } t)
+                    ctx.Token = t.ToString();
+                return Task.CompletedTask;
+            },
         };
     });
 builder.Services.AddAuthorization();
@@ -187,7 +206,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.IntegrationEvents.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
+        try { _ = await db.WalletTransactions.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();
@@ -202,6 +221,19 @@ using (var scope = app.Services.CreateScope())
     // گیت نمایشی برای تست اتصال (هرگز در production)
     if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)
         await scope.ServiceProvider.GetRequiredService<KhashayarGym.Business.Services.Access.IAccessControlService>().EnsureDemoDeviceAsync(demoKey, CancellationToken.None);
+
+    // حساب کارمند نمایشی (بوفه، پذیرش، مدیر شعبه) برای پرزنت؛ هرگز در production
+    if (!app.Environment.IsProduction() && app.Configuration["Demo:StaffPhone"] is { Length: 11 } staffPhone)
+    {
+        var users = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<AppUser>>();
+        var staff = await users.Users.FirstOrDefaultAsync(u => u.PhoneNumber == staffPhone);
+        if (staff is null)
+        {
+            staff = new AppUser { UserName = staffPhone, PhoneNumber = staffPhone, PhoneNumberConfirmed = true, FullName = "کارمند نمایشی", CreatedAtUtc = DateTime.UtcNow };
+            await users.CreateAsync(staff);
+            await users.AddToRolesAsync(staff, [Roles.Member, Roles.CanteenStaff, Roles.Reception, Roles.BranchManager]);
+        }
+    }
 }
 
 app.UseExceptionHandler();
@@ -241,6 +273,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<KhashayarGym.Api.Hubs.CanteenHub>(KhashayarGym.Api.Hubs.CanteenHub.Path);
 app.MapFallbackToFile("index.html");
 
 app.Run();

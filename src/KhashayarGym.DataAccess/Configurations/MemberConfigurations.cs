@@ -67,6 +67,9 @@ internal sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         e.Property(x => x.InvoiceNumber).HasMaxLength(30);
         e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne(x => x.Membership).WithMany(m => m.Payments).HasForeignKey(x => x.MembershipId).OnDelete(DeleteBehavior.Cascade);
+        e.HasOne(x => x.ShopOrder).WithMany().HasForeignKey(x => x.ShopOrderId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne(x => x.CanteenOrder).WithMany().HasForeignKey(x => x.CanteenOrderId).OnDelete(DeleteBehavior.Restrict);
+        e.Property(x => x.Description).HasMaxLength(150);
     }
 }
 

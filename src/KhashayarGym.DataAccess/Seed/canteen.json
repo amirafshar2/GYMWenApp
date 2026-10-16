@@ -1,0 +1,167 @@
+[
+ {
+  "slug": "espresso",
+  "name": "اسپرسو",
+  "category": "Coffee",
+  "priceToman": 95000,
+  "description": "دبل شات",
+  "kcal": 5,
+  "proteinG": null,
+  "imagePath": "/media/canteen/espresso.svg",
+  "sortOrder": 0
+ },
+ {
+  "slug": "americano",
+  "name": "آمریکانو",
+  "category": "Coffee",
+  "priceToman": 120000,
+  "description": "",
+  "kcal": 10,
+  "proteinG": null,
+  "imagePath": "/media/canteen/americano.svg",
+  "sortOrder": 1
+ },
+ {
+  "slug": "latte",
+  "name": "لاته",
+  "category": "Coffee",
+  "priceToman": 165000,
+  "description": "با شیر کم‌چرب",
+  "kcal": 130,
+  "proteinG": 7,
+  "imagePath": "/media/canteen/latte.svg",
+  "sortOrder": 2
+ },
+ {
+  "slug": "cappuccino",
+  "name": "کاپوچینو",
+  "category": "Coffee",
+  "priceToman": 160000,
+  "description": "",
+  "kcal": 110,
+  "proteinG": 6,
+  "imagePath": "/media/canteen/cappuccino.svg",
+  "sortOrder": 3
+ },
+ {
+  "slug": "shake-chocolate",
+  "name": "شیک پروتئین شکلاتی",
+  "category": "Shake",
+  "priceToman": 285000,
+  "description": "وی + شیر + موز",
+  "kcal": 380,
+  "proteinG": 32,
+  "imagePath": "/media/canteen/shake-chocolate.svg",
+  "sortOrder": 4
+ },
+ {
+  "slug": "shake-banana",
+  "name": "شیک موز و جو",
+  "category": "Shake",
+  "priceToman": 265000,
+  "description": "وی + جو دوسر + موز",
+  "kcal": 420,
+  "proteinG": 30,
+  "imagePath": "/media/canteen/shake-banana.svg",
+  "sortOrder": 5
+ },
+ {
+  "slug": "smoothie-berry",
+  "name": "اسموتی توت‌ها",
+  "category": "Shake",
+  "priceToman": 240000,
+  "description": "توت‌فرنگی، شاه‌توت، ماست",
+  "kcal": 220,
+  "proteinG": 8,
+  "imagePath": "/media/canteen/smoothie-berry.svg",
+  "sortOrder": 6
+ },
+ {
+  "slug": "orange-juice",
+  "name": "آب پرتقال طبیعی",
+  "category": "Drink",
+  "priceToman": 180000,
+  "description": "",
+  "kcal": 150,
+  "proteinG": 2,
+  "imagePath": "/media/canteen/orange-juice.svg",
+  "sortOrder": 7
+ },
+ {
+  "slug": "water",
+  "name": "آب معدنی",
+  "category": "Drink",
+  "priceToman": 35000,
+  "description": "نیم لیتری",
+  "kcal": null,
+  "proteinG": null,
+  "imagePath": "/media/canteen/water.svg",
+  "sortOrder": 8
+ },
+ {
+  "slug": "isotonic",
+  "name": "نوشیدنی ایزوتونیک",
+  "category": "Drink",
+  "priceToman": 85000,
+  "description": "",
+  "kcal": 90,
+  "proteinG": null,
+  "imagePath": "/media/canteen/isotonic.svg",
+  "sortOrder": 9
+ },
+ {
+  "slug": "chicken-sandwich",
+  "name": "ساندویچ مرغ گریل",
+  "category": "Meal",
+  "priceToman": 340000,
+  "description": "نان سبوس‌دار، سینهٔ مرغ، سبزیجات",
+  "kcal": 450,
+  "proteinG": 38,
+  "imagePath": "/media/canteen/chicken-sandwich.svg",
+  "sortOrder": 10
+ },
+ {
+  "slug": "egg-white-sandwich",
+  "name": "ساندویچ سفیدهٔ تخم‌مرغ",
+  "category": "Meal",
+  "priceToman": 210000,
+  "description": "۴ سفیده + پنیر کم‌چرب",
+  "kcal": 290,
+  "proteinG": 26,
+  "imagePath": "/media/canteen/egg-white-sandwich.svg",
+  "sortOrder": 11
+ },
+ {
+  "slug": "oats-bowl",
+  "name": "کاسهٔ جو دوسر",
+  "category": "Snack",
+  "priceToman": 190000,
+  "description": "جو، موز، کرهٔ بادام‌زمینی",
+  "kcal": 380,
+  "proteinG": 14,
+  "imagePath": "/media/canteen/oats-bowl.svg",
+  "sortOrder": 12
+ },
+ {
+  "slug": "chicken-salad",
+  "name": "سالاد مرغ",
+  "category": "Meal",
+  "priceToman": 380000,
+  "description": "کاهو، گوجه، مرغ گریل، سس ماست",
+  "kcal": 320,
+  "proteinG": 35,
+  "imagePath": "/media/canteen/chicken-salad.svg",
+  "sortOrder": 13
+ },
+ {
+  "slug": "protein-bar",
+  "name": "پروتئین بار",
+  "category": "Snack",
+  "priceToman": 135000,
+  "description": "۲۰ گرم پروتئین",
+  "kcal": 210,
+  "proteinG": 20,
+  "imagePath": "/media/canteen/protein-bar.svg",
+  "sortOrder": 14
+ }
+]

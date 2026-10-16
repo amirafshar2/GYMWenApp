@@ -345,6 +345,39 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.ToTable("Branches");
                 });
 
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.BranchStock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VariantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("VariantId", "BranchId")
+                        .IsUnique();
+
+                    b.ToTable("BranchStocks", t =>
+                        {
+                            t.HasCheckConstraint("CK_BranchStock_Quantity", "[Quantity] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("KhashayarGym.Domain.Entities.Campaign", b =>
                 {
                     b.Property<int>("Id")
@@ -360,8 +393,15 @@ namespace KhashayarGym.DataAccess.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<long?>("DiscountAmountToman")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("DiscountPercent")
                         .HasColumnType("int");
+
+                    b.PrimitiveCollection<string>("EligibleBranchSlugs")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("EligiblePackageSlugs")
                         .IsRequired()
@@ -372,6 +412,12 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("MaxRedemptions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RedemptionCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartsAtUtc")
                         .HasColumnType("datetime2");
@@ -384,6 +430,158 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Campaigns");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Kcal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<long>("PriceToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("ProteinG")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("CanteenItems");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CollectedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DailyNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("PaidAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PayMethod")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReadyAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TableCode")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<long>("TotalToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("BranchId", "Status", "CreatedAtUtc");
+
+                    b.ToTable("CanteenOrders");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenOrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<long>("UnitPriceToman")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("CanteenOrderItem");
                 });
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.CheckIn", b =>
@@ -614,7 +812,13 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.Property<int?>("MaxUses")
                         .HasColumnType("int");
 
+                    b.Property<bool>("MembersOnly")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Percent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Scope")
                         .HasColumnType("int");
 
                     b.Property<int>("UsedCount")
@@ -882,11 +1086,18 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.Property<int?>("CampaignId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CanteenOrderId")
+                        .HasColumnType("int");
+
                     b.Property<long>("CodeDiscountToman")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("DiscountCode")
                         .HasMaxLength(30)
@@ -910,11 +1121,17 @@ namespace KhashayarGym.DataAccess.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("MembershipId")
+                    b.Property<int?>("MembershipId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("PaidAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ShopOrderId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -931,7 +1148,11 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CanteenOrderId");
+
                     b.HasIndex("MembershipId");
+
+                    b.HasIndex("ShopOrderId");
 
                     b.HasIndex("TrackingNumber")
                         .IsUnique();
@@ -940,6 +1161,123 @@ namespace KhashayarGym.DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.PrimitiveCollection<string>("Highlights")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsKhashayarBrand")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<long>("PriceToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("Kind", "IsActive", "SortOrder");
+
+                    b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ColorHex")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Flavor")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<long?>("PriceToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.RefreshToken", b =>
@@ -983,6 +1321,135 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ShopOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DiscountCode")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<long>("DiscountToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Fulfillment")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Number")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("PaidAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PayMethod")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("RecipientName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RecipientPhone")
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.Property<long>("ShippingToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("StockReserved")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("SubtotalToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TotalToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("Status", "CreatedAtUtc");
+
+                    b.HasIndex("UserId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.ToTable("ShopOrders");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ShopOrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<long>("UnitPriceToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("VariantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VariantLabel")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("ShopOrderItem");
                 });
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.SignedContract", b =>
@@ -1050,6 +1517,64 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.HasIndex("UserId", "Version");
 
                     b.ToTable("SignedContracts");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.Wallet", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("BalanceToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Wallets", t =>
+                        {
+                            t.HasCheckConstraint("CK_Wallet_Balance", "[BalanceToman] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.WalletTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("AmountToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("BalanceAfterToman")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.ToTable("WalletTransactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1177,6 +1702,55 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.Navigation("Branch");
                 });
 
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.BranchStock", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KhashayarGym.Domain.Entities.ProductVariant", "Variant")
+                        .WithMany("Stocks")
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Variant");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenOrder", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KhashayarGym.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenOrderItem", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.CanteenOrder", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("KhashayarGym.Domain.Entities.CheckIn", b =>
                 {
                     b.HasOne("KhashayarGym.Domain.Entities.AccessDevice", "Device")
@@ -1238,11 +1812,20 @@ namespace KhashayarGym.DataAccess.Migrations
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.Payment", b =>
                 {
+                    b.HasOne("KhashayarGym.Domain.Entities.CanteenOrder", "CanteenOrder")
+                        .WithMany()
+                        .HasForeignKey("CanteenOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("KhashayarGym.Domain.Entities.Membership", "Membership")
                         .WithMany("Payments")
                         .HasForeignKey("MembershipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("KhashayarGym.Domain.Entities.ShopOrder", "ShopOrder")
+                        .WithMany()
+                        .HasForeignKey("ShopOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("KhashayarGym.Domain.Entities.AppUser", "User")
                         .WithMany()
@@ -1250,9 +1833,24 @@ namespace KhashayarGym.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("CanteenOrder");
+
                     b.Navigation("Membership");
 
+                    b.Navigation("ShopOrder");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ProductVariant", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.RefreshToken", b =>
@@ -1264,6 +1862,36 @@ namespace KhashayarGym.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ShopOrder", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KhashayarGym.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ShopOrderItem", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.ShopOrder", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("KhashayarGym.Domain.Entities.SignedContract", b =>
@@ -1281,6 +1909,17 @@ namespace KhashayarGym.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Template");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.Wallet", b =>
+                {
+                    b.HasOne("KhashayarGym.Domain.Entities.AppUser", "User")
+                        .WithOne()
+                        .HasForeignKey("KhashayarGym.Domain.Entities.Wallet", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -1346,9 +1985,29 @@ namespace KhashayarGym.DataAccess.Migrations
                     b.Navigation("Coaches");
                 });
 
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.CanteenOrder", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("KhashayarGym.Domain.Entities.Membership", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ProductVariant", b =>
+                {
+                    b.Navigation("Stocks");
+                });
+
+            modelBuilder.Entity("KhashayarGym.Domain.Entities.ShopOrder", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

@@ -90,7 +90,55 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
             // کدهای تخفیف دمو (روی قیمت پس از جشنواره اعمال می‌شوند)
             db.DiscountCodes.AddRange(
                 new DiscountCode { Code = "KHASHAYAR10", Percent = 10, MaxUses = 500 },
-                new DiscountCode { Code = "WELCOME5", Percent = 5 });
+                new DiscountCode { Code = "WELCOME5", Percent = 5 },
+                // فروشگاه: فقط برای اعضای دارای عضویت فعال
+                new DiscountCode { Code = "MEMBER15", Percent = 15, Scope = DiscountScope.Shop, MembersOnly = true });
+            await db.SaveChangesAsync(ct);
+        }
+
+        if (!await db.Products.AnyAsync(ct) && File.Exists(Path.Combine(seedDir, "products.json")))
+        {
+            var products = Read<List<ProductSeed>>(seedDir, "products.json");
+            var branchIds = await db.Branches.OrderBy(b => b.Id).Select(b => b.Id).ToListAsync(ct);
+            var n = 0;
+            foreach (var s in products)
+            {
+                var product = new Product
+                {
+                    Slug = s.Slug, Name = s.Name, BrandName = s.BrandName, Kind = s.Kind, Category = s.Category, Description = s.Description,
+                    ImagePath = s.ImagePath, PriceToman = s.PriceToman, IsKhashayarBrand = s.IsKhashayarBrand, SortOrder = s.SortOrder,
+                    Highlights = s.Highlights ?? [],
+                };
+                var vi = 0;
+                foreach (var v in s.Variants)
+                {
+                    var variant = new ProductVariant
+                    {
+                        Sku = $"{s.Slug}-{++vi}".ToUpperInvariant(), Size = v.Size, Color = v.Color, ColorHex = v.ColorHex, Flavor = v.Flavor,
+                    };
+                    // موجودی نمونه و قابل‌تکرار: بیشتر شعبه‌ها چند عدد، بعضی صفر (برای نمایش «ناموجود در این شعبه»)
+                    foreach (var b in branchIds)
+                    {
+                        var q = (n * 7 + b * 5 + vi * 3) % 13;
+                        variant.Stocks.Add(new BranchStock { BranchId = b, Quantity = q < 3 ? 0 : q });
+                    }
+                    product.Variants.Add(variant);
+                    n++;
+                }
+                db.Products.Add(product);
+            }
+            await db.SaveChangesAsync(ct);
+            logger.LogInformation("Seeded {Count} products", products.Count);
+        }
+
+        if (!await db.CanteenItems.AnyAsync(ct) && File.Exists(Path.Combine(seedDir, "canteen.json")))
+        {
+            foreach (var c in Read<List<CanteenSeed>>(seedDir, "canteen.json"))
+                db.CanteenItems.Add(new CanteenItem
+                {
+                    Slug = c.Slug, Name = c.Name, Description = string.IsNullOrEmpty(c.Description) ? null : c.Description, Category = c.Category,
+                    PriceToman = c.PriceToman, Kcal = c.Kcal, ProteinG = c.ProteinG, ImagePath = c.ImagePath, SortOrder = c.SortOrder,
+                });
             await db.SaveChangesAsync(ct);
         }
 
@@ -131,5 +179,12 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
         string Slug, string FullName, string Specialty, string? Bio, int YearsOfExperience,
         GenderSection Section, string BranchSlug, List<string>? Achievements);
 }
+
+internal sealed record ProductSeed(
+    string Slug, string Name, string BrandName, ProductKind Kind, string Category, long PriceToman, string? Description,
+    List<string>? Highlights, string ImagePath, bool IsKhashayarBrand, int SortOrder, List<VariantSeed> Variants);
+internal sealed record VariantSeed(string? Size, string? Color, string? ColorHex, string? Flavor);
+internal sealed record CanteenSeed(
+    string Slug, string Name, CanteenCategory Category, long PriceToman, string? Description, int? Kcal, int? ProteinG, string ImagePath, int SortOrder);
 
 internal sealed record ContractSeed(string Title, List<string> Clauses, List<string> HealthQuestions);

@@ -24,6 +24,9 @@ public static class BusinessExtensions
         services.AddScoped<IContractService, ContractService>();
         services.AddSingleton<IPdfService, PdfService>();
         services.AddScoped<Services.Access.IAccessControlService, Services.Access.AccessControlService>();
+        services.AddScoped<Services.Commerce.IWalletService, Services.Commerce.WalletService>();
+        services.AddScoped<Services.Commerce.IShopService, Services.Commerce.ShopService>();
+        services.AddScoped<Services.Commerce.ICanteenService, Services.Commerce.CanteenService>();
         services.AddValidatorsFromAssemblyContaining<CreateConsultationValidator>(ServiceLifetime.Singleton);
         return services;
     }

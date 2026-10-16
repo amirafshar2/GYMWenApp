@@ -33,7 +33,7 @@ public sealed class MemberService(GymDbContext db, UserManager<AppUser> users, I
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAtUtc)
             .Take(50)
-            .Select(p => new PaymentRowDto(p.Id, p.Status.ToString().ToLower(), p.AmountToman, p.Membership!.Package!.Name, p.InvoiceNumber, p.CreatedAtUtc, p.PaidAtUtc))
+            .Select(p => new PaymentRowDto(p.Id, p.Status.ToString().ToLower(), p.AmountToman, p.Description ?? p.Membership!.Package!.Name, p.InvoiceNumber, p.CreatedAtUtc, p.PaidAtUtc))
             .ToListAsync(ct);
 
         var contracts = await db.SignedContracts.AsNoTracking()

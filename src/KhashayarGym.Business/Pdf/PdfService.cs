@@ -15,7 +15,11 @@ public sealed record InvoicePdfModel(
     string BrandName, string InvoiceNumber, DateTime PaidAtUtc, string BuyerName, string BuyerPhone,
     string PackageName, string BranchName, string Section, DateTime? StartsAtUtc, DateTime? EndsAtUtc,
     long BaseAmountToman, long CampaignDiscountToman, long CodeDiscountToman, string? DiscountCode, long AmountToman,
-    long TrackingNumber, string? TransactionCode);
+    long TrackingNumber, string? TransactionCode,
+    string Title = "فاکتور فروش عضویت", IReadOnlyList<InvoiceLine>? Lines = null, long ShippingToman = 0, string? DeliveryText = null);
+
+/// <summary>یک ردیف کالا در فاکتور فروشگاه/بوفه</summary>
+public sealed record InvoiceLine(string Name, int Quantity, long UnitToman);
 
 public interface IPdfService
 {
@@ -127,7 +131,7 @@ public sealed class PdfService : IPdfService
         });
     })).GeneratePdf();
 
-    public byte[] Invoice(InvoicePdfModel m) => Document.Create(doc => Frame(doc, m.BrandName, "فاکتور فروش عضویت", col =>
+    public byte[] Invoice(InvoicePdfModel m) => Document.Create(doc => Frame(doc, m.BrandName, m.Title, col =>
     {
         col.Spacing(12);
         col.Item().Row(r =>
@@ -151,10 +155,24 @@ public sealed class PdfService : IPdfService
                 if (strong) cell.Bold();
                 if (color is not null) cell.FontColor(color);
             }
-            Row("پکیج", m.PackageName, true);
-            Row("شعبه", $"{m.BranchName} — {(m.Section == "women" ? "سالن بانوان" : "سالن آقایان")}");
-            if (m.StartsAtUtc is { } s && m.EndsAtUtc is { } e) Row("مدت اعتبار", $"{Jalali.Date(s)} تا {Jalali.Date(e)}");
-            Row("قیمت پکیج", Fa(m.BaseAmountToman) + " تومان");
+            if (m.Lines is { Count: > 0 } lines)
+            {
+                foreach (var l in lines) Row($"{l.Name} × {PersianText.FaDigits(l.Quantity.ToString())}", Fa(l.UnitToman * l.Quantity) + " تومان");
+                if (m.DeliveryText is not null) Row("تحویل", m.DeliveryText);
+                Row("جمع کالاها", Fa(m.BaseAmountToman) + " تومان");
+                if (m.ShippingToman > 0) Row("هزینهٔ ارسال", Fa(m.ShippingToman) + " تومان");
+            }
+            else if (m.Section == "wallet")
+            {
+                Row("شرح", m.PackageName, true);
+            }
+            else
+            {
+                Row("پکیج", m.PackageName, true);
+                Row("شعبه", $"{m.BranchName} — {(m.Section == "women" ? "سالن بانوان" : "سالن آقایان")}");
+                if (m.StartsAtUtc is { } s && m.EndsAtUtc is { } e) Row("مدت اعتبار", $"{Jalali.Date(s)} تا {Jalali.Date(e)}");
+                Row("قیمت پکیج", Fa(m.BaseAmountToman) + " تومان");
+            }
             if (m.CampaignDiscountToman > 0) Row("تخفیف جشنواره", "− " + Fa(m.CampaignDiscountToman) + " تومان", color: Red);
             if (m.CodeDiscountToman > 0) Row($"کد تخفیف {m.DiscountCode}", "− " + Fa(m.CodeDiscountToman) + " تومان", color: Red);
             Row("مبلغ پرداخت‌شده", Fa(m.AmountToman) + " تومان", true);

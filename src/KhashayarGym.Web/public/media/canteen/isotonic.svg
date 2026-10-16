@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+<defs><radialGradient id="bg" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F1F5F9"/></radialGradient>
+<linearGradient id="gloss" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".22" stop-color="#fff" stop-opacity=".35"/><stop offset=".34" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect width="600" height="600" fill="url(#bg)"/><ellipse cx="300" cy="520" rx="170" ry="18" fill="#000" opacity=".08"/><rect x="270" y="100" width="60" height="34" rx="6" fill="#16A085"/><path d="M262 134 h76 v30 q40 26 40 70 v256 q0 18 -18 18 h-120 q-18 0 -18 -18 v-256 q0 -44 40 -70z" fill="#D9ECFA" stroke="#A9CCEA" stroke-width="4"/>
+<rect x="222" y="300" width="156" height="90" fill="#16A085"/><text x="300" y="356" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="30" letter-spacing="3" fill="#fff">AQUA</text></svg>

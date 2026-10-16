@@ -49,11 +49,12 @@ public sealed class CatalogService(
 
         return list.Select(p =>
         {
-            var camp = pricing.BestCampaignFor(p.Slug, running, now);
-            long? discounted = camp is null ? null : pricing.ApplyDiscount(p.PriceToman, camp.DiscountPercent);
+            var camp = pricing.BestCampaignFor(p.Slug, p.PriceToman, running, now, null);
+            long? discounted = camp is null ? null : p.PriceToman - camp.DiscountFor(p.PriceToman);
+            int? percent = camp is null ? null : camp.DiscountAmountToman is null ? camp.DiscountPercent : (int)(100 * (p.PriceToman - discounted!.Value) / Math.Max(1, p.PriceToman));
             return new PackageDto(
                 p.Id, p.Slug, p.Name, p.Tagline, p.Category.ToString(), p.DurationMonths, p.Sessions,
-                p.PriceToman, discounted, camp?.DiscountPercent,
+                p.PriceToman, discounted, percent,
                 pricing.MonthlyEquivalent(discounted ?? p.PriceToman, p.DurationMonths),
                 p.IncludesPersonalCoach, p.IncludesNutritionPlan, p.IsFeatured, p.Features);
         }).ToList();
@@ -77,7 +78,8 @@ public sealed class CatalogService(
             .FirstOrDefault();
         return c is null ? null : new CampaignDto(
             c.Id, c.Title, c.Description,
-            DateTime.SpecifyKind(c.StartsAtUtc, DateTimeKind.Utc), DateTime.SpecifyKind(c.EndsAtUtc, DateTimeKind.Utc), c.DiscountPercent, c.EligiblePackageSlugs);
+            DateTime.SpecifyKind(c.StartsAtUtc, DateTimeKind.Utc), DateTime.SpecifyKind(c.EndsAtUtc, DateTimeKind.Utc), c.DiscountPercent, c.EligiblePackageSlugs,
+            c.DiscountAmountToman, c.EligibleBranchSlugs, c.MaxRedemptions is { } max ? Math.Max(0, max - c.RedemptionCount) : null);
     }
 
     public async Task<IReadOnlyList<FaqDto>> GetFaqAsync(CancellationToken ct) =>

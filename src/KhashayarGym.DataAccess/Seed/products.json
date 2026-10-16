@@ -1,0 +1,1095 @@
+[
+ {
+  "slug": "whey-2kg",
+  "name": "پروتئین وی ۲ کیلویی",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "پروتئین",
+  "priceToman": 8900000,
+  "description": "پروتئین وی کنسانتره با ۲۴ گرم پروتئین در هر اسکوپ؛ مناسب بعد از تمرین.",
+  "highlights": [
+   "۲۴ گرم پروتئین در هر وعده",
+   "۶۶ وعده",
+   "هضم سریع"
+  ],
+  "imagePath": "/media/shop/whey-2kg.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   },
+   {
+    "flavor": "وانیل"
+   },
+   {
+    "flavor": "توت‌فرنگی"
+   }
+  ],
+  "sortOrder": 0
+ },
+ {
+  "slug": "whey-iso-2kg",
+  "name": "وی ایزوله ۲ کیلویی",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "پروتئین",
+  "priceToman": 12400000,
+  "description": "وی ایزوله با چربی و لاکتوز بسیار کم برای دورهٔ کات.",
+  "highlights": [
+   "۲۷ گرم پروتئین",
+   "کم‌لاکتوز",
+   "زیر ۱ گرم چربی"
+  ],
+  "imagePath": "/media/shop/whey-iso-2kg.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   },
+   {
+    "flavor": "کافه‌موکا"
+   }
+  ],
+  "sortOrder": 1
+ },
+ {
+  "slug": "whey-1kg",
+  "name": "پروتئین وی ۱ کیلویی",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "پروتئین",
+  "priceToman": 4900000,
+  "description": "بستهٔ کوچک‌تر وی برای شروع.",
+  "highlights": [
+   "۲۳ گرم پروتئین",
+   "۳۳ وعده"
+  ],
+  "imagePath": "/media/shop/whey-1kg.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   },
+   {
+    "flavor": "وانیل"
+   }
+  ],
+  "sortOrder": 2
+ },
+ {
+  "slug": "casein-1kg",
+  "name": "کازئین شبانه ۱ کیلویی",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "پروتئین",
+  "priceToman": 5600000,
+  "description": "پروتئین آهسته‌جذب برای قبل از خواب.",
+  "highlights": [
+   "آزادسازی تا ۷ ساعت",
+   "۲۴ گرم پروتئین"
+  ],
+  "imagePath": "/media/shop/casein-1kg.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   }
+  ],
+  "sortOrder": 3
+ },
+ {
+  "slug": "mass-gainer-3kg",
+  "name": "گینر ۳ کیلویی",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "گینر",
+  "priceToman": 6800000,
+  "description": "کربوهیدرات و پروتئین برای افزایش وزن.",
+  "highlights": [
+   "۶۵۰ کالری در هر وعده",
+   "۳۰ گرم پروتئین"
+  ],
+  "imagePath": "/media/shop/mass-gainer-3kg.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   },
+   {
+    "flavor": "موز"
+   }
+  ],
+  "sortOrder": 4
+ },
+ {
+  "slug": "creatine-300",
+  "name": "کراتین مونوهیدرات ۳۰۰ گرم",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "کراتین",
+  "priceToman": 2400000,
+  "description": "کراتین خالص میکرونایز برای قدرت و حجم.",
+  "highlights": [
+   "۵ گرم در روز",
+   "بدون طعم"
+  ],
+  "imagePath": "/media/shop/creatine-300.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 5
+ },
+ {
+  "slug": "creatine-500",
+  "name": "کراتین مونوهیدرات ۵۰۰ گرم",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "کراتین",
+  "priceToman": 3600000,
+  "description": "بستهٔ اقتصادی کراتین خالص.",
+  "highlights": [
+   "۱۰۰ وعده",
+   "بدون طعم"
+  ],
+  "imagePath": "/media/shop/creatine-500.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 6
+ },
+ {
+  "slug": "bcaa-400",
+  "name": "آمینو BCAA ۴۰۰ گرم",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "آمینو",
+  "priceToman": 2900000,
+  "description": "نسبت ۲:۱:۱ لوسین، ایزولوسین و والین.",
+  "highlights": [
+   "حین تمرین",
+   "بدون قند"
+  ],
+  "imagePath": "/media/shop/bcaa-400.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "هندوانه"
+   },
+   {
+    "flavor": "لیمو"
+   }
+  ],
+  "sortOrder": 7
+ },
+ {
+  "slug": "eaa-350",
+  "name": "آمینو EAA ۳۵۰ گرم",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "آمینو",
+  "priceToman": 3300000,
+  "description": "همهٔ آمینواسیدهای ضروری.",
+  "highlights": [
+   "۹ آمینواسید ضروری"
+  ],
+  "imagePath": "/media/shop/eaa-350.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "انبه"
+   }
+  ],
+  "sortOrder": 8
+ },
+ {
+  "slug": "glutamine-300",
+  "name": "گلوتامین ۳۰۰ گرم",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "آمینو",
+  "priceToman": 2200000,
+  "description": "برای ریکاوری.",
+  "highlights": [
+   "بدون طعم"
+  ],
+  "imagePath": "/media/shop/glutamine-300.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 9
+ },
+ {
+  "slug": "preworkout-300",
+  "name": "پری‌ورک‌اوت ۳۰۰ گرم",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "انرژی‌زا",
+  "priceToman": 3100000,
+  "description": "انرژی و تمرکز قبل از تمرین.",
+  "highlights": [
+   "کافئین ۲۰۰ میلی‌گرم",
+   "بتاآلانین"
+  ],
+  "imagePath": "/media/shop/preworkout-300.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "میوه‌ای"
+   },
+   {
+    "flavor": "سیب سبز"
+   }
+  ],
+  "sortOrder": 10
+ },
+ {
+  "slug": "citrulline-200",
+  "name": "سیترولین مالات ۲۰۰ گرم",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "انرژی‌زا",
+  "priceToman": 2500000,
+  "description": "پمپ و استقامت عضلانی.",
+  "highlights": [
+   "۶ گرم در وعده"
+  ],
+  "imagePath": "/media/shop/citrulline-200.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 11
+ },
+ {
+  "slug": "beta-alanine-250",
+  "name": "بتاآلانین ۲۵۰ گرم",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "انرژی‌زا",
+  "priceToman": 1900000,
+  "description": "افزایش استقامت در ست‌های سنگین.",
+  "highlights": [
+   "۳٫۲ گرم در وعده"
+  ],
+  "imagePath": "/media/shop/beta-alanine-250.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 12
+ },
+ {
+  "slug": "l-carnitine",
+  "name": "ال‌کارنیتین مایع ۵۰۰ میلی",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "کاهش وزن",
+  "priceToman": 1700000,
+  "description": "ال‌کارنیتین مایع برای قبل از هوازی.",
+  "highlights": [
+   "۲۰۰۰ میلی‌گرم در وعده"
+  ],
+  "imagePath": "/media/shop/l-carnitine.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "پرتقال"
+   }
+  ],
+  "sortOrder": 13
+ },
+ {
+  "slug": "fat-burner",
+  "name": "چربی‌سوز ۹۰ کپسول",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "کاهش وزن",
+  "priceToman": 2600000,
+  "description": "ترکیب چای سبز و کافئین. با پزشک مشورت کنید.",
+  "highlights": [
+   "۹۰ کپسول"
+  ],
+  "imagePath": "/media/shop/fat-burner.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 14
+ },
+ {
+  "slug": "omega3",
+  "name": "امگا ۳ — ۶۰ سافت‌ژل",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 1450000,
+  "description": "روغن ماهی خالص‌شده.",
+  "highlights": [
+   "۱۰۰۰ میلی‌گرم"
+  ],
+  "imagePath": "/media/shop/omega3.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 15
+ },
+ {
+  "slug": "multivitamin",
+  "name": "مولتی‌ویتامین ورزشی ۶۰ قرص",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 1350000,
+  "description": "ویتامین‌ها و مواد معدنی برای ورزشکاران.",
+  "highlights": [
+   "روزی یک قرص"
+  ],
+  "imagePath": "/media/shop/multivitamin.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 16
+ },
+ {
+  "slug": "vitamin-d3",
+  "name": "ویتامین D3 هزار واحد",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 690000,
+  "description": "۱۰۰ قرص.",
+  "highlights": [
+   "۱۰۰۰ واحد"
+  ],
+  "imagePath": "/media/shop/vitamin-d3.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 17
+ },
+ {
+  "slug": "zma",
+  "name": "ZMA — ۹۰ کپسول",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 1250000,
+  "description": "زینک، منیزیم و B6 برای خواب و ریکاوری.",
+  "highlights": [
+   "شب قبل از خواب"
+  ],
+  "imagePath": "/media/shop/zma.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 18
+ },
+ {
+  "slug": "magnesium",
+  "name": "منیزیم ۱۲۰ قرص",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 780000,
+  "description": "منیزیم سیترات.",
+  "highlights": [
+   "۱۲۰ قرص"
+  ],
+  "imagePath": "/media/shop/magnesium.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 19
+ },
+ {
+  "slug": "collagen",
+  "name": "کلاژن ۲۰۰ گرم",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "ویتامین",
+  "priceToman": 2100000,
+  "description": "پپتید کلاژن برای مفاصل و پوست.",
+  "highlights": [
+   "۱۰ گرم در وعده"
+  ],
+  "imagePath": "/media/shop/collagen.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "بدون طعم"
+   },
+   {
+    "flavor": "لیمو"
+   }
+  ],
+  "sortOrder": 20
+ },
+ {
+  "slug": "protein-bar-box",
+  "name": "پروتئین بار — جعبهٔ ۱۲تایی",
+  "brandName": "آیرون‌لب",
+  "kind": "Supplement",
+  "category": "میان‌وعده",
+  "priceToman": 2280000,
+  "description": "هر بار ۲۰ گرم پروتئین.",
+  "highlights": [
+   "۱۲ عدد ۶۰ گرمی"
+  ],
+  "imagePath": "/media/shop/protein-bar-box.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "شکلات"
+   },
+   {
+    "flavor": "کارامل"
+   }
+  ],
+  "sortOrder": 21
+ },
+ {
+  "slug": "electrolyte",
+  "name": "الکترولیت ۳۰۰ گرم",
+  "brandName": "پاورفیت",
+  "kind": "Supplement",
+  "category": "میان‌وعده",
+  "priceToman": 980000,
+  "description": "جبران املاح در تمرین‌های طولانی.",
+  "highlights": [
+   "بدون قند"
+  ],
+  "imagePath": "/media/shop/electrolyte.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "لیمو"
+   },
+   {
+    "flavor": "هندوانه"
+   }
+  ],
+  "sortOrder": 22
+ },
+ {
+  "slug": "oats-powder",
+  "name": "پودر جو دوسر ۱ کیلویی",
+  "brandName": "نوتری‌مکس",
+  "kind": "Supplement",
+  "category": "میان‌وعده",
+  "priceToman": 650000,
+  "description": "کربوهیدرات کامل برای صبحانه و گینر خانگی.",
+  "highlights": [
+   "۱ کیلوگرم"
+  ],
+  "imagePath": "/media/shop/oats-powder.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": "ساده"
+   },
+   {
+    "flavor": "شکلاتی"
+   }
+  ],
+  "sortOrder": 23
+ },
+ {
+  "slug": "peanut-butter",
+  "name": "کرهٔ بادام‌زمینی پروتئینی",
+  "brandName": "بادی‌پرو",
+  "kind": "Supplement",
+  "category": "میان‌وعده",
+  "priceToman": 590000,
+  "description": "بدون شکر افزوده.",
+  "highlights": [
+   "۵۰۰ گرم"
+  ],
+  "imagePath": "/media/shop/peanut-butter.svg",
+  "isKhashayarBrand": false,
+  "variants": [
+   {
+    "flavor": null
+   }
+  ],
+  "sortOrder": 24
+ },
+ {
+  "slug": "tshirt-dry",
+  "name": "تیشرت دری‌فیت خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "تیشرت",
+  "priceToman": 950000,
+  "description": "پارچهٔ سبک و خنک با لوگوی خشایار.",
+  "highlights": [
+   "پارچهٔ دری‌فیت",
+   "دوخت تخت"
+  ],
+  "imagePath": "/media/shop/tshirt-dry.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "S"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XXL"
+   },
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": "S"
+   },
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": "M"
+   },
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": "L"
+   },
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": "XL"
+   },
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": "XXL"
+   },
+   {
+    "color": "سفید",
+    "colorHex": "#F4F4F4",
+    "size": "S"
+   },
+   {
+    "color": "سفید",
+    "colorHex": "#F4F4F4",
+    "size": "M"
+   },
+   {
+    "color": "سفید",
+    "colorHex": "#F4F4F4",
+    "size": "L"
+   },
+   {
+    "color": "سفید",
+    "colorHex": "#F4F4F4",
+    "size": "XL"
+   },
+   {
+    "color": "سفید",
+    "colorHex": "#F4F4F4",
+    "size": "XXL"
+   }
+  ],
+  "sortOrder": 25
+ },
+ {
+  "slug": "tank-top",
+  "name": "رکابی تمرینی خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "تیشرت",
+  "priceToman": 720000,
+  "description": "برای تمرین‌های گرم.",
+  "highlights": [
+   "خنک و سبک"
+  ],
+  "imagePath": "/media/shop/tank-top.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "M"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "L"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 26
+ },
+ {
+  "slug": "hoodie",
+  "name": "هودی خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "هودی",
+  "priceToman": 2450000,
+  "description": "هودی کلاه‌دار گرم برای قبل و بعد از تمرین.",
+  "highlights": [
+   "دورس داخل‌کرک",
+   "جیب کانگورویی"
+  ],
+  "imagePath": "/media/shop/hoodie.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "M"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "L"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "XL"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "XXL"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XXL"
+   }
+  ],
+  "sortOrder": 27
+ },
+ {
+  "slug": "joggers",
+  "name": "شلوار اسلش خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "شلوار",
+  "priceToman": 1650000,
+  "description": "شلوار راحتی کمرکش با جیب زیپ‌دار.",
+  "highlights": [
+   "جیب زیپ‌دار"
+  ],
+  "imagePath": "/media/shop/joggers.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "M"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "L"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 28
+ },
+ {
+  "slug": "women-long-tee",
+  "name": "تیشرت بلند بانوان خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "بانوان",
+  "priceToman": 1150000,
+  "description": "تیشرت آستین‌بلند و پوشیده، مناسب سالن بانوان.",
+  "highlights": [
+   "آستین‌بلند",
+   "قد بلند"
+  ],
+  "imagePath": "/media/shop/women-long-tee.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "S"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "M"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "L"
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": "XL"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "S"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   },
+   {
+    "color": "صورتی دودی",
+    "colorHex": "#B88A92",
+    "size": "S"
+   },
+   {
+    "color": "صورتی دودی",
+    "colorHex": "#B88A92",
+    "size": "M"
+   },
+   {
+    "color": "صورتی دودی",
+    "colorHex": "#B88A92",
+    "size": "L"
+   },
+   {
+    "color": "صورتی دودی",
+    "colorHex": "#B88A92",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 29
+ },
+ {
+  "slug": "women-leggings",
+  "name": "لگ ورزشی بانوان خشایار",
+  "brandName": "خشایار",
+  "kind": "Apparel",
+  "category": "بانوان",
+  "priceToman": 1250000,
+  "description": "کشسان با کمر بلند.",
+  "highlights": [
+   "کمر بلند",
+   "ضدتعریق"
+  ],
+  "imagePath": "/media/shop/women-leggings.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "S"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "M"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "L"
+   },
+   {
+    "color": "سرمه‌ای",
+    "colorHex": "#0B2F57",
+    "size": "XL"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "S"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 30
+ },
+ {
+  "slug": "shaker-700",
+  "name": "شیکر ۷۰۰ میلی خشایار",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "شیکر و بطری",
+  "priceToman": 380000,
+  "description": "شیکر با فنر هم‌زن و درب ضدنشت.",
+  "highlights": [
+   "۷۰۰ میلی‌لیتر",
+   "بدون BPA"
+  ],
+  "imagePath": "/media/shop/shaker-700.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": null
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": null
+   }
+  ],
+  "sortOrder": 31
+ },
+ {
+  "slug": "bottle-1l",
+  "name": "بطری آب یک‌لیتری خشایار",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "شیکر و بطری",
+  "priceToman": 520000,
+  "description": "بطری مقاوم با درب ورزشی.",
+  "highlights": [
+   "۱ لیتر"
+  ],
+  "imagePath": "/media/shop/bottle-1l.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": null
+   }
+  ],
+  "sortOrder": 32
+ },
+ {
+  "slug": "towel",
+  "name": "حولهٔ ورزشی میکروفایبر",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "لوازم",
+  "priceToman": 450000,
+  "description": "حولهٔ سبک و زودخشک، لازم برای ورود به سالن.",
+  "highlights": [
+   "۴۰×۹۰ سانتی‌متر"
+  ],
+  "imagePath": "/media/shop/towel.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "آبی خشایار",
+    "colorHex": "#0B5FB0",
+    "size": null
+   },
+   {
+    "color": "طوسی",
+    "colorHex": "#6B6F76",
+    "size": null
+   }
+  ],
+  "sortOrder": 33
+ },
+ {
+  "slug": "gloves",
+  "name": "دستکش بدنسازی خشایار",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "لوازم",
+  "priceToman": 690000,
+  "description": "کف چرمی ضدلغزش.",
+  "highlights": [
+   "مچ‌بند دار"
+  ],
+  "imagePath": "/media/shop/gloves.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "S"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 34
+ },
+ {
+  "slug": "lifting-belt",
+  "name": "کمربند بدنسازی چرمی",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "لوازم",
+  "priceToman": 1850000,
+  "description": "برای اسکوات و ددلیفت سنگین.",
+  "highlights": [
+   "چرم ۱۰ میلی‌متری"
+  ],
+  "imagePath": "/media/shop/lifting-belt.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "M"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "L"
+   },
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": "XL"
+   }
+  ],
+  "sortOrder": 35
+ },
+ {
+  "slug": "gym-bag",
+  "name": "ساک ورزشی خشایار",
+  "brandName": "خشایار",
+  "kind": "Gear",
+  "category": "لوازم",
+  "priceToman": 1950000,
+  "description": "جای کفش جدا و جیب ضدآب.",
+  "highlights": [
+   "۳۵ لیتر"
+  ],
+  "imagePath": "/media/shop/gym-bag.svg",
+  "isKhashayarBrand": true,
+  "variants": [
+   {
+    "color": "مشکی",
+    "colorHex": "#1E1E1E",
+    "size": null
+   }
+  ],
+  "sortOrder": 36
+ }
+]

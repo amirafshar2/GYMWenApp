@@ -96,14 +96,46 @@ public sealed class ContractService(
             .Include(x => x.User)
             .Include(x => x.Membership).ThenInclude(m => m!.Package)
             .Include(x => x.Membership).ThenInclude(m => m!.Branch)
+            .Include(x => x.ShopOrder).ThenInclude(o => o!.Items)
+            .Include(x => x.ShopOrder).ThenInclude(o => o!.Branch)
+            .Include(x => x.CanteenOrder).ThenInclude(o => o!.Items)
+            .Include(x => x.CanteenOrder).ThenInclude(o => o!.Branch)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == paymentId && x.UserId == userId && x.Status == PaymentStatus.Succeeded, ct);
-        if (p?.Membership is null || p.User is null) return null;
-        var m = p.Membership;
-        var bytes = pdf.Invoice(new InvoicePdfModel(Brand, p.InvoiceNumber ?? p.Id.ToString(), p.PaidAtUtc ?? p.CreatedAtUtc,
-            p.User.FullName ?? "", p.User.PhoneNumber ?? "", m.Package!.Name, m.Branch!.Name,
-            m.Section == GenderSection.Women ? "women" : "men", m.StartsAtUtc, m.EndsAtUtc,
-            p.BaseAmountToman, p.CampaignDiscountToman, p.CodeDiscountToman, p.DiscountCode, p.AmountToman, p.TrackingNumber, p.TransactionCode));
-        return (bytes, $"khashayar-invoice-{p.InvoiceNumber}.pdf");
+        if (p?.User is null) return null;
+        var model = BuildInvoice(p);
+        if (model is null) return null;
+        return (pdf.Invoice(model), $"khashayar-invoice-{p.InvoiceNumber}.pdf");
+    }
+
+    private static InvoicePdfModel? BuildInvoice(Payment p)
+    {
+        var no = p.InvoiceNumber ?? p.Id.ToString();
+        var at = p.PaidAtUtc ?? p.CreatedAtUtc;
+        var name = p.User!.FullName ?? "";
+        var phone = p.User.PhoneNumber ?? "";
+        switch (p.Purpose)
+        {
+            case PaymentPurpose.Membership when p.Membership is { } m:
+                return new InvoicePdfModel(Brand, no, at, name, phone, m.Package!.Name, m.Branch!.Name,
+                    m.Section == GenderSection.Women ? "women" : "men", m.StartsAtUtc, m.EndsAtUtc,
+                    p.BaseAmountToman, p.CampaignDiscountToman, p.CodeDiscountToman, p.DiscountCode, p.AmountToman, p.TrackingNumber, p.TransactionCode);
+            case PaymentPurpose.ShopOrder when p.ShopOrder is { } o:
+                return new InvoicePdfModel(Brand, no, at, name, phone, o.Number ?? "", o.Branch?.Name ?? "", "shop", null, null,
+                    o.SubtotalToman, 0, o.DiscountToman, o.DiscountCode, p.AmountToman, p.TrackingNumber, p.TransactionCode,
+                    $"فاکتور فروشگاه — سفارش {PersianText.FaDigits(o.Number ?? "")}",
+                    o.Items.Select(i => new InvoiceLine(i.VariantLabel is null ? i.ProductName : $"{i.ProductName} ({i.VariantLabel})", i.Quantity, i.UnitPriceToman)).ToList(),
+                    o.ShippingToman, o.Fulfillment == Fulfillment.Pickup ? $"تحویل حضوری — {o.Branch?.Name}" : "ارسال به نشانی");
+            case PaymentPurpose.CanteenOrder when p.CanteenOrder is { } c:
+                return new InvoicePdfModel(Brand, no, at, name, phone, "", c.Branch?.Name ?? "", "canteen", null, null,
+                    c.TotalToman, 0, 0, null, p.AmountToman, p.TrackingNumber, p.TransactionCode,
+                    $"رسید بوفه — {c.Branch?.Name}", c.Items.Select(i => new InvoiceLine(i.Name, i.Quantity, i.UnitPriceToman)).ToList());
+            case PaymentPurpose.WalletTopUp:
+                return new InvoicePdfModel(Brand, no, at, name, phone, "شارژ کیف پول", "", "wallet", null, null,
+                    p.AmountToman, 0, 0, null, p.AmountToman, p.TrackingNumber, p.TransactionCode, "رسید شارژ کیف پول");
+            default:
+                return null;
+        }
     }
 
     private static string ContentHash(ContractTemplate t, string name, string phone, IReadOnlyList<bool> answers, string? notes, DateTime at)

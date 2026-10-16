@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+<defs><radialGradient id="bg" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F1F5F9"/></radialGradient>
+<linearGradient id="gloss" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".22" stop-color="#fff" stop-opacity=".35"/><stop offset=".34" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect width="600" height="600" fill="url(#bg)"/><ellipse cx="300" cy="520" rx="170" ry="18" fill="#000" opacity=".08"/><g transform="rotate(-14 300 320)"><rect x="140" y="270" width="320" height="100" rx="18" fill="#6E4B3A"/><path d="M140 290 l-24 -10 v80 l24 -10z" fill="#4d3529"/><path d="M460 290 l24 -10 v80 l-24 -10z" fill="#4d3529"/>
+<text x="300" y="334" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="34" letter-spacing="4" fill="#fff">PROTEIN</text></g></svg>

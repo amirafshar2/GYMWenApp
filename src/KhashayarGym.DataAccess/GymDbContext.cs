@@ -27,6 +27,14 @@ public class GymDbContext(DbContextOptions<GymDbContext> options)
     public DbSet<AccessDevice> AccessDevices => Set<AccessDevice>();
     public DbSet<CheckIn> CheckIns => Set<CheckIn>();
     public DbSet<IntegrationEvent> IntegrationEvents => Set<IntegrationEvent>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<BranchStock> BranchStocks => Set<BranchStock>();
+    public DbSet<ShopOrder> ShopOrders => Set<ShopOrder>();
+    public DbSet<CanteenItem> CanteenItems => Set<CanteenItem>();
+    public DbSet<CanteenOrder> CanteenOrders => Set<CanteenOrder>();
+    public DbSet<Wallet> Wallets => Set<Wallet>();
+    public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

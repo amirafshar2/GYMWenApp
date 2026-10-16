@@ -7,6 +7,8 @@ public interface IPricingService
     /// <summary>قیمت پس از تخفیف کمپین، گرد به پایین تا هزار تومان.</summary>
     long ApplyDiscount(long priceToman, int discountPercent);
     Campaign? BestCampaignFor(string packageSlug, IEnumerable<Campaign> campaigns, DateTime utcNow);
+    /// <summary>بیشترین تخفیف برای این پکیج (و در صورت مشخص بودن، این شعبه)، با درنظر گرفتن تخفیف درصدی یا مبلغ ثابت.</summary>
+    Campaign? BestCampaignFor(string packageSlug, long basePriceToman, IEnumerable<Campaign> campaigns, DateTime utcNow, string? branchSlug);
     long MonthlyEquivalent(long priceToman, int durationMonths);
 }
 
@@ -24,6 +26,11 @@ public sealed class PricingService : IPricingService
     public Campaign? BestCampaignFor(string packageSlug, IEnumerable<Campaign> campaigns, DateTime utcNow) =>
         campaigns.Where(c => c.IsRunningAt(utcNow) && c.AppliesTo(packageSlug))
                  .OrderByDescending(c => c.DiscountPercent)
+                 .FirstOrDefault();
+
+    public Campaign? BestCampaignFor(string packageSlug, long basePriceToman, IEnumerable<Campaign> campaigns, DateTime utcNow, string? branchSlug) =>
+        campaigns.Where(c => c.IsRunningAt(utcNow) && (branchSlug is null ? c.AppliesTo(packageSlug) : c.AppliesTo(packageSlug, branchSlug)))
+                 .OrderByDescending(c => c.DiscountFor(basePriceToman))
                  .FirstOrDefault();
 
     public long MonthlyEquivalent(long priceToman, int durationMonths) =>

@@ -67,7 +67,8 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
         };
         var payment = new Payment
         {
-            UserId = userId, Membership = membership, IdempotencyKey = key,
+            UserId = userId, Membership = membership, IdempotencyKey = key, Purpose = PaymentPurpose.Membership,
+            Description = $"{p.Package.Name} — {p.Branch.Name}",
             BaseAmountToman = p.Quote.BaseAmountToman, CampaignDiscountToman = p.Quote.CampaignDiscountToman,
             CodeDiscountToman = p.Quote.CodeDiscountToman, AmountToman = p.Quote.TotalToman,
             CampaignId = p.CampaignId, DiscountCode = p.Quote.DiscountCode,
@@ -104,21 +105,21 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
 
         var now = clock.UtcNow;
         var campaigns = await db.Campaigns.AsNoTracking().Where(c => c.IsActive && c.StartsAtUtc <= now && c.EndsAtUtc > now).ToListAsync(ct);
-        var campaign = pricing.BestCampaignFor(package!.Slug, campaigns, now);
-        var afterCampaign = campaign is null ? package.PriceToman : pricing.ApplyDiscount(package.PriceToman, campaign.DiscountPercent);
+        var campaign = pricing.BestCampaignFor(package!.Slug, package.PriceToman, campaigns, now, branch!.Slug);
+        var afterCampaign = package.PriceToman - (campaign?.DiscountFor(package.PriceToman) ?? 0);
 
         string? code = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant();
         int? codePercent = null; string? codeError = null; var total = afterCampaign;
         if (code is not null)
         {
             var dc = await db.DiscountCodes.AsNoTracking().FirstOrDefaultAsync(d => d.Code == code, ct);
-            if (dc is null || !dc.IsUsableAt(now)) codeError = "کد تخفیف معتبر نیست یا منقضی شده است.";
+            if (dc is null || !dc.IsUsableAt(now) || !dc.AppliesTo(DiscountScope.Membership)) codeError = "کد تخفیف معتبر نیست یا منقضی شده است.";
             else { codePercent = dc.Percent; total = pricing.ApplyDiscount(afterCampaign, dc.Percent); }
         }
 
         var quote = new QuoteDto(
             branch!.Name, package.Name, sec == GenderSection.Women ? "women" : "men", package.DurationMonths, package.Sessions,
-            package.PriceToman, campaign?.DiscountPercent, campaign?.Title, package.PriceToman - afterCampaign,
+            package.PriceToman, campaign is null ? null : campaign.DiscountAmountToman is null ? campaign.DiscountPercent : null, campaign?.Title, package.PriceToman - afterCampaign,
             codeError is null ? code : null, codePercent, afterCampaign - total, total, codeError);
         return Result<Priced>.Ok(new Priced(quote, branch, package, sec!.Value, campaign?.Id));
     }
