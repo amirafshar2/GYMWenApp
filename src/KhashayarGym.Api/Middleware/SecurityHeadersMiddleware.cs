@@ -1,17 +1,18 @@
 namespace KhashayarGym.Api.Middleware;
 
-/// <summary>هدرهای امنیتی (OWASP Secure Headers). CSP برای نقشهٔ MapLibre و تایل‌های CARTO باز شده است.</summary>
+/// <summary>هدرهای امنیتی (OWASP Secure Headers). CSP فقط عکس‌های موقت مربیان را از Unsplash اجازه می‌دهد.</summary>
 public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvironment env)
 {
-    private const string MapHosts = "https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com";
+    // عکس‌های موقت مربیان تا رسیدن عکس واقعی؛ بعد از جایگزینی، این میزبان حذف شود
+    private const string ImageHosts = "https://images.unsplash.com";
 
     private static readonly string Csp = string.Join("; ",
         "default-src 'self'",
         "script-src 'self'",
         "style-src 'self' 'unsafe-inline'",
-        $"img-src 'self' data: blob: {MapHosts}",
+        $"img-src 'self' data: blob: {ImageHosts}",
         "font-src 'self' data:",
-        $"connect-src 'self' {MapHosts}",
+        "connect-src 'self'",
         "worker-src 'self' blob:",
         "media-src 'self' blob:",
         "frame-ancestors 'none'",

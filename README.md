@@ -92,9 +92,9 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | ویدیوی اسکرولی وسط صفحه | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) — ویدیو: `public/media/video/gym.mp4` |
 | آنچه ارائه می‌دهیم (کاروسل آیکون) | `site/SiteOffer.tsx` | چیدمان صفحهٔ مرجع |
 | شعبه‌ها و نقشه | `site/SiteBranches.tsx`، `components/ui/shiraz-branch-picker.tsx` | ساختار Nepal Address Picker (21st.dev) با رنگ‌های تم؛ نقشهٔ شماتیک شیراز + حوزهٔ هر شعبه |
-| پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev) |
+| پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev، نسخهٔ سوییچ متحرک) با رنگ‌های تم |
 | جشنواره (دو تصویر پارالاکس) | `site/SiteEvents.tsx` | چیدمان صفحهٔ مرجع |
-| مربیان | `site/SiteCoaches.tsx` | Glow Cards (21st.dev) |
+| مربیان | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev)؛ عکس‌ها و نام‌ها موقت‌اند |
 | سؤالات / فرم مشاوره | `site/SiteFaq.tsx`، `site/SiteContact.tsx` | FAQ Accordion و Contact Form (21st.dev) |
 | نوار جشنواره | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
 | فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |
