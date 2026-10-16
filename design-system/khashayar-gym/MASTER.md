@@ -2,7 +2,7 @@
 
 منبع: صفحهٔ مرجعی که کارفرما انتخاب کرد (قالب «GYM Store — Sports Complex»)؛ فقط چیدمان و سبک بازسازی شده، نه کد یا محتوای آن.
 
-## رنگ‌ها (توکن‌ها در `src/KhashayarGym.Web/src/index.css`)
+## رنگ‌ها (توکن‌ها در `src/GymPlatform.Web/src/index.css`)
 | نقش | مقدار | توکن |
 |---|---|---|
 | پس‌زمینهٔ صفحه | `#FFFFFF` | `--color-iron` |

@@ -1,17 +1,15 @@
-# Khashayar Fitness – Online-Plattform für eine Fitnessstudio-Kette in Shiraz
+# Fitnessstudio-Plattform – ein Ideenprojekt mit Vibe-Coding
 
 > [!IMPORTANT]
-> **Dies ist eine Demo-Version.** Alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
+> **Dies ist ein Demo- und Lernprojekt.** Die Marke „Ahankooh“ ist frei erfunden; alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
 >
-> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
->
-> Entwickelt von **[Afshar Web Studio – afsharweb.com](https://afsharweb.com/)**
+> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/?brand=demo)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
 
-Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 12 Standorten in Shiraz (Iran): öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Geschäftsführung. Die Oberfläche ist vollständig auf Persisch (Rechts-nach-links).
+Eine Web-Plattform für eine (fiktive) Fitnessstudio-Kette mit 12 Standorten: öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Leitung. Die Oberfläche ist auf Persisch (Rechts-nach-links) – ein bewusst gewählter Härtetest für Layout und Typografie.
 
 ## Live-Demo
 
-**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)**
+**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/?brand=demo)**
 
 - **Ein-Klick-Login:** Auf der Login-Seite gibt es die Schaltflächen „Gesamtleitung“, „Standortleitung“ und „Mitglied“ – ohne Nummer und Code direkt ins Panel bzw. ins Mitgliedskonto.
 - Alternativ mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) anmelden – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
@@ -26,7 +24,7 @@ Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 
 | ![Startseite](docs/screenshots/home.webp) | ![Standorte](docs/screenshots/branches.webp) |
 | **Pakete** | **Online-Anmeldung** |
 | ![Pakete](docs/screenshots/packages.webp) | ![Anmeldung](docs/screenshots/join.webp) |
-| **Shop** | **Dashboard der Geschäftsführung** |
+| **Shop** | **Dashboard der Leitung** |
 | ![Shop](docs/screenshots/shop.webp) | ![Dashboard](docs/screenshots/dashboard.webp) |
 | **Empfang und Check-in** | **Trainer-Panel** |
 | ![Empfang](docs/screenshots/reception.webp) | ![Trainer-Panel](docs/screenshots/coach.webp) |
@@ -39,16 +37,18 @@ Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 
 |---|---|
 | <img src="docs/screenshots/m-profile.webp" alt="Mitgliedskarte" width="300"> | <img src="docs/screenshots/m-canteen.webp" alt="Kantine" width="300"> |
 
-## Mein erstes Projekt mit vollständigem Vibe-Coding
+## Die Idee: aus Neugier gebaut, komplett mit Vibe-Coding
 
-Dieses Projekt war meine erste Erfahrung mit **komplettem Vibe-Coding**: Ich habe die Anforderungen, die Architektur und jede Phase in natürlicher Sprache beschrieben, die Ergebnisse geprüft, getestet und Schritt für Schritt nachgesteuert – den Code selbst hat eine KI geschrieben. Für mich war das eine **sehr spannende und richtig gute Erfahrung**: In kurzer Zeit ist ein Projekt entstanden, das ich allein so nicht hätte bauen können – mit Drei-Schichten-Architektur, Sicherheits-Audit, automatisierten Tests und messbarer Performance. Gleichzeitig habe ich gelernt, wie wichtig klare Anforderungen, Planung vor jeder Phase und konsequentes Testen sind, damit am Ende etwas Belastbares herauskommt.
+Dieses Projekt ist kein Auftrag und kein Produkt, sondern eine Sammlung von Ideen, die ich aus Neugier ausprobieren wollte: Wie weit kommt man mit **komplettem Vibe-Coding**, wenn man eine realistische, große Anwendung baut – mit Drei-Schichten-Architektur, Zahlungen, Rollen, Echtzeit-Funktionen, Sicherheits-Audit und Tests?
+
+Ich habe die Ideen, die Anforderungen und jede Phase in natürlicher Sprache beschrieben, die Ergebnisse geprüft, getestet und Schritt für Schritt nachgesteuert – den Code selbst hat eine KI geschrieben. Es war meine erste Erfahrung dieser Art und für mich **sehr spannend und eine richtig gute Erfahrung**: In kurzer Zeit ist etwas entstanden, das ich allein so nicht hätte bauen können. Gleichzeitig habe ich gelernt, wie wichtig klare Anforderungen, Planung vor jeder Phase und konsequentes Testen sind, damit am Ende etwas Belastbares herauskommt.
 
 ## Funktionen
 
 - **Phase 1 – Öffentliche Website:** Scroll-Hero, Standortkarte mit „nächster Standort“, Pakete mit Aktionsrabatt, Trainer, Galerie, Beratungsformular.
 - **Phase 2 – Mitgliedschaft:** Login per Handynummer und SMS-Code, mehrstufige Online-Anmeldung (Standort → Paket → Login → Vertrag → Zahlung), digitaler Vertrag und Gesundheitsfragebogen mit SMS-Signatur, Zahlung (Test-Gateway / ZarinPal), PDF-Rechnung, QR-Mitgliedskarte und Profil.
-- **Phase 3 – Verkauf:** Shop (Supplements, Kleidung, Zubehör, Bestand pro Standort), Kantinen-Menü per QR-Code am Tisch mit Live-Bestelltafel (SignalR), Wallet, Aktionsseite, Anbindung an Drehkreuz/Armband.
-- **Phase 4 – Mitarbeiter-Panel:** Dashboard für die Geschäftsführung (Umsatz der 12 Standorte nach Quelle, Verlängerungsrate, Stoßzeiten, auslaufende Mitgliedschaften, Aktionswirkung, Excel-Export), Empfang mit Scanner/Kamera/Armband, Trainer-Panel (Trainings- und Ernährungsplan, Gewichtsverlauf), Verwaltung von Preisen, Aktionen, Rabattcodes, Vertrag, Lager, Kantinen-Menü, Trainern und Mitarbeitern, automatische SMS, Präsentationsmodus.
+- **Phase 3 – Shop & Kantine:** Shop (Supplements, Kleidung, Zubehör, Bestand pro Standort), Kantinen-Menü per QR-Code am Tisch mit Live-Bestelltafel (SignalR), Wallet, Aktionsseite, Anbindung an Drehkreuz/Armband.
+- **Phase 4 – Mitarbeiter-Panel:** Dashboard für die Leitung (Umsatz der 12 Standorte nach Quelle, Verlängerungsrate, Stoßzeiten, auslaufende Mitgliedschaften, Aktionswirkung, Excel-Export), Empfang mit Scanner/Kamera/Armband, Trainer-Panel (Trainings- und Ernährungsplan, Gewichtsverlauf), Verwaltung von Preisen, Aktionen, Rabattcodes, Vertrag, Lager, Kantinen-Menü, Trainern und Mitarbeitern, automatische SMS, Präsentationsmodus.
 - **Phase 5 – Qualität:** unabhängiges Sicherheits-Audit mit behobenen Befunden, Performance-Optimierung, Barrierefreiheit, Health-Checks, CI.
 
 ## Technologien
@@ -94,16 +94,16 @@ flowchart LR
         Panel["Mitarbeiter-Panel"]
     end
 
-    subgraph Api["KhashayarGym.Api"]
+    subgraph Api["Api-Schicht"]
         Ctrl["Controller /api/v1"]
         Sec["Sicherheit: JWT, CSRF, CSP, Rate-Limit"]
         Hub["SignalR-Hub /hubs/canteen"]
         Workers["Hintergrund-Dienste: SMS, Wartung, Drehkreuz"]
     end
 
-    Biz["KhashayarGym.Business<br/>Services, Validierung, Preise, Rechte"]
-    Data["KhashayarGym.DataAccess<br/>EF Core, Migrationen, Seed"]
-    Dom["KhashayarGym.Domain<br/>Entitäten"]
+    Biz["Business-Schicht<br/>Services, Validierung, Preise, Rechte"]
+    Data["DataAccess-Schicht<br/>EF Core, Migrationen, Seed"]
+    Dom["Domain-Schicht<br/>Entitäten"]
     DB[("SQL Server<br/>(Demo: SQLite)")]
 
     Pay["ZarinPal / Test-Gateway"]
@@ -164,16 +164,16 @@ Rolle und Standort werden bei jeder Anfrage aus der Datenbank gelesen; jede Roll
 ### Projektstruktur
 
 ```
-KhashayarGym.slnx
+GymPlatform.slnx
 src/
-  KhashayarGym.Domain       Entitäten und Enums
-  KhashayarGym.DataAccess   EF Core, DbContext, Repositories, Migrationen, Beispieldaten (Seed/*.json)
-  KhashayarGym.Business     Services, DTOs, Validierung (FluentValidation), Preisberechnung
-  KhashayarGym.Api          Web-API, Sicherheit, Caching, liefert das Frontend aus wwwroot aus
-  KhashayarGym.Web          React + Vite + TypeScript + Tailwind v4 (Build → Api/wwwroot)
-tests/KhashayarGym.Tests    xUnit-Tests (Business) und Integrationstests (WebApplicationFactory)
-src/KhashayarGym.Web/e2e    Playwright-Tests (Desktop und Mobil)
-scripts/                    Hilfsskripte (Hero-Video, Bilder, Portfolio-Export, Komprimierung)
+  GymPlatform.Domain       Entitäten und Enums
+  GymPlatform.DataAccess   EF Core, DbContext, Repositories, Migrationen, Beispieldaten (Seed/*.json)
+  GymPlatform.Business     Services, DTOs, Validierung (FluentValidation), Preisberechnung
+  GymPlatform.Api          Web-API, Sicherheit, Caching, liefert das Frontend aus wwwroot aus
+  GymPlatform.Web          React + Vite + TypeScript + Tailwind v4 (Build → Api/wwwroot)
+tests/GymPlatform.Tests    xUnit-Tests (Business) und Integrationstests (WebApplicationFactory)
+src/GymPlatform.Web/e2e    Playwright-Tests (Desktop und Mobil)
+scripts/                    Hilfsskripte (Hero-Video, Bilder, Komprimierung)
 render.yaml                 Render-Blueprint für die Live-Demo
 ```
 
@@ -186,22 +186,22 @@ render.yaml                 Render-Blueprint für die Live-Demo
 
 ## Start in Visual Studio (ein Klick)
 
-1. `KhashayarGym.slnx` in Visual Studio öffnen.
-2. `KhashayarGym.Api` als Startprojekt festlegen.
+1. `GymPlatform.slnx` in Visual Studio öffnen.
+2. `GymPlatform.Api` als Startprojekt festlegen.
 3. Oben das Profil **Demo (SQLite)** wählen und ▶ drücken.
 
-Der Browser öffnet http://localhost:5180. Die Demo-Datenbank (`khashayar-demo.db`) wird automatisch angelegt, ein SQL Server ist nicht nötig.
+Der Browser öffnet http://localhost:5180. Die Demo-Datenbank (`gym-demo.db`) wird automatisch angelegt, ein SQL Server ist nicht nötig.
 
 ## Start über die Kommandozeile (SQLite-Demo)
 
 ```powershell
-cd src\KhashayarGym.Web
+cd src\GymPlatform.Web
 npm install
-npm run build            # Ausgabe nach src\KhashayarGym.Api\wwwroot
+npm run build            # Ausgabe nach src\GymPlatform.Api\wwwroot
 
-cd ..\KhashayarGym.Api
+cd ..\GymPlatform.Api
 $env:Database__Provider = "Sqlite"
-$env:ConnectionStrings__Default = "Data Source=khashayar-demo.db"
+$env:ConnectionStrings__Default = "Data Source=gym-demo.db"
 dotnet dev-certs https --trust     # nur beim ersten Mal
 dotnet run --launch-profile https
 ```
@@ -211,7 +211,7 @@ Danach https://localhost:7180 öffnen. Datenbank und Beispieldaten werden automa
 ## Start mit SQL Server (LocalDB)
 
 ```powershell
-cd src\KhashayarGym.Api
+cd src\GymPlatform.Api
 dotnet run --launch-profile https   # Migrationen werden automatisch angewendet
 ```
 
@@ -219,16 +219,16 @@ Eine andere Verbindungszeichenfolge gehört in die User Secrets, nicht in `appse
 
 ```powershell
 dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:Default" "Server=...;Database=KhashayarGym;..."
+dotnet user-secrets set "ConnectionStrings:Default" "Server=...;Database=GymPlatform;..."
 ```
 
 ## Frontend-Entwicklung mit Hot Reload
 
 ```powershell
 # Terminal 1
-cd src\KhashayarGym.Api; dotnet run --launch-profile https
+cd src\GymPlatform.Api; dotnet run --launch-profile https
 # Terminal 2
-cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173, /api wird an https://localhost:7180 weitergeleitet
+cd src\GymPlatform.Web; npm run dev     # http://localhost:5173, /api wird an https://localhost:7180 weitergeleitet
 ```
 
 ## Demo-Zugänge
@@ -236,11 +236,11 @@ cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173, /api wird an h
 | Zugang | Telefonnummer | Rechte |
 |---|---|---|
 | Demo-Mitarbeiter | 09100000000 | alle Rollen inkl. Gesamtleitung |
-| Demo-Standortleitung | 09100000001 | nur Standort „Ghoddousi Gharbi“ |
+| Demo-Standortleitung | 09100000001 | nur ein Standort |
 | Demo-Mitglieder | 09391000001 und folgende | Mitgliedskonto mit Karte, Bestellungen, Plan |
 
 - Im Demo-Modus wird keine echte SMS verschickt – der **Code erscheint direkt auf der Seite**.
-- Rabattcodes (nur Demo): `KHASHAYAR10`, `WELCOME5`, `MEMBER15` (nur für aktive Mitglieder).
+- Rabattcodes (nur Demo): `WELCOME5` und `MEMBER15` (nur für aktive Mitglieder).
 - Das Test-Gateway (Parbad Virtual) bewegt kein echtes Geld: **Pay** = erfolgreich, **Cancel** = abgebrochen.
 - In der Entwicklungsumgebung werden 200 fiktive Mitglieder mit 6 Monaten Historie erzeugt; in Production niemals.
 - **Präsentationsmodus:** im Panel unten in der Seitenleiste „Präsentationsmodus“ anklicken oder `?present=1` an die Adresse hängen – eine schwebende Leiste wechselt zwischen Kunden-, Empfangs-, Kantinen-, Trainer- und Leitungsansicht.
@@ -250,8 +250,8 @@ cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173, /api wird an h
 - **Anmeldung:** „Online-Anmeldung“ im Header → Standort (Button „nächster Standort“) → Paket und Rabattcode → Login → Vertrag und Gesundheitsfragebogen signieren → Zahlung → PDF-Rechnung und QR-Karte. Unter `/profile`: Resttage, Verlängerung mit einem Klick, Rechnungen, Vertrags-PDF, Trainingsplan und Gewichtsdiagramm.
 - **Shop:** `/shop` – Kategorien, Standort für den Bestand wählen, Farbe und Größe, Warenkorb, Abholung oder Versand.
 - **Wallet:** `/wallet` – Aufladen über das Gateway, Bezahlen in Shop und Kantine.
-- **Kantine (Kunde):** `/canteen/ghoddousi-gharbi?table=Tisch 4` – dieselbe Adresse, die der QR-Code am Tisch öffnet.
-- **Kantine (Personal):** als 09100000000 anmelden und `/panel/canteen?branch=ghoddousi-gharbi` öffnen; Bestellungen erscheinen live, bei „fertig“ piept das Handy des Kunden. Druckvorlage der Tisch-QR-Codes: `/panel/canteen/qr`.
+- **Kantine (Gast):** `/canteen/<standort>?table=Tisch 4` – dieselbe Adresse, die der QR-Code am Tisch öffnet.
+- **Kantine (Personal):** als 09100000000 anmelden und `/panel/canteen` öffnen und einen Standort wählen; Bestellungen erscheinen live, bei „fertig“ piept das Handy des Gastes. Druckvorlage der Tisch-QR-Codes: `/panel/canteen/qr`.
 
 ## Rollen und Rechte im Panel
 
@@ -270,17 +270,15 @@ cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173, /api wird an h
 
 ## Automatische SMS
 
-Willkommen/Verlängerungsbestätigung (sofort), Erinnerung 7 und 1 Tag vor Ablauf, Geburtstag (persischer Kalender, mit Einmal-Rabattcode für den Shop) und Aktionen (nur abgelaufene Mitglieder mit Werbe-Einwilligung). Erinnerungen und Werbung nur zwischen 9 und 21 Uhr; jede SMS per eindeutigem Schlüssel nur einmal. Kavenegar-Vorlagen: `khashayar-welcome`, `khashayar-renew`, `khashayar-birthday`, `khashayar-campaign` (je 3 Tokens). Website-Adresse im SMS-Text: `Sms:SiteUrl`.
+Willkommen/Verlängerungsbestätigung (sofort), Erinnerung 7 und 1 Tag vor Ablauf, Geburtstag (persischer Kalender, mit Einmal-Rabattcode für den Shop) und Aktionen (nur abgelaufene Mitglieder mit Werbe-Einwilligung). Erinnerungen und Werbung nur zwischen 9 und 21 Uhr; jede SMS per eindeutigem Schlüssel nur einmal. Vier Kavenegar-Vorlagen (Willkommen, Verlängerung, Geburtstag, Aktion; je 3 Tokens). Website-Adresse im SMS-Text: `Sms:SiteUrl`.
 
 ## Drehkreuz- und Armband-Anbindung
 
-Technische Doku für den Hersteller: [`docs/access-control-api.md`](docs/access-control-api.md). In der Entwicklungsumgebung wird ein Demo-Gerät mit dem Schlüssel `demo-gate-key-khashayar-0001` angelegt.
+Technische Schnittstellen-Doku: [`docs/access-control-api.md`](docs/access-control-api.md). In der Entwicklungsumgebung wird ein Demo-Gerät angelegt (Schlüssel in `appsettings.Development.json`).
 
-## Inbetriebnahme beim Kunden
+## Vom Demo- zum Echtbetrieb
 
-`docs/راهنمای-راه‌اندازی-سایت-خشایار.docx` – Schritt-für-Schritt-Anleitung (auf Persisch) für das Studio und das Technik-Team: Domain, eNamad, Steuer, Zahlungsgateway, SMS, Server, Drehkreuz. Neu erzeugen mit `node scripts/make-launch-guide.js <Ausgabe>`.
-
-Für den Live-Betrieb: `Otp:ExposeCodeInResponse=false`, `Sms:Provider=Kavenegar` mit Schlüssel in den User Secrets und `Payment:UseVirtualGateway=false`, sobald ein Gateway auf den Namen des Studios vorliegt (Parbad unterstützt ZarinPal, IDPay, Saman, Mellat u. a.).
+Für einen echten Betrieb müssten nur Einstellungen geändert werden: `Otp:ExposeCodeInResponse=false`, `Sms:Provider=Kavenegar` mit Schlüssel in den User Secrets und `Payment:UseVirtualGateway=false` mit einem echten Gateway (Parbad unterstützt ZarinPal, IDPay, Saman, Mellat u. a.). Der ProductionGuard verhindert den Start, solange Demo-Einstellungen aktiv sind.
 
 ## Docker
 
@@ -293,7 +291,7 @@ Mehrstufiges Image (Node → .NET SDK → aspnet), läuft als Nicht-Root-Benutze
 
 ## Demo-Deployment auf Render
 
-Das Repository enthält eine fertige **Render-Blueprint-Datei** (`render.yaml`). Damit wird die öffentliche Demo (z. B. für die Präsentation beim Kunden) mit wenigen Klicks erstellt:
+Das Repository enthält eine fertige **Render-Blueprint-Datei** (`render.yaml`). Damit wird die öffentliche Demo mit wenigen Klicks erstellt:
 
 1. In Render **New → Blueprint** wählen.
 2. GitHub verbinden und **nur dieses Repository** freigeben (es ist privat – „Public Git Repository“ findet es nicht).
@@ -306,6 +304,7 @@ Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check 
 |---|---|
 | `ASPNETCORE_ENVIRONMENT` | `Staging` |
 | `PORT` | `8080` |
+| `VITE_BRAND` | `demo` (fiktive Marke „Ahankooh“ im Build) |
 | `Database__Provider` / `ConnectionStrings__Default` | `Sqlite` / `Data Source=/data/private/kg.db` |
 | `Jwt__SigningKey`, `Otp__Pepper` | von Render zufällig erzeugt |
 | `Otp__ExposeCodeInResponse` | `true` (Code auf der Seite) |
@@ -316,13 +315,13 @@ Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check 
 
 Die Zahlungs-Rücksprungadresse wird automatisch aus der aufgerufenen Adresse gebildet. `Staging` statt `Production`, weil die Demo bewusst unsichere Einstellungen nutzt – der ProductionGuard würde den Start in Production verhindern.
 
-**Grenzen des Free-Tarifs:** Der Dienst schläft nach 15 Minuten ohne Zugriff ein (der erste Aufruf danach dauert etwa eine Minute), und ohne persistente Festplatte werden die Daten bei jedem Neustart zurückgesetzt und die Demo-Daten neu erzeugt. Für den echten Betrieb ist ein Server im Iran mit SQL Server vorgesehen.
+**Grenzen des Free-Tarifs:** Der Dienst schläft nach 15 Minuten ohne Zugriff ein (der erste Aufruf danach dauert etwa eine Minute), und ohne persistente Festplatte werden die Daten bei jedem Neustart zurückgesetzt und die Demo-Daten neu erzeugt. Für einen echten Betrieb ist SQL Server vorgesehen.
 
 ## Tests
 
 ```powershell
 dotnet test                                   # xUnit + API-Integrationstests (Login, Token-Rotation, Zahlung, Idempotenz)
-cd src\KhashayarGym.Web
+cd src\GymPlatform.Web
 npx playwright install chromium               # einmalig
 $env:BASE_URL = "http://localhost:5180"; npx playwright test   # inkl. kompletter Anmeldung mit Zahlung
 ```
@@ -337,25 +336,25 @@ Aktuell 110 automatisierte Tests: 77 Server-Tests und 33 Browser-Tests (Desktop 
 
 ## Daten bearbeiten
 
-- **Standorte:** `src/KhashayarGym.DataAccess/Seed/branches.json` – Einträge mit `addressConfirmed: false` haben ungefähre Koordinaten.
+- **Standorte:** `src/GymPlatform.DataAccess/Seed/branches.json` – Einträge mit `addressConfirmed: false` haben ungefähre Koordinaten.
 - Pakete, Trainer und FAQ: weitere Dateien im selben Ordner (oder später direkt im Panel).
-- Seed-Daten werden nur in eine leere Datenbank geschrieben; nach Änderungen die Demo-Datenbank (`khashayar-demo.db`) löschen bzw. die LocalDB-Datenbank droppen.
-- **Logo:** `src/KhashayarGym.Web/public/brand/logo.svg` durch das Original ersetzen.
-- **Farben:** nur im `@theme`-Block von `src/KhashayarGym.Web/src/index.css`.
+- Seed-Daten werden nur in eine leere Datenbank geschrieben; nach Änderungen die Demo-Datenbank (`gym-demo.db`) löschen bzw. die LocalDB-Datenbank droppen.
+- **Marke:** Name, Logo, Slogan und Kontaktdaten stehen in `src/GymPlatform.Web/src/lib/brand.ts`.
+- **Farben:** nur im `@theme`-Block von `src/GymPlatform.Web/src/index.css`.
 
 ## Frontend
 
-Layout und Stil orientieren sich an einer vom Kunden gewählten Referenzseite (Vorlage „GYM Store – Sports Complex“); Code, Texte und Bilder dieser Vorlage wurden nicht kopiert, alles ist neu mit React/Tailwind gebaut. Tokens und Regeln: `design-system/khashayar-gym/MASTER.md`.
+Layout und Stil orientieren sich an einer Referenzseite (Vorlage „GYM Store – Sports Complex“); Code, Texte und Bilder dieser Vorlage wurden nicht kopiert, alles ist neu mit React/Tailwind gebaut. Tokens und Regeln: `design-system/khashayar-gym/MASTER.md`.
 
 | Bereich | Datei | Quelle |
 |---|---|---|
 | Weißer Sticky-Header + Seitenpanel | `site/SiteHeader.tsx` | Layout der Referenzseite |
 | Hero: Partikel-Hantel, die auf die Maus reagiert | `site/SiteHero.tsx` | Liquid Sculpture Hero (21st.dev, guglielmogiannattasio); Hantelbild mit Canva AI erstellt |
-| Was wir machen (4 Bildkarten) | `site/SiteWhatWeDo.tsx` | Bilder aus Videos des Studios |
-| Warum Khashayar + Zahlen | `site/SiteWhy.tsx` | Count Up (21st.dev) |
+| Was wir machen (4 Bildkarten) | `site/SiteWhatWeDo.tsx` | Bilder aus Beispielvideos |
+| Warum wir + Zahlen | `site/SiteWhy.tsx` | Count Up (21st.dev) |
 | Scroll-Video | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) – Video: `public/media/video/gym.mp4` |
 | Angebot (Icon-Karussell) | `site/SiteOffer.tsx` | Layout der Referenzseite |
-| Standorte und Karte | `site/SiteBranches.tsx`, `components/ui/shiraz-branch-picker.tsx` | Struktur von Nepal Address Picker (21st.dev) in Theme-Farben; schematische Karte von Shiraz |
+| Standorte und Karte | `site/SiteBranches.tsx`, `components/ui/city-branch-picker.tsx` | Struktur von Nepal Address Picker (21st.dev) in Theme-Farben; schematische Stadtkarte |
 | Pakete | `site/SitePricing.tsx` | Pricing Section (21st.dev, animierter Umschalter) |
 | Aktion (zwei Parallax-Bilder) | `site/SiteEvents.tsx` | Layout der Referenzseite |
 | Trainer | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev) |
@@ -369,18 +368,18 @@ Layout und Stil orientieren sich an einer vom Kunden gewählten Referenzseite (V
 
 ### Scroll-Video austauschen
 
-Neues Rohvideo als `gym-source.mp4` in `src/KhashayarGym.Web/public/media/video/` legen und ausführen:
+Neues Rohvideo als `gym-source.mp4` in `src/GymPlatform.Web/public/media/video/` legen und ausführen:
 
 ```powershell
 .\scripts\make-scrub-video.ps1
-cd src\KhashayarGym.Web; npm run build
+cd src\GymPlatform.Web; npm run build
 ```
 
 Das Skript macht jeden Frame zum Keyframe, damit Vor- und Zurückspulen beim Scrollen flüssig ist.
 
-### Demo-Marke für das Portfolio
+### Fiktive Demo-Marke
 
-Mit `?brand=demo` werden Name, Logo, Slogan und Kontaktdaten durch eine fiktive Marke ersetzt (für Portfolio-Screenshots); `?brand=khashayar` stellt das Original wieder her.
+Mit `?brand=demo` in der Adresse (oder `VITE_BRAND=demo` beim Build) erscheint die erfundene Marke „Ahankooh“: Name, Logo, Slogan, Kontaktdaten sowie Standort- und Ortsnamen werden durch neutrale Beispielwerte ersetzt.
 
 ## Sicherheit
 
@@ -447,7 +446,7 @@ OpenAPI in der Entwicklung: `/openapi/v1.json` (mit Bearer-Schema).
 | `GET\|POST /payments/callback` | Rückkehr vom Gateway |
 | `GET /me/payments/{id}`, `…/invoice.pdf`, `GET /me/contracts/{id}/pdf`, `GET /me/card.svg` | Ergebnis, Rechnung, Vertrag, QR-Karte |
 | `GET /shop/products`, `GET /shop/products/{slug}`, `POST /shop/quote`, `POST /shop/orders` | Shop |
-| `GET /canteen/{branch}/menu`, `POST /canteen/orders` | Kantine (Kunde) |
+| `GET /canteen/{branch}/menu`, `POST /canteen/orders` | Kantine (Gast) |
 | `GET /canteen/staff/{branch}/orders`, `POST /canteen/staff/orders/{id}/status`, Hub `/hubs/canteen` | Kantine (Personal, live) |
 | `GET /me/wallet`, `POST /me/wallet/topups`, `GET /me/orders` | Wallet und Bestellungen |
 | `POST /access/check`, `GET /access/whitelist`, `POST /access/events` | Drehkreuz/Armband (Geräteschlüssel) |

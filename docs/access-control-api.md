@@ -72,12 +72,12 @@ DELETE /api/v1/staff/members/{userId}/credentials/{id}
 ```
 
 ## تست سریع در نسخهٔ نمایشی
-در حالت Development یک گیت نمایشی برای شعبهٔ اول با کلید `demo-gate-key-khashayar-0001` ساخته می‌شود:
+در حالت Development یک گیت نمایشی برای شعبهٔ اول با کلید `demo-gate-key-0001` ساخته می‌شود:
 ```bash
 curl -X POST http://localhost:5180/api/v1/access/check \
-  -H "X-Device-Key: demo-gate-key-khashayar-0001" -H "Content-Type: application/json" \
+  -H "X-Device-Key: demo-gate-key-0001" -H "Content-Type: application/json" \
   -d '{"credential":"KG1:<توکن کارت از پروفایل>"}'
 ```
 
 ## اگر سیستم گیت هیچ‌کدام از این‌ها را پشتیبانی نکند
-یک «آداپتور» کوچک (`IIntegrationSink` در `src/KhashayarGym.Api/Integrations`) برای API همان سیستم نوشته می‌شود؛ بقیهٔ سایت تغییری نمی‌کند. برای این کار از شرکت گیت لازم است: مستند API یا SDK، روش احراز هویت، و یک دستگاه یا محیط تست.
+یک «آداپتور» کوچک (`IIntegrationSink` در `src/GymPlatform.Api/Integrations`) برای API همان سیستم نوشته می‌شود؛ بقیهٔ سایت تغییری نمی‌کند. برای این کار از شرکت گیت لازم است: مستند API یا SDK، روش احراز هویت، و یک دستگاه یا محیط تست.

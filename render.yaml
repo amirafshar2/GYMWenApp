@@ -19,6 +19,9 @@ services:
         value: Staging
       - key: PORT
         value: "8080"
+      # Build mit der fiktiven Marke „Ahankooh“
+      - key: VITE_BRAND
+        value: demo
       - key: Database__Provider
         value: Sqlite
       - key: ConnectionStrings__Default

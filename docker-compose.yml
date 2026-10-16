@@ -30,7 +30,7 @@ services:
       ASPNETCORE_ENVIRONMENT: ${APP_ENV:-Production}
       AllowedHosts: ${SITE_HOSTS:-}
       Database__Provider: SqlServer
-      ConnectionStrings__Default: "Server=db;Database=KhashayarGym;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      ConnectionStrings__Default: "Server=db;Database=GymPlatform;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY را در .env بگذارید}
       Otp__Pepper: ${OTP_PEPPER:?OTP_PEPPER را در .env بگذارید}
       Otp__ExposeCodeInResponse: ${OTP_EXPOSE_CODE:-false}

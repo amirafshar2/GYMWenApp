@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # بازتولید آرشیو پرتفولیو: PNG→WebP (کیفیت ۸۵، حداکثر ۴۰۰KB)، manifest.json و zip هر آیتم.
 # برای گرفتن اسکرین‌شات‌های تازه اول بک‌اند را اجرا کنید و بعد:
-#   (cd src/KhashayarGym.Web && node scripts/capture-portfolio.mjs http://localhost:5180)
+#   (cd src/GymPlatform.Web && node scripts/capture-portfolio.mjs http://localhost:5180)
 set -euo pipefail
 cd "$(dirname "$0")/../portfolio-export"
 for png in */images/*.png; do

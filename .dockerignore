@@ -11,11 +11,11 @@
 .env
 .env.*
 portfolio-export/
-src/KhashayarGym.Api/wwwroot/
-src/KhashayarGym.Api/App_Data/
-src/KhashayarGym.Web/public/media/video/gym-source.mp4
-src/KhashayarGym.Web/public/media/hero/dumbbell.png
-src/KhashayarGym.Web/public/media/hero/frames/
+src/GymPlatform.Api/wwwroot/
+src/GymPlatform.Api/App_Data/
+src/GymPlatform.Web/public/media/video/gym-source.mp4
+src/GymPlatform.Web/public/media/hero/dumbbell.png
+src/GymPlatform.Web/public/media/hero/frames/
 tests/
 *.zip
 .sync*/

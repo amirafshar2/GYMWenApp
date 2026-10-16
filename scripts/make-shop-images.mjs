@@ -1,10 +1,10 @@
 // تصویرهای برداری ساده و یکدست برای کالاهای شاپ و آیتم‌های بوفه (بدون عکس و برند واقعی).
-// اجرا: node scripts/make-shop-images.mjs  → src/KhashayarGym.Web/public/media/{shop,canteen}/*.svg
+// اجرا: node scripts/make-shop-images.mjs  → src/GymPlatform.Web/public/media/{shop,canteen}/*.svg
 import fs from 'node:fs'
 import path from 'node:path'
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
-const out = (dir) => { const d = path.join(root, 'src/KhashayarGym.Web/public/media', dir); fs.mkdirSync(d, { recursive: true }); return d }
+const out = (dir) => { const d = path.join(root, 'src/GymPlatform.Web/public/media', dir); fs.mkdirSync(d, { recursive: true }); return d }
 const shopDir = out('shop'), canteenDir = out('canteen')
 
 const BLUE = '#0B5FB0', NAVY = '#0B2F57', INK = '#2C2C2C'

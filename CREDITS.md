@@ -23,4 +23,4 @@
 
 ## عکس و ویدیوی واقعی (فاز بعد)
 هر عکس یا ویدیویی که از Unsplash / Pexels / Pixabay اضافه می‌شود، باید این‌جا با نام فایل، لینک صفحهٔ منبع، نام عکاس و لایسنس ثبت شود.
-پوشه‌ها: `src/KhashayarGym.Web/public/media/{hero,coaches,gallery}/`
+پوشه‌ها: `src/GymPlatform.Web/public/media/{hero,coaches,gallery}/`

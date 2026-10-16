@@ -9,10 +9,10 @@ obj/
 
 # فرانت
 node_modules/
-src/KhashayarGym.Api/wwwroot/
-src/KhashayarGym.Web/test-results/
-src/KhashayarGym.Web/playwright-report/
-src/KhashayarGym.Web/dist/
+src/GymPlatform.Api/wwwroot/
+src/GymPlatform.Web/test-results/
+src/GymPlatform.Web/playwright-report/
+src/GymPlatform.Web/dist/
 
 # اسرار
 .env
@@ -24,15 +24,15 @@ appsettings.*.local.json
 portfolio-export/
 
 # فریم‌های ویدیوی هیرو (حجیم؛ با scripts/make-hero-frames ساخته می‌شوند)
-src/KhashayarGym.Web/public/media/hero/frames/desktop/
-src/KhashayarGym.Web/public/media/hero/frames/mobile/
+src/GymPlatform.Web/public/media/hero/frames/desktop/
+src/GymPlatform.Web/public/media/hero/frames/mobile/
 
 # تصویر خام مجسمه (۱۱ مگابایت)؛ نسخه‌های وب dumbbell.webp و dumbbell-mobile.webp در گیت هستند
-src/KhashayarGym.Web/public/media/hero/dumbbell.png
+src/GymPlatform.Web/public/media/hero/dumbbell.png
 
 # ویدیوی خام باشگاه (نسخهٔ بهینه‌اش gym.mp4 است که سایت پخش می‌کند)
-src/KhashayarGym.Web/public/media/video/gym-source.mp4
-src/KhashayarGym.Api/App_Data/
+src/GymPlatform.Web/public/media/video/gym-source.mp4
+src/GymPlatform.Api/App_Data/
 
 # Übertragungsdateien (Sync-Archive, Git-Bundles)
 *.zip
