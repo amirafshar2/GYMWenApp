@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace KhashayarGym.Api.Controllers;
 
 [ApiController]
-[Route("api")]
+[Route("api/v1")]
 public sealed class ConsultationsController(IConsultationService service, IAntiforgery antiforgery) : ControllerBase
 {
     /// <summary>توکن CSRF: کوکی را ست می‌کند و توکن را برای هدر X-XSRF-TOKEN برمی‌گرداند.</summary>

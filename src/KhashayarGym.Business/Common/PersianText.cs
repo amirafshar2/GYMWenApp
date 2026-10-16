@@ -38,4 +38,13 @@ public static class PersianText
             .Replace('ي', 'ی').Replace('ك', 'ک').Trim();
         return s.Length == 0 ? null : s;
     }
+
+    public static string ToLatinDigits(string? input) => NormalizeDigits(input);
+
+    public static bool IsValidMobile(string normalized) =>
+        normalized.Length == 11 && normalized.StartsWith("09") && normalized.All(char.IsAsciiDigit);
+
+    /// <summary>ارقام لاتین را فارسی می‌کند (برای پیام‌های کاربر).</summary>
+    public static string FaDigits(string input) =>
+        new(input.Select(c => c is >= '0' and <= '9' ? (char)('۰' + (c - '0')) : c).ToArray());
 }

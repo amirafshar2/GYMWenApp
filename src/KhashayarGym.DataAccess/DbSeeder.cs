@@ -74,6 +74,33 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
             await db.SaveChangesAsync(ct);
         }
 
+        if (!await db.ContractTemplates.AnyAsync(ct))
+        {
+            var c = Read<ContractSeed>(seedDir, "contract.json");
+            db.ContractTemplates.Add(new ContractTemplate
+            {
+                Version = 1, Title = c.Title, Clauses = c.Clauses, HealthQuestions = c.HealthQuestions,
+                IsActive = true, PublishedAtUtc = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync(ct);
+        }
+
+        if (!await db.DiscountCodes.AnyAsync(ct))
+        {
+            // کدهای تخفیف دمو (روی قیمت پس از جشنواره اعمال می‌شوند)
+            db.DiscountCodes.AddRange(
+                new DiscountCode { Code = "KHASHAYAR10", Percent = 10, MaxUses = 500 },
+                new DiscountCode { Code = "WELCOME5", Percent = 5 });
+            await db.SaveChangesAsync(ct);
+        }
+
+        if (!await db.Roles.AnyAsync(ct))
+        {
+            foreach (var r in Roles.All)
+                db.Roles.Add(new AppRole(r) { NormalizedName = r.ToUpperInvariant(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+            await db.SaveChangesAsync(ct);
+        }
+
         if (!await db.Campaigns.AnyAsync(ct))
         {
             // جشنوارهٔ فعال دمو: از امروز تا ۲۱ روز بعد، تا شمارش معکوس همیشه زنده باشد.
@@ -104,3 +131,5 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
         string Slug, string FullName, string Specialty, string? Bio, int YearsOfExperience,
         GenderSection Section, string BranchSlug, List<string>? Achievements);
 }
+
+internal sealed record ContractSeed(string Title, List<string> Clauses, List<string> HealthQuestions);

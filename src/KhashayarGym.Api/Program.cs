@@ -1,10 +1,20 @@
 using System.IO.Compression;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.RateLimiting;
+using KhashayarGym.Api.Auth;
+using KhashayarGym.Api.Infrastructure;
 using KhashayarGym.Api.Middleware;
 using KhashayarGym.Business;
+using KhashayarGym.Business.Common;
 using KhashayarGym.DataAccess;
+using KhashayarGym.Domain.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Parbad.Builder;
+using Parbad.Gateway.ParbadVirtual;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,8 +28,63 @@ builder.Services.AddDataAccess(builder.Configuration);
 builder.Services.AddBusiness();
 
 builder.Services.AddControllers();
-builder.Services.AddProblemDetails();
-builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ProblemDetailsSetup.Customize);
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddOpenApi(o => o.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+
+// ---- رمزها: فقط از User Secrets / متغیر محیطی. در توسعه اگر نبود، کلید موقت ساخته می‌شود ----
+EnsureSecret(builder, "Jwt:SigningKey");
+EnsureSecret(builder, "Otp:Pepper");
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Section));
+builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection(OtpOptions.Section));
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.Section));
+
+// ---- Identity (فقط هسته؛ ورود با OTP، نقش‌ها برای فاز ۴) + JWT ----
+builder.Services.AddIdentityCore<AppUser>(o =>
+    {
+        o.User.RequireUniqueEmail = false;
+        o.User.AllowedUserNameCharacters = "0123456789";
+        o.Password.RequiredLength = 10;
+    })
+    .AddRoles<AppRole>()
+    .AddEntityFrameworkStores<GymDbContext>();
+
+var jwt = builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>() ?? new JwtOptions();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =>
+    {
+        o.MapInboundClaims = false;
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = jwt.Key(),
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+            NameClaimType = "sub",
+            RoleClaimType = ClaimTypes.Role,
+        };
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAccessTokenFactory, JwtTokenFactory>();
+builder.Services.AddSingleton<IPrivateFileStore, PrivateFileStore>();
+
+// ---- پیامک: Log (دمو) یا Kavenegar ----
+if (builder.Configuration["Sms:Provider"]?.Equals("Kavenegar", StringComparison.OrdinalIgnoreCase) == true)
+{
+    builder.Services.Configure<KavenegarOptions>(builder.Configuration.GetSection("Sms:Kavenegar"));
+    builder.Services.AddHttpClient<ISmsSender, KavenegarSmsSender>(c => c.Timeout = TimeSpan.FromSeconds(10));
+}
+else builder.Services.AddSingleton<ISmsSender, LogSmsSender>();
+
+// ---- درگاه پرداخت: Parbad (دمو: درگاه مجازی Parbad؛ بعداً زرین‌پال/IDPay/بانک‌ها) ----
+builder.Services.AddParbad()
+    .ConfigureGateways(g => g.AddParbadVirtual().WithOptions(o => o.GatewayPath = "/payment-sandbox"))
+    .ConfigureHttpContext(h => h.UseDefaultAspNetCore())
+    .ConfigureStorage(s => s.UseMemoryCache());
 
 builder.Services.AddAntiforgery(o =>
 {
@@ -40,16 +105,31 @@ builder.Services.AddAntiforgery(o =>
 });
 
 // Rate limiting: فرم‌ها (و بعداً OTP/پرداخت) بر اساس IP محدود می‌شوند.
+// ضریب سقف‌ها فقط برای تست‌های یکپارچه (همهٔ درخواست‌های تست از یک IP می‌آیند)؛ در production همیشه ۱
+var rl = builder.Environment.IsEnvironment("Testing") ? builder.Configuration.GetValue("RateLimiting:PermitMultiplier", 1) : 1;
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     o.AddPolicy("forms", ctx => RateLimitPartition.GetFixedWindowLimiter(
         ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    // OTP: هر IP حداکثر ۵ درخواست در دقیقه (محدودیت هر شماره هم در سرویس اعمال می‌شود)
+    o.AddPolicy("otp", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        "otp:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 5 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    o.AddPolicy("auth", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        "auth:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 15 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    o.AddPolicy("payment", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        "pay:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    o.AddPolicy("forms-read", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        "read:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 60 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
         RateLimitPartition.GetFixedWindowLimiter(
             ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 300, Window = TimeSpan.FromMinutes(1) }));
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 300 * rl, Window = TimeSpan.FromMinutes(1) }));
 });
 
 builder.Services.AddOutputCache(o =>
@@ -74,7 +154,17 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
     if (db.Database.IsSqlServer()) await db.Database.MigrateAsync();
-    else await db.Database.EnsureCreatedAsync();
+    else
+    {
+        // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
+        await db.Database.EnsureCreatedAsync();
+        try { _ = await db.Memberships.AnyAsync(); }
+        catch (Microsoft.Data.Sqlite.SqliteException)
+        {
+            await db.Database.EnsureDeletedAsync();
+            await db.Database.EnsureCreatedAsync();
+        }
+    }
 
     if (app.Configuration.GetValue("Database:SeedDemoData", true))
         await scope.ServiceProvider.GetRequiredService<DbSeeder>()
@@ -111,9 +201,25 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRateLimiter();
 app.UseOutputCache();
 
+// صفحهٔ درگاه آزمایشی Parbad (فقط وقتی Payment:UseVirtualGateway روشن است)
+if (app.Configuration.GetValue("Payment:UseVirtualGateway", true)) app.UseParbadVirtualGateway();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+// در توسعه، نبودِ رمز با کلید تصادفی موقت جبران می‌شود؛ در production خطا می‌دهد.
+static void EnsureSecret(WebApplicationBuilder b, string key)
+{
+    if (!string.IsNullOrWhiteSpace(b.Configuration[key])) return;
+    if (!b.Environment.IsDevelopment() && !b.Environment.IsEnvironment("Testing"))
+        throw new InvalidOperationException($"{key} تنظیم نشده است (User Secrets یا متغیر محیطی {key.Replace(":", "__")}).");
+    b.Configuration[key] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
+    Console.WriteLine($"[warn] {key} not configured; using an ephemeral development key.");
+}
 
 public partial class Program;

@@ -8,7 +8,7 @@ namespace KhashayarGym.Api.Controllers;
 
 /// <summary>داده‌های عمومی سایت (فقط خواندنی، کش‌شده).</summary>
 [ApiController]
-[Route("api")]
+[Route("api/v1")]
 [OutputCache(PolicyName = "public")]
 public sealed class PublicController(ICatalogService catalog) : ControllerBase
 {
