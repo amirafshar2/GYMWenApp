@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { shopApi } from '@/lib/commerce'
 import { useData } from '@/lib/useData'
-import { brand } from '@/lib/brand'
+import { brand, rebrand } from '@/lib/brand'
 import { toman } from '@/lib/fa'
 import { SectionHead, useFadeUp, wrap } from './ui/SectionHead'
 
@@ -24,7 +24,7 @@ export default function SiteShop() {
             <li key={p.slug}>
               <Link to={`/shop/${p.slug}`} className="group block overflow-hidden rounded-[8px] bg-white transition-shadow hover:shadow-[0_14px_40px_rgb(0_0_0/0.08)]">
                 <div className="aspect-square bg-[#EEF3F9]"><img src={p.imagePath} alt="" loading="lazy" className="size-full object-contain transition-transform duration-500 group-hover:scale-105" /></div>
-                <div className="p-3"><p className="line-clamp-1 text-[14px] font-bold text-chalk">{p.name}</p><p className="text-[13px] font-bold text-plate">{toman(p.priceToman)}</p></div>
+                <div className="p-3"><p className="line-clamp-1 text-[14px] font-bold text-chalk">{rebrand(p.name)}</p><p className="text-[13px] font-bold text-plate">{toman(p.priceToman)}</p></div>
               </Link>
             </li>
           ))}

@@ -18,7 +18,7 @@ test('ثبت‌نام کامل: پکیج ← ورود ← قرارداد ← پ�
   await page.locator('input[name=branch]').first().check()
   await page.getByRole('button', { name: /ادامه: انتخاب پکیج/ }).click()
 
-  await page.getByPlaceholder('KHASHAYAR10').fill('khashayar10')
+  await page.getByPlaceholder(/KHASHAYAR10|CODE10/).fill('khashayar10')
   await page.getByRole('button', { name: 'اعمال' }).click()
   await expect(page.getByText(/اعمال شد/)).toBeVisible()
   await page.getByRole('button', { name: /^ادامه/ }).click()

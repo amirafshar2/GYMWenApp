@@ -25,7 +25,7 @@ const DOCS: Record<string, Doc> = {
         <li>نام صاحب امتیاز / شرکت: <Fill>نام کامل یا نام شرکت</Fill></li>
         <li>شمارهٔ مجوز فعالیت: <Fill>شمارهٔ پروانه / مجوز اداره ورزش و جوانان</Fill></li>
         <li>نشانی دفتر مرکزی: <Fill>نشانی کامل + کد پستی</Fill></li>
-        <li>تلفن ثابت: <Fill>۰۷۱-…</Fill> · موبایل پشتیبانی: <span dir="ltr">{faDigits(brand.phone)}</span></li>
+        <li>تلفن ثابت: <Fill>۰۷۱-…</Fill> – موبایل پشتیبانی: <span dir="ltr">{faDigits(brand.phone)}</span></li>
         <li>ساعات پاسخگویی: <Fill>شنبه تا پنجشنبه ۹ تا ۲۱</Fill></li>
         <li>ایمیل: <Fill>info@دامنه</Fill></li>
       </ul>

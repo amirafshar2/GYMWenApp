@@ -1,0 +1,46 @@
+{
+  "khashayar-sculpture-hero": {
+    "page": "/",
+    "selector": null
+  },
+  "khashayar-branch-map": {
+    "page": "/",
+    "selector": "#branches"
+  },
+  "khashayar-pricing": {
+    "page": "/",
+    "selector": "#packages"
+  },
+  "khashayar-coaches-scroll": {
+    "page": "/",
+    "selector": "#coaches"
+  },
+  "khashayar-gallery": {
+    "page": "/",
+    "selector": "#gallery"
+  },
+  "khashayar-consult-form": {
+    "page": "/",
+    "selector": "#consult"
+  },
+  "khashayar-join-wizard": {
+    "page": "/join?package=quarter&section=men",
+    "selector": null
+  },
+  "khashayar-shop": {
+    "page": "/shop?kind=merch",
+    "selector": null
+  },
+  "khashayar-canteen-live": {
+    "page": "board",
+    "selector": null
+  },
+  "khashayar-festival": {
+    "page": "/festival",
+    "selector": null
+  },
+  "khashayar-member-card": {
+    "page": "profile",
+    "selector": null
+  }
+}

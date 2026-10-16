@@ -52,7 +52,7 @@ export default function CanteenOrderPage() {
         <motion.div layout className={cn('rounded-[18px] p-7 text-center shadow-[0_20px_60px_rgb(0_0_0/0.12)]', isReady ? 'bg-white' : 'bg-white')}>
           <p className="text-[14px] text-rubber">شمارهٔ سفارش</p>
           <motion.p key={o.status} initial={reduced ? false : { scale: 0.8 }} animate={{ scale: 1 }} className="text-[84px] font-black leading-none text-chalk tabular-nums">{faNum(o.dailyNumber)}</motion.p>
-          <p className="mt-2 text-[14px] text-rubber">{o.branchName}{o.tableCode ? ` · ${o.tableCode}` : ''}</p>
+          <p className="mt-2 text-[14px] text-rubber">{o.branchName}{o.tableCode ? ` – ${o.tableCode}` : ''}</p>
           <p role="status" aria-live="assertive" className={cn('mt-6 text-[26px] font-black', isReady ? 'text-[#0f7a45]' : o.status === 'cancelled' ? 'text-danger' : 'text-plate')}>
             {isReady ? 'سفارشت آماده است! از بوفه تحویل بگیر' : CANTEEN_STATUS[o.status]}
           </p>
@@ -79,7 +79,7 @@ export default function CanteenOrderPage() {
           <ul className="grid gap-1 text-[14px]">{o.items.map((i, n) => <li key={n} className="flex justify-between"><span>{i.name} × {faNum(i.quantity)}</span><span>{toman(i.unitPriceToman * i.quantity)}</span></li>)}</ul>
           <p className="mt-3 flex justify-between border-t border-steel-2 pt-3 font-black"><span>جمع</span><span>{toman(o.totalToman)}</span></p>
           {o.note && <p className="mt-2 text-[13px] text-rubber">توضیح: {o.note}</p>}
-          <p className="mt-2 text-[12px] text-rubber">{jalali(o.createdAtUtc, { hour: '2-digit', minute: '2-digit' })} · {o.payMethod === 'wallet' ? 'کیف پول' : 'درگاه'}</p>
+          <p className="mt-2 text-[12px] text-rubber">{jalali(o.createdAtUtc, { hour: '2-digit', minute: '2-digit' })} – {o.payMethod === 'wallet' ? 'کیف پول' : 'درگاه'}</p>
         </div>
         <p className={cn('mt-4 text-center text-[12px]', isReady ? 'text-white/80' : 'text-rubber')}>
           {status === 'live' ? '● اتصال لحظه‌ای برقرار است' : status === 'reconnecting' ? 'در حال اتصال دوباره…' : 'به‌روزرسانی هر ۲۰ ثانیه'}

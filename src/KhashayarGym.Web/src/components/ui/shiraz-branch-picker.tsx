@@ -348,7 +348,7 @@ export function ShirazBranchPicker<B extends PickerBranch>({
           <span className="sbp-grow">
             <span className="sbp-block sbp-trunc">{c.b.name}</span>
             <span className="sbp-block sbp-sub sbp-trunc">
-              {[c.b.hasMen && "آقایان", c.b.hasWomen && "بانوان"].filter(Boolean).join(" · ")}
+              {[c.b.hasMen && "آقایان", c.b.hasWomen && "بانوان"].filter(Boolean).join(" – ")}
             </span>
           </span>
           {d !== null && formatDistance && (

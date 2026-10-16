@@ -39,7 +39,7 @@ function CoachCard({ c }: { c: Coach }) {
       <div className="absolute inset-x-0 bottom-0 p-4 text-white">
         <h3 className="text-[19px] font-black leading-tight">{c.fullName}</h3>
         <p className="mt-1 text-[13px] font-bold text-white/85">{c.specialty}</p>
-        <p className="mt-0.5 text-[12px] text-white/60">{faNum(c.yearsOfExperience)} سال سابقه · {rebrand(c.branchName)}</p>
+        <p className="mt-0.5 text-[12px] text-white/60">{faNum(c.yearsOfExperience)} سال سابقه – {rebrand(c.branchName)}</p>
         <span aria-hidden className="mt-3 block h-[3px] w-10 origin-right rounded-full bg-plate transition-[width] duration-500 group-hover:w-20" />
       </div>
     </article>
@@ -54,7 +54,7 @@ export default function SiteCoaches() {
       <ContainerScroll
         titleComponent={
           <div className="px-4">
-            <p className="text-[13px] font-bold text-plate">مربیان {coaches.length ? `· ${faNum(coaches.length)} نفر` : ''}</p>
+            <p className="text-[13px] font-bold text-plate">مربیان {coaches.length ? `– ${faNum(coaches.length)} نفر` : ''}</p>
             <h2 id="coaches-title" className="mt-3 text-[clamp(1.9rem,4vw,3.2rem)] font-bold leading-[1.3] text-chalk">
               کسانی که <span className="text-plate">کنارت تمرین می‌کنند</span>
             </h2>

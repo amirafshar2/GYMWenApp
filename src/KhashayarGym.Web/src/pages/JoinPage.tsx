@@ -230,7 +230,7 @@ function BranchStep({ branches, draft, set, onNext }: { branches: Branch[]; draf
                     {b.name}
                     {pos && i === 0 && <span className="rounded-full bg-plate px-2 py-0.5 text-[11px] text-white">نزدیک‌ترین</span>}
                   </span>
-                  <span className="mt-1 flex items-center gap-1 text-[13px] text-rubber"><MapPin className="size-3.5 shrink-0" aria-hidden />{b.district}{d !== null && <> · {formatDistance(d)}</>}</span>
+                  <span className="mt-1 flex items-center gap-1 text-[13px] text-rubber"><MapPin className="size-3.5 shrink-0" aria-hidden />{b.district}{d !== null && <> – {formatDistance(d)}</>}</span>
                 </span>
               </label>
             ))}
@@ -269,7 +269,7 @@ function PackageStep({ pkgs, draft, set, quote, quoteErr, onBack, onNext }: {
                   <span className="text-[16px] font-bold text-chalk">{p.name}</span>
                   {p.discountPercent ? <span className="rounded-full bg-plate/10 px-2 py-0.5 text-[11px] font-bold text-plate">{faNum(p.discountPercent)}٪ جشنواره</span> : null}
                 </span>
-                <span className="text-[13px] text-rubber">{faNum(p.durationMonths)} ماه · {p.sessions ? `${faNum(p.sessions)} جلسه` : 'نامحدود'}</span>
+                <span className="text-[13px] text-rubber">{faNum(p.durationMonths)} ماه – {p.sessions ? `${faNum(p.sessions)} جلسه` : 'نامحدود'}</span>
                 <span className="mt-1 text-[15px] font-black text-chalk">
                   {p.discountedPriceToman && <s className="me-2 text-[12px] font-normal text-rubber">{faNum(p.priceToman)}</s>}
                   {toman(price)}
@@ -284,7 +284,7 @@ function PackageStep({ pkgs, draft, set, quote, quoteErr, onBack, onNext }: {
       <form onSubmit={apply} className="mt-7 grid gap-2">
         <label htmlFor={`${uid}-code`} className="flex items-center gap-1.5 text-[14px] font-bold text-chalk"><TicketPercent className="size-4" aria-hidden />کد تخفیف (اختیاری)</label>
         <div className="flex gap-2">
-          <input id={`${uid}-code`} value={code} onChange={(e) => setCode(e.target.value)} dir="ltr" placeholder="KHASHAYAR10" autoComplete="off"
+          <input id={`${uid}-code`} value={code} onChange={(e) => setCode(e.target.value)} dir="ltr" placeholder={brand.key === 'demo' ? 'CODE10' : 'KHASHAYAR10'} autoComplete="off"
             aria-describedby={`${uid}-cm`} aria-invalid={!!quote?.discountCodeError || undefined} className={`${inputCls} text-left uppercase`} />
           <Btn type="submit" variant="dark" className="shrink-0">اعمال</Btn>
         </div>
@@ -355,7 +355,7 @@ function ContractStep({ section, defaultName, alreadySigned, onBack, onSigned }:
   return (
     <Panel aria-labelledby="ct-t">
       <h2 id="ct-t" className="mb-1 text-[20px] font-black text-chalk">{contract.title}</h2>
-      <p className="mb-5 text-[13px] text-rubber">نسخهٔ {faNum(contract.version)} · امضا با کد پیامکی؛ نسخهٔ PDF در پروفایل شما می‌ماند.</p>
+      <p className="mb-5 text-[13px] text-rubber">نسخهٔ {faNum(contract.version)} – امضا با کد پیامکی؛ نسخهٔ PDF در پروفایل شما می‌ماند.</p>
       {alreadySigned && <Notice tone="ok" className="mb-5">این نسخه را قبلاً امضا کرده‌اید. اگر نام را عوض کرده‌اید، دوباره امضا کنید؛ وگرنه مستقیم به پرداخت بروید.</Notice>}
 
       {phase === 'form' ? (
@@ -426,7 +426,7 @@ function ContractStep({ section, defaultName, alreadySigned, onBack, onSigned }:
           <p className="text-center text-[13px] text-rubber">
             {left > 0 ? <>ارسال دوباره تا {faNum(left)} ثانیه</> :
               <button type="button" onClick={() => void requestCode()} className="cursor-pointer font-bold text-plate hover:underline">ارسال دوبارهٔ کد</button>}
-            {' · '}
+            {' – '}
             <button type="button" onClick={() => setPhase('form')} className="cursor-pointer font-bold text-chalk hover:underline">ویرایش فرم</button>
           </p>
         </form>

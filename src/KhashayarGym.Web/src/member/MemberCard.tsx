@@ -52,7 +52,7 @@ export default function MemberCard({ m, name }: { m: Membership; name: string })
         <div className="min-w-0">
           <p className="text-[13px] text-white/60">عضو</p>
           <p className="truncate text-[22px] font-black">{name}</p>
-          <p className="mt-3 text-[14px] text-white/80">{m.packageName} · {sectionLabel(m.section)}</p>
+          <p className="mt-3 text-[14px] text-white/80">{m.packageName} – {sectionLabel(m.section)}</p>
           <p className="text-[14px] text-white/80">{m.branchName}</p>
           {m.endsAtUtc && <p className="mt-3 text-[13px] text-white/60">اعتبار تا {jalali(m.endsAtUtc, D)}</p>}
         </div>

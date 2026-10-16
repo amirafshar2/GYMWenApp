@@ -142,7 +142,7 @@ public sealed class PdfService : IPdfService
         col.Item().Background("#F7F7F7").Padding(10).Text(t =>
         {
             t.Span("خریدار: ").FontColor(Muted); t.Span(m.BuyerName).Bold();
-            t.Span("   ·   موبایل: ").FontColor(Muted); t.Span(PersianText.FaDigits(m.BuyerPhone)).Bold();
+            t.Span("   |   موبایل: ").FontColor(Muted); t.Span(PersianText.FaDigits(m.BuyerPhone)).Bold();
         });
 
         col.Item().Table(t =>
@@ -181,7 +181,7 @@ public sealed class PdfService : IPdfService
         col.Item().Text(t =>
         {
             t.Span("شمارهٔ پیگیری: ").FontColor(Muted); t.Span(PersianText.FaDigits(m.TrackingNumber.ToString())).Bold();
-            if (m.TransactionCode is not null) { t.Span("   ·   کد تراکنش: ").FontColor(Muted); t.Span(PersianText.FaDigits(m.TransactionCode)).Bold(); }
+            if (m.TransactionCode is not null) { t.Span("   |   کد تراکنش: ").FontColor(Muted); t.Span(PersianText.FaDigits(m.TransactionCode)).Bold(); }
         });
         col.Item().PaddingTop(6).Text("این فاکتور به‌صورت الکترونیکی صادر شده و بدون مهر معتبر است.").FontSize(9).FontColor(Muted);
     })).GeneratePdf();

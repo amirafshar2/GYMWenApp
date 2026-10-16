@@ -27,7 +27,7 @@ export function Banner1({ children, href = "#", label = "Promotion announcement"
         className="flex w-full cursor-pointer items-start justify-start gap-2 md:items-center md:justify-center"
       >
         <p className="text-left text-sm text-white hover:underline md:text-center">
-          {children ?? (<><span className="font-semibold">New update</span> · Pro blocks are now
+          {children ?? (<><span className="font-semibold">New update</span> – Pro blocks are now
           available in shadcn/ui kit for Figma!</>)}
         </p>
         <ChevronsRight className="hidden h-4 w-4 text-white md:block" />

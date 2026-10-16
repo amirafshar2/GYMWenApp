@@ -90,7 +90,7 @@ export default function CanteenBoardPage() {
                             className="rounded-[10px] bg-white p-4 text-chalk">
                             <div className="flex items-start justify-between gap-3">
                               <div><p className="text-[40px] font-black leading-none tabular-nums">{faNum(o.dailyNumber)}</p>
-                                <p className="mt-1 text-[13px] text-rubber">{o.customerName ?? 'مشتری'}{o.tableCode ? ` · ${o.tableCode}` : ''}</p></div>
+                                <p className="mt-1 text-[13px] text-rubber">{o.customerName ?? 'مشتری'}{o.tableCode ? ` – ${o.tableCode}` : ''}</p></div>
                               <span className={cn('rounded-full px-2.5 py-1 text-[12px] font-bold', mins >= 10 && col.key !== 'ready' ? 'bg-danger text-white' : col.tone)}>{faNum(mins)} دقیقه</span>
                             </div>
                             <ul className="mt-3 grid gap-1 border-t border-steel-2 pt-3 text-[15px] font-bold">{o.items.map((i, n) => <li key={n}>{faNum(i.quantity)} × {i.name}</li>)}</ul>

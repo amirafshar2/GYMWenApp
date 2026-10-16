@@ -51,7 +51,7 @@ export default function ProfilePage() {
             <Panel className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-[16px] font-black text-chalk">تمدید با یک کلیک</p>
-                <p className="text-[13px] text-rubber">{renewTo.packageName} · {renewTo.branchName}{m?.endsAtUtc && <><br />از {jalali(m.endsAtUtc, D)} ادامه پیدا می‌کند</>}</p>
+                <p className="text-[13px] text-rubber">{renewTo.packageName} – {renewTo.branchName}{m?.endsAtUtc && <><br />از {jalali(m.endsAtUtc, D)} ادامه پیدا می‌کند</>}</p>
               </div>
               <Btn onClick={renew}><RefreshCcw className="size-4" aria-hidden />تمدید</Btn>
             </Panel>
@@ -97,14 +97,14 @@ function Orders({ orders }: { orders: { shop: ShopOrder[]; canteen: CanteenOrder
           <li key={`s${o.id}`}><Link to={`/shop/orders/${o.id}`} className="flex items-center gap-3 py-3 hover:text-plate">
             <ShoppingBag className="size-5 shrink-0 text-plate" aria-hidden />
             <span className="min-w-0 flex-1"><span className="block truncate font-bold">{o.items.map((i) => i.productName).join('، ')}</span>
-              <span className="text-[12px] text-rubber">{faDigits(o.number ?? '')} · {jalali(o.createdAtUtc, D)} · {SHOP_STATUS[o.status].text}</span></span>
+              <span className="text-[12px] text-rubber">{faDigits(o.number ?? '')} – {jalali(o.createdAtUtc, D)} – {SHOP_STATUS[o.status].text}</span></span>
             <span className="font-bold">{toman(o.totalToman)}</span></Link></li>
         ))}
         {orders.canteen.map((o) => (
           <li key={`c${o.id}`}><Link to={`/canteen/orders/${o.id}`} className="flex items-center gap-3 py-3 hover:text-plate">
             <Coffee className="size-5 shrink-0 text-plate" aria-hidden />
             <span className="min-w-0 flex-1"><span className="block truncate font-bold">بوفه — {o.items.map((i) => i.name).join('، ')}</span>
-              <span className="text-[12px] text-rubber">شمارهٔ {faNum(o.dailyNumber)} · {jalali(o.createdAtUtc, D)} · {CANTEEN_STATUS[o.status]}</span></span>
+              <span className="text-[12px] text-rubber">شمارهٔ {faNum(o.dailyNumber)} – {jalali(o.createdAtUtc, D)} – {CANTEEN_STATUS[o.status]}</span></span>
             <span className="font-bold">{toman(o.totalToman)}</span></Link></li>
         ))}
       </ul>

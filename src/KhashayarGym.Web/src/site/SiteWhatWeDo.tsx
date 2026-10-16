@@ -24,7 +24,7 @@ export default function SiteWhatWeDo() {
             هر رشته‌ای که انتخاب کنی، در {brand.shortName} مربی، سالن و برنامه‌اش آماده است
           </h2>
           <p className="mt-6 text-[17px] font-bold text-chalk">{brand.name}</p>
-          <p className="mt-1 text-[14px] text-rubber">{faNum(12)} شعبه · سالن‌های جدای آقایان و بانوان</p>
+          <p className="mt-1 text-[14px] text-rubber">{faNum(12)} شعبه – سالن‌های جدای آقایان و بانوان</p>
         </motion.div>
 
         <ul className="mt-16 grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-[30px]">

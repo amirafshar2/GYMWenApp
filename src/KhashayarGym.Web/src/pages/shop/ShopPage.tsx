@@ -5,7 +5,7 @@ import { api } from '@/lib/api'
 import { shopApi, type ProductCard, type ShopCatalog } from '@/lib/commerce'
 import { cart, cartCount, useCart } from '@/lib/cart'
 import { useData } from '@/lib/useData'
-import { brand } from '@/lib/brand'
+import { brand, rebrand } from '@/lib/brand'
 import { faNum, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { inputCls, Spinner } from '@/member/ui'
@@ -132,8 +132,8 @@ function Card({ p }: { p: ProductCard }) {
         {!p.inStock && <span className="absolute inset-x-3 bottom-3 rounded-[3px] bg-white/90 py-1.5 text-center text-[12px] font-bold text-rubber">ناموجود</span>}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
-        <p className="text-[12px] text-rubber">{p.brandName} · {p.category}</p>
-        <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-chalk sm:text-[15px]">{p.name}</h2>
+        <p className="text-[12px] text-rubber">{p.brandName} – {p.category}</p>
+        <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-chalk sm:text-[15px]">{rebrand(p.name)}</h2>
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <p className="text-[15px] font-black text-chalk sm:text-[16px]">{toman(p.priceToman)}</p>
           {p.colors.length > 0 && (

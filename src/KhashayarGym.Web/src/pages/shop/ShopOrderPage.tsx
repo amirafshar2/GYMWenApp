@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CheckCircle2, Printer, Store, Truck, XCircle } from 'lucide-react'
 import { cart } from '@/lib/cart'
+import { rebrand } from '@/lib/brand'
 import { SHOP_STATUS, shopApi, type ShopOrder } from '@/lib/commerce'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { useRequireAuth } from '@/member/MemberCard'
@@ -39,14 +40,14 @@ export default function ShopOrderPage() {
             {ok ? <CheckCircle2 className="size-10 text-[#1f9d55]" aria-hidden /> : <XCircle className="size-10 text-danger" aria-hidden />}
             <div>
               <p className="text-[18px] font-black text-chalk">{st.text}</p>
-              <p className="text-[14px] text-rubber">شمارهٔ سفارش <b dir="ltr">{faDigits(o.number ?? String(o.id))}</b> · {jalali(o.createdAtUtc, DT)}</p>
+              <p className="text-[14px] text-rubber">شمارهٔ سفارش <b dir="ltr">{faDigits(o.number ?? String(o.id))}</b> – {jalali(o.createdAtUtc, DT)}</p>
             </div>
           </div>
           <ul className="divide-y divide-steel-2 border-y border-steel-2">
             {o.items.map((i, n) => (
               <li key={n} className="flex items-center gap-3 py-3">
                 <img src={i.imagePath} alt="" className="size-14 rounded-[6px] bg-[#EEF3F9] object-contain" />
-                <div className="min-w-0 flex-1"><p className="font-bold text-chalk">{i.productName}</p>{i.variantLabel && <p className="text-[13px] text-rubber">{i.variantLabel}</p>}</div>
+                <div className="min-w-0 flex-1"><p className="font-bold text-chalk">{rebrand(i.productName)}</p>{i.variantLabel && <p className="text-[13px] text-rubber">{i.variantLabel}</p>}</div>
                 <p className="text-[14px] text-rubber">{faNum(i.quantity)} ×</p>
                 <p className="w-32 text-left font-bold">{toman(i.unitPriceToman * i.quantity)}</p>
               </li>

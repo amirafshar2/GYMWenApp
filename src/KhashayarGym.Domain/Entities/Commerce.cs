@@ -36,7 +36,7 @@ public class ProductVariant : BaseEntity
     public long? PriceToman { get; set; }
     public ICollection<BranchStock> Stocks { get; set; } = [];
 
-    public string Label => string.Join(" · ", new[] { Flavor, Color, Size }.Where(x => !string.IsNullOrEmpty(x)));
+    public string Label => string.Join("، ", new[] { Flavor, Color, Size }.Where(x => !string.IsNullOrEmpty(x)));
 }
 
 /// <summary>موجودی یک مدل کالا در یک شعبه. کم شدن فقط با به‌روزرسانی شرطی (Quantity &gt;= n) انجام می‌شود تا منفی نشود.</summary>

@@ -72,7 +72,7 @@ const cover = [
   new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { after: 300 }, children: [run('راهنمای راه‌اندازی کامل سایت', { size: 52, bold: true, boldComplexScript: true, sizeComplexScript: 52, color: INK })] }),
   new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { after: 120 }, children: [run('کارهای باشگاه و کارهای تیم فنی، قدم‌به‌قدم — برای فعال شدن همهٔ صفحه‌ها، پرداخت آنلاین، پیامک و اتصال به گیت', { size: 24, sizeComplexScript: 24, color: MUTED })] }),
   new Paragraph({ spacing: { before: 1800 }, children: [] }),
-  new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, children: [run(`نسخهٔ ۱ · ${today}`, { color: MUTED })] }),
+  new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, children: [run(`نسخهٔ ۱ – ${today}`, { color: MUTED })] }),
 ]
 
 const toc = [
@@ -232,7 +232,7 @@ const ours = [
   Done('لایهٔ اتصال به سیستم گیت/دستبند (بخش ۶)'),
   Done('فاز ۳: شاپ خشایار با موجودی هر شعبه، منوی بوفه با QR و تابلوی لحظه‌ای، کیف پول، صفحهٔ جشنواره'),
   Done('رنگ‌بندی آبی هماهنگ با لوگو'),
-  Done('امنیت پایه: نشست امن، محدودیت تعداد درخواست، بررسی مبلغ پرداخت سمت سرور، و بیش از ۸۰ تست خودکار'),
+  Done('امنیت پایه: نشست امن، محدودیت تعداد درخواست، بررسی مبلغ پرداخت سمت سرور، و ۸۰ تست خودکار'),
   Done('بسته‌بندی Docker برای نصب روی سرور'),
 
   H2('کارهای باقی‌مانده، قدم‌به‌قدم'),
@@ -348,7 +348,7 @@ const sources = [
   H2('منابع'),
   new Paragraph({ bidirectional: true, spacing: { after: 80 }, children: [run('مراحل و هزینهٔ اینماد: '), Link('زومیت — راهنمای گام‌به‌گام دریافت اینماد', 'https://www.zoomit.ir/howto/178304-how-to-register-for-enamad/')] }),
   new Paragraph({ bidirectional: true, spacing: { after: 80 }, children: [run('الزام کد مالیاتی برای درگاه: '), Link('زومیت — دریافت کد مالیاتی برای دارندگان درگاه پرداخت الزامی شد', 'https://www.zoomit.ir/tech-iran/365436-tax-code-obligatory-payment-gateway/')] }),
-  new Paragraph({ bidirectional: true, spacing: { after: 80 }, children: [run('سامانه‌ها: '), Link('enamad.ir', 'https://enamad.ir'), run(' · '), Link('nic.ir', 'https://www.nic.ir'), run(' · '), Link('my.tax.gov.ir', 'https://my.tax.gov.ir')] }),
+  new Paragraph({ bidirectional: true, spacing: { after: 80 }, children: [run('سامانه‌ها: '), Link('enamad.ir', 'https://enamad.ir'), run(' – '), Link('nic.ir', 'https://www.nic.ir'), run(' – '), Link('my.tax.gov.ir', 'https://my.tax.gov.ir')] }),
 ]
 
 // ---------------------------------------------------------------- سند
@@ -371,7 +371,7 @@ const doc = new Document({
   sections: [{
     properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } } },
     footers: { default: new Footer({ children: [new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER,
-      children: [run('راهنمای راه‌اندازی سایت خشایار · صفحهٔ ', { color: MUTED, size: 18, sizeComplexScript: 18 }), new TextRun({ children: [PageNumber.CURRENT], color: MUTED, size: 18 })] })] }) },
+      children: [run('راهنمای راه‌اندازی سایت خشایار – صفحهٔ ', { color: MUTED, size: 18, sizeComplexScript: 18 }), new TextRun({ children: [PageNumber.CURRENT], color: MUTED, size: 18 })] })] }) },
     children: [...cover, ...toc, ...intro, ...timeline, ...client, ...ours, ...pages, ...gate, ...costs, ...sources],
   }],
 })
