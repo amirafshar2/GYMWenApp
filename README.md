@@ -95,7 +95,8 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev، نسخهٔ سوییچ متحرک) با رنگ‌های تم |
 | جشنواره (دو تصویر پارالاکس) | `site/SiteEvents.tsx` | چیدمان صفحهٔ مرجع |
 | مربیان | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev)؛ عکس‌ها و نام‌ها موقت‌اند |
-| سؤالات / فرم مشاوره | `site/SiteFaq.tsx`، `site/SiteContact.tsx` | FAQ Accordion و Contact Form (21st.dev) |
+| سؤالات | `site/SiteFaq.tsx` | FAQ Accordion (21st.dev) |
+| فرم مشاوره | `site/SiteContact.tsx` | طراحی اختصاصی هم‌سبک سایت (تیره + فرم سفید، انتخاب هدف، پکیج انتخابی) |
 | نوار جشنواره | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
 | گالری | `site/SiteGallery.tsx` | Shared Element Gallery (21st.dev)؛ عکس‌ها فعلاً فریم ویدیوها |
 | فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |

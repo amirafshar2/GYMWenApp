@@ -54,6 +54,7 @@ export default function SitePricing() {
         groups={groups}
         onSelect={(plan) => {
           try { sessionStorage.setItem('chosen-package', plan.id) } catch { /* */ }
+          window.dispatchEvent(new Event('kg:package'))
           document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })
         }}
       />
