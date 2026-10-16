@@ -38,8 +38,22 @@ export default function App() {
   const { pathname, hash } = useLocation()
   const inPanel = pathname.startsWith('/panel')
   useEffect(() => {
-    if (hash) setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' }), 80)
-    else window.scrollTo(0, 0)
+    if (!hash) { window.scrollTo(0, 0); return }
+    // بخش‌های صفحهٔ اصلی جدا بار می‌شوند؛ تا رسیدن بخش مقصد (حداکثر ۴ ثانیه) صبر کن
+    let tries = 0, fix = 0
+    const t = setInterval(() => {
+      const el = document.getElementById(hash.slice(1))
+      if (el || ++tries > 40) {
+        clearInterval(t)
+        el?.scrollIntoView({ behavior: 'smooth' })
+        // بخش‌های بالاتر ممکن است بعد از رسیدن داده بلندتر شوند؛ یک بار دیگر دقیق تنظیم شود
+        if (el) fix = window.setTimeout(() => {
+          const off = el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop || '0')
+          if (Math.abs(off) > 30) el.scrollIntoView({ behavior: 'smooth' })
+        }, 1600)
+      }
+    }, 100)
+    return () => { clearInterval(t); clearTimeout(fix) }
   }, [pathname, hash])
 
   return (

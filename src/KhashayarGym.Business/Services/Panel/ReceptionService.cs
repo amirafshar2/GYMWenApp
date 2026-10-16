@@ -10,8 +10,10 @@ namespace KhashayarGym.Business.Services.Panel;
 
 public interface IReceptionService
 {
-    Task<IReadOnlyList<MemberSearchRowDto>> SearchAsync(string q, CancellationToken ct);
-    Task<MemberSummaryDto?> SummaryAsync(int userId, CancellationToken ct);
+    Task<IReadOnlyList<MemberSearchRowDto>> SearchAsync(StaffScope scope, string q, CancellationToken ct);
+    Task<MemberSummaryDto?> SummaryAsync(StaffScope scope, int userId, CancellationToken ct);
+    /// <summary>کارمند فقط اعضای شعبه‌های خودش را می‌بیند: کسی که در یکی از این شعبه‌ها عضویت (فعلی یا قبلی) دارد.</summary>
+    Task<bool> CanSeeMemberAsync(StaffScope scope, int userId, CancellationToken ct);
     Task<Result<AccessCheckResult>> CheckInAsync(StaffScope scope, ReceptionCheckInRequest request, CancellationToken ct);
     Task<Result<IReadOnlyList<CheckInRowDto>>> TodayAsync(StaffScope scope, string branchSlug, CancellationToken ct);
 }
@@ -19,14 +21,25 @@ public interface IReceptionService
 /// <summary>پذیرش: جست‌وجوی عضو، خلاصهٔ پرونده، ثبت ورود با اسکن QR/دستبند در پیشخوان (همان منطق گیت).</summary>
 public sealed class ReceptionService(GymDbContext db, IAccessControlService access, IClock clock) : IReceptionService
 {
-    public async Task<IReadOnlyList<MemberSearchRowDto>> SearchAsync(string q, CancellationToken ct)
+    private IQueryable<int> VisibleMemberIds(StaffScope scope)
+    {
+        var ids = scope.BranchIds.ToList();
+        return db.Memberships.Where(m => ids.Contains(m.BranchId) && m.Status != MembershipStatus.PendingPayment).Select(m => m.UserId);
+    }
+
+    public async Task<bool> CanSeeMemberAsync(StaffScope scope, int userId, CancellationToken ct) =>
+        scope.IsSuperAdmin ? await db.Users.AnyAsync(u => u.Id == userId, ct) : await VisibleMemberIds(scope).AnyAsync(id => id == userId, ct);
+
+    public async Task<IReadOnlyList<MemberSearchRowDto>> SearchAsync(StaffScope scope, string q, CancellationToken ct)
     {
         var term = PersianText.CleanText(q) ?? "";
         if (term.Length < 2) return [];
         var digits = PersianText.ToLatinDigits(term).Replace(" ", "");
         var now = clock.UtcNow;
-        var users = await db.Users.AsNoTracking()
-            .Where(u => (digits.Length >= 4 && u.PhoneNumber!.Contains(digits)) || (u.FullName != null && u.FullName.Contains(term)))
+        var query = db.Users.AsNoTracking()
+            .Where(u => (digits.Length >= 4 && u.PhoneNumber!.Contains(digits)) || (u.FullName != null && u.FullName.Contains(term)));
+        if (!scope.IsSuperAdmin) { var visible = VisibleMemberIds(scope); query = query.Where(u => visible.Contains(u.Id)); }
+        var users = await query
             .OrderBy(u => u.FullName).Take(20).Select(u => new { u.Id, u.FullName, u.PhoneNumber }).ToListAsync(ct);
         var ids = users.Select(u => u.Id).ToList();
         var active = await db.Memberships.AsNoTracking()
@@ -39,15 +52,17 @@ public sealed class ReceptionService(GymDbContext db, IAccessControlService acce
         }).ToList();
     }
 
-    public async Task<MemberSummaryDto?> SummaryAsync(int userId, CancellationToken ct)
+    public async Task<MemberSummaryDto?> SummaryAsync(StaffScope scope, int userId, CancellationToken ct)
     {
+        if (!await CanSeeMemberAsync(scope, userId, ct)) return null;
         var u = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId, ct);
         if (u is null) return null;
         var now = clock.UtcNow;
         var ms = await db.Memberships.AsNoTracking().Include(m => m.Branch).Include(m => m.Package)
             .Where(m => m.UserId == userId && m.Status != MembershipStatus.PendingPayment && m.Status != MembershipStatus.Cancelled)
             .OrderByDescending(m => m.StartsAtUtc).AsSplitQuery().ToListAsync(ct);
-        var dtos = ms.Select(m => MemberService.ToDto(m, now)).ToList();
+        // توکن کارت (QR) هرگز به کارمند داده نمی‌شود؛ با آن می‌شد به‌جای عضو وارد شد
+        var dtos = ms.Select(m => MemberService.ToDto(m, now) with { CardToken = "" }).ToList();
         var checkIns = await db.CheckIns.AsNoTracking().Where(c => c.UserId == userId).OrderByDescending(c => c.Id).Take(10)
             .Select(c => new { c.Id, c.OccurredAtUtc, c.BranchId, c.Decision, c.Reason, c.CredentialType }).ToListAsync(ct);
         var branchNames = await db.Branches.AsNoTracking().ToDictionaryAsync(b => b.Id, b => b.Name, ct);
@@ -66,9 +81,20 @@ public sealed class ReceptionService(GymDbContext db, IAccessControlService acce
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == r.BranchSlug, ct);
         if (branch is null) return Result<AccessCheckResult>.Fail("branchSlug", "شعبه پیدا نشد.", ErrorType.NotFound);
         if (!scope.Can(branch.Id)) return Result<AccessCheckResult>.Fail("branchSlug", "به این شعبه دسترسی ندارید.", ErrorType.Forbidden);
-        if (string.IsNullOrWhiteSpace(r.Credential)) return Result<AccessCheckResult>.Fail("credential", "QR یا شمارهٔ دستبند را اسکن کنید.");
+        var credential = r.Credential;
+        if (r.UserId is { } memberId)
+        {
+            // ورود دستی از پروندهٔ عضو: توکن کارت فقط سمت سرور خوانده می‌شود
+            if (!await CanSeeMemberAsync(scope, memberId, ct)) return Result<AccessCheckResult>.Fail("userId", "عضو پیدا نشد.", ErrorType.NotFound);
+            var now = clock.UtcNow;
+            var token = await db.Memberships.Where(m => m.UserId == memberId && m.Status == MembershipStatus.Active && m.StartsAtUtc <= now && m.EndsAtUtc > now)
+                .OrderBy(m => m.BranchId == branch.Id ? 0 : 1).ThenBy(m => m.EndsAtUtc).Select(m => m.CardToken).FirstOrDefaultAsync(ct);
+            if (token is null) return Result<AccessCheckResult>.Fail("userId", "این عضو عضویت فعال ندارد.");
+            credential = AccessControlService.QrPrefix + token;
+        }
+        if (string.IsNullOrWhiteSpace(credential)) return Result<AccessCheckResult>.Fail("credential", "QR یا شمارهٔ دستبند را اسکن کنید.");
         var device = await access.ReceptionDeviceAsync(branch.Id, ct);
-        return Result<AccessCheckResult>.Ok(await access.CheckAsync(device, new AccessCheckRequest(r.Credential), ct));
+        return Result<AccessCheckResult>.Ok(await access.CheckAsync(device, new AccessCheckRequest(credential), ct));
     }
 
     public async Task<Result<IReadOnlyList<CheckInRowDto>>> TodayAsync(StaffScope scope, string branchSlug, CancellationToken ct)

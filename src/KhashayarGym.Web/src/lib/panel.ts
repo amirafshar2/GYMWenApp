@@ -71,6 +71,8 @@ export const panelApi = {
   search: (text: string) => get<MemberRow[]>(`${P}/reception/members${q({ q: text })}`),
   member: (id: number) => get<MemberSummary>(`${P}/reception/members/${id}`),
   checkIn: (branchSlug: string, credential: string) => send<AccessResult>('POST', `${P}/reception/checkins`, { branchSlug, credential }),
+  /** ورود دستی از پروندهٔ عضو؛ توکن کارت فقط سمت سرور خوانده می‌شود */
+  checkInMember: (branchSlug: string, userId: number) => send<AccessResult>('POST', `${P}/reception/checkins`, { branchSlug, userId }),
   today: (branch: string) => get<CheckInRow[]>(`${P}/reception/checkins${q({ branch })}`),
   assignCredential: (userId: number, body: { type: string; value: string; label?: string }) => send<Credential>('POST', `/staff/members/${userId}/credentials`, body),
   revokeCredential: (userId: number, id: number) => send<null>('DELETE', `/staff/members/${userId}/credentials/${id}`),

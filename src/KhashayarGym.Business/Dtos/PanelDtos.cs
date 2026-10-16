@@ -31,7 +31,7 @@ public sealed record MemberSummaryDto(
     int UserId, string? FullName, string Phone, string? Gender, MembershipDto? Active, IReadOnlyList<MembershipDto> Memberships,
     IReadOnlyList<Services.Access.CredentialDto> Credentials, IReadOnlyList<CheckInRowDto> RecentCheckIns, long WalletToman, bool HasSignedContract);
 public sealed record CheckInRowDto(int Id, DateTime OccurredAtUtc, string BranchName, string? MemberName, int? UserId, bool Allowed, string Reason, string Method);
-public sealed record ReceptionCheckInRequest(string BranchSlug, string Credential);
+public sealed record ReceptionCheckInRequest(string BranchSlug, string? Credential, int? UserId = null);
 
 // ---- مربی ----
 public sealed record PlanDayDto(string Day, string Focus, IReadOnlyList<string> Items);

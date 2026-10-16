@@ -192,6 +192,11 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
             if (!allowed) return Result<CanteenOrderDto>.Fail("status", "این تغییر وضعیت ممکن نیست.", ErrorType.Conflict);
 
             var now = clock.UtcNow;
+            // تغییر وضعیت شرطی و اتمی: دو «لغو» هم‌زمان (دوبار کلیک) فقط یک بار وجه برمی‌گرداند
+            var from = o.Status; var to = target.Value;
+            if (await db.CanteenOrders.Where(x => x.Id == orderId && x.Status == from)
+                    .ExecuteUpdateAsync(x => x.SetProperty(c => c.Status, to), ct) == 0)
+                return Result<CanteenOrderDto>.Fail("status", "وضعیت سفارش همین الان عوض شد؛ صفحه را تازه کنید.", ErrorType.Conflict);
             o.Status = target.Value;
             if (target == CanteenOrderStatus.Ready) o.ReadyAtUtc = now;
             if (target == CanteenOrderStatus.Collected) o.CollectedAtUtc = now;

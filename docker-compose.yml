@@ -21,17 +21,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # فقط روی همین سرور باز است؛ reverse proxy (Caddy/Nginx) با TLS جلوی آن می‌نشیند.
+    # هرگز "8080:8080" نگذارید: آن‌وقت هر کسی با X-Forwarded-For جعلی محدودیت درخواست‌ها را دور می‌زند.
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
+      # Production: اگر تنظیمی دمو یا ناامن باشد، برنامه اجرا نمی‌شود. برای دموی داخلی: APP_ENV=Staging
+      ASPNETCORE_ENVIRONMENT: ${APP_ENV:-Production}
+      AllowedHosts: ${SITE_HOSTS:-}
       Database__Provider: SqlServer
       ConnectionStrings__Default: "Server=db;Database=KhashayarGym;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY را در .env بگذارید}
       Otp__Pepper: ${OTP_PEPPER:?OTP_PEPPER را در .env بگذارید}
       Otp__ExposeCodeInResponse: ${OTP_EXPOSE_CODE:-false}
-      Sms__Provider: ${SMS_PROVIDER:-Log}
+      Sms__Provider: ${SMS_PROVIDER:-Kavenegar}
       Sms__Kavenegar__ApiKey: ${KAVENEGAR_API_KEY:-}
-      Payment__UseVirtualGateway: ${PAYMENT_SANDBOX:-true}
+      Sms__SiteUrl: ${SMS_SITE_URL:-}
+      Payment__UseVirtualGateway: ${PAYMENT_SANDBOX:-false}
+      Payment__CallbackBaseUrl: ${SITE_URL:-}
+      Payment__ZarinPal__MerchantId: ${ZARINPAL_MERCHANT_ID:-}
       ReverseProxy__Enabled: ${BEHIND_PROXY:-true}
     volumes:
       - private:/data/private

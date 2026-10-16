@@ -47,9 +47,9 @@ export default function SitePricing() {
     { key: 'special', label: 'پکیج‌های تخصصی', plans: special.map(toPlan) },
   ]
   return (
-    <section aria-labelledby="packages-title">
+    <section id="packages" aria-labelledby="packages-title">
       <PricingSection
-        id="packages"
+        id="packages-grid"
         title={<span id="packages-title">عضویتی که با</span>}
         accent="برنامه‌ات جور است"
         subtitle="قیمت‌ها به تومان است و تخفیف جشنوارهٔ فعال خودکار روی پکیج‌های مشمول اعمال شده. پکیج‌های تخصصی: مربی خصوصی، تغذیه و صخره‌نوردی."

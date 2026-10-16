@@ -85,12 +85,20 @@ public sealed class OtpService(
         if (otp.Attempts >= _o.MaxAttempts)
             return Result<bool>.Fail("code", "تعداد تلاش‌ها تمام شد. کد تازه بگیرید.", ErrorType.TooManyRequests);
 
-        otp.Attempts++;
+        // شمارش تلاش با به‌روزرسانی شرطی و اتمی: درخواست‌های هم‌زمان نمی‌توانند بیش از MaxAttempts بار حدس بزنند
+        var id = otp.Id;
+        var claimed = await db.OtpCodes.Where(o => o.Id == id && o.Attempts < _o.MaxAttempts && o.ConsumedAtUtc == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1), ct);
+        if (claimed == 0)
+            return Result<bool>.Fail("code", "تعداد تلاش‌ها تمام شد. کد تازه بگیرید.", ErrorType.TooManyRequests);
+
         var ok = digits.Length == _o.CodeLength &&
                  CryptographicOperations.FixedTimeEquals(
                      Encoding.ASCII.GetBytes(otp.CodeHash), Encoding.ASCII.GetBytes(Hash(phone, purpose, digits)));
-        if (ok) otp.ConsumedAtUtc = now;
-        await db.SaveChangesAsync(ct);
+        // هر کد فقط یک بار مصرف می‌شود (حتی اگر دو درخواست هم‌زمان کد درست را بفرستند)
+        if (ok && await db.OtpCodes.Where(o => o.Id == id && o.ConsumedAtUtc == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(o => o.ConsumedAtUtc, now), ct) == 0)
+            ok = false;
 
         return ok ? Result<bool>.Ok(true) : Result<bool>.Fail("code", invalid);
     }

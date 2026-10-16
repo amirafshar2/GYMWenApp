@@ -59,6 +59,16 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
             return Result<CheckoutStartedDto>.Fail("discountCode", p.Quote.DiscountCodeError);
 
         var now = clock.UtcNow;
+        // سقف کد (با احتساب پرداخت‌های در انتظار)، یک‌بار برای هر نفر، «فقط اعضا»، و ظرفیت جشنواره
+        if (p.Quote.DiscountCode is { } usedCode && await db.DiscountCodes.AsNoTracking().FirstOrDefaultAsync(d => d.Code == usedCode, ct) is { } dc)
+        {
+            if (dc.MembersOnly && !await DiscountGuard.IsActiveMemberAsync(db, userId, now, ct))
+                return Result<CheckoutStartedDto>.Fail("discountCode", "این کد فقط برای اعضای دارای عضویت فعال است.");
+            if (await DiscountGuard.CodeErrorAsync(db, dc, userId, now, ct) is { } codeLimit)
+                return Result<CheckoutStartedDto>.Fail("discountCode", codeLimit, ErrorType.Conflict);
+        }
+        if (p.CampaignId is { } cid && await DiscountGuard.CampaignErrorAsync(db, cid, now, ct) is { } campaignFull)
+            return Result<CheckoutStartedDto>.Fail("campaign", campaignFull, ErrorType.Conflict);
         var membership = new Membership
         {
             UserId = userId, BranchId = p.Branch.Id, PackageId = p.Package.Id, Section = p.Section,

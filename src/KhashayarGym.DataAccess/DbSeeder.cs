@@ -19,7 +19,7 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public async Task SeedAsync(string seedDir, CancellationToken ct = default)
+    public async Task SeedAsync(string seedDir, bool includeDemoCodes = true, CancellationToken ct = default)
     {
         if (!await db.Branches.AnyAsync(ct))
         {
@@ -85,7 +85,7 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
             await db.SaveChangesAsync(ct);
         }
 
-        if (!await db.DiscountCodes.AnyAsync(ct))
+        if (includeDemoCodes && !await db.DiscountCodes.AnyAsync(ct))
         {
             // کدهای تخفیف دمو (روی قیمت پس از جشنواره اعمال می‌شوند)
             db.DiscountCodes.AddRange(

@@ -36,11 +36,11 @@ export default function ReceptionPage() {
   const loadToday = useCallback(() => { if (branch) panelApi.today(branch).then(setToday).catch(() => null) }, [branch])
   useEffect(() => { loadToday(); const t = setInterval(loadToday, 20000); return () => clearInterval(t) }, [loadToday])
 
-  const check = useCallback(async (raw: string) => {
-    const value = toLatinDigits(raw.trim())
+  const check = useCallback(async (raw: string | { userId: number }) => {
+    const value = typeof raw === 'string' ? toLatinDigits(raw.trim()) : raw
     if (!value || !branch) return
     setBusy(true); setErr(null)
-    try { setResult(await panelApi.checkIn(branch, value)); loadToday() }
+    try { setResult(typeof value === 'string' ? await panelApi.checkIn(branch, value) : await panelApi.checkInMember(branch, value.userId)); loadToday() }
     catch (e) { setErr((e as Error).message) }
     finally { setBusy(false); setCode(''); scanRef.current?.focus() }
   }, [branch, loadToday])
@@ -81,7 +81,7 @@ export default function ReceptionPage() {
           </Panel>
 
           <MemberSearch onPick={setSelected} />
-          {selected !== null && <MemberCardPanel key={selected} userId={selected} onClose={() => setSelected(null)} onCheckIn={(qr) => void check(qr)} />}
+          {selected !== null && <MemberCardPanel key={selected} userId={selected} onClose={() => setSelected(null)} onCheckIn={(userId) => void check({ userId })} />}
         </div>
 
         <Panel>
@@ -181,7 +181,7 @@ function MemberSearch({ onPick }: { onPick: (id: number) => void }) {
   )
 }
 
-function MemberCardPanel({ userId, onClose, onCheckIn }: { userId: number; onClose: () => void; onCheckIn: (qr: string) => void }) {
+function MemberCardPanel({ userId, onClose, onCheckIn }: { userId: number; onClose: () => void; onCheckIn: (userId: number) => void }) {
   const [m, setM] = useState<MemberSummary | null>(null)
   const [type, setType] = useState<'wristband' | 'card'>('wristband')
   const [value, setValue] = useState('')
@@ -213,7 +213,7 @@ function MemberCardPanel({ userId, onClose, onCheckIn }: { userId: number; onClo
         <Info label="کیف پول" value={toman(m.walletToman)} />
         <Info label="قرارداد" value={m.hasSignedContract ? 'امضا شده' : 'امضا نشده'} icon={m.hasSignedContract ? FileCheck2 : FileX2} tone={m.hasSignedContract ? 'ok' : 'err'} />
       </div>
-      {a && <Btn variant="dark" className="mt-4" onClick={() => onCheckIn(`KG1:${a.cardToken}`)}>ثبت ورود دستی برای این عضو</Btn>}
+      {a && <Btn variant="dark" className="mt-4" onClick={() => onCheckIn(m.userId)}>ثبت ورود دستی برای این عضو</Btn>}
 
       <h3 className="mb-2 mt-6 text-[15px] font-black text-chalk">دستبند و کارت‌ها</h3>
       {m.credentials.filter((c) => c.isActive).length === 0 ? <p className="text-[13px] text-rubber">دستبندی ثبت نشده.</p> : (

@@ -1783,6 +1783,10 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasIndex("UserId", "CreatedAtUtc");
 
+                    b.HasIndex("UserId", "Reference", "Type")
+                        .IsUnique()
+                        .HasFilter("[Reference] IS NOT NULL");
+
                     b.ToTable("WalletTransactions");
                 });
 

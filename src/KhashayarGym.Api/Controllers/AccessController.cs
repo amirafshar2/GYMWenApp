@@ -74,22 +74,27 @@ public sealed class DeviceKeyFilter(IAccessControlService access) : IAsyncAction
     }
 }
 
-/// <summary>پذیرش: دادن و پس گرفتن دستبند/کارت (رابط کاربری‌اش در پنل پذیرش، فاز ۴)</summary>
+/// <summary>
+/// پذیرش: دادن و پس گرفتن دستبند/کارت. نقش از دیتابیس (PanelAccess) و فقط برای اعضای شعبه‌های خود کارمند.
+/// </summary>
 [ApiController]
 [Route("api/v1/staff/members/{userId:int}/credentials")]
-[Authorize(Roles = $"{Roles.SuperAdmin},{Roles.BranchManager},{Roles.Reception}")]
+[Authorize]
+[PanelAccess(Roles.BranchManager, Roles.Reception)]
 [Produces("application/json")]
-public sealed class StaffCredentialsController(IAccessControlService access) : ControllerBase
+public sealed class StaffCredentialsController(IAccessControlService access, KhashayarGym.Business.Services.Panel.IReceptionService reception) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(int userId, CancellationToken ct) => Ok(await access.ListAsync(userId, ct));
+    public async Task<IActionResult> List(int userId, CancellationToken ct) =>
+        await reception.CanSeeMemberAsync(this.Scope(), userId, ct) ? Ok(await access.ListAsync(userId, ct)) : NotFound();
 
     [HttpPost]
     [RequestSizeLimit(1024)]
     public async Task<IActionResult> Assign(int userId, [FromBody] AssignCredentialRequest request, CancellationToken ct) =>
-        (await access.AssignAsync(userId, request, User.UserId(), ct)).ToActionResult(this, c => StatusCode(201, c));
+        !await reception.CanSeeMemberAsync(this.Scope(), userId, ct) ? NotFound()
+            : (await access.AssignAsync(userId, request, User.UserId(), ct)).ToActionResult(this, c => StatusCode(201, c));
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Revoke(int userId, int id, CancellationToken ct) =>
-        await access.RevokeAsync(userId, id, ct) ? NoContent() : NotFound();
+        await reception.CanSeeMemberAsync(this.Scope(), userId, ct) && await access.RevokeAsync(userId, id, ct) ? NoContent() : NotFound();
 }

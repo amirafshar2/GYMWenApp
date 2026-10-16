@@ -71,8 +71,11 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
         var coach = await CoachOf(coachUserId, ct);
         if (coach is null) return Result<TraineeRowDto>.Fail("coach", "حساب شما به پروفایل مربی وصل نیست.", ErrorType.Forbidden);
         var p = PersianText.NormalizeMobile(phone);
-        var user = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == p, ct);
-        if (user is null) return Result<TraineeRowDto>.Fail("phone", "عضوی با این شماره پیدا نشد. اول باید در سایت یا پذیرش ثبت‌نام کند.", ErrorType.NotFound);
+        var now = clock.UtcNow;
+        // فقط عضو دارای عضویت فعال در شعبه و سالن همین مربی؛ پیام یکسان تا با این فرم نشود شماره‌ها را استعلام کرد
+        var user = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == p && db.Memberships.Any(m => m.UserId == u.Id && m.BranchId == coach.BranchId
+            && m.Status == MembershipStatus.Active && m.StartsAtUtc <= now && m.EndsAtUtc > now && (m.Section & coach.Section) != 0), ct);
+        if (user is null) return Result<TraineeRowDto>.Fail("phone", "عضوی با این شماره در شعبه و سالن شما عضویت فعال ندارد.", ErrorType.NotFound);
         var a = await db.CoachAssignments.FirstOrDefaultAsync(x => x.CoachId == coach.Id && x.MemberUserId == user.Id, ct);
         if (a is null) db.CoachAssignments.Add(new CoachAssignment { CoachId = coach.Id, MemberUserId = user.Id, CreatedAtUtc = clock.UtcNow });
         else a.IsActive = true;
@@ -90,7 +93,7 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
             .Where(x => x.UserId == memberId && x.Status == MembershipStatus.Active && x.StartsAtUtc <= now && x.EndsAtUtc > now)
             .OrderBy(x => x.EndsAtUtc).FirstOrDefaultAsync(ct);
         var checks = await db.CheckIns.CountAsync(c => c.UserId == memberId && c.Decision == AccessDecision.Allowed && c.OccurredAtUtc > now.AddDays(-30), ct);
-        return Result<TraineeDetailDto>.Ok(new TraineeDetailDto(row, m is null ? null : MemberService.ToDto(m, now), await MetricsAsync(memberId, ct), await MyPlanAsync(memberId, ct), checks));
+        return Result<TraineeDetailDto>.Ok(new TraineeDetailDto(row, m is null ? null : MemberService.ToDto(m, now) with { CardToken = "" }, await MetricsAsync(memberId, ct), await MyPlanAsync(memberId, ct), checks));
     }
 
     public async Task<Result<TrainingPlanDto>> SavePlanAsync(int coachUserId, int memberId, SavePlanRequest r, CancellationToken ct)

@@ -1188,12 +1188,12 @@ const CSS = `
 .sh-root *,.sh-root *::before,.sh-root *::after{box-sizing:border-box}
 .sh-stage{position:absolute;inset:0;z-index:0;pointer-events:none}
 .sh-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .5s ease}
-.sh-fallback{position:absolute;display:block;max-width:none;user-select:none;-webkit-user-drag:none;transition:opacity .5s ease}
+.sh-fallback{position:absolute;display:block;max-width:none;user-select:none;-webkit-user-drag:none;transition:opacity .5s ease;visibility:hidden}
 .sh-root[data-gl="on"] .sh-canvas{opacity:1}
 .sh-root[data-gl="on"] .sh-fallback{opacity:0}
 .sh-root[data-swap="1"] .sh-canvas{opacity:0;transition-duration:.25s}
 .sh-root[data-swap="1"] .sh-fallback{opacity:0;transition-duration:.25s}
-.sh-backdrop{position:absolute;left:50%;z-index:0;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;user-select:none;
+.sh-backdrop{visibility:hidden;position:absolute;left:50%;z-index:0;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;user-select:none;
   font-family:var(--sh-head);font-weight:600;letter-spacing:-.06em;line-height:.8;color:color-mix(in srgb,var(--sh-fg) 5%,transparent)}
 .sh-nav{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:24px;
   padding:26px clamp(20px,3.2cqw,48px) 0}
@@ -1411,8 +1411,10 @@ export default function SculptureHero(props: SculptureHeroProps) {
     () => (imageBackground ? hexToRgb(imageBackground, [0.918, 0.914, 0.906]) : null),
     [imageBackground]
   )
-  const [isMobile, setIsMobile] = React.useState(false)
-  const mobileRef = React.useRef(false)
+  // از همان اول درست حدس زده شود تا گوشی تصویر بزرگ دسکتاپ را بی‌دلیل دانلود نکند
+  const [isMobile, setIsMobile] = React.useState(() => typeof window !== "undefined" && window.innerWidth < 640)
+  const loadedImageRef = React.useRef<HTMLImageElement | null>(null)
+  const mobileRef = React.useRef(typeof window !== "undefined" && window.innerWidth < 640)
   // pick the image for the current theme and layout, falling back sensibly
   const activeSrc =
     (isMobile && mode === "dark" && (mobileDarkSrc || darkSrc)) ||
@@ -1471,6 +1473,7 @@ export default function SculptureHero(props: SculptureHeroProps) {
       const chars = Math.max(1, (bd.textContent || "").length)
       bd.style.fontSize = Math.min((band.bottom - band.top) * 0.95, (w * 0.92) / (chars * 0.56)) + "px"
       bd.style.top = (band.top + band.bottom) / 2 + "px"
+      bd.style.visibility = "visible"
     }
     const img = imgRef.current
     if (img) {
@@ -1478,6 +1481,8 @@ export default function SculptureHero(props: SculptureHeroProps) {
       img.style.top = rect.y + "px"
       img.style.width = rect.w + "px"
       img.style.height = rect.h + "px"
+      // تا تناسب واقعی تصویر معلوم و جایش محاسبه نشده پنهان است (وگرنه لحظه‌ای جابه‌جا می‌شود)
+      if (loadedImageRef.current) img.style.visibility = "visible"
     }
     const hintEl = hintRef.current
     if (hintEl) {
@@ -1505,11 +1510,28 @@ export default function SculptureHero(props: SculptureHeroProps) {
     const fail = () => {
       root.dataset.gl = "off"
     }
-    try {
-      engine = new LiquidEngine(canvas, optsRef.current(mq.matches), fail)
-      engineRef.current = engine
-    } catch {
-      fail()
+    // سرعت (پروژهٔ خشایار): موتور ذرات فقط با اولین حرکت ماوس/لمس روی هیرو ساخته می‌شود.
+    // در حالت سکون همان تصویر ثابت دیده می‌شود (intro خاموش است)، پس ظاهر عوض نمی‌شود
+    // ولی ساخت ~۱۰۰ هزار ذره دیگر بارگذاری اول صفحه را کند نمی‌کند.
+    let visible = true
+    const start = () => {
+      if (engine || root.dataset.gl === "off") return
+      try {
+        engine = new LiquidEngine(canvas, optsRef.current(mq.matches), fail)
+        engineRef.current = engine
+        engine.setVisible(visible && !document.hidden)
+        const img = loadedImageRef.current
+        if (img) {
+          engine.onFirstFrame = () => {
+            root.dataset.gl = "on"
+            delete root.dataset.swap
+          }
+          engine.setImage(img)
+          relayout()
+        }
+      } catch {
+        fail()
+      }
     }
 
     const ro = new ResizeObserver(() => relayout())
@@ -1518,7 +1540,10 @@ export default function SculptureHero(props: SculptureHeroProps) {
     if (navRef.current) ro.observe(navRef.current)
     if (contentRef.current) ro.observe(contentRef.current)
     const io = new IntersectionObserver((entries) => {
-      for (const e of entries) engine?.setVisible(e.isIntersecting && !document.hidden)
+      for (const e of entries) {
+        visible = e.isIntersecting
+        engine?.setVisible(e.isIntersecting && !document.hidden)
+      }
     })
     io.observe(root)
     const onVis = () => engine?.setVisible(!document.hidden)
@@ -1537,7 +1562,9 @@ export default function SculptureHero(props: SculptureHeroProps) {
         root.dataset.touched = "1"
       }
     }
+    const onEnter = () => start()
     const onMove = (e: PointerEvent) => {
+      start()
       const [x, y] = pos(e)
       const touch = e.pointerType === "touch"
       if (touch && e.buttons === 0 && e.pressure === 0) return
@@ -1545,6 +1572,7 @@ export default function SculptureHero(props: SculptureHeroProps) {
       markTouched()
     }
     const onDown = (e: PointerEvent) => {
+      start()
       const [x, y] = pos(e)
       engine?.pointer("down", x, y, e.pointerType === "touch")
       markTouched()
@@ -1557,6 +1585,8 @@ export default function SculptureHero(props: SculptureHeroProps) {
       const [x, y] = pos(e)
       engine?.pointer("leave", x, y, e.pointerType === "touch")
     }
+    root.addEventListener("pointerenter", onEnter, { passive: true })
+    root.addEventListener("touchstart", onEnter, { passive: true })
     root.addEventListener("pointermove", onMove, { passive: true })
     root.addEventListener("pointerdown", onDown, { passive: true })
     root.addEventListener("pointerup", onUp, { passive: true })
@@ -1568,6 +1598,8 @@ export default function SculptureHero(props: SculptureHeroProps) {
       io.disconnect()
       document.removeEventListener("visibilitychange", onVis)
       mq.removeEventListener?.("change", onMq)
+      root.removeEventListener("pointerenter", onEnter)
+      root.removeEventListener("touchstart", onEnter)
       root.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointerdown", onDown)
       root.removeEventListener("pointerup", onUp)
@@ -1584,7 +1616,6 @@ export default function SculptureHero(props: SculptureHeroProps) {
   // the canvas dips out while the static image covers the swap
   React.useEffect(() => {
     const root = rootRef.current
-    const engine = engineRef.current
     if (!root) return
     let cancelled = false
     const image = new Image()
@@ -1595,7 +1626,9 @@ export default function SculptureHero(props: SculptureHeroProps) {
     image.onload = () => {
       if (cancelled) return
       aspectRef.current = image.naturalWidth / image.naturalHeight || aspectRef.current
+      loadedImageRef.current = image
       relayout()
+      const engine = engineRef.current
       if (engine && root.dataset.gl !== "off") {
         try {
           engine.onFirstFrame = () => {
@@ -1656,7 +1689,7 @@ export default function SculptureHero(props: SculptureHeroProps) {
         </div>
       ) : null}
       <div ref={stageRef} className="sh-stage" aria-hidden="true">
-        <img ref={imgRef} className="sh-fallback" src={activeSrc} alt="" crossOrigin="anonymous" draggable={false} />
+        <img ref={imgRef} className="sh-fallback" src={activeSrc} alt="" crossOrigin="anonymous" draggable={false} fetchPriority="high" decoding="async" />
       </div>
       <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>{imageAlt}</span>
 

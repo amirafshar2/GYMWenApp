@@ -18,7 +18,7 @@ export interface Banner1Props {
 export function Banner1({ children, href = "#", label = "Promotion announcement", closeLabel = "Close announcement", onClose, className }: Banner1Props = {}) {
   return (
     <aside
-      role="banner"
+      role="region"
       aria-label={label}
       className={`relative flex items-center bg-neutral-950 py-3 pr-8 pl-6 ${className ?? ""}`}
     >

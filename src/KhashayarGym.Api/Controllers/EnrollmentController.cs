@@ -75,6 +75,7 @@ public sealed class CheckoutController(
 
     /// <summary>بازگشت از درگاه. تأیید فقط سمت سرور (Fetch + Verify) و تطبیق مبلغ؛ کاربر به صفحهٔ نتیجه می‌رود.</summary>
     [HttpGet("payments/callback"), HttpPost("payments/callback")]
+    [RequestSizeLimit(16 * 1024)]
     [IgnoreAntiforgeryToken]
     [EnableRateLimiting("payment")]
     public async Task<IActionResult> Callback(CancellationToken ct)

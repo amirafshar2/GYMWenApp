@@ -85,11 +85,11 @@ public sealed class ReceptionController(IReceptionService reception) : Controlle
     [HttpGet("members")]
     [EnableRateLimiting("forms-read")]
     public async Task<IActionResult> Search([FromQuery] string q, CancellationToken ct) =>
-        Ok(await reception.SearchAsync(q?.Length > 40 ? q[..40] : q ?? "", ct));
+        Ok(await reception.SearchAsync(this.Scope(), q?.Length > 40 ? q[..40] : q ?? "", ct));
 
     [HttpGet("members/{userId:int}")]
     public async Task<IActionResult> Member(int userId, CancellationToken ct) =>
-        await reception.SummaryAsync(userId, ct) is { } m ? Ok(m) : NotFound();
+        await reception.SummaryAsync(this.Scope(), userId, ct) is { } m ? Ok(m) : NotFound();
 
     [HttpPost("checkins")]
     [RequestSizeLimit(1024)]

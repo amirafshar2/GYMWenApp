@@ -161,6 +161,8 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         var p = priced.Value!;
         if (!p.Quote.CanCheckout) return Result<PurchaseStartedDto>.Fail("items", p.Quote.Lines.FirstOrDefault(l => l.Problem is not null)?.Problem ?? "سبد خرید معتبر نیست.");
         if (p.Quote.DiscountCodeError is not null) return Result<PurchaseStartedDto>.Fail("discountCode", p.Quote.DiscountCodeError);
+        if (p.Code is not null && await DiscountGuard.CodeErrorAsync(db, p.Code, userId, clock.UtcNow, ct) is { } codeLimit)
+            return Result<PurchaseStartedDto>.Fail("discountCode", codeLimit, ErrorType.Conflict);
 
         string? name = null, phone = null, address = null, postal = null;
         if (p.Fulfillment == Fulfillment.Delivery)

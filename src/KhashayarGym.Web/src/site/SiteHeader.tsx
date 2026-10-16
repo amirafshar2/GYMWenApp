@@ -48,8 +48,14 @@ export default function SiteHeader() {
     const on = () => setScrolled(window.scrollY > 8)
     on(); window.addEventListener('scroll', on, { passive: true })
     const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) setActive(e.target.id) }, { rootMargin: '-45% 0px -50% 0px' })
-    const t = setTimeout(() => LINKS.forEach((l) => { const el = document.getElementById(l.id); if (el) io.observe(el) }), 600)
-    return () => { window.removeEventListener('scroll', on); clearTimeout(t); io.disconnect() }
+    // بخش‌ها ممکن است کمی دیرتر بار شوند (فایل جدا)؛ چند بار تلاش تا همه دیده شوند
+    const seen = new Set<string>()
+    const t = setInterval(() => {
+      LINKS.forEach((l) => { const el = document.getElementById(l.id); if (el && !seen.has(l.id)) { seen.add(l.id); io.observe(el) } })
+      if (seen.size === LINKS.length) clearInterval(t)
+    }, 500)
+    const stop = setTimeout(() => clearInterval(t), 10000)
+    return () => { window.removeEventListener('scroll', on); clearInterval(t); clearTimeout(stop); io.disconnect() }
   }, [])
 
   useEffect(() => {

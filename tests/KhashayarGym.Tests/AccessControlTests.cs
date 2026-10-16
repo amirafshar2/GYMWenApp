@@ -50,6 +50,10 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
             var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var u = await users.Users.FirstAsync(x => x.PhoneNumber == phone);
             await users.AddToRoleAsync(u, Roles.Reception);
+            // پذیرش فقط اعضای شعبهٔ خودش را می‌بیند
+            var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
+            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "ghoddousi-gharbi").Select(x => x.Id).FirstAsync() });
+            await db.SaveChangesAsync();
         }
         // توکن تازه با نقش جدید (refresh نقش‌ها را دوباره می‌خواند)
         b.AccessToken = null;
@@ -116,6 +120,19 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         var member = new Browser(factory);
         await member.LoginAsync();
         var userId = (await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/me"))).GetProperty("id").GetInt32();
+        using (var scope = factory.Services.CreateScope())
+        {
+            // عضو قبلی همین شعبه که عضویتش تمام شده (پذیرش فقط اعضای شعبهٔ خودش را می‌بیند)
+            var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
+            db.Memberships.Add(new Membership
+            {
+                UserId = userId, BranchId = await db.Branches.Where(b => b.Slug == "ghoddousi-gharbi").Select(b => b.Id).FirstAsync(),
+                PackageId = await db.Packages.Select(p => p.Id).FirstAsync(), Section = KhashayarGym.Domain.Enums.GenderSection.Men,
+                Status = KhashayarGym.Domain.Enums.MembershipStatus.Expired, StartsAtUtc = DateTime.UtcNow.AddDays(-60), EndsAtUtc = DateTime.UtcNow.AddDays(-30),
+                CardToken = Guid.NewGuid().ToString("N"),
+            });
+            await db.SaveChangesAsync();
+        }
         var staff = await ReceptionistAsync();
         var uid = "CAFE" + Random.Shared.Next(100000, 999999);
         (await staff.SendAsync(HttpMethod.Post, $"/api/v1/staff/members/{userId}/credentials", new { type = "card", value = uid })).EnsureSuccessStatusCode();

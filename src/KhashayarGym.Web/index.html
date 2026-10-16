@@ -12,6 +12,21 @@
     <link rel="icon" href="/brand/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/brand/favicon-64.png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <!-- سرعت: فونت فارسی زودتر دانلود شود تا متن هیرو بعد از نمایش جابه‌جا نشود -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/vazirmatn/files/vazirmatn-arabic-wght-normal.woff2" />
+    <script>
+      // جای نوار جشنواره از قبل رزرو شود تا با رسیدن آن، صفحه پایین نپرد (اگر جشنواره‌ای نباشد صفر می‌شود)
+      try {
+        if (location.pathname.indexOf('/panel') !== 0 && sessionStorage.getItem('festival-hidden') !== '1')
+          document.documentElement.style.setProperty('--festival-h', innerWidth < 640 ? '64px' : '44px')
+      } catch (e) { /* حالت خصوصی */ }
+      // فقط در صفحهٔ اصلی: تصویر هیرو (بزرگ‌ترین المان صفحه) با بالاترین اولویت
+      if (location.pathname === '/') {
+        var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.fetchPriority = 'high'
+        l.href = innerWidth < 640 ? '/media/hero/dumbbell-mobile.webp' : '/media/hero/dumbbell.webp'
+        document.head.appendChild(l)
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

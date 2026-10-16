@@ -25,7 +25,7 @@ const khashayar: Brand = {
   name: 'مجموعه باشگاه‌های خشایار',
   shortName: 'خشایار',
   latinName: 'KHASHAYAR FITNESS CLUB',
-  logo: '/brand/logo-mark.png',
+  logo: '/brand/logo-mark.webp',
   logoFull: '/brand/logo.png',
   slogan: 'ورزش کن؛ حتی اگه خشایار نمیای',
   nearSlogan: 'هرکجا هستی، خشایار نزدیکته',

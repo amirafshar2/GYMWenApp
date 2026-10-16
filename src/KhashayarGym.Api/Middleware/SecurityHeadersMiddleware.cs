@@ -1,6 +1,6 @@
 namespace KhashayarGym.Api.Middleware;
 
-/// <summary>هدرهای امنیتی (OWASP Secure Headers). CSP فقط عکس‌های موقت مربیان را از Unsplash اجازه می‌دهد.</summary>
+/// <summary>هدرهای امنیتی (OWASP Secure Headers). CSP فقط عکس‌های موقت مربیان را از Unsplash اجازه می‌دهد. دوربین فقط برای خود سایت (اسکن QR در پذیرش).</summary>
 public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvironment env, IConfiguration config)
 {
     /// <summary>صفحهٔ درگاه آزمایشی Parbad اسکریپت درون‌خطی دارد؛ CSP شل‌تر فقط برای همین مسیر.</summary>
@@ -11,19 +11,34 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
     private const string ImageHosts = "https://images.unsplash.com https://trustseal.enamad.ir";
 
     private string? _csp;
-    private string Csp => _csp ??= BuildCsp(config);
+    private string Csp => _csp ??= BuildCsp(config, InlineScriptHashes(env));
+
+    /// <summary>
+    /// اسکریپت کوچک درون‌خطی index.html (پیش‌بارگذاری تصویر هیرو فقط در صفحهٔ اصلی) با hash مجاز می‌شود،
+    /// نه با 'unsafe-inline'. hash موقع اجرا از همان فایل ساخته می‌شود تا با هر بیلد درست بماند.
+    /// </summary>
+    private static string InlineScriptHashes(IWebHostEnvironment env)
+    {
+        var path = Path.Combine(env.WebRootPath ?? "", "index.html");
+        if (!File.Exists(path)) return "";
+        var html = File.ReadAllText(path);
+        var hashes = System.Text.RegularExpressions.Regex.Matches(html, @"<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>")
+            .Select(m => m.Groups[1].Value).Where(js => js.Trim().Length > 0)
+            .Select(js => $"'sha256-{Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(js)))}'");
+        return string.Join(' ', hashes);
+    }
 
     private static readonly string SandboxCsp = string.Join("; ",
         "default-src 'self'", "script-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data:", "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'", "object-src 'none'");
 
     // فرم پرداخت از سایت مستقیم به درگاه بانک (shaparak) ارسال می‌شود؛ میزبان‌ها از تنظیمات Payment:GatewayHosts
-    private static string BuildCsp(IConfiguration config)
+    private static string BuildCsp(IConfiguration config, string scriptHashes)
     {
         var gateways = config.GetSection("Payment:GatewayHosts").Get<string[]>() ?? ["https://*.shaparak.ir"];
         return string.Join("; ",
         "default-src 'self'",
-        "script-src 'self'",
+        $"script-src 'self' {scriptHashes}".TrimEnd(),
         "style-src 'self' 'unsafe-inline'",
         $"img-src 'self' data: blob: {ImageHosts}",
         "font-src 'self' data:",
@@ -47,7 +62,7 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
             h["X-Content-Type-Options"] = "nosniff";
             h["X-Frame-Options"] = "DENY";
             h["Referrer-Policy"] = "strict-origin-when-cross-origin";
-            h["Permissions-Policy"] = "geolocation=(self), camera=(), microphone=(), payment=(self), usb=()";
+            h["Permissions-Policy"] = "geolocation=(self), camera=(self), microphone=(), payment=(self), usb=()";
             h["Cross-Origin-Opener-Policy"] = "same-origin";
             h.Remove("Server");
             h.Remove("X-Powered-By");

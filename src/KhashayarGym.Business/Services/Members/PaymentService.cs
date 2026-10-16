@@ -39,6 +39,14 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         if (payment.Status != PaymentStatus.Pending)
             return Result<int>.Ok(payment.Id);
 
+        // «برداشتن» اتمی پرداخت: اگر دو callback هم‌زمان برسند، فقط یکی Pending را نهایی می‌کند و دومی همین‌جا برمی‌گردد
+        // (قفل ردیف تا پایان تراکنش می‌ماند؛ بدون این، کیف پول یا بازگشت وجه دو بار شارژ می‌شد)
+        var finalStatus = succeeded ? PaymentStatus.Succeeded : PaymentStatus.Failed;
+        var payId = payment.Id;
+        if (await db.Payments.Where(p => p.Id == payId && p.Status == PaymentStatus.Pending)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, finalStatus), ct) == 0)
+            return Result<int>.Ok(payment.Id);
+
         var now = clock.UtcNow;
         payment.TransactionCode = transactionCode;
         payment.GatewayMessage = message?.Length > 300 ? message[..300] : message;

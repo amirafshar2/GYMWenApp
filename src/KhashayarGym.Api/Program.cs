@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Parbad.Builder;
 using Parbad.Gateway.ParbadVirtual;
+using Parbad.Gateway.ZarinPal;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi(o => o.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
 // ---- رمزها: فقط از User Secrets / متغیر محیطی. در توسعه اگر نبود، کلید موقت ساخته می‌شود ----
+ProductionGuard.Enforce(builder.Configuration, builder.Environment);
 EnsureSecret(builder, "Jwt:SigningKey");
 EnsureSecret(builder, "Otp:Pepper");
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Section));
@@ -113,11 +115,33 @@ if (builder.Configuration["Sms:Provider"]?.Equals("Kavenegar", StringComparison.
 }
 else builder.Services.AddSingleton<ISmsSender, LogSmsSender>();
 
-// ---- درگاه پرداخت: Parbad (دمو: درگاه مجازی Parbad؛ بعداً زرین‌پال/IDPay/بانک‌ها) ----
+// ---- درگاه پرداخت: Parbad — آزمایشی (فقط دمو) یا زرین‌پال ----
+builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection(PaymentOptions.Section));
+var paymentCfg = builder.Configuration.GetSection(PaymentOptions.Section).Get<PaymentOptions>() ?? new PaymentOptions();
+var sqlServer = !string.Equals(builder.Configuration["Database:Provider"], "Sqlite", StringComparison.OrdinalIgnoreCase);
+if (sqlServer)
+    // وضعیت درگاه (Parbad) در SQL Server تا با ری‌استارت سرور پرداخت در جریان گم نشود؛ جدول ParbadCache در مایگریشن ساخته می‌شود
+    builder.Services.AddDistributedSqlServerCache(o =>
+    {
+        o.ConnectionString = builder.Configuration.GetConnectionString("Default");
+        o.SchemaName = "dbo";
+        o.TableName = "ParbadCache";
+    });
 builder.Services.AddParbad()
-    .ConfigureGateways(g => g.AddParbadVirtual().WithOptions(o => o.GatewayPath = "/payment-sandbox"))
+    .ConfigureGateways(g =>
+    {
+        if (paymentCfg.UseVirtualGateway) g.AddParbadVirtual().WithOptions(o => o.GatewayPath = "/payment-sandbox");
+        g.AddZarinPal().WithAccounts(a => a.AddInMemory(acc =>
+        {
+            acc.MerchantId = paymentCfg.ZarinPal.MerchantId;
+            acc.IsSandbox = paymentCfg.ZarinPal.IsSandbox;
+        }));
+    })
     .ConfigureHttpContext(h => h.UseDefaultAspNetCore())
-    .ConfigureStorage(s => s.UseMemoryCache());
+    .ConfigureStorage(s => { if (sqlServer) s.UseDistributedCache(); else s.UseMemoryCache(); });
+
+// ---- سلامت سرویس برای مانیتورینگ: /health/live (برنامه بالاست) و /health/ready (دیتابیس هم جواب می‌دهد)
+builder.Services.AddHealthChecks().AddDbContextCheck<GymDbContext>("database", tags: ["ready"]);
 
 builder.Services.AddAntiforgery(o =>
 {
@@ -194,8 +218,13 @@ if (builder.Configuration.GetValue("ReverseProxy:Enabled", false))
     {
         o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         o.ForwardLimit = 1;
-        o.KnownIPNetworks.Clear(); // پراکسی در شبکهٔ داخلی Docker است؛ پورت اپ نباید مستقیم به اینترنت باز باشد
+        // فقط هدرهای پراکسی‌های شناخته‌شده پذیرفته می‌شود (ReverseProxy:KnownNetworks، مثل 172.16.0.0/12).
+        // اگر خالی باشد هر فرستنده‌ای قبول می‌شود؛ آن‌وقت پورت اپ حتماً باید فقط روی 127.0.0.1 یا شبکهٔ داخلی Docker باز باشد
+        // (در docker-compose همین‌طور است)، وگرنه با X-Forwarded-For جعلی محدودیت تعداد درخواست دور زده می‌شود.
+        o.KnownIPNetworks.Clear();
         o.KnownProxies.Clear();
+        foreach (var cidr in builder.Configuration.GetSection("ReverseProxy:KnownNetworks").Get<string[]>() ?? [])
+            o.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(cidr));
     });
 
 var app = builder.Build();
@@ -205,7 +234,8 @@ if (app.Configuration.GetValue("ReverseProxy:Enabled", false)) app.UseForwardedH
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-    if (db.Database.IsSqlServer()) await db.Database.MigrateAsync();
+    // Database:AutoMigrate=false یعنی مایگریشن با اسکریپت بازبینی‌شده (docs/database/migrate.sql) اجرا می‌شود
+    if (db.Database.IsSqlServer()) { if (app.Configuration.GetValue("Database:AutoMigrate", true)) await db.Database.MigrateAsync(); }
     else
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
@@ -220,7 +250,7 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Configuration.GetValue("Database:SeedDemoData", true))
         await scope.ServiceProvider.GetRequiredService<DbSeeder>()
-            .SeedAsync(Path.Combine(AppContext.BaseDirectory, "Seed"));
+            .SeedAsync(Path.Combine(AppContext.BaseDirectory, "Seed"), includeDemoCodes: !app.Environment.IsProduction());
 
     // گیت نمایشی برای تست اتصال (هرگز در production)
     if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)
@@ -244,6 +274,7 @@ app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseResponseCompression();
 app.UseSerilogRequestLogging();
 
+app.UseMiddleware<PrecompressedStaticFilesMiddleware>();
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -266,11 +297,13 @@ app.UseRateLimiter();
 app.UseOutputCache();
 
 // صفحهٔ درگاه آزمایشی Parbad (فقط وقتی Payment:UseVirtualGateway روشن است)
-if (app.Configuration.GetValue("Payment:UseVirtualGateway", true)) app.UseParbadVirtualGateway();
+if (paymentCfg.UseVirtualGateway) app.UseParbadVirtualGateway();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 app.MapControllers();
 app.MapHub<KhashayarGym.Api.Hubs.CanteenHub>(KhashayarGym.Api.Hubs.CanteenHub.Path);
 app.MapFallbackToFile("index.html");

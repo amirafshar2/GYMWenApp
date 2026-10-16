@@ -72,7 +72,7 @@ export default function FrequentlyAskedQuestions({
   return (
     <section className={cn("relative w-full overflow-hidden py-24", className)}>
       <div className="mx-auto max-w-3xl px-6">
-        <h1 className="relative z-10 mx-auto max-w-4xl text-center text-3xl font-bold tracking-tight text-zinc-800 md:text-5xl lg:text-6xl dark:text-zinc-100">
+        <h2 className="relative z-10 mx-auto max-w-4xl text-center text-3xl font-bold tracking-tight text-zinc-800 md:text-5xl lg:text-6xl dark:text-zinc-100">
           {words.map((word, index) => (
             <motion.span
               key={`${word}-${index}`}
@@ -89,7 +89,7 @@ export default function FrequentlyAskedQuestions({
               {word}
             </motion.span>
           ))}
-        </h1>
+        </h2>
 
         <motion.p
           initial={{ opacity: 0 }}

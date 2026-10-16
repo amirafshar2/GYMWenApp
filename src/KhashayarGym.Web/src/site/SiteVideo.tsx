@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { brand } from '@/lib/brand'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
 
@@ -12,13 +12,23 @@ const GYM_VIDEO = '/media/video/gym.mp4?v=owner-1'
  */
 export default function SiteVideo() {
   const [src, setSrc] = useState<string | null | undefined>(undefined)
+  const [near, setNear] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+  // سرعت: ویدیو (چند مگابایت) فقط وقتی کاربر به این بخش نزدیک شد دانلود می‌شود، نه با باز شدن صفحه
   useEffect(() => {
+    if (near || !box.current) return
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) setNear(true) }, { rootMargin: '600px 0px' })
+    io.observe(box.current)
+    return () => io.disconnect()
+  }, [near, src])
+  useEffect(() => {
+    if (!near) return
     fetch(GYM_VIDEO, { method: 'HEAD' })
       .then((r) => setSrc(r.ok && r.headers.get('content-type')?.startsWith('video/') ? GYM_VIDEO : null))
       .catch(() => setSrc(null))
-  }, [])
+  }, [near])
 
-  if (src === undefined) return <div className="h-[100dvh] bg-[#151514]" aria-hidden />
+  if (src === undefined) return <div ref={box} className="h-[100dvh] bg-[#151514]" aria-hidden />
   if (src === null) {
     // تا ویدیوی باشگاه نرسیده: جای خالی با توضیح (ویدیوی نمونهٔ دیگری نمایش داده نمی‌شود)
     return (

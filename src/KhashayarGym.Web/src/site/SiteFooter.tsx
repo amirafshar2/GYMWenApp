@@ -52,7 +52,7 @@ export default function SiteFooter() {
             <dl className={t}>
               {hours.men && <><dt className="font-bold text-white/85">آقایان</dt><dd>{faDigits(hours.men)}</dd></>}
               {hours.women && <><dt className="mt-2 font-bold text-white/85">بانوان</dt><dd>{faDigits(hours.women)}</dd></>}
-              <dd className="mt-2 text-[13px] text-white/45">ساعت دقیق هر شعبه در فهرست شعبه‌ها</dd>
+              <dd className="mt-2 text-[13px] text-white/60">ساعت دقیق هر شعبه در فهرست شعبه‌ها</dd>
             </dl>
           ) : <p className={t}>ساعت دقیق هر شعبه در فهرست شعبه‌ها آمده است.</p>}
         </div>
@@ -120,7 +120,7 @@ function Enamad() {
     )
   }
   if (!import.meta.env.DEV) return null
-  return <span className="grid size-[76px] place-items-center rounded-[6px] border border-dashed border-white/25 text-center text-[11px] leading-5 text-white/45">جای نماد<br />اینماد</span>
+  return <span className="grid size-[76px] place-items-center rounded-[6px] border border-dashed border-white/25 text-center text-[11px] leading-5 text-white/60">جای نماد<br />اینماد</span>
 }
 
 /** دکمهٔ برگشت به بالا (گوشهٔ پایین صفحهٔ مرجع) */

@@ -91,6 +91,7 @@ public sealed class CanteenController(ICanteenService canteen, PaymentGateway ga
     [PanelAccess(Roles.CanteenStaff, Roles.BranchManager)]
     [HttpPost("staff/orders/{id:int}/status")]
     [ValidateCsrf]
+    [RequestSizeLimit(1024)]
     public async Task<IActionResult> Status(int id, [FromBody] CanteenStatusRequest request, CancellationToken ct)
     {
         var branchId = await scopes.CanteenOrderBranchAsync(id, ct);

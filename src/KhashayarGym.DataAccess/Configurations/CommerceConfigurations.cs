@@ -123,6 +123,8 @@ internal sealed class WalletTransactionConfiguration : IEntityTypeConfiguration<
         e.Property(x => x.Description).HasMaxLength(150);
         e.Property(x => x.Reference).HasMaxLength(40);
         e.HasIndex(x => new { x.UserId, x.CreatedAtUtc });
+        // پشتیبان در برابر شارژ/بازگشت وجه تکراری: هر مرجع (payment:7، canteen:40…) برای هر نوع فقط یک ردیف
+        e.HasIndex(x => new { x.UserId, x.Reference, x.Type }).IsUnique().HasFilter("[Reference] IS NOT NULL");
     }
 }
 

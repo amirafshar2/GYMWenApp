@@ -72,7 +72,7 @@ export default function CanteenBoardPage() {
             <option value="">— شعبه —</option>
             {branches.map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
           </select>
-          <span className={cn('rounded-full px-3 py-1 text-[12px] font-bold', status === 'live' ? 'bg-[#1f9d55]' : 'bg-white/15')}>{status === 'live' ? '● لحظه‌ای' : 'در حال اتصال…'}</span>
+          <span className={cn('rounded-full px-3 py-1 text-[12px] font-bold', status === 'live' ? 'bg-[#14783f]' : 'bg-white/15')}>{status === 'live' ? '● لحظه‌ای' : 'در حال اتصال…'}</span>
           <div className="ms-auto flex gap-2">
             <button type="button" onClick={() => { setSound(!sound); if (!sound) beep() }} aria-pressed={sound} className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[3px] bg-white/10 px-4 text-[14px] font-bold hover:bg-white/20">
               {sound ? <Volume2 className="size-5" /> : <VolumeX className="size-5" />}{sound ? 'صدا روشن' : 'بی‌صدا'}

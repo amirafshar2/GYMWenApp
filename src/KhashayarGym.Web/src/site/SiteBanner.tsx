@@ -7,7 +7,7 @@ import { rebrand } from '@/lib/brand'
 
 /** نوار «جشنواره» — کامپوننت Promo Banner از 21st.dev با شمارش معکوس */
 export default function SiteBanner() {
-  const { data: c } = useData('campaign', api.campaign)
+  const { data: c, error } = useData('campaign', api.campaign)
   const [hidden, setHidden] = useState(() => { try { return sessionStorage.getItem('festival-hidden') === '1' } catch { return false } })
   const [now, setNow] = useState(Date.now())
   const box = useRef<HTMLDivElement>(null)
@@ -16,10 +16,13 @@ export default function SiteBanner() {
   const end = c ? Date.parse(c.endsAtUtc) : 0
   const ms = Math.max(0, end - now)
   const show = !!c && !hidden && ms > 0
+  // تا جواب جشنواره نیامده، جای نوار که index.html از قبل رزرو کرده دست نمی‌خورد (صفحه جابه‌جا نشود)
+  const pending = c === undefined && !error && !hidden
   useLayoutEffect(() => {
+    if (pending) return
     document.documentElement.style.setProperty('--festival-h', `${show && box.current ? box.current.offsetHeight : 0}px`)
     return () => document.documentElement.style.setProperty('--festival-h', '0px')
-  }, [show])
+  }, [show, pending])
   if (!show || !c) return null
 
   const d = Math.floor(ms / 86_400_000), h = Math.floor(ms / 3_600_000) % 24, m = Math.floor(ms / 60_000) % 60, s = Math.floor(ms / 1000) % 60
