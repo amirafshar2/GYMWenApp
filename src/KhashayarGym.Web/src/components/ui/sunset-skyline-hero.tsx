@@ -35,6 +35,8 @@ export interface TokyoSkylineHeroProps {
    * صفحه می‌رسد فعال می‌شود و در انتهای ویدیو (یا ابتدای آن هنگام برگشت) آزاد می‌شود.
    */
   midPage?: boolean
+  /** object-position ویدیو (مثلاً «50% 20%» تا سر سوژه بریده نشود) */
+  videoPosition?: string
   /** نمایش منوی شیشه‌ای داخل بخش */
   showNav?: boolean
   fontFamily?: string
@@ -78,6 +80,7 @@ export default function TokyoSkylineHero({
   signature = DEFAULT_SIGNATURE,
   scrubDistance = 3200,
   midPage = false,
+  videoPosition = "50% 50%",
   showNav = true,
   fontFamily,
   className,
@@ -329,6 +332,7 @@ export default function TokyoSkylineHero({
           width: "100%",
           height: "100%",
           objectFit: "cover",
+          objectPosition: videoPosition,
           opacity: ready ? 1 : 0,
           transition: "opacity 0.6s ease",
         }}

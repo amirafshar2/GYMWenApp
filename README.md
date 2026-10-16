@@ -97,10 +97,11 @@ $env:BASE_URL = "https://localhost:7180"; npx playwright test
 | مربیان | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev)؛ عکس‌ها و نام‌ها موقت‌اند |
 | سؤالات / فرم مشاوره | `site/SiteFaq.tsx`، `site/SiteContact.tsx` | FAQ Accordion و Contact Form (21st.dev) |
 | نوار جشنواره | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
+| گالری | `site/SiteGallery.tsx` | Shared Element Gallery (21st.dev)؛ عکس‌ها فعلاً فریم ویدیوها |
 | فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |
 
 ### ویدیوی بخش وسط
-صفحهٔ اصلی مستقیم `src/KhashayarGym.Web/public/media/video/gym.mp4` را پخش می‌کند (الان: ادغام سکانس ۱ و ۲).
+صفحهٔ اصلی مستقیم `src/KhashayarGym.Web/public/media/video/gym.mp4` را پخش می‌کند (الان: ویدیوی مدیر باشگاه، نوارهای سیاه کناری بریده شده).
 برای ویدیوی تازه، فایل خام را با اسم `gym-source.mp4` همان‌جا بگذارید و اجرا کنید:
 ```powershell
 .\scripts\make-scrub-video.ps1

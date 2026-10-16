@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { brand } from '@/lib/brand'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
 
 /** ویدیوی خود باشگاه: public/media/video/gym.mp4 (برای اسکرول نرم، فایل با scripts/make-scrub-video بهینه شده — همهٔ فریم‌ها کلیدی) */
@@ -26,18 +27,19 @@ export default function SiteVideo() {
     )
   }
   return (
-    <section aria-label="داخل سالن‌های خشایار">
+    <section aria-label="ویدیوی مدیر باشگاه در سالن خشایار">
       <TokyoSkylineHero
         midPage
         showNav={false}
         videoSrc={src}
         skylineSrc=""
         title="هر روز، یک تکرار بیشتر."
-        brandMark=""
+        brandMark={brand.shortName}
+        videoPosition="50% 22%"
         scrollHint="اسکرول کن"
         signature={{ name: 'guglielmogiannattasio', url: 'https://www.guglielmogiannattasio.it' }}
         fontFamily="'Vazirmatn Variable', Tahoma, sans-serif"
-        scrubDistance={3600}
+        scrubDistance={2400}
       />
     </section>
   )

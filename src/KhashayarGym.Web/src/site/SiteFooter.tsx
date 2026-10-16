@@ -18,7 +18,7 @@ const mostCommon = (xs: (string | null)[]) => {
 
 const LINKS = [
   { text: 'خانه', href: '/#top' }, { text: 'شعبه‌ها', href: '/#branches' }, { text: 'رشته‌ها', href: '/#disciplines' },
-  { text: 'پکیج‌ها', href: '/#packages' }, { text: 'مربیان', href: '/#coaches' }, { text: 'مشاورهٔ رایگان', href: '/#consult' },
+  { text: 'پکیج‌ها', href: '/#packages' }, { text: 'مربیان', href: '/#coaches' }, { text: 'گالری', href: '/#gallery' }, { text: 'مشاورهٔ رایگان', href: '/#consult' },
 ]
 
 /** فوتر تیرهٔ چهارستونه مثل صفحهٔ مرجع: ساعات کاری، دفتر، لینک‌ها، در تماس باشید */

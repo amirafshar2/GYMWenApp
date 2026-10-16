@@ -13,6 +13,7 @@ const LINKS = [
   { label: 'رشته‌ها', href: '/#disciplines', id: 'disciplines' },
   { label: 'پکیج‌ها', href: '/#packages', id: 'packages' },
   { label: 'مربیان', href: '/#coaches', id: 'coaches' },
+  { label: 'گالری', href: '/#gallery', id: 'gallery' },
   { label: 'تماس', href: '/#consult', id: 'consult' },
 ]
 
