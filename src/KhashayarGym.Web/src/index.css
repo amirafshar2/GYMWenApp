@@ -53,6 +53,8 @@
     font-feature-settings: "ss01";
     text-rendering: optimizeLegibility;
   }
+  /* هیچ تصویر یا انیمیشنی صفحه را در موبایل عریض‌تر از صفحه‌نمایش نکند (clip، نه hidden، تا sticky کار کند) */
+  #main { overflow-x: clip; }
   section[id] { scroll-margin-top: calc(var(--festival-h, 0px) + 5rem); }
   /* بخش‌های پایین صفحه تا نزدیک شدن به دید رندر نمی‌شوند */
   

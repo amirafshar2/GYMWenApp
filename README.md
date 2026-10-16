@@ -3,7 +3,9 @@
 > [!IMPORTANT]
 > **Dies ist eine Demo-Version.** Alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
 >
-> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Login für das Panel: `09100000000` (der Code erscheint auf der Seite)
+> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
+>
+> Entwickelt von **[Afshar Web Studio – afsharweb.com](https://afsharweb.com/)**
 
 Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 12 Standorten in Shiraz (Iran): öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Geschäftsführung. Die Oberfläche ist vollständig auf Persisch (Rechts-nach-links).
 
@@ -11,7 +13,9 @@ Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 
 
 **👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)**
 
-- Anmeldung im Mitarbeiter-Panel mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
+- **Ein-Klick-Login:** Auf der Login-Seite gibt es die Schaltflächen „Gesamtleitung“, „Standortleitung“ und „Mitglied“ – ohne Nummer und Code direkt ins Panel bzw. ins Mitgliedskonto.
+- Alternativ mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) anmelden – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
+- Ein oranger Hinweisbalken oben auf jeder Seite kennzeichnet die Demo.
 - Zahlungen laufen über ein Test-Gateway, es wird kein echtes Geld bewegt.
 - Die Demo läuft im kostenlosen Render-Tarif: Nach 15 Minuten ohne Zugriff schläft sie ein, der erste Aufruf dauert dann etwa eine Minute. Demo-Daten werden bei jedem Neustart neu erzeugt.
 
@@ -28,6 +32,8 @@ Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 
 | ![Empfang](docs/screenshots/reception.webp) | ![Trainer-Panel](docs/screenshots/coach.webp) |
 | **Kantinen-Menü verwalten** | **Trainer verwalten** |
 | ![Kantinen-Menü](docs/screenshots/admin-menu.webp) | ![Trainer verwalten](docs/screenshots/admin-coaches.webp) |
+| **Login mit Ein-Klick-Demo-Zugang** | |
+| ![Login](docs/screenshots/login.webp) | |
 
 | Mitgliedskarte (mobil) | Kantine per QR (mobil) |
 |---|---|
@@ -45,7 +51,117 @@ Dieses Projekt war meine erste Erfahrung mit **komplettem Vibe-Coding**: Ich hab
 - **Phase 4 – Mitarbeiter-Panel:** Dashboard für die Geschäftsführung (Umsatz der 12 Standorte nach Quelle, Verlängerungsrate, Stoßzeiten, auslaufende Mitgliedschaften, Aktionswirkung, Excel-Export), Empfang mit Scanner/Kamera/Armband, Trainer-Panel (Trainings- und Ernährungsplan, Gewichtsverlauf), Verwaltung von Preisen, Aktionen, Rabattcodes, Vertrag, Lager, Kantinen-Menü, Trainern und Mitarbeitern, automatische SMS, Präsentationsmodus.
 - **Phase 5 – Qualität:** unabhängiges Sicherheits-Audit mit behobenen Befunden, Performance-Optimierung, Barrierefreiheit, Health-Checks, CI.
 
+## Technologien
+
+![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-Web_API-512BD4?logo=dotnet&logoColor=white)
+![EF Core](https://img.shields.io/badge/EF_Core-10-512BD4)
+![SQL Server](https://img.shields.io/badge/SQL_Server-Production-CC2927?logo=microsoftsqlserver&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Demo-003B57?logo=sqlite&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![SignalR](https://img.shields.io/badge/SignalR-Live-512BD4)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33?logo=playwright&logoColor=white)
+![xUnit](https://img.shields.io/badge/xUnit-Tests-5E2B97)
+![Docker](https://img.shields.io/badge/Docker-Image-2496ED?logo=docker&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Demo-46E3B7?logo=render&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?logo=githubactions&logoColor=white)
+
+| Bereich | Technologie | Wofür |
+|---|---|---|
+| Backend | ASP.NET Core 10 Web API, C# | REST-API `/api/v1`, Sicherheit, Output-Caching, Rate-Limiting, Health-Checks |
+| Daten | EF Core 10, SQL Server (Production), SQLite (Demo) | Drei-Schichten-Zugriff, Migrationen, atomare bedingte Updates |
+| Login | ASP.NET Identity, JWT, rotierende Refresh-Tokens (HttpOnly-Cookie) | Login per Handynummer + SMS-Code, Rollen und Standort-Rechte |
+| Validierung | FluentValidation | alle Eingaben in der Business-Schicht |
+| Zahlung | Parbad (ZarinPal + Test-Gateway) | Mitgliedschaft, Shop, Kantine, Wallet |
+| Echtzeit | SignalR | Live-Bestelltafel der Kantine |
+| Dokumente | QuestPDF, ClosedXML, QRCoder | PDF-Rechnung und -Vertrag, Excel-Export, QR-Mitgliedskarte |
+| Logging | Serilog | strukturierte Logs, Audit-Log in der Datenbank |
+| Frontend | React 19, TypeScript, Vite 8, React Router 7 | Single-Page-App, vollständig RTL/Persisch |
+| Design | Tailwind CSS 4, Motion, Lucide, Komponenten von 21st.dev | Hero mit Partikel-Hantel, Scroll-Animationen, Panels |
+| Tests | xUnit + WebApplicationFactory, Playwright | 77 Server- und 33 Browser-Tests (Desktop und Mobil) |
+| Betrieb | Docker (mehrstufig), docker-compose, Render, GitHub Actions | Image ohne Root, Demo-Hosting, CI mit Sicherheitsprüfung |
+
 ## Architektur (drei Schichten, .NET 10)
+
+```mermaid
+flowchart LR
+    subgraph Client["Browser (React SPA, RTL)"]
+        Site["Öffentliche Website"]
+        Member["Mitgliedskonto"]
+        Panel["Mitarbeiter-Panel"]
+    end
+
+    subgraph Api["KhashayarGym.Api"]
+        Ctrl["Controller /api/v1"]
+        Sec["Sicherheit: JWT, CSRF, CSP, Rate-Limit"]
+        Hub["SignalR-Hub /hubs/canteen"]
+        Workers["Hintergrund-Dienste: SMS, Wartung, Drehkreuz"]
+    end
+
+    Biz["KhashayarGym.Business<br/>Services, Validierung, Preise, Rechte"]
+    Data["KhashayarGym.DataAccess<br/>EF Core, Migrationen, Seed"]
+    Dom["KhashayarGym.Domain<br/>Entitäten"]
+    DB[("SQL Server<br/>(Demo: SQLite)")]
+
+    Pay["ZarinPal / Test-Gateway"]
+    Sms["Kavenegar SMS"]
+    Gate["Drehkreuz und Armband"]
+
+    Client -->|HTTPS + JSON| Sec --> Ctrl --> Biz --> Data --> DB
+    Panel <-->|WebSocket| Hub
+    Biz -.-> Dom
+    Data -.-> Dom
+    Ctrl <-->|Zahlung und Rückruf| Pay
+    Workers --> Sms
+    Gate -->|Check-in, Whitelist| Ctrl
+```
+
+### Ablauf der Online-Mitgliedschaft
+
+```mermaid
+sequenceDiagram
+    actor M as Mitglied
+    participant W as Website (React)
+    participant A as API
+    participant S as SMS (Kavenegar)
+    participant G as Gateway (ZarinPal)
+    M->>W: Standort und Paket wählen
+    W->>A: POST /auth/otp
+    A->>S: 5-stelliger Code
+    M->>W: Code eingeben
+    W->>A: POST /auth/verify → JWT + Refresh-Cookie
+    W->>A: Vertrag + Gesundheitsfragebogen signieren (zweiter SMS-Code)
+    W->>A: POST /checkout (Preis nur serverseitig)
+    A->>G: Zahlung anlegen
+    M->>G: bezahlen
+    G->>A: Rückruf /payments/callback
+    A->>A: Betrag prüfen, Verify, Abschluss atomar
+    A-->>W: PDF-Rechnung + QR-Mitgliedskarte
+```
+
+### Rollen und Zugriff
+
+```mermaid
+flowchart TB
+    SA["Gesamtleitung<br/>alle 12 Standorte, alle Bereiche"]
+    BM["Standortleitung<br/>Dashboard, Empfang, Kantine, Shop"]
+    R["Empfang<br/>Check-in"]
+    C["Trainer<br/>eigene Schüler"]
+    K["Kantine<br/>Bestelltafel, Menü"]
+    S["Shop<br/>Bestellungen, Lager"]
+    SA --> BM
+    BM --> R
+    BM --> K
+    BM --> S
+    SA --> C
+```
+
+Rolle und Standort werden bei jeder Anfrage aus der Datenbank gelesen; jede Rolle sieht nur die Daten ihrer eigenen Standorte.
+
+### Projektstruktur
 
 ```
 KhashayarGym.slnx
@@ -58,9 +174,8 @@ src/
 tests/KhashayarGym.Tests    xUnit-Tests (Business) und Integrationstests (WebApplicationFactory)
 src/KhashayarGym.Web/e2e    Playwright-Tests (Desktop und Mobil)
 scripts/                    Hilfsskripte (Hero-Video, Bilder, Portfolio-Export, Komprimierung)
+render.yaml                 Render-Blueprint für die Live-Demo
 ```
-
-**Technologien:** ASP.NET Core 10, EF Core (SQL Server / SQLite), ASP.NET Identity + JWT mit rotierenden Refresh-Tokens, Parbad (Zahlungen), SignalR, QuestPDF, ClosedXML, Serilog, React 19, Tailwind CSS v4, Playwright.
 
 ## Voraussetzungen
 
@@ -218,7 +333,7 @@ Für komplette Playwright-Läufe das Rate-Limit in der Entwicklung anheben (alle
 $env:RateLimiting__PermitMultiplier = "20"   # nur Development/Testing; in Production ignoriert
 ```
 
-Aktuell über 100 automatisierte Tests (Server und Browser, Desktop und Mobil).
+Aktuell 110 automatisierte Tests: 77 Server-Tests und 33 Browser-Tests (Desktop und Mobil).
 
 ## Daten bearbeiten
 

@@ -58,7 +58,7 @@ export default function App() {
 
   return (
     <>
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] rounded-full bg-primary px-4 py-2 text-primary-foreground">پرش به محتوا</a>
+      <a href="#main" className="sr-only top-0 left-0 focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:left-auto focus:z-[100] rounded-full bg-primary focus:px-4 focus:py-2 text-primary-foreground">پرش به محتوا</a>
       {!inPanel && <SiteBanner />}
       <SiteHeader />
       <main id="main" style={{ paddingTop: inPanel ? 78 : 'calc(78px + var(--festival-h, 0px))' }}>
