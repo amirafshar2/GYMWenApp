@@ -12,7 +12,7 @@ import ShirazBranchPicker, { type PickerArea } from '@/components/ui/shiraz-bran
 /** چهار منطقهٔ شهر با رنگ‌های تم سایت */
 const AREAS: PickerArea[] = [
   { id: 'nw', name: 'شمال‌غرب', sub: 'شهرک گلستان', color: '#2C2C2C' },
-  { id: 'w', name: 'غرب', sub: 'معالی‌آباد و قدوسی', color: '#E8283C' },
+  { id: 'w', name: 'غرب', sub: 'معالی‌آباد و قدوسی', color: '#0B5FB0' },
   { id: 'c', name: 'مرکز', sub: 'فرهنگ‌شهر، نیایش، سروناز', color: '#FFB400' },
   { id: 'e', name: 'شرق و جنوب', sub: 'شعبه‌های تازه', color: '#8A8A8A' },
 ]
@@ -115,8 +115,8 @@ export default function SiteBranches() {
       />
 
       <div aria-live="polite" className="mt-6 min-h-6 text-sm">
-        {geo.msg && <p className={geo.status === 'error' ? 'text-[#a4361f]' : 'text-plate'}>{geo.msg}</p>}
-        {error && <p className="text-[#a4361f]">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
+        {geo.msg && <p className={geo.status === 'error' ? 'text-danger' : 'text-plate'}>{geo.msg}</p>}
+        {error && <p className="text-danger">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
       </div>
 
       <div className="mt-4">

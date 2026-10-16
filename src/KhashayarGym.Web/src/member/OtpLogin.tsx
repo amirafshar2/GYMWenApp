@@ -70,7 +70,7 @@ export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => voi
           className={`${inputCls} text-right text-[17px]`} />
         <p className="text-[13px] text-rubber">کد ورود با پیامک فرستاده می‌شود. حساب جدا لازم نیست؛ اولین ورود یعنی ثبت‌نام.</p>
       </div>
-      {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-plate">{err}</p>}
+      {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-danger">{err}</p>}
       <Btn type="submit" busy={busy}><MessageSquareText className="size-5" aria-hidden />دریافت کد ورود</Btn>
     </form>
   ) : (
@@ -89,7 +89,7 @@ export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => voi
           <b>حالت نمایشی:</b> پیامک واقعی ارسال نمی‌شود. کد شما: <b dir="ltr" className="text-[17px] tracking-widest">{faDigits(demo)}</b>
         </Notice>
       )}
-      {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-plate">{err}</p>}
+      {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-danger">{err}</p>}
       <Btn type="submit" busy={busy}>ورود</Btn>
       <p className="text-center text-[13px] text-rubber">
         {left > 0 ? <>ارسال دوباره تا {faNum(left)} ثانیهٔ دیگر</> :

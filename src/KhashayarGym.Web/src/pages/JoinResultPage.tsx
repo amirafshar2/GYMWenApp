@@ -39,7 +39,7 @@ export default function JoinResultPage() {
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_400px] [&>*]:min-w-0">
         <Panel>
           <div className="mb-5 flex items-center gap-3">
-            {ok ? <CheckCircle2 className="size-10 text-[#1f9d55]" aria-hidden /> : <XCircle className="size-10 text-plate" aria-hidden />}
+            {ok ? <CheckCircle2 className="size-10 text-[#1f9d55]" aria-hidden /> : <XCircle className="size-10 text-danger" aria-hidden />}
             <div>
               <p className="text-[18px] font-black text-chalk">{ok ? 'پرداخت موفق بود' : p.status === 'pending' ? 'پرداخت هنوز تأیید نشده' : 'پرداخت لغو شد یا ناموفق بود'}</p>
               <p className="text-[14px] text-rubber">{ok ? 'رسید پرداخت و فاکتور رسمی آماده است.' : 'اگر مبلغی از حساب شما کم شده، حداکثر تا ۷۲ ساعت توسط بانک برمی‌گردد.'}</p>

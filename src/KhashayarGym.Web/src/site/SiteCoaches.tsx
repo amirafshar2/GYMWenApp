@@ -22,7 +22,7 @@ const unsplash = (id: string) => `https://images.unsplash.com/photo-${id}?w=480&
 /** اگر عکس بارگذاری نشد (مثلاً بدون اینترنت): حرف اول نام روی زمینهٔ تیره */
 const initials = (name: string) =>
   'data:image/svg+xml;utf8,' + encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150"><rect width="120" height="150" fill="#2c2c2c"/><text x="60" y="92" text-anchor="middle" font-family="Vazirmatn, Tahoma" font-size="56" font-weight="900" fill="#e8283c">${name.trim()[0]}</text></svg>`)
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150"><rect width="120" height="150" fill="#2c2c2c"/><text x="60" y="92" text-anchor="middle" font-family="Vazirmatn, Tahoma" font-size="56" font-weight="900" fill="#0b5fb0">${name.trim()[0]}</text></svg>`)
 
 function CoachCard({ c }: { c: Coach }) {
   const ph = PLACEHOLDER[c.slug]

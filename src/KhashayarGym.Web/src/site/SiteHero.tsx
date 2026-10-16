@@ -41,7 +41,7 @@ export default function SiteHero() {
         accentFont="'Vazirmatn Variable', Tahoma, sans-serif"
         loadFonts={false}
         textColor="#2C2C2C"
-        accentColor="#E8283C"
+        accentColor="#0B5FB0"
         height="calc(100svh - 78px - var(--festival-h, 0px))"
         showCredit
       />

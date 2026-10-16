@@ -15,7 +15,7 @@ const toLatin = (s: string) => s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵
 
 type Status = { s: 'idle' | 'busy' | 'ok' | 'err'; msg?: string; fields?: Record<string, string> }
 
-const input = 'h-[52px] w-full rounded-[3px] border border-steel-2 bg-white px-4 text-[15px] text-chalk outline-none transition-colors placeholder:text-rubber/60 hover:border-chalk/30 focus:border-plate focus:ring-2 focus:ring-plate/15 aria-[invalid=true]:border-plate'
+const input = 'h-[52px] w-full rounded-[3px] border border-steel-2 bg-white px-4 text-[15px] text-chalk outline-none transition-colors placeholder:text-rubber/60 hover:border-chalk/30 focus:border-plate focus:ring-2 focus:ring-plate/15 aria-[invalid=true]:border-danger'
 
 /** مشاورهٔ رایگان: بخش تیره با تصویر سالن، اطلاعات تماس و فرم سفید هم‌سبک بقیهٔ سایت */
 export default function SiteContact() {
@@ -69,7 +69,7 @@ export default function SiteContact() {
 
       <div className={`${wrap} grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20`}>
         <motion.div {...fadeA}>
-          <Eyebrow className="text-plate">مشاورهٔ رایگان</Eyebrow>
+          <Eyebrow className="text-plate-lt">مشاورهٔ رایگان</Eyebrow>
           <h2 id="consult-title" className="mt-3 text-[clamp(2rem,3.8vw,3.4rem)] font-black leading-[1.25]">
             قبل از ثبت‌نام<br />با ما مشورت کن
           </h2>
@@ -168,7 +168,7 @@ export default function SiteContact() {
 
           <div className="mt-4 min-h-6 text-[14px]">
             {st.s === 'ok' && <p role="status" className="flex items-center gap-2 font-bold text-[#178a4c]"><Check className="size-4" aria-hidden />{st.msg}</p>}
-            {st.s === 'err' && <p role="alert" className="font-bold text-plate">{st.msg}</p>}
+            {st.s === 'err' && <p role="alert" className="font-bold text-danger">{st.msg}</p>}
           </div>
         </motion.form>
       </div>

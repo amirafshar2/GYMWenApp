@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 /** کلاس‌های مشترک صفحه‌های عضویت (هم‌سبک فرم مشاوره: گوشهٔ ۳px، قرمز تم) */
 export const inputCls =
-  'h-[52px] w-full rounded-[3px] border border-steel-2 bg-white px-4 text-[15px] text-chalk outline-none transition-colors placeholder:text-rubber/60 hover:border-chalk/30 focus:border-plate focus:ring-2 focus:ring-plate/15 aria-[invalid=true]:border-plate disabled:bg-steel'
+  'h-[52px] w-full rounded-[3px] border border-steel-2 bg-white px-4 text-[15px] text-chalk outline-none transition-colors placeholder:text-rubber/60 hover:border-chalk/30 focus:border-plate focus:ring-2 focus:ring-plate/15 aria-[invalid=true]:border-danger disabled:bg-steel'
 
 export function Btn({ busy, variant = 'primary', className, children, disabled, ...p }: ComponentProps<'button'> & { busy?: boolean; variant?: 'primary' | 'dark' | 'ghost' }) {
   return (
@@ -30,7 +30,7 @@ export function Notice({ tone = 'info', children, className }: { tone?: 'info' |
       className={cn('rounded-[3px] border-r-4 px-4 py-3 text-[14px] leading-7',
         tone === 'info' && 'border-chalk bg-steel text-chalk',
         tone === 'ok' && 'border-[#1f9d55] bg-[#ecf8f1] text-[#14532d]',
-        tone === 'err' && 'border-plate bg-[#fdecee] text-[#8a1020]',
+        tone === 'err' && 'border-danger bg-[#fdecee] text-[#8a1020]',
         tone === 'warn' && 'border-sun bg-[#fff6e0] text-[#5c4300]',
         className)}>
       {children}

@@ -27,7 +27,7 @@ public interface IPdfService
 public sealed class PdfService : IPdfService
 {
     private const string Font = "Vazirmatn FD";
-    private static readonly string Ink = "#2C2C2C", Muted = "#6B6B6B", Line = "#E5E5E5", Red = "#E8283C";
+    private static readonly string Ink = "#2C2C2C", Muted = "#6B6B6B", Line = "#E5E5E5", Red = "#0B5FB0";
     private static bool _init;
     private static readonly object Gate = new();
 
@@ -116,7 +116,7 @@ public sealed class PdfService : IPdfService
         if (!string.IsNullOrWhiteSpace(m.HealthNotes))
             col.Item().Text(t => { t.Span("توضیح عضو: ").FontColor(Muted); t.Span(m.HealthNotes); });
         if (m.HealthAnswers.Any(a => a))
-            col.Item().Background("#FDE8EA").Padding(8).Text("به دست‌کم یکی از پرسش‌ها «بله» پاسخ داده شده؛ شروع تمرین پس از مشورت با پزشک توصیه می‌شود.").FontColor(Red);
+            col.Item().Background("#E7F0FA").Padding(8).Text("به دست‌کم یکی از پرسش‌ها «بله» پاسخ داده شده؛ شروع تمرین پس از مشورت با پزشک توصیه می‌شود.").FontColor(Red);
 
         col.Item().PaddingTop(10).Border(1).BorderColor(Line).Padding(10).Column(s =>
         {

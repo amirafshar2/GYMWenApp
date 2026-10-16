@@ -58,7 +58,7 @@ export default function SiteFooter() {
         <div>
           <h2 className={h}>{brand.name}</h2>
           <p className={t}>{faNum(12)} شعبه در {brand.city}<br />سالن‌های جدای آقایان و بانوان</p>
-          <a href={`tel:${brand.phone}`} className="mt-3 inline-flex items-center gap-2 text-[17px] font-bold text-white transition-colors hover:text-plate">
+          <a href={`tel:${brand.phone}`} className="mt-3 inline-flex items-center gap-2 text-[17px] font-bold text-white transition-colors hover:text-plate-lt">
             <Phone className="size-4" aria-hidden /><span dir="ltr">{faDigits(brand.phone)}</span>
           </a>
         </div>

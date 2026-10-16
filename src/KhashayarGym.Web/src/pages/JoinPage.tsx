@@ -223,7 +223,7 @@ function BranchStep({ branches, draft, set, onNext }: { branches: Branch[]; draf
           <div className="grid max-h-[440px] gap-2 overflow-y-auto pe-1">
             {list.map(({ b, d }, i) => (
               <label key={b.slug} className={cn('flex cursor-pointer items-start gap-3 rounded-[3px] border p-4 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-plate/40',
-                draft.branch === b.slug ? 'border-plate bg-[#fff5f6]' : 'border-steel-2 hover:border-chalk/30')}>
+                draft.branch === b.slug ? 'border-plate bg-[#f2f7fd]' : 'border-steel-2 hover:border-chalk/30')}>
                 <input type="radio" name="branch" value={b.slug} checked={draft.branch === b.slug} onChange={() => set({ branch: b.slug })} className="mt-1 accent-[var(--color-plate)]" />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-chalk">
@@ -263,7 +263,7 @@ function PackageStep({ pkgs, draft, set, quote, quoteErr, onBack, onNext }: {
             const price = p.discountedPriceToman ?? p.priceToman
             return (
               <label key={p.slug} className={cn('relative flex cursor-pointer flex-col gap-1 rounded-[3px] border p-4 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-plate/40',
-                draft.pkg === p.slug ? 'border-plate bg-[#fff5f6]' : 'border-steel-2 hover:border-chalk/30')}>
+                draft.pkg === p.slug ? 'border-plate bg-[#f2f7fd]' : 'border-steel-2 hover:border-chalk/30')}>
                 <input type="radio" name="pkg" value={p.slug} checked={draft.pkg === p.slug} onChange={() => set({ pkg: p.slug })} className="sr-only" />
                 <span className="flex items-center justify-between gap-2">
                   <span className="text-[16px] font-bold text-chalk">{p.name}</span>
@@ -288,7 +288,7 @@ function PackageStep({ pkgs, draft, set, quote, quoteErr, onBack, onNext }: {
             aria-describedby={`${uid}-cm`} aria-invalid={!!quote?.discountCodeError || undefined} className={`${inputCls} text-left uppercase`} />
           <Btn type="submit" variant="dark" className="shrink-0">اعمال</Btn>
         </div>
-        <p id={`${uid}-cm`} role="status" className={cn('min-h-6 text-[13px]', quote?.discountCodeError ? 'text-plate' : 'text-[#1f7a46]')}>{codeMsg}</p>
+        <p id={`${uid}-cm`} role="status" className={cn('min-h-6 text-[13px]', quote?.discountCodeError ? 'text-danger' : 'text-[#1f7a46]')}>{codeMsg}</p>
       </form>
       {quoteErr && <Notice tone="err">{quoteErr}</Notice>}
 
@@ -407,7 +407,7 @@ function ContractStep({ section, defaultName, alreadySigned, onBack, onSigned }:
             متن قرارداد را خواندم و می‌پذیرم و پاسخ‌های فرم سلامت درست است.
           </label>
 
-          {err && <p role="alert" className="text-[14px] text-plate">{err}</p>}
+          {err && <p role="alert" className="text-[14px] text-danger">{err}</p>}
           <div className="flex flex-wrap justify-between gap-3">
             <Btn type="button" variant="ghost" onClick={onBack}>بازگشت</Btn>
             <div className="flex flex-wrap gap-3">
@@ -421,7 +421,7 @@ function ContractStep({ section, defaultName, alreadySigned, onBack, onSigned }:
           <label htmlFor={`${uid}-sc`} className="text-[14px] font-bold text-chalk">کد امضای قرارداد را وارد کنید</label>
           <CodeField id={`${uid}-sc`} value={code} onChange={setCode} invalid={!!err} />
           {demo && <Notice tone="warn"><b>حالت نمایشی:</b> کد امضا: <b dir="ltr" className="text-[17px] tracking-widest">{faDigits(demo)}</b></Notice>}
-          {err && <p role="alert" className="text-[14px] text-plate">{err}</p>}
+          {err && <p role="alert" className="text-[14px] text-danger">{err}</p>}
           <Btn type="submit" busy={busy}>امضا و ادامه</Btn>
           <p className="text-center text-[13px] text-rubber">
             {left > 0 ? <>ارسال دوباره تا {faNum(left)} ثانیه</> :

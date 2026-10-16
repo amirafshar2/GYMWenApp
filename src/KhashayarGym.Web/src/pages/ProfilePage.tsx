@@ -198,9 +198,9 @@ function WeightChart({ userId }: { userId: number }) {
       </div>
       {chart ? (
         <svg viewBox={`0 0 ${chart.W} ${chart.H}`} className="h-auto w-full" role="img" aria-label={`نمودار وزن: از ${faNum(pts[0].kg)} تا ${faNum(pts[pts.length - 1].kg)} کیلوگرم`}>
-          <defs><linearGradient id={`${uid}-g`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#e8283c" stopOpacity=".25" /><stop offset="1" stopColor="#e8283c" stopOpacity="0" /></linearGradient></defs>
+          <defs><linearGradient id={`${uid}-g`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#0b5fb0" stopOpacity=".25" /><stop offset="1" stopColor="#0b5fb0" stopOpacity="0" /></linearGradient></defs>
           <path d={chart.area} fill={`url(#${uid}-g)`} />
-          <path d={chart.line} fill="none" stroke="#e8283c" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={chart.line} fill="none" stroke="#0b5fb0" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
           {chart.dots.map(({ cx, cy, p }, i) => (
             <g key={i}><circle cx={cx} cy={cy} r="5" fill="#fff" stroke="#2c2c2c" strokeWidth="2" />
               <text x={cx} y={cy - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill="#2c2c2c">{faNum(p.kg)}</text></g>
@@ -212,7 +212,7 @@ function WeightChart({ userId }: { userId: number }) {
         <input id={`${uid}-kg`} value={kg} onChange={(e) => setKg(e.target.value)} inputMode="decimal" placeholder="وزن امروز، مثلاً ۷۸٫۵" aria-invalid={!!err || undefined}
           className={`${inputCls} max-w-[240px]`} />
         <Btn type="submit" variant="dark"><Plus className="size-4" aria-hidden />ثبت</Btn>
-        {err && <p role="alert" className="w-full text-[13px] text-plate">{err}</p>}
+        {err && <p role="alert" className="w-full text-[13px] text-danger">{err}</p>}
       </form>
       <p className="mt-2 text-[12px] text-rubber">این اعداد فقط روی همین دستگاه ذخیره می‌شوند.</p>
     </Panel>

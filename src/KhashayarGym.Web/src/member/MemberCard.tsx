@@ -39,7 +39,7 @@ export default function MemberCard({ m, name }: { m: Membership; name: string })
   const women = m.section === 'women'
   return (
     <article aria-label="کارت عضویت"
-      className={cn('relative overflow-hidden rounded-[14px] p-6 text-white shadow-[0_20px_50px_rgb(0_0_0/0.18)] sm:p-7', women ? 'bg-[linear-gradient(135deg,#5d2858,#8e3f86_60%,#b0569f)]' : 'bg-[linear-gradient(135deg,#181818,#2c2c2c_55%,#4a1219)]')}>
+      className={cn('relative overflow-hidden rounded-[14px] p-6 text-white shadow-[0_20px_50px_rgb(0_0_0/0.18)] sm:p-7', women ? 'bg-[linear-gradient(135deg,#5d2858,#8e3f86_60%,#b0569f)]' : 'bg-[linear-gradient(135deg,#181818,#2c2c2c_55%,#0b2f57)]')}>
       <div aria-hidden className="pointer-events-none absolute -left-16 -top-16 size-56 rounded-full bg-plate/30 blur-3xl" />
       <div className="relative flex items-start justify-between gap-4">
         <div className="flex items-center gap-2.5">

@@ -9,8 +9,10 @@
   --color-iron: #ffffff;        /* پس‌زمینهٔ صفحه */
   --color-steel: #f7f7f7;       /* بخش‌های خاکستری روشن و کارت‌ها */
   --color-steel-2: #e5e5e5;     /* خطوط مویی */
-  --color-plate: #e8283c;       /* قرمز تأکید (دکمه‌ها؛ کنتراست متن سفید ۴٫۶:۱) */
-  --color-plate-hi: #c81c2f;    /* hover */
+  --color-plate: #0b5fb0;       /* آبی لوگو (دکمه‌ها و تأکید؛ کنتراست متن سفید ۶٫۳:۱) */
+  --color-plate-hi: #084a8c;    /* hover */
+  --color-plate-lt: #5aa2ec;    /* آبی روشن برای متن روی پس‌زمینهٔ تیره (کنتراست ۶:۱ روی #181818) */
+  --color-danger: #d32f3c;      /* فقط پیام خطا (قرمز معنای «اشتباه» دارد) */
   --color-chalk: #2c2c2c;       /* متن اصلی و تیترها */
   --color-rubber: #6b6b6b;      /* متن ثانویه (۵٫۳:۱ روی سفید) */
   --color-night: #181818;       /* فوتر */
@@ -36,7 +38,7 @@
   --color-muted-foreground: var(--color-rubber);
   --color-accent: #efefef;
   --color-accent-foreground: var(--color-chalk);
-  --color-destructive: #e5484d;
+  --color-destructive: var(--color-danger);
   --color-destructive-foreground: #ffffff;
   --color-border: var(--color-steel-2);
   --color-input: var(--color-steel-2);

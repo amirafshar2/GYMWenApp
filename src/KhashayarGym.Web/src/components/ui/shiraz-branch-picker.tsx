@@ -139,7 +139,7 @@ const norm = (s: string) => s.replace(/[‌\s]/g, "").replace(/ي/g, "ی").repla
 
 const CSS = `
 .sbp{--sbp-bg:#fff;--sbp-fg:var(--color-chalk,#2c2c2c);--sbp-muted:var(--color-steel,#f7f7f7);--sbp-muted-fg:var(--color-rubber,#6b6b6b);
-  --sbp-border:var(--color-steel-2,#e5e5e5);--sbp-ring:var(--color-plate,#e8283c);--sbp-accent:var(--color-plate,#e8283c);
+  --sbp-border:var(--color-steel-2,#e5e5e5);--sbp-ring:var(--color-plate,#0b5fb0);--sbp-accent:var(--color-plate,#0b5fb0);
   width:100%;overflow:hidden;border:1px solid var(--sbp-border);border-radius:4px;background:var(--sbp-bg);color:var(--sbp-fg);
   font-size:14px;line-height:1.5;box-shadow:0 20px 50px -30px rgb(0 0 0/.25)}
 .sbp *,.sbp *::before,.sbp *::after{box-sizing:border-box}
