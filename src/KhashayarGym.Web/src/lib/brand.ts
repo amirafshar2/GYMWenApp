@@ -8,6 +8,8 @@ export interface Brand {
   shortName: string
   latinName: string
   logo: string
+  /** لوگوی کامل (با نوشته) برای فوتر */
+  logoFull: string
   slogan: string
   nearSlogan: string
   whySlogan: string
@@ -21,7 +23,8 @@ const khashayar: Brand = {
   name: 'مجموعه باشگاه‌های خشایار',
   shortName: 'خشایار',
   latinName: 'KHASHAYAR FITNESS CLUB',
-  logo: '/brand/logo.svg',
+  logo: '/brand/logo-mark.png',
+  logoFull: '/brand/logo.png',
   slogan: 'ورزش کن؛ حتی اگه خشایار نمیای',
   nearSlogan: 'هرکجا هستی، خشایار نزدیکته',
   whySlogan: 'چرا خشایار؟',
@@ -36,6 +39,7 @@ const demo: Brand = {
   shortName: 'آهن‌کوه',
   latinName: 'AHANKOOH ATHLETIC',
   logo: '/brand/demo-logo.svg',
+  logoFull: '/brand/demo-logo.svg',
   slogan: 'تمرین کن؛ هر روز یک وزنه سنگین‌تر',
   nearSlogan: 'هرجای شهر باشی، یک سالن نزدیکته',
   whySlogan: 'چرا آهن‌کوه؟',

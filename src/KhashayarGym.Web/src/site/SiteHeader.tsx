@@ -20,7 +20,7 @@ const LINKS = [
 export function Logo({ light }: { light?: boolean }) {
   return (
     <a href="/#top" className="flex shrink-0 items-center gap-2.5" aria-label={`${brand.name} — صفحهٔ اصلی`}>
-      <img src={brand.logo} alt="" width={40} height={40} className="size-10" />
+      <img src={brand.logo} alt="" width={44} height={44} className="size-11 rounded-full" />
       <span className={cn('inline-block -skew-x-[8deg] text-[28px] font-black leading-none', light ? 'text-white' : 'text-chalk')}>{brand.shortName}</span>
     </a>
   )
