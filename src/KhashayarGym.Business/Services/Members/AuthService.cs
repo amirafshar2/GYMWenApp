@@ -65,6 +65,20 @@ public sealed class AuthService(
         {
             if (stored.RevokedAtUtc is not null && stored.ReplacedByHash is not null)
             {
+                // پاسخ قبلی گم شده؟ جانشین را باطل و زنجیره را از همان‌جا ادامه بده
+                var successor = await db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == stored.ReplacedByHash, ct);
+                if (successor is not null && successor.IsActive(now) && successor.CreatedIp == rc.Ip &&
+                    now - stored.RevokedAtUtc.Value <= TimeSpan.FromSeconds(options.Value.ReuseGraceSeconds))
+                {
+                    // جانشینِ گم‌شده بدون «جایگزین» باطل می‌شود تا استفادهٔ بعدی از آن فقط ۴۰۱ بگیرد؛ زمان چرخش اصلی حفظ می‌شود
+                    var rotatedAt = stored.RevokedAtUtc;
+                    successor.RevokedAtUtc = now;
+                    var resumed = await IssueAsync(stored.User, rc, ct, rotateFrom: stored);
+                    stored.RevokedAtUtc = rotatedAt;
+                    await db.SaveChangesAsync(ct);
+                    return Result<AuthSession>.Ok(resumed);
+                }
+
                 // توکن قبلاً چرخانده شده و دوباره استفاده شده → احتمال سرقت؛ همهٔ نشست‌های کاربر باطل می‌شوند
                 await db.RefreshTokens.Where(t => t.UserId == stored.UserId && t.RevokedAtUtc == null)
                     .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAtUtc, now), ct);

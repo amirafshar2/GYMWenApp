@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Phone, Menu, X, MapPin, Clock, LayoutGrid } from 'lucide-react'
+import { Phone, Menu, X, MapPin, Clock, LayoutGrid, UserRound } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/lib/auth'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
 import { Instagram } from '@/components/ui/brand-icons'
@@ -32,6 +34,10 @@ export default function SiteHeader() {
   const [active, setActive] = useState('top')
   const [scrolled, setScrolled] = useState(false)
   const [panel, setPanel] = useState(false)
+  const { user } = useAuth()
+  const account = user
+    ? { to: '/profile', text: user.fullName?.split(' ')[0] ?? 'پروفایل', label: 'پروفایل من' }
+    : { to: '/login', text: 'ورود', label: 'ورود یا ثبت‌نام' }
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 8)
@@ -76,7 +82,11 @@ export default function SiteHeader() {
               <Phone className="size-[18px]" aria-hidden />
               <span dir="ltr">{faDigits(brand.phone)}</span>
             </a>
-            <a href="/#consult" className="ms-2 hidden h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white transition-colors hover:bg-plate-hi sm:inline-flex">مشاورهٔ رایگان</a>
+            <Link to={account.to} aria-label={account.label}
+              className="flex h-11 items-center gap-2 rounded-[3px] px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate">
+              <UserRound className="size-5" aria-hidden /><span className="hidden max-w-[110px] truncate sm:inline">{account.text}</span>
+            </Link>
+            <Link to="/join" className="ms-1 hidden h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white transition-colors hover:bg-plate-hi sm:inline-flex">ثبت‌نام آنلاین</Link>
             <button type="button" onClick={() => setPanel(true)} aria-label="باز کردن منو" aria-expanded={panel}
               className="grid size-11 cursor-pointer place-items-center text-chalk transition-colors hover:text-plate">
               <Menu className="size-6 lg:hidden" aria-hidden />
@@ -116,7 +126,8 @@ export default function SiteHeader() {
                   <a href={brand.instagram} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
                     className="grid size-11 place-items-center rounded-full bg-steel text-chalk transition-colors hover:bg-plate hover:text-white"><Instagram className="size-5" /></a>
                 )}
-                <a href="/#consult" onClick={() => setPanel(false)} className="inline-flex h-11 flex-1 items-center justify-center rounded-[3px] bg-plate text-[15px] font-bold text-white hover:bg-plate-hi">مشاورهٔ رایگان</a>
+                <Link to="/join" onClick={() => setPanel(false)} className="inline-flex h-11 flex-1 items-center justify-center rounded-[3px] bg-plate text-[15px] font-bold text-white hover:bg-plate-hi">ثبت‌نام آنلاین</Link>
+                <Link to={account.to} onClick={() => setPanel(false)} className="inline-flex h-11 items-center justify-center gap-2 rounded-[3px] border border-steel-2 px-4 text-[15px] font-bold text-chalk hover:border-chalk"><UserRound className="size-4" aria-hidden />{account.text}</Link>
               </div>
             </motion.aside>
           </motion.div>

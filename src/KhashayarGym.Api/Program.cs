@@ -10,6 +10,8 @@ using KhashayarGym.Business.Common;
 using KhashayarGym.DataAccess;
 using KhashayarGym.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -106,7 +108,7 @@ builder.Services.AddAntiforgery(o =>
 
 // Rate limiting: فرم‌ها (و بعداً OTP/پرداخت) بر اساس IP محدود می‌شوند.
 // ضریب سقف‌ها فقط برای تست‌های یکپارچه (همهٔ درخواست‌های تست از یک IP می‌آیند)؛ در production همیشه ۱
-var rl = builder.Environment.IsEnvironment("Testing") ? builder.Configuration.GetValue("RateLimiting:PermitMultiplier", 1) : 1;
+var rl = (builder.Environment.IsEnvironment("Testing") || builder.Environment.IsDevelopment()) ? builder.Configuration.GetValue("RateLimiting:PermitMultiplier", 1) : 1;
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -147,7 +149,22 @@ builder.Services.AddResponseCompression(o =>
 builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 builder.Services.AddHsts(o => { o.MaxAge = TimeSpan.FromDays(365); o.IncludeSubDomains = true; });
 
+// کلیدهای Data Protection (توکن ضد CSRF) در volume پایدار تا با ری‌استارت کانتینر باطل نشوند
+if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } keysPath)
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath)).SetApplicationName("KhashayarGym");
+
+// پشت reverse proxy (Caddy/Nginx در Docker): IP واقعی کاربر برای rate limit و HTTPS برای کوکی‌های Secure
+if (builder.Configuration.GetValue("ReverseProxy:Enabled", false))
+    builder.Services.Configure<ForwardedHeadersOptions>(o =>
+    {
+        o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        o.ForwardLimit = 1;
+        o.KnownIPNetworks.Clear(); // پراکسی در شبکهٔ داخلی Docker است؛ پورت اپ نباید مستقیم به اینترنت باز باشد
+        o.KnownProxies.Clear();
+    });
+
 var app = builder.Build();
+if (app.Configuration.GetValue("ReverseProxy:Enabled", false)) app.UseForwardedHeaders();
 
 // ساخت/به‌روزرسانی دیتابیس و دادهٔ نمونهٔ دمو
 using (var scope = app.Services.CreateScope())

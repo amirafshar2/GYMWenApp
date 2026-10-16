@@ -4,6 +4,7 @@ import { api, type Pkg } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { faNum, tomanShort } from '@/lib/fa'
 import { rebrand } from '@/lib/brand'
+import { useNavigate } from 'react-router-dom'
 
 const short = (n: number) => tomanShort(n)
 
@@ -35,6 +36,7 @@ const toPlan = (p: Pkg): PricingPlan => {
 
 /** پکیج‌ها — Pricing Section از 21st.dev با رنگ‌های تم (قیمت‌ها از API، تخفیف جشنواره اعمال‌شده) */
 export default function SitePricing() {
+  const nav = useNavigate()
   const { data: pkgs = [] } = useData('packages', api.packages)
   if (!pkgs.length) return <section id="packages" className="h-[900px]" />
   const membership = pkgs.filter((p) => p.category === 'Gym' && p.slug !== 'month-12')
@@ -55,7 +57,7 @@ export default function SitePricing() {
         onSelect={(plan) => {
           try { sessionStorage.setItem('chosen-package', plan.id) } catch { /* */ }
           window.dispatchEvent(new Event('kg:package'))
-          document.getElementById('consult')?.scrollIntoView({ behavior: 'smooth' })
+          nav(`/join?package=${encodeURIComponent(plan.id)}`)
         }}
       />
     </section>

@@ -37,10 +37,11 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
 
     public Task Invoke(HttpContext ctx)
     {
+        // تصمیم همین‌جا گرفته می‌شود: Parbad با Map مسیر را به PathBase منتقل می‌کند و در OnStarting دیگر دیده نمی‌شود
+        var csp = ctx.Request.Path.StartsWithSegments(SandboxPath) ? SandboxCsp : Csp;
         ctx.Response.OnStarting(() =>
         {
             var h = ctx.Response.Headers;
-            var csp = ctx.Request.Path.StartsWithSegments(SandboxPath) ? SandboxCsp : Csp;
             h["Content-Security-Policy"] = env.IsDevelopment() ? csp : csp + "; upgrade-insecure-requests";
             h["X-Content-Type-Options"] = "nosniff";
             h["X-Frame-Options"] = "DENY";

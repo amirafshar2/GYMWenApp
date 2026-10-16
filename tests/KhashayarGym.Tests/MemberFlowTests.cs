@@ -121,32 +121,54 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
+    private static void UseRefresh(Browser b, string token) => b.Cookies[b.Cookies.Keys.FirstOrDefault(k => k.EndsWith("kg-rt")) ?? "kg-rt"] = token;
+
     [Fact]
-    public async Task Refresh_rotates_token_and_reuse_revokes_all_sessions()
+    public async Task Refresh_rotates_token_and_reuse_of_old_chain_revokes_all_sessions()
     {
-        // Arrange
+        // Arrange: کاربر واقعی دو بار تازه‌سازی کرده است (first → second → third)
         var b = new Browser(factory);
         await b.LoginAsync();
-        var first = b.RefreshCookie;
-        Assert.False(string.IsNullOrEmpty(first));
-
-        // Act: یک بار تازه‌سازی معمولی → توکن جدید
         b.AccessToken = null;
-        var ok = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
-        var second = b.RefreshCookie;
+        var first = b.RefreshCookie!;
+        Assert.Equal(HttpStatusCode.OK, (await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh")).StatusCode);
+        var second = b.RefreshCookie!;
+        Assert.Equal(HttpStatusCode.OK, (await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh")).StatusCode);
+        var third = b.RefreshCookie!;
 
-        // Act: مهاجم توکن قدیمی را دوباره می‌فرستد
-        b.Cookies[b.Cookies.Keys.First(k => k.EndsWith("kg-rt"))] = first!;
+        // Act: مهاجم توکن قدیمی را می‌فرستد
+        UseRefresh(b, first);
         var reuse = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
+        UseRefresh(b, third);
+        var victim = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
 
-        // Assert: توکن جدیدِ کاربر واقعی هم باطل شده است
-        b.Cookies[b.Cookies.Keys.FirstOrDefault(k => k.EndsWith("kg-rt")) ?? "kg-rt"] = second!;
-        var afterReuse = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
-
-        Assert.Equal(HttpStatusCode.OK, ok.StatusCode);
+        // Assert: همهٔ نشست‌ها باطل شده‌اند، حتی توکن فعلی کاربر واقعی
         Assert.NotEqual(first, second);
+        Assert.NotEqual(second, third);
         Assert.Equal(HttpStatusCode.Unauthorized, reuse.StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, afterReuse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, victim.StatusCode);
+    }
+
+    [Fact]
+    public async Task Refresh_whose_response_was_lost_is_accepted_once_and_keeps_single_chain()
+    {
+        // Arrange: پاسخ تازه‌سازی به مرورگر نرسید (رفرش صفحه وسط درخواست)
+        var b = new Browser(factory);
+        await b.LoginAsync();
+        b.AccessToken = null;
+        var first = b.RefreshCookie!;
+        await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
+        var lost = b.RefreshCookie!;
+
+        // Act: مرورگر دوباره با توکن قبلی می‌آید
+        UseRefresh(b, first);
+        var retry = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
+        UseRefresh(b, lost);
+        var lostUse = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
+
+        // Assert: نشست ادامه دارد و توکنِ گم‌شده دیگر کار نمی‌کند
+        Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, lostUse.StatusCode);
     }
 
     [Fact]

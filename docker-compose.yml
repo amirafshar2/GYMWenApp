@@ -1,0 +1,47 @@
+# اجرای کامل با SQL Server. رمزها از فایل .env (کپی از .env.example) خوانده می‌شوند و در گیت نیستند.
+#   docker compose up --build    →  http://localhost:8080
+# در production جلوی این سرویس یک reverse proxy با TLS (Caddy/Nginx) بگذارید؛ کوکی‌های نشست فقط روی HTTPS ارسال می‌شوند.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD را در .env بگذارید}
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      Database__Provider: SqlServer
+      ConnectionStrings__Default: "Server=db;Database=KhashayarGym;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY را در .env بگذارید}
+      Otp__Pepper: ${OTP_PEPPER:?OTP_PEPPER را در .env بگذارید}
+      Otp__ExposeCodeInResponse: ${OTP_EXPOSE_CODE:-false}
+      Sms__Provider: ${SMS_PROVIDER:-Log}
+      Sms__Kavenegar__ApiKey: ${KAVENEGAR_API_KEY:-}
+      Payment__UseVirtualGateway: ${PAYMENT_SANDBOX:-true}
+      ReverseProxy__Enabled: ${BEHIND_PROXY:-true}
+    volumes:
+      - private:/data/private
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  sqldata:
+  private:

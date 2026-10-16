@@ -37,7 +37,7 @@ test('فرم مشاوره خطای شمارهٔ نامعتبر را نشان م�
 })
 
 test('هدرهای امنیتی روی پاسخ‌ها هست', async ({ request }) => {
-  const res = await request.get('/api/branches')
+  const res = await request.get('/api/v1/branches')
   expect(res.headers()['content-security-policy']).toContain("default-src 'self'")
   expect(res.headers()['x-content-type-options']).toBe('nosniff')
 })

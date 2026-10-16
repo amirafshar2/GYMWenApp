@@ -1,6 +1,7 @@
 # پلتفرم آنلاین مجموعه باشگاه‌های خشایار شیراز
 
-دموی فاز ۱: سایت عمومی با هیروی اسکرولی، نقشهٔ «نزدیک‌ترین شعبه»، پکیج‌ها با تخفیف جشنواره و فرم مشاوره.
+- **فاز ۱:** سایت عمومی با هیروی اسکرولی، نقشهٔ «نزدیک‌ترین شعبه»، پکیج‌ها با تخفیف جشنواره و فرم مشاوره.
+- **فاز ۲:** ورود با موبایل و کد پیامکی، ثبت‌نام آنلاین چندمرحله‌ای، قرارداد دیجیتال + فرم سلامت با امضای پیامکی، پرداخت (درگاه آزمایشی)، فاکتور PDF، کارت عضویت QR و پروفایل.
 
 ## ساختار (سه‌لایه، .NET 10)
 
@@ -12,7 +13,7 @@ src/
   KhashayarGym.Business     سرویس‌ها، DTOها، اعتبارسنجی FluentValidation، قیمت‌گذاری
   KhashayarGym.Api          Web API، امنیت، کش، سرو کردن فرانت از wwwroot
   KhashayarGym.Web          React + Vite + TypeScript + Tailwind v4 (بیلد → Api/wwwroot)
-tests/KhashayarGym.Tests    تست‌های xUnit لایهٔ Business
+tests/KhashayarGym.Tests    تست‌های xUnit (Business) و یکپارچه (WebApplicationFactory)
 src/KhashayarGym.Web/e2e    تست‌های Playwright
 scripts/                    ساخت فریم ویدیوی هیرو، خروجی پرتفولیو
 ```
@@ -65,12 +66,34 @@ cd src\KhashayarGym.Api; dotnet run --launch-profile https
 cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173 ، /api به https://localhost:7180 پراکسی می‌شود
 ```
 
+## دموی فاز ۲ (ثبت‌نام و پرداخت)
+با پروفایل **Demo (SQLite)**:
+1. در بخش پکیج‌ها «انتخاب این پکیج» یا دکمهٔ «ثبت‌نام آنلاین» در هدر را بزنید.
+2. سالن و شعبه (دکمهٔ «نزدیک‌ترین شعبه به من»)، پکیج و کد تخفیف (`KHASHAYAR10` یا `WELCOME5`).
+3. ورود با هر شمارهٔ موبایل؛ در حالت دمو پیامک واقعی نمی‌رود و **کد روی صفحه** نمایش داده می‌شود.
+4. قرارداد و فرم سلامت، امضا با کد دوم.
+5. «پرداخت» درگاه آزمایشی Parbad را باز می‌کند: **Pay** = موفق، **Cancel** = انصراف. پولی جابه‌جا نمی‌شود.
+6. صفحهٔ نتیجه: فاکتور PDF و کارت QR؛ در `/profile`: روزهای باقی‌مانده، تمدید یک‌کلیکی، فاکتورها، PDF قرارداد، برنامهٔ تمرینی نمونه و نمودار وزن.
+
+برای سرور واقعی: `Otp:ExposeCodeInResponse=false`، `Sms:Provider=Kavenegar` با کلید در User Secrets، و `Payment:UseVirtualGateway=false` بعد از گرفتن درگاه به نام باشگاه (Parbad زرین‌پال، IDPay، سامان، ملت و… را پشتیبانی می‌کند).
+
+## Docker
+```bash
+cp .env.example .env      # DB_PASSWORD، JWT_SIGNING_KEY و OTP_PEPPER را با مقادیر تصادفی پر کنید
+docker compose up --build # http://localhost:8080
+```
+ایمیج چندمرحله‌ای است (Node → .NET SDK → aspnet)، با کاربر غیر root و فایل‌سیستم فقط‌خواندنی اجرا می‌شود؛ PDF قراردادها و کلیدهای Data Protection در volume `private` می‌مانند. جلوی آن reverse proxy با TLS بگذارید (کوکی‌ها `Secure` هستند).
+
 ## تست‌ها
 ```powershell
-dotnet test                                   # xUnit
+dotnet test                                   # xUnit + تست‌های یکپارچهٔ API (ورود، چرخش توکن، پرداخت، idempotency)
 cd src\KhashayarGym.Web
 npx playwright install chromium               # یک‌بار
-$env:BASE_URL = "https://localhost:7180"; npx playwright test
+$env:BASE_URL = "http://localhost:5180"; npx playwright test   # شامل سناریوی کامل ثبت‌نام و پرداخت
+```
+برای اجرای همهٔ تست‌های Playwright پشت سر هم، سقف rate limit را در توسعه بالا ببرید (همهٔ درخواست‌ها از یک IP است):
+```powershell
+$env:RateLimiting__PermitMultiplier = "20"   # فقط Development/Testing؛ در production نادیده گرفته می‌شود
 ```
 
 ## ویرایش داده‌ها
@@ -118,21 +141,38 @@ cd src\KhashayarGym.Web; npm run build
 ## برند دمو برای پرتفولیو
 با افزودن `?brand=demo` به آدرس، نام، لوگو، شعار و اطلاعات تماس با یک برند ساختگی عوض می‌شود (برای اسکرین‌شات‌های پرتفولیو). `?brand=khashayar` برمی‌گرداند.
 
-## امنیت پیاده‌شده در فاز ۱
+## امنیت
+**فاز ۱**
 - هدرهای CSP، HSTS (production)، X-Content-Type-Options، X-Frame-Options، Referrer-Policy، Permissions-Policy (geolocation فقط self)
-- Rate limiting: فرم‌ها ۵ درخواست در دقیقه به ازای IP، سراسری ۳۰۰ در دقیقه
-- CSRF با کوکی + هدر `X-XSRF-TOKEN` (`GET /api/security/csrf`)
+- Rate limiting: فرم‌ها ۵ در دقیقه، OTP ۵ در دقیقه، ورود ۱۵ در دقیقه، پرداخت ۱۰ در دقیقه به ازای IP؛ سراسری ۳۰۰
+- CSRF با کوکی + هدر `X-XSRF-TOKEN` (`GET /api/v1/security/csrf`) برای درخواست‌های مهمان
 - اعتبارسنجی همهٔ ورودی‌ها در لایهٔ Business، نرمال‌سازی ارقام فارسی و شمارهٔ موبایل
 - EF Core پارامتری، بدون SQL خام؛ محدودیت حجم درخواست
 - موقعیت کاربر فقط در مرورگر استفاده می‌شود و به سرور ارسال نمی‌شود
 
-## API (فاز ۱)
+**فاز ۲**
+- کد پیامکی ۵ رقمی، فقط HMAC-SHA256 آن (با pepper) ذخیره می‌شود؛ ۲ دقیقه اعتبار، ۵ تلاش، فاصلهٔ ۶۰ ثانیه، حداکثر ۵ کد در ساعت برای هر شماره
+- JWT کوتاه‌عمر فقط در حافظهٔ مرورگر؛ توکن تازه‌سازی چرخشی در کوکی `HttpOnly; Secure; SameSite=Strict` با مسیر محدود. فقط هش توکن در دیتابیس است. استفادهٔ دوباره از توکن قدیمی همهٔ نشست‌ها را باطل می‌کند (با مهلت ۳۰ ثانیه برای پاسخِ گم‌شده هنگام رفرش صفحه)
+- refresh/logout فقط هم‌مبدأ (`Sec-Fetch-Site`، `Origin` و هدر `X-KG-Client`)
+- مبلغ فقط سمت سرور محاسبه می‌شود؛ بعد از بازگشت از بانک، Fetch + تطبیق مبلغ + Verify سمت سرور و تکمیل idempotent داخل تراکنش. کلید idempotency برای جلوگیری از پرداخت دوباره با دوبار کلیک
+- سالن انتخابی باید با جنسیت ثبت‌شده بخواند؛ هر کاربر فقط پرداخت‌ها و قراردادهای خودش را می‌بیند
+- قرارداد امضاشده با هش SHA-256 محتوا، IP، مرورگر و زمان ثبت می‌شود؛ PDFها بیرون از wwwroot
+- رمزها (کلید JWT، pepper، کلید پیامک) فقط در User Secrets / متغیر محیطی؛ نبودشان در production خطای شروع می‌دهد
+- خطاها به شکل ProblemDetails با `traceId` و بدون جزئیات داخلی؛ لاگ ممیزی برای ساخت حساب، امضا و پرداخت
+
+## API نسخهٔ ۱ (`/api/v1`)
+مستندات OpenAPI در توسعه: `/openapi/v1.json` (با طرح امنیتی Bearer).
+
 | مسیر | توضیح |
 |---|---|
-| `GET /api/branches?section=men\|women` | شعبه‌ها |
-| `GET /api/branches/{slug}` | یک شعبه |
-| `GET /api/packages` | پکیج‌ها با قیمت پس از تخفیف کمپین |
-| `GET /api/coaches` | مربی‌ها |
-| `GET /api/campaigns/active` | جشنوارهٔ فعال (204 اگر نباشد) |
-| `GET /api/faq` ، `GET /api/stats` | سؤالات و آمار |
-| `POST /api/consultations` | فرم مشاوره (CSRF + rate limit) |
+| `GET /branches?section=men\|women` ، `GET /branches/{slug}` | شعبه‌ها |
+| `GET /packages` ، `GET /coaches` ، `GET /faq` ، `GET /stats` | داده‌های عمومی |
+| `GET /campaigns/active` | جشنوارهٔ فعال (204 اگر نباشد) |
+| `POST /consultations` | فرم مشاوره (CSRF + rate limit) |
+| `POST /auth/otp` ، `POST /auth/verify` | ورود با کد پیامکی |
+| `POST /auth/refresh` ، `POST /auth/logout` | نشست با کوکی HttpOnly |
+| `GET/PUT /me` ، `GET /me/profile` | حساب و پروفایل |
+| `GET /contracts/active` ، `POST /contracts/sign/otp` ، `POST /contracts/sign` | قرارداد و امضا |
+| `POST /checkout/quote` ، `POST /checkout` | پیش‌فاکتور و شروع پرداخت |
+| `GET\|POST /payments/callback` | بازگشت از درگاه |
+| `GET /me/payments/{id}` ، `…/invoice.pdf` ، `GET /me/contracts/{id}/pdf` ، `GET /me/card.svg` | نتیجه، فاکتور، قرارداد، QR کارت |

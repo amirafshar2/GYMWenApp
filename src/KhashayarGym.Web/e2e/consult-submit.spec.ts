@@ -9,6 +9,6 @@ test('فرم مشاوره با CSRF ثبت می‌شود', async ({ page }) => {
 })
 
 test('درخواست بدون توکن CSRF رد می‌شود', async ({ request }) => {
-  const res = await request.post('/api/consultations', { data: { fullName: 'سارا رضایی', mobile: '09171234567' } })
+  const res = await request.post('/api/v1/consultations', { data: { fullName: 'سارا رضایی', mobile: '09171234567' } })
   expect(res.status()).toBe(400)
 })
