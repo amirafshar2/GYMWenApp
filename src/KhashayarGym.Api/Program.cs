@@ -95,13 +95,16 @@ app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        // فایل‌های هش‌دار Vite یک سال کش می‌شوند؛ index.html هرگز.
+        // فایل‌های هش‌دار Vite یک سال کش می‌شوند؛ index.html و رسانه‌ها (ویدیو، عکس، لوگو) هر بار با ETag
+        // اعتبارسنجی می‌شوند تا با عوض شدن فایل، مرورگر نسخهٔ قدیمی را نشان ندهد.
         var path = ctx.File.Name;
-        ctx.Context.Response.Headers.CacheControl = path.EndsWith(".html")
-            ? "no-cache"
-            : ctx.Context.Request.Path.StartsWithSegments("/assets")
-                ? "public, max-age=31536000, immutable"
-                : "public, max-age=86400";
+        var req = ctx.Context.Request.Path;
+        ctx.Context.Response.Headers.CacheControl =
+            path.EndsWith(".html") || req.StartsWithSegments("/media") || req.StartsWithSegments("/brand")
+                ? "no-cache"
+                : req.StartsWithSegments("/assets")
+                    ? "public, max-age=31536000, immutable"
+                    : "public, max-age=86400";
     }
 });
 

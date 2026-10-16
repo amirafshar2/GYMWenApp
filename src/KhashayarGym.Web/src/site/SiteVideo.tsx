@@ -3,7 +3,8 @@ import { brand } from '@/lib/brand'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
 
 /** ویدیوی خود باشگاه: public/media/video/gym.mp4 (برای اسکرول نرم، فایل با scripts/make-scrub-video بهینه شده — همهٔ فریم‌ها کلیدی) */
-const GYM_VIDEO = '/media/video/gym.mp4'
+// ?v= با هر ویدیوی تازه عوض شود تا کش قدیمی مرورگر دور زده شود
+const GYM_VIDEO = '/media/video/gym.mp4?v=owner-1'
 
 /**
  * بخش ویدیویی وسط صفحه — Sunset Skyline Hero از 21st.dev (guglielmogiannattasio).
