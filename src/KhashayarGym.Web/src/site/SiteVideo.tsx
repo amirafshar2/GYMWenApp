@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
-import { brand } from '@/lib/brand'
 
 /** ویدیوی خود باشگاه (scripts/make-scrub-video آن را برای اسکرول فریم‌به‌فریم بهینه می‌کند) */
 const GYM_VIDEO = '/media/video/gym-scrub.mp4'
@@ -34,11 +33,11 @@ export default function SiteVideo() {
         videoSrc={src}
         skylineSrc=""
         title="هر روز، یک تکرار بیشتر."
-        brandMark={brand.shortName}
+        brandMark=""
         scrollHint="اسکرول کن"
         signature={{ name: 'guglielmogiannattasio', url: 'https://www.guglielmogiannattasio.it' }}
         fontFamily="'Vazirmatn Variable', Tahoma, sans-serif"
-        scrubDistance={2600}
+        scrubDistance={3600}
       />
     </section>
   )
