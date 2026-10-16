@@ -16,4 +16,8 @@ public class Coach : BaseEntity
 
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
+
+    /// <summary>حساب ورود مربی (برای پنل مربی)</summary>
+    public int? UserId { get; set; }
+    public AppUser? User { get; set; }
 }

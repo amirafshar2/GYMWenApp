@@ -106,6 +106,17 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
             startsAtUtc = m.StartsAtUtc, endsAtUtc = m.EndsAtUtc, sessionsTotal = m.SessionsTotal, qr = AccessControlService.QrPrefix + m.CardToken,
         });
 
+        // پیامک خوش‌آمد / تأیید تمدید (از صف پیامک ارسال می‌شود)
+        var who = await db.Users.AsNoTracking().Where(u => u.Id == payment.UserId).Select(u => new { u.FullName, u.PhoneNumber }).FirstAsync(ct);
+        var branchName = await db.Branches.AsNoTracking().Where(b => b.Id == m.BranchId).Select(b => b.Name).FirstAsync(ct);
+        if (who.PhoneNumber is not null)
+        {
+            var renewal = await db.Memberships.AnyAsync(x => x.UserId == payment.UserId && x.Id != m.Id && (x.Status == MembershipStatus.Active || x.Status == MembershipStatus.Expired), ct);
+            var name = Panel.SmsTexts.Token(Panel.SmsService.FirstName(who.FullName)); var until = Jalali.Date(m.EndsAtUtc!.Value);
+            Panel.SmsService.Add(db, payment.UserId, who.PhoneNumber, SmsKind.Welcome, "khashayar-welcome", [name, Panel.SmsTexts.Token(branchName), until],
+                Panel.SmsTexts.Welcome(name, branchName, until, renewal), $"welcome:{m.Id}");
+        }
+
         if (payment.DiscountCode is not null)
             await db.DiscountCodes.Where(d => d.Code == payment.DiscountCode)
                 .ExecuteUpdateAsync(s => s.SetProperty(d => d.UsedCount, d => d.UsedCount + 1), ct);

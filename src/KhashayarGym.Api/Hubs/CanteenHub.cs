@@ -20,7 +20,7 @@ public interface ICanteenClient
 /// عضو فقط به گروه سفارش خودش می‌پیوندد تا «آماده است» را بگیرد.
 /// </summary>
 [Authorize]
-public sealed class CanteenHub(GymDbContext db) : Hub<ICanteenClient>
+public sealed class CanteenHub(GymDbContext db, KhashayarGym.Business.Services.Panel.IStaffScopeService scopes) : Hub<ICanteenClient>
 {
     public const string Path = "/hubs/canteen";
     public static string BranchGroup(int branchId) => $"canteen-branch:{branchId}";
@@ -28,11 +28,12 @@ public sealed class CanteenHub(GymDbContext db) : Hub<ICanteenClient>
 
     public async Task WatchBranch(string branchSlug)
     {
-        var u = Context.User!;
-        if (!(u.IsInRole(Roles.CanteenStaff) || u.IsInRole(Roles.BranchManager) || u.IsInRole(Roles.SuperAdmin)))
-            throw new HubException("دسترسی ندارید.");
-        var id = await db.Branches.Where(b => b.Slug == branchSlug).Select(b => (int?)b.Id).FirstOrDefaultAsync();
+        // نقش و شعبه از پایگاه داده: کارمند بوفهٔ شعبهٔ «الف» سفارش‌های شعبهٔ «ب» را نمی‌بیند
+        var scope = await scopes.ResolveFromDbAsync(Context.User!.UserId(), Context.ConnectionAborted);
+        if (!(scope.Has(Roles.CanteenStaff) || scope.Has(Roles.BranchManager))) throw new HubException("دسترسی ندارید.");
+        var id = await scopes.BranchIdAsync(branchSlug, Context.ConnectionAborted);
         if (id is null) throw new HubException("شعبه پیدا نشد.");
+        if (!scope.Can(id.Value)) throw new HubException("به بوفهٔ این شعبه دسترسی ندارید.");
         await Groups.AddToGroupAsync(Context.ConnectionId, BranchGroup(id.Value));
     }
 

@@ -50,6 +50,7 @@ if (builder.Configuration.GetValue("Integrations:DispatcherEnabled", true))
 {
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.IntegrationDispatcher>();
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.PendingOrderSweeper>();
+    builder.Services.AddHostedService<KhashayarGym.Api.Integrations.SmsWorker>();
 }
 
 // ---- فاز ۳: فروشگاه، بوفه (لحظه‌ای با SignalR)، کیف پول ----
@@ -102,6 +103,8 @@ builder.Services.AddSingleton<IAccessTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IPrivateFileStore, PrivateFileStore>();
 
 // ---- پیامک: Log (دمو) یا Kavenegar ----
+builder.Services.Configure<KhashayarGym.Business.Services.Panel.SmsOptions>(builder.Configuration.GetSection(KhashayarGym.Business.Services.Panel.SmsOptions.Section));
+builder.Services.AddScoped<KhashayarGym.Business.Services.Panel.DemoSeeder>();
 if (builder.Configuration["Sms:Provider"]?.Equals("Kavenegar", StringComparison.OrdinalIgnoreCase) == true)
 {
     builder.Services.Configure<KavenegarOptions>(builder.Configuration.GetSection("Sms:Kavenegar"));
@@ -206,7 +209,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.WalletTransactions.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
+        try { _ = await db.SmsMessages.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();
@@ -222,17 +225,12 @@ using (var scope = app.Services.CreateScope())
     if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)
         await scope.ServiceProvider.GetRequiredService<KhashayarGym.Business.Services.Access.IAccessControlService>().EnsureDemoDeviceAsync(demoKey, CancellationToken.None);
 
-    // حساب کارمند نمایشی (بوفه، پذیرش، مدیر شعبه) برای پرزنت؛ هرگز در production
+    // کارمندان نمایشی و ۲۰۰ عضو ساختگی با ۶ ماه سابقه برای پرزنت؛ هرگز در production
     if (!app.Environment.IsProduction() && app.Configuration["Demo:StaffPhone"] is { Length: 11 } staffPhone)
     {
-        var users = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<AppUser>>();
-        var staff = await users.Users.FirstOrDefaultAsync(u => u.PhoneNumber == staffPhone);
-        if (staff is null)
-        {
-            staff = new AppUser { UserName = staffPhone, PhoneNumber = staffPhone, PhoneNumberConfirmed = true, FullName = "کارمند نمایشی", CreatedAtUtc = DateTime.UtcNow };
-            await users.CreateAsync(staff);
-            await users.AddToRolesAsync(staff, [Roles.Member, Roles.CanteenStaff, Roles.Reception, Roles.BranchManager]);
-        }
+        var demo = scope.ServiceProvider.GetRequiredService<KhashayarGym.Business.Services.Panel.DemoSeeder>();
+        if (app.Configuration.GetValue("Demo:SeedMembers", false)) await demo.SeedAsync(staffPhone);
+        else await demo.EnsureStaffAsync(staffPhone, CancellationToken.None);
     }
 }
 

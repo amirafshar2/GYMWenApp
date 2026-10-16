@@ -43,3 +43,8 @@ public enum WalletTxType { TopUp = 0, ShopPurchase = 1, CanteenPurchase = 2, Ref
 
 /// <summary>کد تخفیف برای کدام خرید معتبر است.</summary>
 public enum DiscountScope { Membership = 0, Shop = 1, Any = 2 }
+
+// ---- فاز ۴ ----
+public enum SmsKind { Welcome = 0, Reminder7 = 1, Reminder1 = 2, Birthday = 3, Campaign = 4, Custom = 5 }
+
+public enum SmsStatus { Queued = 0, Sent = 1, Failed = 2 }

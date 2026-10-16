@@ -4,6 +4,8 @@ namespace KhashayarGym.Business.Common;
 public interface ISmsSender
 {
     Task SendOtpAsync(string phoneNumber, string code, string purposeLabel, CancellationToken ct);
+    /// <summary>پیامک الگودار (خوش‌آمد، یادآوری، تولد، جشنواره). preview فقط برای لاگ دمو است.</summary>
+    Task SendTemplateAsync(string phoneNumber, string template, IReadOnlyList<string> tokens, string preview, CancellationToken ct);
 }
 
 /// <summary>ساخت توکن دسترسی (JWT) — در لایهٔ API پیاده‌سازی می‌شود.</summary>

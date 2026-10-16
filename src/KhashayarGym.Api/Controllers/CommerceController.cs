@@ -61,7 +61,7 @@ public sealed class ShopController(IShopService shop, PaymentGateway gateway) : 
 [ApiController]
 [Route("api/v1/canteen")]
 [Produces("application/json")]
-public sealed class CanteenController(ICanteenService canteen, PaymentGateway gateway) : ControllerBase
+public sealed class CanteenController(ICanteenService canteen, PaymentGateway gateway, KhashayarGym.Business.Services.Panel.IStaffScopeService scopes) : ControllerBase
 {
     [HttpGet("{branchSlug}/menu")]
     public async Task<IActionResult> Menu(string branchSlug, [FromQuery] string? table, CancellationToken ct) =>
@@ -75,15 +75,28 @@ public sealed class CanteenController(ICanteenService canteen, PaymentGateway ga
     public async Task<IActionResult> Place([FromBody] CanteenOrderRequest request, CancellationToken ct) =>
         await (await canteen.PlaceAsync(User.UserId(), request, ct)).ToResponseAsync(this, gateway, ct);
 
-    [Authorize(Roles = $"{Roles.CanteenStaff},{Roles.BranchManager},{Roles.SuperAdmin}")]
+    /// <summary>تابلوی بوفه فقط برای شعبه‌هایی که کارمند به آن‌ها وصل است</summary>
+    [Authorize]
+    [PanelAccess(Roles.CanteenStaff, Roles.BranchManager)]
     [HttpGet("staff/{branchSlug}/orders")]
-    public async Task<IActionResult> Board(string branchSlug, CancellationToken ct) => Ok(await canteen.BoardAsync(branchSlug, ct));
+    public async Task<IActionResult> Board(string branchSlug, CancellationToken ct)
+    {
+        var id = await scopes.BranchIdAsync(branchSlug, ct);
+        if (id is null) return NotFound();
+        if (!this.Scope().Can(id.Value)) return Problem(statusCode: 403, title: "به بوفهٔ این شعبه دسترسی ندارید.");
+        return Ok(await canteen.BoardAsync(branchSlug, ct));
+    }
 
-    [Authorize(Roles = $"{Roles.CanteenStaff},{Roles.BranchManager},{Roles.SuperAdmin}")]
+    [Authorize]
+    [PanelAccess(Roles.CanteenStaff, Roles.BranchManager)]
     [HttpPost("staff/orders/{id:int}/status")]
     [ValidateCsrf]
-    public async Task<IActionResult> Status(int id, [FromBody] CanteenStatusRequest request, CancellationToken ct) =>
-        (await canteen.UpdateStatusAsync(id, request.Status, User.UserId(), ct)).ToActionResult(this);
+    public async Task<IActionResult> Status(int id, [FromBody] CanteenStatusRequest request, CancellationToken ct)
+    {
+        var branchId = await scopes.CanteenOrderBranchAsync(id, ct);
+        if (branchId is null || !this.Scope().Can(branchId.Value)) return NotFound();
+        return (await canteen.UpdateStatusAsync(id, request.Status, User.UserId(), ct)).ToActionResult(this);
+    }
 }
 
 /// <summary>خریدها و کیف پول عضو</summary>

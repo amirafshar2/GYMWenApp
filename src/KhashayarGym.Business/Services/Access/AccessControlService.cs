@@ -44,6 +44,8 @@ public interface IAccessControlService
     Task<bool> RevokeAsync(int userId, int credentialId, CancellationToken ct);
     Task<IReadOnlyList<CredentialDto>> ListAsync(int userId, CancellationToken ct);
     Task EnsureDemoDeviceAsync(string rawKey, CancellationToken ct);
+    /// <summary>«دستگاه» مجازی پذیرش هر شعبه (اسکن QR با دوربین/اسکنر پشت پیشخوان)</summary>
+    Task<DeviceInfo> ReceptionDeviceAsync(int branchId, CancellationToken ct);
     static string HashKey(string raw) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
 }
 
@@ -281,6 +283,20 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
 
     private static CredentialDto ToDto(AccessCredential c) =>
         new(c.Id, TypeName(c.Type), "…" + (c.Value.Length > 4 ? c.Value[^4..] : c.Value), c.Label, c.ExternalRef, c.CreatedAtUtc, c.IsActive);
+
+    public async Task<DeviceInfo> ReceptionDeviceAsync(int branchId, CancellationToken ct)
+    {
+        var d = await db.AccessDevices.FirstOrDefaultAsync(x => x.BranchId == branchId && x.Vendor == "reception", ct);
+        if (d is null)
+        {
+            // کلید تصادفی که هیچ‌جا استفاده نمی‌شود: این دستگاه فقط از داخل پنل پذیرش (با ورود کارمند) صدا زده می‌شود
+            d = new AccessDevice { Name = "پذیرش", BranchId = branchId, Section = GenderSection.Both, Vendor = "reception",
+                KeyHash = IAccessControlService.HashKey(Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))) };
+            db.AccessDevices.Add(d);
+            await db.SaveChangesAsync(ct);
+        }
+        return new DeviceInfo(d.Id, d.Name, d.BranchId, d.Section);
+    }
 
     public async Task EnsureDemoDeviceAsync(string rawKey, CancellationToken ct)
     {

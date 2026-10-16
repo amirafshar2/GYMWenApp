@@ -10,6 +10,10 @@ public class AppUser : IdentityUser<int>
     public Gender? Gender { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAtUtc { get; set; }
+    /// <summary>برای پیامک تبریک تولد (اختیاری؛ خود عضو وارد می‌کند)</summary>
+    public DateOnly? BirthDate { get; set; }
+    /// <summary>رضایت صریح برای پیامک تبلیغاتی (جشنواره). پیش‌فرض خاموش.</summary>
+    public bool MarketingSmsOptIn { get; set; }
 
     public ICollection<Membership> Memberships { get; set; } = [];
 }

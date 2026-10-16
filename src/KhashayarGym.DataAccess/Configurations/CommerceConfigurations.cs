@@ -125,3 +125,61 @@ internal sealed class WalletTransactionConfiguration : IEntityTypeConfiguration<
         e.HasIndex(x => new { x.UserId, x.CreatedAtUtc });
     }
 }
+
+internal sealed class StaffBranchConfiguration : IEntityTypeConfiguration<StaffBranch>
+{
+    public void Configure(EntityTypeBuilder<StaffBranch> e)
+    {
+        e.HasKey(x => new { x.UserId, x.BranchId });
+        e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        e.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class CoachAssignmentConfiguration : IEntityTypeConfiguration<CoachAssignment>
+{
+    public void Configure(EntityTypeBuilder<CoachAssignment> e)
+    {
+        e.HasIndex(x => new { x.CoachId, x.MemberUserId }).IsUnique();
+        e.HasOne(x => x.Coach).WithMany().HasForeignKey(x => x.CoachId).OnDelete(DeleteBehavior.Restrict); // SQL Server: مسیر دوم حذف از AspNetUsers (از طریق Coaches.UserId) ممنوع است
+        e.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberUserId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class TrainingPlanConfiguration : IEntityTypeConfiguration<TrainingPlan>
+{
+    public void Configure(EntityTypeBuilder<TrainingPlan> e)
+    {
+        e.Property(x => x.Title).HasMaxLength(100);
+        e.Property(x => x.DaysJson).HasMaxLength(8000);
+        e.Property(x => x.Nutrition).HasMaxLength(3000);
+        e.HasIndex(x => new { x.MemberUserId, x.IsActive });
+        e.HasOne(x => x.Coach).WithMany().HasForeignKey(x => x.CoachId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class BodyMetricConfiguration : IEntityTypeConfiguration<BodyMetric>
+{
+    public void Configure(EntityTypeBuilder<BodyMetric> e)
+    {
+        e.Property(x => x.WeightKg).HasPrecision(5, 1);
+        e.Property(x => x.BodyFatPercent).HasPrecision(4, 1);
+        e.Property(x => x.WaistCm).HasPrecision(5, 1);
+        e.HasIndex(x => new { x.UserId, x.MeasuredOn });
+    }
+}
+
+internal sealed class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
+{
+    public void Configure(EntityTypeBuilder<SmsMessage> e)
+    {
+        e.Property(x => x.Phone).HasMaxLength(11);
+        e.Property(x => x.Template).HasMaxLength(60);
+        e.Property(x => x.TokensJson).HasMaxLength(500);
+        e.Property(x => x.Preview).HasMaxLength(500);
+        e.Property(x => x.Error).HasMaxLength(300);
+        e.Property(x => x.DedupeKey).HasMaxLength(80);
+        e.HasIndex(x => x.DedupeKey).IsUnique();
+        e.HasIndex(x => new { x.Status, x.CreatedAtUtc });
+    }
+}

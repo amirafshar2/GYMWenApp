@@ -40,6 +40,7 @@ internal sealed class CoachConfiguration : IEntityTypeConfiguration<Coach>
         e.Property(x => x.Specialty).HasMaxLength(120);
         e.Property(x => x.Bio).HasMaxLength(1000);
         e.HasOne(x => x.Branch).WithMany(x => x.Coaches).HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
     }
 }
 

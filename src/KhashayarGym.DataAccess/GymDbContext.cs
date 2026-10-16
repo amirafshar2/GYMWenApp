@@ -35,6 +35,11 @@ public class GymDbContext(DbContextOptions<GymDbContext> options)
     public DbSet<CanteenOrder> CanteenOrders => Set<CanteenOrder>();
     public DbSet<Wallet> Wallets => Set<Wallet>();
     public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
+    public DbSet<StaffBranch> StaffBranches => Set<StaffBranch>();
+    public DbSet<CoachAssignment> CoachAssignments => Set<CoachAssignment>();
+    public DbSet<TrainingPlan> TrainingPlans => Set<TrainingPlan>();
+    public DbSet<BodyMetric> BodyMetrics => Set<BodyMetric>();
+    public DbSet<SmsMessage> SmsMessages => Set<SmsMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

@@ -27,6 +27,13 @@ public static class BusinessExtensions
         services.AddScoped<Services.Commerce.IWalletService, Services.Commerce.WalletService>();
         services.AddScoped<Services.Commerce.IShopService, Services.Commerce.ShopService>();
         services.AddScoped<Services.Commerce.ICanteenService, Services.Commerce.CanteenService>();
+        services.AddScoped<Services.Panel.IStaffScopeService, Services.Panel.StaffScopeService>();
+        services.AddScoped<Services.Panel.IDashboardService, Services.Panel.DashboardService>();
+        services.AddScoped<Services.Panel.IReceptionService, Services.Panel.ReceptionService>();
+        services.AddScoped<Services.Panel.ICoachService, Services.Panel.CoachService>();
+        services.AddScoped<Services.Panel.IAdminService, Services.Panel.AdminService>();
+        services.AddScoped<Services.Panel.ISmsService, Services.Panel.SmsService>();
+        services.AddScoped<Services.Panel.IReportService, Services.Panel.ReportService>();
         services.AddValidatorsFromAssemblyContaining<CreateConsultationValidator>(ServiceLifetime.Singleton);
         return services;
     }

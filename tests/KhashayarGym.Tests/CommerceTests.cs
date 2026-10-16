@@ -178,7 +178,12 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         using (var scope = factory.Services.CreateScope())
         {
             var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-            await users.AddToRoleAsync(await users.Users.FirstAsync(x => x.PhoneNumber == phone), Roles.CanteenStaff);
+            var u = await users.Users.FirstAsync(x => x.PhoneNumber == phone);
+            await users.AddToRoleAsync(u, Roles.CanteenStaff);
+            // کارمند بوفه فقط تابلوی شعبهٔ خودش را می‌بیند
+            var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
+            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "ghoddousi-gharbi").Select(x => x.Id).FirstAsync() });
+            await db.SaveChangesAsync();
         }
         b.AccessToken = null;
         b.AccessToken = (await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh"))).GetProperty("accessToken").GetString();
