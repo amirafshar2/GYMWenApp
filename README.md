@@ -1,237 +1,315 @@
-# پلتفرم آنلاین مجموعه باشگاه‌های خشایار شیراز
+# Khashayar Fitness – Online-Plattform für eine Fitnessstudio-Kette in Shiraz
 
-- **فاز ۱:** سایت عمومی با هیروی اسکرولی، نقشهٔ «نزدیک‌ترین شعبه»، پکیج‌ها با تخفیف جشنواره و فرم مشاوره.
-- **فاز ۴:** پنل کارکنان — داشبورد مدیر (درآمد ۱۲ شعبه به تفکیک منبع، نرخ تمدید، در آستانهٔ پایان، اثر جشنواره، اکسل)، پذیرش با اسکنر/دوربین/دستبند، پنل مربی (برنامهٔ تمرین و تغذیه، وزن)، مدیریت قیمت، جشنواره، کد تخفیف، قرارداد، انبار، منوی بوفه و کارکنان، پیامک خودکار، حالت پرزنت.
-- **فاز ۳:** شاپ خشایار (مکمل، پوشاک و لوازم، موجودی هر شعبه)، منوی بوفه با QR و تابلوی لحظه‌ای (SignalR)، کیف پول، صفحهٔ جشنواره، اتصال به گیت/دستبند.
-- **فاز ۲:** ورود با موبایل و کد پیامکی، ثبت‌نام آنلاین چندمرحله‌ای، قرارداد دیجیتال + فرم سلامت با امضای پیامکی، پرداخت (درگاه آزمایشی)، فاکتور PDF، کارت عضویت QR و پروفایل.
+Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 12 Standorten in Shiraz (Iran): öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Geschäftsführung. Die Oberfläche ist vollständig auf Persisch (Rechts-nach-links).
 
-## ساختار (سه‌لایه، .NET 10)
+## Mein erstes Projekt mit vollständigem Vibe-Coding
+
+Dieses Projekt war meine erste Erfahrung mit **komplettem Vibe-Coding**: Ich habe die Anforderungen, die Architektur und jede Phase in natürlicher Sprache beschrieben, die Ergebnisse geprüft, getestet und Schritt für Schritt nachgesteuert – den Code selbst hat eine KI geschrieben. Für mich war das eine **sehr spannende und richtig gute Erfahrung**: In kurzer Zeit ist ein Projekt entstanden, das ich allein so nicht hätte bauen können – mit Drei-Schichten-Architektur, Sicherheits-Audit, automatisierten Tests und messbarer Performance. Gleichzeitig habe ich gelernt, wie wichtig klare Anforderungen, Planung vor jeder Phase und konsequentes Testen sind, damit am Ende etwas Belastbares herauskommt.
+
+## Funktionen
+
+- **Phase 1 – Öffentliche Website:** Scroll-Hero, Standortkarte mit „nächster Standort“, Pakete mit Aktionsrabatt, Trainer, Galerie, Beratungsformular.
+- **Phase 2 – Mitgliedschaft:** Login per Handynummer und SMS-Code, mehrstufige Online-Anmeldung (Standort → Paket → Login → Vertrag → Zahlung), digitaler Vertrag und Gesundheitsfragebogen mit SMS-Signatur, Zahlung (Test-Gateway / ZarinPal), PDF-Rechnung, QR-Mitgliedskarte und Profil.
+- **Phase 3 – Verkauf:** Shop (Supplements, Kleidung, Zubehör, Bestand pro Standort), Kantinen-Menü per QR-Code am Tisch mit Live-Bestelltafel (SignalR), Wallet, Aktionsseite, Anbindung an Drehkreuz/Armband.
+- **Phase 4 – Mitarbeiter-Panel:** Dashboard für die Geschäftsführung (Umsatz der 12 Standorte nach Quelle, Verlängerungsrate, Stoßzeiten, auslaufende Mitgliedschaften, Aktionswirkung, Excel-Export), Empfang mit Scanner/Kamera/Armband, Trainer-Panel (Trainings- und Ernährungsplan, Gewichtsverlauf), Verwaltung von Preisen, Aktionen, Rabattcodes, Vertrag, Lager, Kantinen-Menü, Trainern und Mitarbeitern, automatische SMS, Präsentationsmodus.
+- **Phase 5 – Qualität:** unabhängiges Sicherheits-Audit mit behobenen Befunden, Performance-Optimierung, Barrierefreiheit, Health-Checks, CI.
+
+## Architektur (drei Schichten, .NET 10)
 
 ```
 KhashayarGym.slnx
 src/
-  KhashayarGym.Domain       موجودیت‌ها و Enumها
-  KhashayarGym.DataAccess   EF Core، DbContext، Repository، Migration، دادهٔ نمونه (Seed/*.json)
-  KhashayarGym.Business     سرویس‌ها، DTOها، اعتبارسنجی FluentValidation، قیمت‌گذاری
-  KhashayarGym.Api          Web API، امنیت، کش، سرو کردن فرانت از wwwroot
-  KhashayarGym.Web          React + Vite + TypeScript + Tailwind v4 (بیلد → Api/wwwroot)
-tests/KhashayarGym.Tests    تست‌های xUnit (Business) و یکپارچه (WebApplicationFactory)
-src/KhashayarGym.Web/e2e    تست‌های Playwright
-scripts/                    ساخت فریم ویدیوی هیرو، خروجی پرتفولیو
+  KhashayarGym.Domain       Entitäten und Enums
+  KhashayarGym.DataAccess   EF Core, DbContext, Repositories, Migrationen, Beispieldaten (Seed/*.json)
+  KhashayarGym.Business     Services, DTOs, Validierung (FluentValidation), Preisberechnung
+  KhashayarGym.Api          Web-API, Sicherheit, Caching, liefert das Frontend aus wwwroot aus
+  KhashayarGym.Web          React + Vite + TypeScript + Tailwind v4 (Build → Api/wwwroot)
+tests/KhashayarGym.Tests    xUnit-Tests (Business) und Integrationstests (WebApplicationFactory)
+src/KhashayarGym.Web/e2e    Playwright-Tests (Desktop und Mobil)
+scripts/                    Hilfsskripte (Hero-Video, Bilder, Portfolio-Export, Komprimierung)
 ```
 
-## پیش‌نیازها
+**Technologien:** ASP.NET Core 10, EF Core (SQL Server / SQLite), ASP.NET Identity + JWT mit rotierenden Refresh-Tokens, Parbad (Zahlungen), SignalR, QuestPDF, ClosedXML, Serilog, React 19, Tailwind CSS v4, Playwright.
+
+## Voraussetzungen
+
 - .NET SDK 10
-- Node.js 22 یا جدیدتر
-- SQL Server LocalDB (همراه Visual Studio) — یا بدون آن با SQLite (پایین‌تر)
-- ffmpeg (فقط برای ساخت فریم‌های ویدیوی هیرو)
+- Node.js 22 oder neuer
+- SQL Server LocalDB (kommt mit Visual Studio) – oder ohne Datenbankserver mit SQLite (siehe unten)
+- ffmpeg (nur zum Erzeugen der Hero-Video-Frames)
 
-## اجرا در Visual Studio (یک کلیک)
-1. `KhashayarGym.slnx` را در Visual Studio باز کنید.
-2. پروژهٔ آغازین (Startup) را `KhashayarGym.Api` بگذارید.
-3. در نوار بالا، پروفایل **Demo (SQLite)** را انتخاب کنید و دکمهٔ ▶ را بزنید.
-مرورگر روی http://localhost:5180 باز می‌شود؛ دیتابیس دمو (فایل `khashayar-demo.db`) خودکار ساخته می‌شود و نیازی به SQL Server نیست.
+## Start in Visual Studio (ein Klick)
 
-## اجرا (سریع‌ترین راه برای دمو — SQLite)
-در PowerShell از ریشهٔ پروژه:
+1. `KhashayarGym.slnx` in Visual Studio öffnen.
+2. `KhashayarGym.Api` als Startprojekt festlegen.
+3. Oben das Profil **Demo (SQLite)** wählen und ▶ drücken.
+
+Der Browser öffnet http://localhost:5180. Die Demo-Datenbank (`khashayar-demo.db`) wird automatisch angelegt, ein SQL Server ist nicht nötig.
+
+## Start über die Kommandozeile (SQLite-Demo)
 
 ```powershell
 cd src\KhashayarGym.Web
 npm install
-npm run build            # خروجی داخل src\KhashayarGym.Api\wwwroot
+npm run build            # Ausgabe nach src\KhashayarGym.Api\wwwroot
 
 cd ..\KhashayarGym.Api
 $env:Database__Provider = "Sqlite"
 $env:ConnectionStrings__Default = "Data Source=khashayar-demo.db"
-dotnet dev-certs https --trust     # فقط بار اول
+dotnet dev-certs https --trust     # nur beim ersten Mal
 dotnet run --launch-profile https
 ```
-سپس https://localhost:7180 را باز کنید. دیتابیس و دادهٔ نمونه خودکار ساخته می‌شود.
 
-## اجرا با SQL Server (LocalDB)
+Danach https://localhost:7180 öffnen. Datenbank und Beispieldaten werden automatisch erstellt.
+
+## Start mit SQL Server (LocalDB)
+
 ```powershell
 cd src\KhashayarGym.Api
-dotnet run --launch-profile https   # Migrationها خودکار اعمال می‌شوند
+dotnet run --launch-profile https   # Migrationen werden automatisch angewendet
 ```
-رشتهٔ اتصال دیگر را با User Secrets بدهید (نه در appsettings):
+
+Eine andere Verbindungszeichenfolge gehört in die User Secrets, nicht in `appsettings.json`:
+
 ```powershell
 dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:Default" "Server=...;Database=KhashayarGym;..."
 ```
 
-## توسعهٔ فرانت با Hot Reload
-دو ترمینال:
+## Frontend-Entwicklung mit Hot Reload
+
 ```powershell
-# ترمینال ۱
+# Terminal 1
 cd src\KhashayarGym.Api; dotnet run --launch-profile https
-# ترمینال ۲
-cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173 ، /api به https://localhost:7180 پراکسی می‌شود
+# Terminal 2
+cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173, /api wird an https://localhost:7180 weitergeleitet
 ```
 
-## دموی فاز ۲ (ثبت‌نام و پرداخت)
-با پروفایل **Demo (SQLite)**:
-1. در بخش پکیج‌ها «انتخاب این پکیج» یا دکمهٔ «ثبت‌نام آنلاین» در هدر را بزنید.
-2. سالن و شعبه (دکمهٔ «نزدیک‌ترین شعبه به من»)، پکیج و کد تخفیف (`KHASHAYAR10` یا `WELCOME5`).
-3. ورود با هر شمارهٔ موبایل؛ در حالت دمو پیامک واقعی نمی‌رود و **کد روی صفحه** نمایش داده می‌شود.
-4. قرارداد و فرم سلامت، امضا با کد دوم.
-5. «پرداخت» درگاه آزمایشی Parbad را باز می‌کند: **Pay** = موفق، **Cancel** = انصراف. پولی جابه‌جا نمی‌شود.
-6. صفحهٔ نتیجه: فاکتور PDF و کارت QR؛ در `/profile`: روزهای باقی‌مانده، تمدید یک‌کلیکی، فاکتورها، PDF قرارداد، برنامهٔ تمرینی نمونه و نمودار وزن.
+## Demo-Zugänge
 
-## دموی فاز ۳ (شاپ، بوفه، کیف پول)
-- **شاپ:** `/shop` — تب «مکمل‌ها» و «پوشاک و لوازم خشایار»، انتخاب شعبه برای دیدن موجودی، رنگ و سایز، سبد خرید، تحویل حضوری یا ارسال. کد `MEMBER15` فقط برای اعضای دارای عضویت فعال.
-- **کیف پول:** `/wallet` — شارژ با درگاه آزمایشی، خرج در شاپ و بوفه.
-- **بوفه (مشتری):** `/canteen/ghoddousi-gharbi?table=میز 4` (همان آدرسی که QR میز باز می‌کند).
-- **بوفه (کارمند):** با شمارهٔ کارمند نمایشی **۰۹۱۰۰۰۰۰۰۰۰** وارد شوید و `/panel/canteen?branch=ghoddousi-gharbi` را باز کنید؛ سفارش‌ها لحظه‌ای می‌آیند و با «آماده شد» گوشی مشتری بوق می‌زند. برگهٔ چاپی QR میزها: `/panel/canteen/qr`.
-- **جشنواره:** `/festival`.
-- تصویر کالاها و آیتم‌های بوفه برداری و ساختهٔ همین پروژه است (`scripts/make-shop-images.mjs`)؛ نام برند مکمل‌ها ساختگی است.
+| Zugang | Telefonnummer | Rechte |
+|---|---|---|
+| Demo-Mitarbeiter | 09100000000 | alle Rollen inkl. Gesamtleitung |
+| Demo-Standortleitung | 09100000001 | nur Standort „Ghoddousi Gharbi“ |
+| Demo-Mitglieder | 09391000001 und folgende | Mitgliedskonto mit Karte, Bestellungen, Plan |
 
-## دموی فاز ۴ (پنل کارکنان)
-- **ورود:** شمارهٔ **۰۹۱۰۰۰۰۰۰۰۰** (مدیر کل با همهٔ نقش‌ها و مربیِ اول) یا **۰۹۱۰۰۰۰۰۰۰۱** (مدیر فقط شعبهٔ قدوسی غربی) ← دکمهٔ «پنل» در هدر یا `/panel`.
-- **دادهٔ نمایشی:** در Development (`Demo:SeedMembers=true`) ۲۰۰ عضو ساختگی با ۶ ماه سابقه ساخته می‌شود (شماره‌های `09391000000` به بعد). در production هرگز ساخته نمی‌شود.
-- **حالت پرزنت:** در پنل «حالت پرزنت» را بزنید (یا `?present=1`)؛ نوار پایین صفحه بین نمای مشتری، پذیرش، بوفه، مربی و مدیر جابه‌جا می‌کند.
-- **دسترسی:** نقش و شعبهٔ کارمند هر درخواست از دیتابیس خوانده می‌شود؛ گرفتن دسترسی در «کارکنان و دسترسی» همان لحظه اعمال می‌شود. مدیر شعبه/پذیرش/بوفه/فروشگاه فقط شعبه‌های خودشان را می‌بینند (داشبورد، اکسل، انبار، سفارش‌ها، تابلوی بوفه و SignalR).
-- **پیامک خودکار:** خوش‌آمد/تأیید تمدید (فوری)، یادآوری ۷ و ۱ روز مانده، تولد (روز و ماه شمسی، با کد تخفیف یک‌بارمصرف شاپ) و جشنواره (فقط اعضای منقضی‌شده‌ای که در پروفایل پیامک تبلیغاتی را قبول کرده‌اند). یادآوری/تبلیغ فقط ۹ صبح تا ۹ شب؛ هر پیامک با کلید یکتا فقط یک بار. الگوهای کاوه‌نگار: `khashayar-welcome`، `khashayar-renew`، `khashayar-birthday`، `khashayar-campaign` (هر کدام ۳ توکن). آدرس سایت در متن پیامک: `Sms:SiteUrl`.
+- Im Demo-Modus wird keine echte SMS verschickt – der **Code erscheint direkt auf der Seite**.
+- Rabattcodes (nur Demo): `KHASHAYAR10`, `WELCOME5`, `MEMBER15` (nur für aktive Mitglieder).
+- Das Test-Gateway (Parbad Virtual) bewegt kein echtes Geld: **Pay** = erfolgreich, **Cancel** = abgebrochen.
+- In der Entwicklungsumgebung werden 200 fiktive Mitglieder mit 6 Monaten Historie erzeugt; in Production niemals.
+- **Präsentationsmodus:** im Panel unten in der Seitenleiste „Präsentationsmodus“ anklicken oder `?present=1` an die Adresse hängen – eine schwebende Leiste wechselt zwischen Kunden-, Empfangs-, Kantinen-, Trainer- und Leitungsansicht.
 
-## اتصال به گیت و دستبند
-سند فنی برای شرکت گیت: [`docs/access-control-api.md`](docs/access-control-api.md). در حالت Development یک گیت نمایشی با کلید `demo-gate-key-khashayar-0001` ساخته می‌شود.
+### Demo-Abläufe
 
-## راهنمای راه‌اندازی برای مشتری
-`docs/راهنمای-راه‌اندازی-سایت-خشایار.docx` — کارهای باشگاه و تیم فنی قدم‌به‌قدم (دامنه، اینماد، مالیات، درگاه، پیامک، سرور، گیت). با `node scripts/make-launch-guide.js <خروجی>` دوباره ساخته می‌شود.
+- **Anmeldung:** „Online-Anmeldung“ im Header → Standort (Button „nächster Standort“) → Paket und Rabattcode → Login → Vertrag und Gesundheitsfragebogen signieren → Zahlung → PDF-Rechnung und QR-Karte. Unter `/profile`: Resttage, Verlängerung mit einem Klick, Rechnungen, Vertrags-PDF, Trainingsplan und Gewichtsdiagramm.
+- **Shop:** `/shop` – Kategorien, Standort für den Bestand wählen, Farbe und Größe, Warenkorb, Abholung oder Versand.
+- **Wallet:** `/wallet` – Aufladen über das Gateway, Bezahlen in Shop und Kantine.
+- **Kantine (Kunde):** `/canteen/ghoddousi-gharbi?table=Tisch 4` – dieselbe Adresse, die der QR-Code am Tisch öffnet.
+- **Kantine (Personal):** als 09100000000 anmelden und `/panel/canteen?branch=ghoddousi-gharbi` öffnen; Bestellungen erscheinen live, bei „fertig“ piept das Handy des Kunden. Druckvorlage der Tisch-QR-Codes: `/panel/canteen/qr`.
 
-برای سرور واقعی: `Otp:ExposeCodeInResponse=false`، `Sms:Provider=Kavenegar` با کلید در User Secrets، و `Payment:UseVirtualGateway=false` بعد از گرفتن درگاه به نام باشگاه (Parbad زرین‌پال، IDPay، سامان، ملت و… را پشتیبانی می‌کند).
+## Rollen und Rechte im Panel
+
+| Rolle | Bereiche | Umfang |
+|---|---|---|
+| Gesamtleitung (SuperAdmin) | alle Bereiche, inkl. Pakete, Aktionen, Vertrag, Trainer, Mitarbeiter, SMS | alle 12 Standorte |
+| Standortleitung | Dashboard, Empfang, Kantinentafel, Shop & Lager, Kantinen-Menü (nur verfügbar/nicht verfügbar) | eigene Standorte |
+| Empfang | Empfang und Check-in | eigene Standorte |
+| Trainer | „Meine Schüler“ | eigene Schüler |
+| Kantine | Kantinentafel, Kantinen-Menü | eigene Standorte |
+| Shop | Shop und Lager | eigene Standorte |
+
+- Rolle und Standort werden bei jeder Anfrage aus der Datenbank gelesen; Änderungen unter „Mitarbeiter und Rechte“ gelten sofort.
+- **Trainer:** unter „Trainer“ wird ein Trainerprofil angelegt (Name, Fachgebiet, Standort, Bereich Herren/Damen, Erfahrung, Erfolge, Foto, Sichtbarkeit auf der Website). Das Feld „Handynummer des Trainers“ legt das Login-Konto an und vergibt automatisch die Trainer-Rolle. Trainer mit Schülern oder Plänen können nicht gelöscht, nur ausgeblendet werden.
+- **Inhalte mit Bildern:** Kantinen-Menü, Produkte (mit Größen/Farben und eigenem Preis) und Pakete werden von der Gesamtleitung angelegt, bearbeitet und gelöscht. Bilder können hochgeladen (jpg/png/webp, max. 2 MB, Prüfung der Dateisignatur, kein SVG, Speicherung außerhalb von wwwroot) oder aus den vorhandenen Website-Bildern gewählt werden.
+
+## Automatische SMS
+
+Willkommen/Verlängerungsbestätigung (sofort), Erinnerung 7 und 1 Tag vor Ablauf, Geburtstag (persischer Kalender, mit Einmal-Rabattcode für den Shop) und Aktionen (nur abgelaufene Mitglieder mit Werbe-Einwilligung). Erinnerungen und Werbung nur zwischen 9 und 21 Uhr; jede SMS per eindeutigem Schlüssel nur einmal. Kavenegar-Vorlagen: `khashayar-welcome`, `khashayar-renew`, `khashayar-birthday`, `khashayar-campaign` (je 3 Tokens). Website-Adresse im SMS-Text: `Sms:SiteUrl`.
+
+## Drehkreuz- und Armband-Anbindung
+
+Technische Doku für den Hersteller: [`docs/access-control-api.md`](docs/access-control-api.md). In der Entwicklungsumgebung wird ein Demo-Gerät mit dem Schlüssel `demo-gate-key-khashayar-0001` angelegt.
+
+## Inbetriebnahme beim Kunden
+
+`docs/راهنمای-راه‌اندازی-سایت-خشایار.docx` – Schritt-für-Schritt-Anleitung (auf Persisch) für das Studio und das Technik-Team: Domain, eNamad, Steuer, Zahlungsgateway, SMS, Server, Drehkreuz. Neu erzeugen mit `node scripts/make-launch-guide.js <Ausgabe>`.
+
+Für den Live-Betrieb: `Otp:ExposeCodeInResponse=false`, `Sms:Provider=Kavenegar` mit Schlüssel in den User Secrets und `Payment:UseVirtualGateway=false`, sobald ein Gateway auf den Namen des Studios vorliegt (Parbad unterstützt ZarinPal, IDPay, Saman, Mellat u. a.).
 
 ## Docker
+
 ```bash
-cp .env.example .env      # DB_PASSWORD، JWT_SIGNING_KEY و OTP_PEPPER را با مقادیر تصادفی پر کنید
+cp .env.example .env      # DB_PASSWORD, JWT_SIGNING_KEY und OTP_PEPPER mit Zufallswerten füllen
 docker compose up --build # http://localhost:8080
 ```
-ایمیج چندمرحله‌ای است (Node → .NET SDK → aspnet)، با کاربر غیر root و فایل‌سیستم فقط‌خواندنی اجرا می‌شود؛ PDF قراردادها و کلیدهای Data Protection در volume `private` می‌مانند. جلوی آن reverse proxy با TLS بگذارید (کوکی‌ها `Secure` هستند).
 
-## تست‌ها
+Mehrstufiges Image (Node → .NET SDK → aspnet), läuft als Nicht-Root-Benutzer mit schreibgeschütztem Dateisystem. Vertrags-PDFs und Data-Protection-Schlüssel liegen im Volume `private`, hochgeladene Bilder im Volume `uploads`. Davor gehört ein Reverse-Proxy mit TLS (Cookies sind `Secure`).
+
+## Demo-Deployment auf Render
+
+Das Repository enthält eine fertige **Render-Blueprint-Datei** (`render.yaml`). Damit wird die öffentliche Demo (z. B. für die Präsentation beim Kunden) mit wenigen Klicks erstellt:
+
+1. In Render **New → Blueprint** wählen.
+2. GitHub verbinden und **nur dieses Repository** freigeben (es ist privat – „Public Git Repository“ findet es nicht).
+3. Repository auswählen, Name bestätigen und **Apply** klicken. Render baut das Docker-Image (Frontend + Backend) und startet den Dienst; der erste Build dauert etwa 10 Minuten.
+4. Die Adresse `https://<name>.onrender.com` öffnen und mit `09100000000` anmelden – der Code erscheint auf der Seite.
+
+Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check `/health/ready`, automatisches Deployment bei jedem Push auf `master` und diese Umgebungsvariablen:
+
+| Name | Wert |
+|---|---|
+| `ASPNETCORE_ENVIRONMENT` | `Staging` |
+| `PORT` | `8080` |
+| `Database__Provider` / `ConnectionStrings__Default` | `Sqlite` / `Data Source=/data/private/kg.db` |
+| `Jwt__SigningKey`, `Otp__Pepper` | von Render zufällig erzeugt |
+| `Otp__ExposeCodeInResponse` | `true` (Code auf der Seite) |
+| `Payment__UseVirtualGateway` | `true` (Test-Gateway) |
+| `Demo__StaffPhone` / `Demo__SeedMembers` | `09100000000` / `true` |
+| `ReverseProxy__Enabled` | `true` (HTTPS hinter dem Render-Proxy) |
+| `DOTNET_gcServer` | `0` (weniger Arbeitsspeicher) |
+
+Die Zahlungs-Rücksprungadresse wird automatisch aus der aufgerufenen Adresse gebildet. `Staging` statt `Production`, weil die Demo bewusst unsichere Einstellungen nutzt – der ProductionGuard würde den Start in Production verhindern.
+
+**Grenzen des Free-Tarifs:** Der Dienst schläft nach 15 Minuten ohne Zugriff ein (der erste Aufruf danach dauert etwa eine Minute), und ohne persistente Festplatte werden die Daten bei jedem Neustart zurückgesetzt und die Demo-Daten neu erzeugt. Für den echten Betrieb ist ein Server im Iran mit SQL Server vorgesehen.
+
+## Tests
+
 ```powershell
-dotnet test                                   # xUnit + تست‌های یکپارچهٔ API (ورود، چرخش توکن، پرداخت، idempotency)
+dotnet test                                   # xUnit + API-Integrationstests (Login, Token-Rotation, Zahlung, Idempotenz)
 cd src\KhashayarGym.Web
-npx playwright install chromium               # یک‌بار
-$env:BASE_URL = "http://localhost:5180"; npx playwright test   # شامل سناریوی کامل ثبت‌نام و پرداخت
+npx playwright install chromium               # einmalig
+$env:BASE_URL = "http://localhost:5180"; npx playwright test   # inkl. kompletter Anmeldung mit Zahlung
 ```
-برای اجرای همهٔ تست‌های Playwright پشت سر هم، سقف rate limit را در توسعه بالا ببرید (همهٔ درخواست‌ها از یک IP است):
+
+Für komplette Playwright-Läufe das Rate-Limit in der Entwicklung anheben (alle Anfragen kommen von derselben IP):
+
 ```powershell
-$env:RateLimiting__PermitMultiplier = "20"   # فقط Development/Testing؛ در production نادیده گرفته می‌شود
+$env:RateLimiting__PermitMultiplier = "20"   # nur Development/Testing; in Production ignoriert
 ```
 
-## ویرایش داده‌ها
-- **شعبه‌ها:** `src/KhashayarGym.DataAccess/Seed/branches.json` — شعبه‌هایی که `addressConfirmed: false` دارند مختصات تقریبی دارند. آدرس و مختصات دقیق را از هایلایت «شعب» اینستاگرام بردارید.
-- پکیج‌ها، مربی‌ها و سؤالات: فایل‌های دیگر همان پوشه.
-- Seed فقط روی دیتابیس خالی اجرا می‌شود؛ بعد از تغییر JSON فایل دیتابیس دمو را پاک کنید (`khashayar-demo.db`) یا دیتابیس LocalDB را drop کنید.
-- **لوگو:** `src/KhashayarGym.Web/public/brand/logo.svg` را با فایل اصلی جایگزین کنید.
-- **رنگ‌ها:** فقط در بلوک `@theme` فایل `src/KhashayarGym.Web/src/index.css`.
+Aktuell über 100 automatisierte Tests (Server und Browser, Desktop und Mobil).
 
-## فرانت‌اند
-چیدمان و سبک صفحه از روی صفحهٔ مرجعی که کارفرما انتخاب کرد (قالب «GYM Store — Sports Complex») بازسازی شده؛ کد، متن و تصویرهای آن قالب کپی نشده و همه‌چیز از نو با React/Tailwind ساخته شده است. توکن‌ها و قواعد: `design-system/khashayar-gym/MASTER.md`.
+## Daten bearbeiten
 
-| بخش | فایل | منبع |
+- **Standorte:** `src/KhashayarGym.DataAccess/Seed/branches.json` – Einträge mit `addressConfirmed: false` haben ungefähre Koordinaten.
+- Pakete, Trainer und FAQ: weitere Dateien im selben Ordner (oder später direkt im Panel).
+- Seed-Daten werden nur in eine leere Datenbank geschrieben; nach Änderungen die Demo-Datenbank (`khashayar-demo.db`) löschen bzw. die LocalDB-Datenbank droppen.
+- **Logo:** `src/KhashayarGym.Web/public/brand/logo.svg` durch das Original ersetzen.
+- **Farben:** nur im `@theme`-Block von `src/KhashayarGym.Web/src/index.css`.
+
+## Frontend
+
+Layout und Stil orientieren sich an einer vom Kunden gewählten Referenzseite (Vorlage „GYM Store – Sports Complex“); Code, Texte und Bilder dieser Vorlage wurden nicht kopiert, alles ist neu mit React/Tailwind gebaut. Tokens und Regeln: `design-system/khashayar-gym/MASTER.md`.
+
+| Bereich | Datei | Quelle |
 |---|---|---|
-| هدر سفید چسبان + پنل کناری | `site/SiteHeader.tsx` | چیدمان صفحهٔ مرجع |
-| هیرو: دمبل ذره‌ای که با ماوس مایع می‌شود | `site/SiteHero.tsx` | Liquid Sculpture Hero (21st.dev، guglielmogiannattasio)؛ تصویر دمبل ساخت Canva AI |
-| چه می‌کنیم (۴ کارت تصویری) | `site/SiteWhatWeDo.tsx` | تصویرها فریم‌های ویدیوی خود باشگاه |
-| چرا خشایار + اعداد | `site/SiteWhy.tsx` | Count Up (21st.dev) |
-| ویدیوی اسکرولی وسط صفحه | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) — ویدیو: `public/media/video/gym.mp4` |
-| آنچه ارائه می‌دهیم (کاروسل آیکون) | `site/SiteOffer.tsx` | چیدمان صفحهٔ مرجع |
-| شعبه‌ها و نقشه | `site/SiteBranches.tsx`، `components/ui/shiraz-branch-picker.tsx` | ساختار Nepal Address Picker (21st.dev) با رنگ‌های تم؛ نقشهٔ شماتیک شیراز + حوزهٔ هر شعبه |
-| پکیج‌ها | `site/SitePricing.tsx` | Pricing Section (21st.dev، نسخهٔ سوییچ متحرک) با رنگ‌های تم |
-| جشنواره (دو تصویر پارالاکس) | `site/SiteEvents.tsx` | چیدمان صفحهٔ مرجع |
-| مربیان | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev)؛ عکس‌ها و نام‌ها موقت‌اند |
-| سؤالات | `site/SiteFaq.tsx` | FAQ Accordion (21st.dev) |
-| فرم مشاوره | `site/SiteContact.tsx` | طراحی اختصاصی هم‌سبک سایت (تیره + فرم سفید، انتخاب هدف، پکیج انتخابی) |
-| نوار جشنواره | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
-| گالری | `site/SiteGallery.tsx` | Shared Element Gallery (21st.dev)؛ عکس‌ها فعلاً فریم ویدیوها |
-| فوتر تیرهٔ چهارستونه + خبرنامه | `site/SiteFooter.tsx` | چیدمان صفحهٔ مرجع |
+| Weißer Sticky-Header + Seitenpanel | `site/SiteHeader.tsx` | Layout der Referenzseite |
+| Hero: Partikel-Hantel, die auf die Maus reagiert | `site/SiteHero.tsx` | Liquid Sculpture Hero (21st.dev, guglielmogiannattasio); Hantelbild mit Canva AI erstellt |
+| Was wir machen (4 Bildkarten) | `site/SiteWhatWeDo.tsx` | Bilder aus Videos des Studios |
+| Warum Khashayar + Zahlen | `site/SiteWhy.tsx` | Count Up (21st.dev) |
+| Scroll-Video | `site/SiteVideo.tsx` | Sunset Skyline Hero (21st.dev) – Video: `public/media/video/gym.mp4` |
+| Angebot (Icon-Karussell) | `site/SiteOffer.tsx` | Layout der Referenzseite |
+| Standorte und Karte | `site/SiteBranches.tsx`, `components/ui/shiraz-branch-picker.tsx` | Struktur von Nepal Address Picker (21st.dev) in Theme-Farben; schematische Karte von Shiraz |
+| Pakete | `site/SitePricing.tsx` | Pricing Section (21st.dev, animierter Umschalter) |
+| Aktion (zwei Parallax-Bilder) | `site/SiteEvents.tsx` | Layout der Referenzseite |
+| Trainer | `site/SiteCoaches.tsx` | Container Scroll Animation (21st.dev) |
+| FAQ | `site/SiteFaq.tsx` | FAQ Accordion (21st.dev) |
+| Beratungsformular | `site/SiteContact.tsx` | eigenes Design im Stil der Seite |
+| Aktionsleiste | `site/SiteBanner.tsx` | Promo Banner (21st.dev) |
+| Galerie | `site/SiteGallery.tsx` | Shared Element Gallery (21st.dev) |
+| Dunkler Footer + Newsletter | `site/SiteFooter.tsx` | Layout der Referenzseite |
 
-### ویدیوی بخش وسط
-صفحهٔ اصلی مستقیم `src/KhashayarGym.Web/public/media/video/gym.mp4` را پخش می‌کند (الان: ویدیوی مدیر باشگاه، نوارهای سیاه کناری بریده شده).
-برای ویدیوی تازه، فایل خام را با اسم `gym-source.mp4` همان‌جا بگذارید و اجرا کنید:
+Änderungen an den Originalkomponenten: feste englische Texte wurden zu persischen Props, dazu RTL-Anpassungen (kein letter-spacing bei Persisch, Pfeilrichtungen). Jede Datei beschreibt oben ihre Änderungen. Die Lizenz dieser Komponenten ist auf 21st.dev „unknown“ – vor kommerzieller Übergabe prüfen. Originaldemos im Entwicklungsmodus: `npm run dev`, dann `http://localhost:5173/lab`.
+
+### Scroll-Video austauschen
+
+Neues Rohvideo als `gym-source.mp4` in `src/KhashayarGym.Web/public/media/video/` legen und ausführen:
+
 ```powershell
 .\scripts\make-scrub-video.ps1
 cd src\KhashayarGym.Web; npm run build
 ```
-اسکریپت هر فریم را keyframe می‌کند تا جلو/عقب رفتن با اسکرول روان باشد.
 
-تغییرات روی کد اصلی فقط این‌هاست: متن ثابت انگلیسی به props فارسی تبدیل شده، و چند سازگاری RTL (حذف letter-spacing روی فارسی، جهت فلش‌ها). هر فایل بالایش نوشته چه چیزی عوض شده.
-لایسنس این کامپوننت‌ها روی 21st.dev «unknown» است؛ پیش از تحویل تجاری بررسی شود.
+Das Skript macht jeden Frame zum Keyframe, damit Vor- und Zurückspulen beim Scrollen flüssig ist.
 
-برای دیدن دموی اصلی هر کامپوننت در حالت توسعه: `npm run dev` و بعد `http://localhost:5173/lab`.
+### Demo-Marke für das Portfolio
 
-## برند دمو برای پرتفولیو
-با افزودن `?brand=demo` به آدرس، نام، لوگو، شعار و اطلاعات تماس با یک برند ساختگی عوض می‌شود (برای اسکرین‌شات‌های پرتفولیو). `?brand=khashayar` برمی‌گرداند.
+Mit `?brand=demo` werden Name, Logo, Slogan und Kontaktdaten durch eine fiktive Marke ersetzt (für Portfolio-Screenshots); `?brand=khashayar` stellt das Original wieder her.
 
-## امنیت
-**فاز ۱**
-- هدرهای CSP، HSTS (production)، X-Content-Type-Options، X-Frame-Options، Referrer-Policy، Permissions-Policy (geolocation فقط self)
-- Rate limiting: فرم‌ها ۵ در دقیقه، OTP ۵ در دقیقه، ورود ۱۵ در دقیقه، پرداخت ۱۰ در دقیقه به ازای IP؛ سراسری ۳۰۰
-- CSRF با کوکی + هدر `X-XSRF-TOKEN` (`GET /api/v1/security/csrf`) برای درخواست‌های مهمان
-- اعتبارسنجی همهٔ ورودی‌ها در لایهٔ Business، نرمال‌سازی ارقام فارسی و شمارهٔ موبایل
-- EF Core پارامتری، بدون SQL خام؛ محدودیت حجم درخواست
-- موقعیت کاربر فقط در مرورگر استفاده می‌شود و به سرور ارسال نمی‌شود
+## Sicherheit
 
-**فاز ۲**
-- کد پیامکی ۵ رقمی، فقط HMAC-SHA256 آن (با pepper) ذخیره می‌شود؛ ۲ دقیقه اعتبار، ۵ تلاش، فاصلهٔ ۶۰ ثانیه، حداکثر ۵ کد در ساعت برای هر شماره
-- JWT کوتاه‌عمر فقط در حافظهٔ مرورگر؛ توکن تازه‌سازی چرخشی در کوکی `HttpOnly; Secure; SameSite=Strict` با مسیر محدود. فقط هش توکن در دیتابیس است. استفادهٔ دوباره از توکن قدیمی همهٔ نشست‌ها را باطل می‌کند (با مهلت ۳۰ ثانیه برای پاسخِ گم‌شده هنگام رفرش صفحه)
-- refresh/logout فقط هم‌مبدأ (`Sec-Fetch-Site`، `Origin` و هدر `X-KG-Client`)
-- مبلغ فقط سمت سرور محاسبه می‌شود؛ بعد از بازگشت از بانک، Fetch + تطبیق مبلغ + Verify سمت سرور و تکمیل idempotent داخل تراکنش. کلید idempotency برای جلوگیری از پرداخت دوباره با دوبار کلیک
-- سالن انتخابی باید با جنسیت ثبت‌شده بخواند؛ هر کاربر فقط پرداخت‌ها و قراردادهای خودش را می‌بیند
-- قرارداد امضاشده با هش SHA-256 محتوا، IP، مرورگر و زمان ثبت می‌شود؛ PDFها بیرون از wwwroot
-- رمزها (کلید JWT، pepper، کلید پیامک) فقط در User Secrets / متغیر محیطی؛ نبودشان در production خطای شروع می‌دهد
-- خطاها به شکل ProblemDetails با `traceId` و بدون جزئیات داخلی؛ لاگ ممیزی برای ساخت حساب، امضا و پرداخت
+**Grundlagen**
+- Header: CSP, HSTS (außer Development), X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy.
+- Rate-Limiting pro IP: Formulare 5/min, OTP 5/min, Login 15/min, Zahlung 10/min, global 300.
+- CSRF-Schutz per Cookie + Header `X-XSRF-TOKEN` für Gast-Anfragen.
+- Validierung aller Eingaben in der Business-Schicht, Normalisierung persischer Ziffern und Handynummern.
+- EF Core parametrisiert, kein Roh-SQL; Begrenzung der Request-Größe.
+- Der Standort des Nutzers wird nur im Browser verwendet und nicht an den Server gesendet.
 
-**فاز ۵ (ممیزی مستقل و رفع یافته‌ها)**
-- **ProductionGuard:** در Production اگر درگاه آزمایشی، نمایش کد ورود، پیامک Log، Sqlite، `AllowedHosts=*`، کلید گیت نمایشی یا تنظیمات Demo مانده باشد، سرور اجرا نمی‌شود و فهرست مشکل‌ها را چاپ می‌کند.
-- **درگاه:** زرین‌پال (`Payment:ZarinPal:MerchantId`)؛ آدرس بازگشت از `Payment:CallbackBaseUrl` (نه هدر Host)؛ وضعیت درگاه در SQL Server (جدول `ParbadCache`) تا با ری‌استارت گم نشود.
-- **هم‌زمانی:** نهایی‌کردن پرداخت با به‌روزرسانی شرطی اتمی (دو callback هم‌زمان فقط یک بار شارژ/بازگشت وجه)، ایندکس یکتای دفتر کیف پول روی (کاربر، مرجع، نوع)، تغییر وضعیت بوفه شرطی (لغو دوباره = یک بازگشت وجه)، شمارش تلاش کد ورود اتمی (حدس موازی بیش از ۵ بار ممکن نیست).
-- **کد تخفیف و جشنواره:** پرداخت‌های در انتظار جزو ظرفیت حساب می‌شوند؛ کدهای سقف‌دار برای هر نفر یک بار؛ «فقط اعضا» در ثبت‌نام هم بررسی می‌شود.
-- **دسترسی:** پذیرش/مدیر شعبه فقط اعضای شعبه‌های خود را می‌بینند (جست‌وجو، پرونده، دستبند، ورود دستی)؛ توکن QR کارت هرگز به کارمند داده نمی‌شود؛ مربی فقط اعضای فعال شعبه و سالن خودش را شاگرد می‌کند.
-- **شبکه:** پورت اپ در docker-compose فقط روی `127.0.0.1`؛ پراکسی‌های مجاز در `ReverseProxy:KnownNetworks`؛ لاگ HttpClient در سطح Warning (کلید پیامک در لاگ نمی‌رود)؛ دوربین فقط برای خود سایت (اسکن پذیرش).
-- **CI:** `.github/workflows/ci.yml` بیلد، تست، `dotnet list package --vulnerable` و `npm audit`.
-- **سلامت:** `/health/live` و `/health/ready` (دیتابیس) برای مانیتورینگ.
-- **مایگریشن:** پیش‌فرض خودکار؛ برای اجرای بازبینی‌شده `Database:AutoMigrate=false` و اسکریپت `docs/database/migrate.sql` (idempotent).
-- **باقی‌مانده (ریسک کم، آگاهانه):** دو درخواست refresh کاملاً هم‌زمان دو نشست معتبر می‌سازد؛ CSP برای استایل `unsafe-inline` دارد (اسکریپت درون‌خطی فقط با hash).
+**Login, Zahlung, Verträge**
+- 5-stelliger SMS-Code, gespeichert nur als HMAC-SHA256 mit Pepper; 2 Minuten gültig, 5 Versuche, 60 Sekunden Abstand, max. 5 Codes pro Stunde und Nummer.
+- Kurzlebiges JWT nur im Arbeitsspeicher des Browsers; rotierendes Refresh-Token im Cookie `HttpOnly; Secure; SameSite=Strict`. Nur der Hash liegt in der Datenbank; Wiederverwendung eines alten Tokens beendet alle Sitzungen.
+- Beträge werden nur serverseitig berechnet; nach der Rückkehr von der Bank: Abruf, Betragsabgleich, Verify und idempotenter Abschluss in einer Transaktion.
+- Signierte Verträge mit SHA-256-Hash des Inhalts, IP, Browser und Zeitstempel; PDFs außerhalb von wwwroot.
+- Geheimnisse (JWT-Schlüssel, Pepper, SMS-Schlüssel) nur in User Secrets / Umgebungsvariablen; fehlen sie außerhalb von Development, startet der Server nicht.
+- Fehler als ProblemDetails mit `traceId`, ohne interne Details; Audit-Log für Kontoerstellung, Signatur und Zahlung.
 
-## حجم داده و دیتابیس
-- **SQLite فقط برای دمو و توسعه است.** در Production فقط SQL Server پذیرفته می‌شود (ProductionGuard). دلیل: SQLite هم‌زمان فقط یک نوشتن را می‌پذیرد، در حالی که گیت‌ها، سایت، بوفه و پنل‌ها هم‌زمان می‌نویسند؛ پشتیبان‌گیری آنلاین و مانیتورینگ هم ندارد.
-- **SQL Server Express (رایگان)** تا سقف ۱۰ گیگابایت برای هر دیتابیس کافی است. تست با ۶۰۰۰ عضو و یک سال سابقه (۳۳۶ هزار ورود، ۸۵ هزار سفارش بوفه) حدود ۱۰۰ مگابایت شد؛ یعنی چند سال جا هست. اگر روزی نزدیک سقف شد، همین کد بدون تغییر روی SQL Server Standard اجرا می‌شود.
-- **سرعت با حجم بالا (همان تست):** داشبورد همهٔ شعبه‌ها ۳۰ روز ≈ ۰٫۳ ثانیه، ۱۸۰ روز ≈ ۰٫۷ ثانیه؛ داشبورد یک شعبه ≈ ۰٫۰۵ ثانیه؛ جست‌وجوی پذیرش و فهرست سفید گیت < ۰٫۰۵ ثانیه. جمع درآمد و ورودها در خود دیتابیس انجام می‌شود و ایندکس‌های لازم (مایگریشن Phase5Scale) ساخته شده است.
-- **فهرست‌های بزرگ در کوئری** به‌صورت یک پارامتر JSON فرستاده می‌شوند (سقف ۲۱۰۰ پارامتر SQL Server؛ نیاز به SQL Server 2016 به بعد).
-- **پاک‌سازی روزانه:** کدهای ورود قدیمی، نشست‌های منقضی و رویدادهای ارسال‌شده به سیستم گیت. داده‌های کسب‌وکار و لاگ ممیزی هرگز پاک نمی‌شوند.
-- **تست حجم:** `Demo__SeedMemberCount=6000` و `Demo__SeedDays=365` (فقط Development).
+**Unabhängiges Audit (Phase 5)**
+- **ProductionGuard:** In Production startet der Server nicht, wenn noch Test-Gateway, sichtbarer Login-Code, SMS-Provider „Log“, SQLite, `AllowedHosts=*`, Demo-Geräteschlüssel oder Demo-Einstellungen aktiv sind.
+- **Gateway:** ZarinPal (`Payment:ZarinPal:MerchantId`); Rücksprungadresse aus `Payment:CallbackBaseUrl` statt Host-Header; Gateway-Status in SQL Server (Tabelle `ParbadCache`).
+- **Nebenläufigkeit:** atomare bedingte Updates beim Zahlungsabschluss (zwei gleichzeitige Callbacks buchen nur einmal), eindeutiger Index im Wallet-Journal, bedingte Statuswechsel in der Kantine, atomarer Zähler für Login-Versuche.
+- **Rabatte:** offene Zahlungen zählen zur Kapazität; limitierte Codes einmal pro Person.
+- **Zugriff:** Empfang und Standortleitung sehen nur Mitglieder ihrer Standorte; das QR-Token der Karte wird nie an Mitarbeiter ausgeliefert; Trainer können nur aktive Mitglieder ihres Standorts und Bereichs als Schüler hinzufügen.
+- **Netzwerk:** App-Port in docker-compose nur auf `127.0.0.1`; erlaubte Proxys über `ReverseProxy:KnownNetworks`.
+- **CI:** `.github/workflows/ci.yml` – Build, Tests, `dotnet list package --vulnerable` und `npm audit`.
+- **Bewusst akzeptierte Restrisiken (gering):** zwei exakt gleichzeitige Refresh-Anfragen erzeugen zwei gültige Sitzungen; die CSP erlaubt `unsafe-inline` für Styles (Inline-Skripte nur per Hash).
 
-## سرعت (فاز ۵)
-Lighthouse روی صفحهٔ اصلی (موبایل شبیه‌سازی‌شده، شبکهٔ کند): عملکرد از ۳۴ به حدود ۷۵، CLS از ۰٫۲ به ۰٫۰۰۵؛ دسکتاپ ۹۹.
-- موتور ذرات هیرو فقط با اولین حرکت ماوس/لمس ساخته می‌شود (ظاهر در حالت سکون همان است)
-- ویدیو فقط نزدیک بخش خودش دانلود می‌شود؛ بخش‌های زیر هیرو در فایل جدا
-- پیش‌بارگذاری فونت و تصویر هیرو، رزرو جای نوار جشنواره، تصویر هیروی موبایل از همان اول
-- فایل‌های بیلد با Brotli کیفیت ۱۱ از قبل فشرده می‌شوند (`scripts/precompress.mjs`) و مستقیم سرو می‌شوند
+## Datenmenge und Datenbank
 
-## API نسخهٔ ۱ (`/api/v1`)
-مستندات OpenAPI در توسعه: `/openapi/v1.json` (با طرح امنیتی Bearer).
+- **SQLite nur für Demo und Entwicklung.** In Production ist nur SQL Server erlaubt: SQLite erlaubt nur einen gleichzeitigen Schreibvorgang, während Drehkreuze, Website, Kantine und Panels parallel schreiben; außerdem fehlen Online-Backup und Monitoring.
+- **SQL Server Express (kostenlos)** reicht bis 10 GB pro Datenbank. Ein Test mit 6.000 Mitgliedern und einem Jahr Historie (336.000 Check-ins, 85.000 Kantinenbestellungen) ergab rund 100 MB.
+- **Geschwindigkeit beim selben Test:** Dashboard aller Standorte über 30 Tage ≈ 0,3 s, über 180 Tage ≈ 0,7 s; ein Standort ≈ 0,05 s; Empfangssuche und Drehkreuz-Whitelist < 0,05 s. Summen werden in der Datenbank berechnet, die nötigen Indizes sind angelegt (Migration Phase5Scale).
+- Große Listen in Abfragen werden als ein JSON-Parameter übergeben (Grenze von 2.100 Parametern bei SQL Server; ab SQL Server 2016).
+- **Tägliche Bereinigung:** alte Login-Codes, abgelaufene Sitzungen, bereits übertragene Drehkreuz-Ereignisse. Geschäftsdaten und Audit-Log werden nie gelöscht.
+- **Lasttest:** `Demo__SeedMemberCount=6000` und `Demo__SeedDays=365` (nur Development).
+- **Migrationen:** standardmäßig automatisch; für geprüfte Ausführung `Database:AutoMigrate=false` und das idempotente Skript `docs/database/migrate.sql`.
+- **Health-Checks:** `/health/live` und `/health/ready` (inkl. Datenbank).
 
-| مسیر | توضیح |
+## Performance
+
+Lighthouse auf der Startseite (mobil, gedrosseltes Netz): Performance von 34 auf etwa 75, CLS von 0,2 auf 0,005; Desktop 99.
+- Die Partikel-Engine des Heros startet erst bei der ersten Maus-/Touch-Bewegung (gleiches Aussehen im Ruhezustand).
+- Das Video lädt erst in der Nähe seines Abschnitts; Abschnitte unter dem Hero liegen in einem eigenen Chunk.
+- Vorladen von Schrift und Hero-Bild, reservierter Platz für die Aktionsleiste.
+- Build-Dateien werden vorab mit Brotli (Stufe 11) komprimiert (`scripts/precompress.mjs`) und direkt ausgeliefert.
+
+## API v1 (`/api/v1`)
+
+OpenAPI in der Entwicklung: `/openapi/v1.json` (mit Bearer-Schema).
+
+| Pfad | Beschreibung |
 |---|---|
-| `GET /branches?section=men\|women` ، `GET /branches/{slug}` | شعبه‌ها |
-| `GET /packages` ، `GET /coaches` ، `GET /faq` ، `GET /stats` | داده‌های عمومی |
-| `GET /campaigns/active` | جشنوارهٔ فعال (204 اگر نباشد) |
-| `POST /consultations` | فرم مشاوره (CSRF + rate limit) |
-| `POST /auth/otp` ، `POST /auth/verify` | ورود با کد پیامکی |
-| `POST /auth/refresh` ، `POST /auth/logout` | نشست با کوکی HttpOnly |
-| `GET/PUT /me` ، `GET /me/profile` | حساب و پروفایل |
-| `GET /contracts/active` ، `POST /contracts/sign/otp` ، `POST /contracts/sign` | قرارداد و امضا |
-| `POST /checkout/quote` ، `POST /checkout` | پیش‌فاکتور و شروع پرداخت |
-| `GET\|POST /payments/callback` | بازگشت از درگاه |
-| `GET /me/payments/{id}` ، `…/invoice.pdf` ، `GET /me/contracts/{id}/pdf` ، `GET /me/card.svg` | نتیجه، فاکتور، قرارداد، QR کارت |
-| `GET /shop/products` ، `GET /shop/products/{slug}` ، `POST /shop/quote` ، `POST /shop/orders` | فروشگاه |
-| `GET /canteen/{branch}/menu` ، `POST /canteen/orders` | بوفه (مشتری) |
-| `GET /canteen/staff/{branch}/orders` ، `POST /canteen/staff/orders/{id}/status` ، Hub `/hubs/canteen` | بوفه (کارکنان، لحظه‌ای) |
-| `GET /me/wallet` ، `POST /me/wallet/topups` ، `GET /me/orders` | کیف پول و سفارش‌ها |
-| `POST /access/check` ، `GET /access/whitelist` ، `POST /access/events` | گیت/دستبند (کلید دستگاه) |
-| `GET /panel/me` ، `GET /panel/dashboard` ، `GET /panel/dashboard/export` | پنل: کارمند فعلی، داشبورد، اکسل |
-| `/panel/reception/*` ، `/staff/members/{id}/credentials` | پذیرش: جست‌وجو، پرونده، ثبت ورود، دستبند |
-| `/panel/coach/*` ، `GET /me/plan` ، `GET/POST/DELETE /me/metrics` ، `GET/PUT /me/preferences` | مربی و سمت عضو |
-| `/panel/admin/*` | پکیج، جشنواره و پیامکش، کد تخفیف، قرارداد، کالا و موجودی، سفارش شاپ، منوی بوفه، کارکنان، پیامک‌ها |
+| `GET /branches?section=men\|women`, `GET /branches/{slug}` | Standorte |
+| `GET /packages`, `GET /coaches`, `GET /faq`, `GET /stats` | öffentliche Daten |
+| `GET /campaigns/active` | aktive Aktion (204, wenn keine) |
+| `POST /consultations` | Beratungsformular (CSRF + Rate-Limit) |
+| `POST /auth/otp`, `POST /auth/verify` | Login per SMS-Code |
+| `POST /auth/refresh`, `POST /auth/logout` | Sitzung per HttpOnly-Cookie |
+| `GET/PUT /me`, `GET /me/profile` | Konto und Profil |
+| `GET /contracts/active`, `POST /contracts/sign/otp`, `POST /contracts/sign` | Vertrag und Signatur |
+| `POST /checkout/quote`, `POST /checkout` | Angebot und Start der Zahlung |
+| `GET\|POST /payments/callback` | Rückkehr vom Gateway |
+| `GET /me/payments/{id}`, `…/invoice.pdf`, `GET /me/contracts/{id}/pdf`, `GET /me/card.svg` | Ergebnis, Rechnung, Vertrag, QR-Karte |
+| `GET /shop/products`, `GET /shop/products/{slug}`, `POST /shop/quote`, `POST /shop/orders` | Shop |
+| `GET /canteen/{branch}/menu`, `POST /canteen/orders` | Kantine (Kunde) |
+| `GET /canteen/staff/{branch}/orders`, `POST /canteen/staff/orders/{id}/status`, Hub `/hubs/canteen` | Kantine (Personal, live) |
+| `GET /me/wallet`, `POST /me/wallet/topups`, `GET /me/orders` | Wallet und Bestellungen |
+| `POST /access/check`, `GET /access/whitelist`, `POST /access/events` | Drehkreuz/Armband (Geräteschlüssel) |
+| `GET /panel/me`, `GET /panel/dashboard`, `GET /panel/dashboard/export` | Panel: aktueller Mitarbeiter, Dashboard, Excel |
+| `/panel/reception/*`, `/staff/members/{id}/credentials` | Empfang: Suche, Akte, Check-in, Armband |
+| `/panel/coach/*`, `GET /me/plan`, `GET/POST/DELETE /me/metrics`, `GET/PUT /me/preferences` | Trainer und Mitgliedsseite |
+| `/panel/admin/*` | Pakete, Aktionen und deren SMS, Rabattcodes, Vertrag, Produkte und Bestand, Shop-Bestellungen, Kantinen-Menü, Trainer, Mitarbeiter, SMS, Bild-Upload |
+
+## Autor
+
+**Amir Reza Afshar**

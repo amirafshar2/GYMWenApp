@@ -17,3 +17,6 @@ src/KhashayarGym.Web/public/media/video/gym-source.mp4
 src/KhashayarGym.Web/public/media/hero/dumbbell.png
 src/KhashayarGym.Web/public/media/hero/frames/
 tests/
+*.zip
+.sync*/
+*.bundle

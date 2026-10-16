@@ -33,3 +33,8 @@ src/KhashayarGym.Web/public/media/hero/dumbbell.png
 # ویدیوی خام باشگاه (نسخهٔ بهینه‌اش gym.mp4 است که سایت پخش می‌کند)
 src/KhashayarGym.Web/public/media/video/gym-source.mp4
 src/KhashayarGym.Api/App_Data/
+
+# Übertragungsdateien (Sync-Archive, Git-Bundles)
+*.zip
+.sync*/
+*.bundle

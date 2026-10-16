@@ -1,0 +1,42 @@
+# Render Blueprint – öffentliche Demo der Khashayar-Plattform
+# Render → New → Blueprint → dieses Repository wählen → Apply.
+# Die Demo läuft bewusst als "Staging": Login-Code auf der Seite, Test-Gateway, Demo-Daten.
+# In "Production" würde der ProductionGuard diese Einstellungen ablehnen (so gewollt).
+# Free-Tarif: keine persistente Festplatte – die SQLite-Demo-Datenbank wird bei jedem Neustart neu erzeugt.
+services:
+  - type: web
+    name: khashayar-gym-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: master
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/ready
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Staging
+      - key: PORT
+        value: "8080"
+      - key: Database__Provider
+        value: Sqlite
+      - key: ConnectionStrings__Default
+        value: Data Source=/data/private/kg.db
+      - key: Jwt__SigningKey
+        generateValue: true
+      - key: Otp__Pepper
+        generateValue: true
+      - key: Otp__ExposeCodeInResponse
+        value: "true"
+      - key: Payment__UseVirtualGateway
+        value: "true"
+      - key: Demo__StaffPhone
+        value: "09100000000"
+      - key: Demo__SeedMembers
+        value: "true"
+      - key: ReverseProxy__Enabled
+        value: "true"
+      # Workstation-GC: weniger Arbeitsspeicher (Free-Tarif hat 512 MB)
+      - key: DOTNET_gcServer
+        value: "0"

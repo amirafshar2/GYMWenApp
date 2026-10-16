@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.7
 # ساخت چندمرحله‌ای: فرانت (Node) ← بک‌اند (.NET SDK) ← اجرای سبک با کاربر غیر root
 
 # ---- ۱. فرانت React → wwwroot ----
@@ -29,6 +28,7 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_RUNNING_IN_CONTAINER=true \
     Storage__PrivateRoot=/data/private \
+    Storage__PublicUploads=/data/uploads \
     DataProtection__KeysPath=/data/private/keys
 COPY --from=build /app ./
 # فایل‌های خصوصی (PDF قراردادها) در volume جدا، با مالکیت کاربر غیر root ایمیج (app، UID 1654)
