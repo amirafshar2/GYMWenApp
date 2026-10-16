@@ -44,6 +44,29 @@ public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostE
         });
     }
 
+    /// <summary>
+    /// ورود یک‌کلیکی نسخهٔ نمایشی. فقط وقتی کار می‌کند که برنامه Production نباشد و کد ورود روی صفحه نمایش داده شود
+    /// (یعنی همین الان هم هر کسی با هر شماره‌ای وارد می‌شود)، و فقط برای حساب‌های دمو؛ در غیر این صورت 404.
+    /// </summary>
+    [HttpPost("demo")]
+    [ValidateCsrf]
+    [EnableRateLimiting("auth")]
+    [RequestSizeLimit(1024)]
+    public async Task<IActionResult> DemoLogin([FromBody] OtpRequest request, [FromServices] IConfiguration cfg, CancellationToken ct)
+    {
+        if (env.IsProduction() || !cfg.GetValue("Otp:ExposeCodeInResponse", false)) return NotFound();
+        var phone = KhashayarGym.Business.Common.PersianText.NormalizeMobile(request.PhoneNumber);
+        var allowed = phone == cfg["Demo:StaffPhone"] || phone == KhashayarGym.Business.Services.Panel.DemoSeeder.ManagerPhone
+            || phone.StartsWith(KhashayarGym.Business.Services.Panel.DemoSeeder.PhonePrefix, StringComparison.Ordinal);
+        if (!allowed) return NotFound();
+        var r = await auth.LoginDemoAsync(phone, this.RequestContext(), ct);
+        return r.ToActionResult(this, s =>
+        {
+            RefreshCookie.Set(Response, env, s.RefreshToken, s.RefreshExpiresAtUtc);
+            return Ok(s.Auth);
+        });
+    }
+
     /// <summary>تمدید توکن دسترسی با کوکی تازه‌سازی (چرخشی).</summary>
     [HttpPost("refresh")]
     [SameOriginOnly]

@@ -47,7 +47,21 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<FaqDto>>> Faq(CancellationToken ct) =>
         Ok(await catalog.GetFaqAsync(ct));
 
+    /// <summary>
+    /// وضعیت نسخه برای نمایش نوار «نسخهٔ نمایشی». خارج از Production، وقتی کد ورود روی صفحه یا درگاه آزمایشی فعال است
+    /// (یا Site:DemoBanner=true)، سایت دمو حساب می‌شود.
+    /// </summary>
+    [HttpGet("site")]
+    public ActionResult<SiteInfoDto> Site([FromServices] IConfiguration cfg, [FromServices] IHostEnvironment env)
+    {
+        var demo = !env.IsProduction() && (cfg.GetValue("Site:DemoBanner", false)
+            || cfg.GetValue("Otp:ExposeCodeInResponse", false) || cfg.GetValue("Payment:UseVirtualGateway", false));
+        return Ok(new SiteInfoDto(demo));
+    }
+
     [HttpGet("stats")]
     public async Task<ActionResult<SiteStatsDto>> Stats(CancellationToken ct) =>
         Ok(await catalog.GetStatsAsync(ct));
 }
+
+public sealed record SiteInfoDto(bool Demo);

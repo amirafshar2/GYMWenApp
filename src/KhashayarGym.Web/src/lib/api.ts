@@ -151,6 +151,7 @@ export const api = {
   campaign: () => get<Campaign | null>('/campaigns/active'),
   faq: () => get<Faq[]>('/faq').then((x) => x ?? []),
   stats: () => get<Stats>('/stats'),
+  site: () => get<{ demo: boolean }>('/site'),
   consult: (body: { fullName: string; mobile: string; goal: string | null; message: string | null; branchId: number | null }) =>
     request<{ id: number; message: string }>('POST', '/consultations', { body }),
 }
@@ -159,6 +160,12 @@ export const authApi = {
   sendOtp: (phoneNumber: string) => request<OtpSent>('POST', '/auth/otp', { body: { phoneNumber } }),
   verify: async (phoneNumber: string, code: string) => {
     const r = await request<AuthResult>('POST', '/auth/verify', { body: { phoneNumber, code } })
+    tokenStore.set(r)
+    return r
+  },
+  /** فقط نسخهٔ نمایشی: ورود یک‌کلیکی به حساب‌های دمو */
+  demoLogin: async (phoneNumber: string) => {
+    const r = await request<AuthResult>('POST', '/auth/demo', { body: { phoneNumber } })
     tokenStore.set(r)
     return r
   },

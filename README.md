@@ -1,5 +1,10 @@
 # Khashayar Fitness – Online-Plattform für eine Fitnessstudio-Kette in Shiraz
 
+> [!IMPORTANT]
+> **Dies ist eine Demo-Version.** Alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
+>
+> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Login für das Panel: `09100000000` (der Code erscheint auf der Seite)
+
 Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 12 Standorten in Shiraz (Iran): öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Geschäftsführung. Die Oberfläche ist vollständig auf Persisch (Rechts-nach-links).
 
 ## Live-Demo

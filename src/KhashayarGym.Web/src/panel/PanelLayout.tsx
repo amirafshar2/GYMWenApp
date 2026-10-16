@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils'
 import { useRequireAuth } from '@/member/MemberCard'
 import { Notice, Spinner } from '@/member/ui'
 import { presentation } from './PresentationBar'
+import { api } from '@/lib/api'
+import { useData } from '@/lib/useData'
+import { DemoStrip } from '@/site/SiteBanner'
 
 const Ctx = createContext<PanelMe | null>(null)
 /** کارمند فعلی (نقش‌ها و شعبه‌ها از سرور) */
@@ -33,6 +36,7 @@ export default function PanelLayout() {
   const [me, setMe] = useState<PanelMe | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const { pathname } = useLocation()
+  const { data: site } = useData('site', api.site)
 
   // در موبایل منوی افقی است؛ گزینهٔ فعال را در دید نگه دار
   useEffect(() => { document.querySelector('nav[aria-label="منوی پنل"] a[aria-current="page"]')?.scrollIntoView({ inline: 'center', block: 'nearest' }) }, [pathname, me])
@@ -78,6 +82,7 @@ export default function PanelLayout() {
           </div>
         </aside>
         <div className="min-w-0 px-4 py-6 sm:px-8 sm:py-8">
+          {site?.demo && <DemoStrip className="mb-5 rounded-[6px]" />}
           {current && !can(me, ...current.roles) ? <Notice tone="err">به این بخش دسترسی ندارید.</Notice> : <Suspense fallback={<Spinner />}><Outlet /></Suspense>}
         </div>
       </div>

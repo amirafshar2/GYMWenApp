@@ -15,6 +15,8 @@ public interface IAuthService
 {
     Task<Result<AuthSession>> LoginWithOtpAsync(VerifyOtpRequest request, RequestContext rc, CancellationToken ct);
     Task<Result<AuthSession>> RefreshAsync(string refreshToken, RequestContext rc, CancellationToken ct);
+    /// <summary>فقط نسخهٔ نمایشی: ورود بدون کد به یک حساب موجود (کنترلر شرط دمو و فهرست شماره‌ها را بررسی می‌کند).</summary>
+    Task<Result<AuthSession>> LoginDemoAsync(string phoneNumber, RequestContext rc, CancellationToken ct);
     Task LogoutAsync(string? refreshToken, CancellationToken ct);
     Task<UserDto?> GetUserAsync(int userId, CancellationToken ct);
     Task<Result<UserDto>> UpdateProfileAsync(int userId, UpdateProfileRequest request, CancellationToken ct);
@@ -50,6 +52,17 @@ public sealed class AuthService(
         user.LastLoginAtUtc = clock.UtcNow;
         await users.UpdateAsync(user);
 
+        return Result<AuthSession>.Ok(await IssueAsync(user, rc, ct));
+    }
+
+    public async Task<Result<AuthSession>> LoginDemoAsync(string phoneNumber, RequestContext rc, CancellationToken ct)
+    {
+        var phone = PersianText.NormalizeMobile(phoneNumber);
+        var user = await users.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone, ct);
+        if (user is null) return Result<AuthSession>.Fail("phoneNumber", "این حساب نمایشی وجود ندارد.", ErrorType.NotFound);
+        user.LastLoginAtUtc = clock.UtcNow;
+        await users.UpdateAsync(user);
+        db.AuditLogs.Add(new AuditLog { Action = "auth.demo_login", EntityType = "User", EntityId = user.Id.ToString(), UserId = user.Id, Ip = rc.Ip });
         return Result<AuthSession>.Ok(await IssueAsync(user, rc, ct));
     }
 

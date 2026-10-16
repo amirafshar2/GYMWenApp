@@ -5,9 +5,11 @@ import { useData } from '@/lib/useData'
 import { faNum } from '@/lib/fa'
 import { rebrand } from '@/lib/brand'
 
-/** نوار «جشنواره» — کامپوننت Promo Banner از 21st.dev با شمارش معکوس */
+/** نوار بالای سایت: «نسخهٔ نمایشی» (فقط در دمو) + نوار «جشنواره» — کامپوننت Promo Banner از 21st.dev با شمارش معکوس */
 export default function SiteBanner() {
   const { data: c, error } = useData('campaign', api.campaign)
+  const { data: site } = useData('site', api.site)
+  const demo = !!site?.demo
   const [hidden, setHidden] = useState(() => { try { return sessionStorage.getItem('festival-hidden') === '1' } catch { return false } })
   const [now, setNow] = useState(Date.now())
   const box = useRef<HTMLDivElement>(null)
@@ -20,15 +22,16 @@ export default function SiteBanner() {
   const pending = c === undefined && !error && !hidden
   useLayoutEffect(() => {
     if (pending) return
-    document.documentElement.style.setProperty('--festival-h', `${show && box.current ? box.current.offsetHeight : 0}px`)
+    document.documentElement.style.setProperty('--festival-h', `${(show || demo) && box.current ? box.current.offsetHeight : 0}px`)
     return () => document.documentElement.style.setProperty('--festival-h', '0px')
-  }, [show, pending])
-  if (!show || !c) return null
+  }, [show, demo, pending])
+  if (!show && !demo) return null
 
   const d = Math.floor(ms / 86_400_000), h = Math.floor(ms / 3_600_000) % 24, m = Math.floor(ms / 60_000) % 60, s = Math.floor(ms / 1000) % 60
   return (
     <div ref={box} className="kg-chrome fixed inset-x-0 top-0 z-[60]">
-      <Banner1
+      {demo && <DemoStrip />}
+      {show && c && <Banner1
         href="/festival"
         label="جشنوارهٔ تخفیف"
         closeLabel="بستن نوار جشنواره"
@@ -36,7 +39,16 @@ export default function SiteBanner() {
         onClose={() => { setHidden(true); try { sessionStorage.setItem('festival-hidden', '1') } catch { /* */ } }}
       >
         <span className="font-semibold">{rebrand(c.title)}</span> – {c.discountAmountToman ? `${faNum(c.discountAmountToman)} تومان` : `${faNum(c.discountPercent)}٪`} تخفیف — <span className="tabular-nums">{faNum(d)} روز {faNum(h)} ساعت {faNum(m)} دقیقه <span className="hidden sm:inline">{faNum(s)} ثانیه</span></span>
-      </Banner1>
+      </Banner1>}
     </div>
+  )
+}
+
+/** نوار باریک «نسخهٔ نمایشی» تا بیننده بداند داده‌ها ساختگی‌اند */
+export function DemoStrip({ className = '' }: { className?: string }) {
+  return (
+    <p role="note" className={`bg-[#F2A33A] px-4 py-1.5 text-center text-[12.5px] font-bold leading-5 text-[#10161F] sm:text-[13px] ${className}`}>
+      نسخهٔ نمایشی (دمو) — <span className="sm:hidden">داده‌ها ساختگی و پرداخت آزمایشی است.</span><span className="hidden sm:inline">اعضا و آمار ساختگی‌اند، پرداخت آزمایشی است و پیامک واقعی ارسال نمی‌شود.</span>
+    </p>
   )
 }
