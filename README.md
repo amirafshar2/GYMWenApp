@@ -2,6 +2,32 @@
 
 Eine vollständige Web-Plattform für die Fitnessstudio-Kette **Khashayar** mit 12 Standorten in Shiraz (Iran): öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Geschäftsführung. Die Oberfläche ist vollständig auf Persisch (Rechts-nach-links).
 
+## Live-Demo
+
+**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)**
+
+- Anmeldung im Mitarbeiter-Panel mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
+- Zahlungen laufen über ein Test-Gateway, es wird kein echtes Geld bewegt.
+- Die Demo läuft im kostenlosen Render-Tarif: Nach 15 Minuten ohne Zugriff schläft sie ein, der erste Aufruf dauert dann etwa eine Minute. Demo-Daten werden bei jedem Neustart neu erzeugt.
+
+### Screenshots
+
+| Startseite | Standorte mit Karte |
+|---|---|
+| ![Startseite](docs/screenshots/home.webp) | ![Standorte](docs/screenshots/branches.webp) |
+| **Pakete** | **Online-Anmeldung** |
+| ![Pakete](docs/screenshots/packages.webp) | ![Anmeldung](docs/screenshots/join.webp) |
+| **Shop** | **Dashboard der Geschäftsführung** |
+| ![Shop](docs/screenshots/shop.webp) | ![Dashboard](docs/screenshots/dashboard.webp) |
+| **Empfang und Check-in** | **Trainer-Panel** |
+| ![Empfang](docs/screenshots/reception.webp) | ![Trainer-Panel](docs/screenshots/coach.webp) |
+| **Kantinen-Menü verwalten** | **Trainer verwalten** |
+| ![Kantinen-Menü](docs/screenshots/admin-menu.webp) | ![Trainer verwalten](docs/screenshots/admin-coaches.webp) |
+
+| Mitgliedskarte (mobil) | Kantine per QR (mobil) |
+|---|---|
+| <img src="docs/screenshots/m-profile.webp" alt="Mitgliedskarte" width="300"> | <img src="docs/screenshots/m-canteen.webp" alt="Kantine" width="300"> |
+
 ## Mein erstes Projekt mit vollständigem Vibe-Coding
 
 Dieses Projekt war meine erste Erfahrung mit **komplettem Vibe-Coding**: Ich habe die Anforderungen, die Architektur und jede Phase in natürlicher Sprache beschrieben, die Ergebnisse geprüft, getestet und Schritt für Schritt nachgesteuert – den Code selbst hat eine KI geschrieben. Für mich war das eine **sehr spannende und richtig gute Erfahrung**: In kurzer Zeit ist ein Projekt entstanden, das ich allein so nicht hätte bauen können – mit Drei-Schichten-Architektur, Sicherheits-Audit, automatisierten Tests und messbarer Performance. Gleichzeitig habe ich gelernt, wie wichtig klare Anforderungen, Planung vor jeder Phase und konsequentes Testen sind, damit am Ende etwas Belastbares herauskommt.
