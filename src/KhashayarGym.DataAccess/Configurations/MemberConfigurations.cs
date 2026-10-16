@@ -117,3 +117,51 @@ internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         e.HasIndex(x => new { x.EntityType, x.EntityId });
     }
 }
+
+internal sealed class AccessCredentialConfiguration : IEntityTypeConfiguration<AccessCredential>
+{
+    public void Configure(EntityTypeBuilder<AccessCredential> e)
+    {
+        e.Property(x => x.Value).HasMaxLength(64);
+        e.Property(x => x.Label).HasMaxLength(60);
+        e.Property(x => x.ExternalRef).HasMaxLength(64);
+        e.HasIndex(x => new { x.Type, x.Value });
+        e.HasIndex(x => x.UserId);
+        e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class AccessDeviceConfiguration : IEntityTypeConfiguration<AccessDevice>
+{
+    public void Configure(EntityTypeBuilder<AccessDevice> e)
+    {
+        e.Property(x => x.Name).HasMaxLength(60);
+        e.Property(x => x.KeyHash).HasMaxLength(64);
+        e.Property(x => x.Vendor).HasMaxLength(60);
+        e.HasIndex(x => x.KeyHash).IsUnique();
+        e.HasOne(x => x.Branch).WithMany().HasForeignKey(x => x.BranchId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class CheckInConfiguration : IEntityTypeConfiguration<CheckIn>
+{
+    public void Configure(EntityTypeBuilder<CheckIn> e)
+    {
+        e.Property(x => x.CredentialHint).HasMaxLength(8);
+        e.Property(x => x.ExternalEventId).HasMaxLength(64);
+        e.HasIndex(x => new { x.DeviceId, x.ExternalEventId }).IsUnique().HasFilter("[ExternalEventId] IS NOT NULL");
+        e.HasIndex(x => new { x.BranchId, x.OccurredAtUtc });
+        e.HasIndex(x => new { x.MembershipId, x.OccurredAtUtc });
+        e.HasOne(x => x.Device).WithMany().HasForeignKey(x => x.DeviceId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class IntegrationEventConfiguration : IEntityTypeConfiguration<IntegrationEvent>
+{
+    public void Configure(EntityTypeBuilder<IntegrationEvent> e)
+    {
+        e.Property(x => x.Type).HasMaxLength(64);
+        e.Property(x => x.LastError).HasMaxLength(500);
+        e.HasIndex(x => new { x.ProcessedAtUtc, x.NextAttemptAtUtc });
+    }
+}

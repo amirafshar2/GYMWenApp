@@ -23,6 +23,7 @@ public static class BusinessExtensions
         services.AddScoped<IMemberService, MemberService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddSingleton<IPdfService, PdfService>();
+        services.AddScoped<Services.Access.IAccessControlService, Services.Access.AccessControlService>();
         services.AddValidatorsFromAssemblyContaining<CreateConsultationValidator>(ServiceLifetime.Singleton);
         return services;
     }

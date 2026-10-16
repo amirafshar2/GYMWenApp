@@ -10,6 +10,7 @@ namespace KhashayarGym.Tests;
 /// <summary>سرور آزمایشی با Sqlite موقت، محیط Testing و کد OTP در پاسخ.</summary>
 public sealed class GymApiFactory : WebApplicationFactory<Program>
 {
+    public const string DeviceKey = "test-gate-key-0000000000000001";
     private readonly string _db = Path.Combine(Path.GetTempPath(), $"kg-test-{Guid.NewGuid():N}.db");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -21,6 +22,8 @@ public sealed class GymApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Sms:Provider", "Log");
         builder.UseSetting("Payment:UseVirtualGateway", "true");
         builder.UseSetting("RateLimiting:PermitMultiplier", "100");
+        builder.UseSetting("Access:DemoDeviceKey", DeviceKey);
+        builder.UseSetting("Integrations:DispatcherEnabled", "false");
         builder.UseSetting("Storage:PrivateRoot", Path.Combine(Path.GetTempPath(), $"kg-test-files-{Guid.NewGuid():N}"));
     }
 
@@ -205,12 +208,12 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 
 public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
-    private static object Order(string key, string section = "men") => new
+    internal static object Order(string key, string section = "men") => new
     {
         branchSlug = "ghoddousi-gharbi", packageSlug = "yearly", section, discountCode = "KHASHAYAR10", idempotencyKey = key,
     };
 
-    private static async Task SignContractAsync(Browser b, string name, string gender)
+    internal static async Task SignContractAsync(Browser b, string name, string gender)
     {
         (await b.SendAsync(HttpMethod.Put, "/api/v1/me", new { fullName = name, gender })).EnsureSuccessStatusCode();
         var c = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, "/api/v1/contracts/active"));
@@ -224,13 +227,13 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
     }
 
-    private static Dictionary<string, string> Inputs(string html) =>
+    internal static Dictionary<string, string> Inputs(string html) =>
         Regex.Matches(html, "<input[^>]*>").Select(m => m.Value)
             .Select(t => (n: Regex.Match(t, "name=\"([^\"]+)\""), v: Regex.Match(t, "value=\"([^\"]*)\"")))
             .Where(x => x.n.Success).ToDictionary(x => x.n.Groups[1].Value, x => x.v.Success ? x.v.Groups[1].Value : "");
 
     /// <summary>کاربر در درگاه آزمایشی «پرداخت» یا «انصراف» را می‌زند و به callback برمی‌گردد.</summary>
-    private static async Task<HttpResponseMessage> PayInSandboxAsync(Browser b, JsonElement g, bool pay)
+    internal static async Task<HttpResponseMessage> PayInSandboxAsync(Browser b, JsonElement g, bool pay)
     {
         var url = new Uri(g.GetProperty("url").GetString()!).PathAndQuery;
         var form = g.GetProperty("form").EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString()!);

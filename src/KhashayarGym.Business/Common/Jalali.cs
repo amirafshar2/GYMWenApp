@@ -14,6 +14,10 @@ public static class Jalali
         catch { try { return TimeZoneInfo.FindSystemTimeZoneById("Iran Standard Time"); } catch { return TimeZoneInfo.Utc; } }
     }
 
+    /// <summary>شروع همان روز (نیمه‌شب تهران) به UTC</summary>
+    public static DateTime TehranDayStartUtc(DateTime utc) =>
+        TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(ToTehran(utc).Date, DateTimeKind.Unspecified), Tehran);
+
     public static DateTime ToTehran(DateTime utc) => TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), Tehran);
 
     public static string Date(DateTime utc)

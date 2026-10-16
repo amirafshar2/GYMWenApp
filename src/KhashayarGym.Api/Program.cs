@@ -41,6 +41,14 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptio
 builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection(OtpOptions.Section));
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.Section));
 
+// ---- اتصال به سیستم گیت/دستبند و سیستم‌های بیرونی ----
+builder.Services.Configure<KhashayarGym.Business.Services.Access.AccessOptions>(builder.Configuration.GetSection(KhashayarGym.Business.Services.Access.AccessOptions.Section));
+builder.Services.Configure<KhashayarGym.Api.Integrations.WebhookOptions>(builder.Configuration.GetSection(KhashayarGym.Api.Integrations.WebhookOptions.Section));
+builder.Services.AddScoped<KhashayarGym.Api.Controllers.DeviceKeyFilter>();
+builder.Services.AddHttpClient<KhashayarGym.Api.Integrations.IIntegrationSink, KhashayarGym.Api.Integrations.WebhookSink>(c => c.Timeout = TimeSpan.FromSeconds(10));
+if (builder.Configuration.GetValue("Integrations:DispatcherEnabled", true))
+    builder.Services.AddHostedService<KhashayarGym.Api.Integrations.IntegrationDispatcher>();
+
 // ---- Identity (فقط هسته؛ ورود با OTP، نقش‌ها برای فاز ۴) + JWT ----
 builder.Services.AddIdentityCore<AppUser>(o =>
     {
@@ -125,6 +133,10 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("payment", ctx => RateLimitPartition.GetFixedWindowLimiter(
         "pay:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    // هر گیت با کلید خودش: تا ۶۰۰ درخواست در دقیقه (ساعت شلوغ)
+    o.AddPolicy("device", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        "dev:" + (ctx.Request.Headers["X-Device-Key"].ToString() is { Length: > 0 } k ? k.GetHashCode().ToString() : ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 600 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
     o.AddPolicy("forms-read", ctx => RateLimitPartition.GetFixedWindowLimiter(
         "read:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 60 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
@@ -175,7 +187,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.Memberships.AnyAsync(); }
+        try { _ = await db.IntegrationEvents.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();
@@ -186,6 +198,10 @@ using (var scope = app.Services.CreateScope())
     if (app.Configuration.GetValue("Database:SeedDemoData", true))
         await scope.ServiceProvider.GetRequiredService<DbSeeder>()
             .SeedAsync(Path.Combine(AppContext.BaseDirectory, "Seed"));
+
+    // گیت نمایشی برای تست اتصال (هرگز در production)
+    if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)
+        await scope.ServiceProvider.GetRequiredService<KhashayarGym.Business.Services.Access.IAccessControlService>().EnsureDemoDeviceAsync(demoKey, CancellationToken.None);
 }
 
 app.UseExceptionHandler();

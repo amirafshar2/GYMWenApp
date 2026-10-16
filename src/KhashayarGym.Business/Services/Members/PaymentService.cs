@@ -1,4 +1,5 @@
 using KhashayarGym.Business.Common;
+using KhashayarGym.Business.Services.Access;
 using KhashayarGym.Business.Dtos;
 using KhashayarGym.DataAccess;
 using KhashayarGym.Domain.Entities;
@@ -57,6 +58,13 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ILogger<Paymen
             m.Status = MembershipStatus.Active;
             m.StartsAtUtc = start;
             m.EndsAtUtc = start.AddMonths(m.Package.DurationMonths);
+
+            // برای نرم‌افزار گیت/حسابداری: عضویت فعال شد (از صف خروجی ارسال می‌شود)
+            IntegrationEvents.Add(db, "membership.activated", new
+            {
+                memberId = payment.UserId, membershipId = m.Id, branchId = m.BranchId, section = m.Section.ToString().ToLowerInvariant(),
+                startsAtUtc = m.StartsAtUtc, endsAtUtc = m.EndsAtUtc, sessionsTotal = m.SessionsTotal, qr = AccessControlService.QrPrefix + m.CardToken,
+            });
 
             if (payment.DiscountCode is not null)
                 await db.DiscountCodes.Where(d => d.Code == payment.DiscountCode)
