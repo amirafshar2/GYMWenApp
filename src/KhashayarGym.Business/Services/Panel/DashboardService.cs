@@ -86,65 +86,84 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
         var periodStart = todayStart.AddDays(-(days - 1));
         var prevStart = periodStart.AddDays(-days);
 
-        // ---- درآمد (یک بار برای دو دوره)
+        // ---- درآمد: جمع روزانه در خود دیتابیس (نه آوردن تک‌تک سفارش‌ها) تا با چند سال داده هم سریع بماند.
+        // روز به وقت تهران = UTC + ۳:۳۰ (ایران از ۱۴۰۱ ساعت تابستانی ندارد)
+        const int tehranMinutes = 210;
         var mem = await db.Payments.AsNoTracking()
             .Where(p => p.Purpose == PaymentPurpose.Membership && p.Status == PaymentStatus.Succeeded && p.PaidAtUtc >= prevStart && ids.Contains(p.Membership!.BranchId))
-            .Select(p => new Rev(p.Membership!.BranchId, p.PaidAtUtc!.Value, p.AmountToman, 0)).ToListAsync(ct);
+            .GroupBy(p => new { p.Membership!.BranchId, Day = p.PaidAtUtc!.Value.AddMinutes(tehranMinutes).Date })
+            .Select(g => new { g.Key.BranchId, g.Key.Day, Amount = g.Sum(x => x.AmountToman) }).ToListAsync(ct);
         var shop = await db.ShopOrders.AsNoTracking()
             .Where(o => PaidShop.Contains(o.Status) && o.PaidAtUtc >= prevStart && ids.Contains(o.BranchId))
-            .Select(o => new Rev(o.BranchId, o.PaidAtUtc!.Value, o.TotalToman, 1)).ToListAsync(ct);
+            .GroupBy(o => new { o.BranchId, Day = o.PaidAtUtc!.Value.AddMinutes(tehranMinutes).Date })
+            .Select(g => new { g.Key.BranchId, g.Key.Day, Amount = g.Sum(x => x.TotalToman) }).ToListAsync(ct);
         var cafe = await db.CanteenOrders.AsNoTracking()
             .Where(o => PaidCanteen.Contains(o.Status) && o.PaidAtUtc >= prevStart && ids.Contains(o.BranchId))
-            .Select(o => new Rev(o.BranchId, o.PaidAtUtc!.Value, o.TotalToman, 2)).ToListAsync(ct);
-        var all = mem.Concat(shop).Concat(cafe).ToList();
+            .GroupBy(o => new { o.BranchId, Day = o.PaidAtUtc!.Value.AddMinutes(tehranMinutes).Date })
+            .Select(g => new { g.Key.BranchId, g.Key.Day, Amount = g.Sum(x => x.TotalToman) }).ToListAsync(ct);
+        var all = mem.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 0))
+            .Concat(shop.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 1)))
+            .Concat(cafe.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 2))).ToList();
+        // از اینجا «At» روزِ تهران است؛ مرزها هم به روز تهران
+        var todayDay = Jalali.ToTehran(now).Date;
+        var periodDay = todayDay.AddDays(-(days - 1));
 
         static RevenueSplitDto Split(IEnumerable<Rev> r)
         {
             var l = r.ToList();
             return new RevenueSplitDto(l.Where(x => x.Source == 0).Sum(x => x.Amount), l.Where(x => x.Source == 1).Sum(x => x.Amount), l.Where(x => x.Source == 2).Sum(x => x.Amount));
         }
-        var period = all.Where(r => r.At >= periodStart).ToList();
+        var period = all.Where(r => r.At >= periodDay).ToList();
         var daily = Enumerable.Range(0, days).Select(i =>
         {
-            var s = periodStart.AddDays(i);
-            var sp = Split(period.Where(r => r.At >= s && r.At < s.AddDays(1)));
-            return new DailyRevenueDto(DateOnly.FromDateTime(Jalali.ToTehran(s)), sp.Membership, sp.Shop, sp.Canteen);
+            var d = periodDay.AddDays(i);
+            var sp = Split(period.Where(r => r.At == d));
+            return new DailyRevenueDto(DateOnly.FromDateTime(d), sp.Membership, sp.Shop, sp.Canteen);
         }).ToList();
 
-        // ---- اعضا
+        // ---- اعضا: فقط عضویت‌های مرتبط (فعال، تمام‌شده در ۹۰ روز اخیر، یا شروع در همین بازه)
+        var recentEnd = now.AddDays(-90);
         var ms = await db.Memberships.AsNoTracking()
-            .Where(m => Paid.Contains(m.Status) && ids.Contains(m.BranchId))
+            .Where(m => Paid.Contains(m.Status) && ids.Contains(m.BranchId) && (m.EndsAtUtc > recentEnd || m.StartsAtUtc >= periodStart))
             .Select(m => new { m.Id, m.UserId, m.BranchId, m.StartsAtUtc, m.EndsAtUtc, Package = m.Package!.Name }).ToListAsync(ct);
         var active = ms.Where(m => m.StartsAtUtc <= now && m.EndsAtUtc > now).ToList();
-        var firstStart = await db.Memberships.AsNoTracking().Where(m => Paid.Contains(m.Status))
-            .GroupBy(m => m.UserId).Select(g => new { g.Key, First = g.Min(m => m.StartsAtUtc) }).ToDictionaryAsync(x => x.Key, x => x.First, ct);
-        var newMembers = ms.Where(m => m.StartsAtUtc >= periodStart && firstStart.GetValueOrDefault(m.UserId) == m.StartsAtUtc).Select(m => m.UserId).Distinct().ToList();
 
-        // نرخ تمدید: از عضویت‌هایی که در ۹۰ روز گذشته تمام شده‌اند، چند درصد عضویت بعدی خریده‌اند
-        var ended = ms.Where(m => m.EndsAtUtc <= now && m.EndsAtUtc > now.AddDays(-90)).ToList();
-        var byUser = await db.Memberships.AsNoTracking().Where(m => Paid.Contains(m.Status))
-            .Select(m => new { m.Id, m.UserId, m.StartsAtUtc }).ToListAsync(ct);
-        var renewed = ended.Count(e => byUser.Any(x => x.UserId == e.UserId && x.Id != e.Id && x.StartsAtUtc >= e.StartsAtUtc));
+        // عضو جدید: اولین عضویتش در همین بازه شروع شده
+        var candidates = ms.Where(m => m.StartsAtUtc >= periodStart).Select(m => m.UserId).Distinct().ToList();
+        var returning = (await db.Memberships.AsNoTracking()
+            .Where(m => Paid.Contains(m.Status) && candidates.Contains(m.UserId) && m.StartsAtUtc < periodStart)
+            .Select(m => m.UserId).Distinct().ToListAsync(ct)).ToHashSet();
+        var newMembers = candidates.Where(u => !returning.Contains(u)).ToHashSet();
+
+        // نرخ تمدید و «در آستانهٔ پایان»: عضویت‌های بعدی همین افراد (گروه‌بندی‌شده، نه جست‌وجوی تو در تو)
+        var ended = ms.Where(m => m.EndsAtUtc <= now && m.EndsAtUtc > recentEnd).ToList();
+        var soonCandidates = active.Where(m => m.EndsAtUtc <= now.AddDays(7)).ToList();
+        var watch = ended.Select(m => m.UserId).Concat(soonCandidates.Select(m => m.UserId)).Distinct().ToList();
+        var byUser = (await db.Memberships.AsNoTracking().Where(m => Paid.Contains(m.Status) && watch.Contains(m.UserId))
+            .Select(m => new { m.Id, m.UserId, m.StartsAtUtc }).ToListAsync(ct))
+            .ToLookup(m => m.UserId);
+        var renewed = ended.Count(e => byUser[e.UserId].Any(x => x.Id != e.Id && x.StartsAtUtc >= e.StartsAtUtc));
         var renewalRate = ended.Count == 0 ? 0 : Math.Round(100.0 * renewed / ended.Count, 1);
 
-        // در آستانهٔ پایان: ۷ روز آینده و هنوز تمدید نکرده
-        var soon = active.Where(m => m.EndsAtUtc <= now.AddDays(7) && !byUser.Any(x => x.UserId == m.UserId && x.Id != m.Id && x.StartsAtUtc >= m.EndsAtUtc!.Value.AddDays(-1)))
+        var soon = soonCandidates.Where(m => !byUser[m.UserId].Any(x => x.Id != m.Id && x.StartsAtUtc >= m.EndsAtUtc!.Value.AddDays(-1)))
             .OrderBy(m => m.EndsAtUtc).Take(50).ToList();
         var soonUsers = soon.Select(s => s.UserId).ToList();
         var users = await db.Users.AsNoTracking().Where(u => soonUsers.Contains(u.Id)).Select(u => new { u.Id, u.FullName, u.PhoneNumber }).ToDictionaryAsync(u => u.Id, ct);
         var expiring = soon.Select(m => new ExpiringMemberDto(m.UserId, users[m.UserId].FullName, users[m.UserId].PhoneNumber ?? "",
             branches.First(b => b.Id == m.BranchId).Name, m.Package, m.EndsAtUtc!.Value, Math.Max(0, (int)Math.Ceiling((m.EndsAtUtc.Value - now).TotalDays)))).ToList();
 
-        // ---- ورودها
+        // ---- ورودها: شمارش بر حسب شعبه و ساعت در خود دیتابیس
         var checkIns = await db.CheckIns.AsNoTracking()
             .Where(c => c.Decision == AccessDecision.Allowed && c.OccurredAtUtc >= periodStart && ids.Contains(c.BranchId))
-            .Select(c => new { c.BranchId, c.OccurredAtUtc }).ToListAsync(ct);
+            .GroupBy(c => new { c.BranchId, Hour = c.OccurredAtUtc.AddMinutes(tehranMinutes).Hour })
+            .Select(g => new { g.Key.BranchId, g.Key.Hour, Count = g.Count() }).ToListAsync(ct);
+        var checkInsToday = await db.CheckIns.CountAsync(c => c.Decision == AccessDecision.Allowed && c.OccurredAtUtc >= todayStart && ids.Contains(c.BranchId), ct);
         var byHour = new int[24];
-        foreach (var c in checkIns) byHour[Jalali.ToTehran(c.OccurredAtUtc).Hour]++;
+        foreach (var c in checkIns) byHour[c.Hour] += c.Count;
 
         var branchStats = branches.Where(b => ids.Contains(b.Id)).Select(b => new BranchStatDto(b.Slug, b.Name,
             Split(period.Where(r => r.BranchId == b.Id)), active.Where(m => m.BranchId == b.Id).Select(m => m.UserId).Distinct().Count(),
-            checkIns.Count(c => c.BranchId == b.Id), ms.Count(m => m.BranchId == b.Id && newMembers.Contains(m.UserId) && m.StartsAtUtc >= periodStart)))
+            checkIns.Where(c => c.BranchId == b.Id).Sum(c => c.Count), ms.Where(m => m.BranchId == b.Id && m.StartsAtUtc >= periodStart && newMembers.Contains(m.UserId)).Select(m => m.UserId).Distinct().Count()))
             .OrderByDescending(s => s.Revenue.Total).ToList();
 
         // ---- اثر جشنواره‌ها
@@ -158,8 +177,8 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
             campPays.Where(p => p.CampaignId == c.Id).Sum(p => p.CampaignDiscountToman), c.IsRunningAt(now))).ToList();
 
         return Result<DashboardDto>.Ok(new DashboardDto(
-            branchSlug, days, Split(all.Where(r => r.At >= todayStart)), Split(period), Split(all.Where(r => r.At < periodStart)),
-            active.Select(m => m.UserId).Distinct().Count(), checkIns.Count(c => c.OccurredAtUtc >= todayStart), newMembers.Count, renewalRate,
+            branchSlug, days, Split(all.Where(r => r.At >= todayDay)), Split(period), Split(all.Where(r => r.At < periodDay)),
+            active.Select(m => m.UserId).Distinct().Count(), checkInsToday, newMembers.Count, renewalRate,
             daily, branchStats, expiring, campaigns, byHour));
     }
 }

@@ -273,6 +273,8 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAtUtc");
+
                     b.HasIndex("EntityType", "EntityId");
 
                     b.ToTable("AuditLogs");
@@ -586,6 +588,8 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BranchId", "PaidAtUtc");
+
                     b.HasIndex("UserId", "IdempotencyKey")
                         .IsUnique();
 
@@ -684,6 +688,8 @@ namespace KhashayarGym.DataAccess.Migrations
                         .HasFilter("[ExternalEventId] IS NOT NULL");
 
                     b.HasIndex("MembershipId", "OccurredAtUtc");
+
+                    b.HasIndex("UserId", "OccurredAtUtc");
 
                     b.ToTable("CheckIns");
                 });
@@ -1033,6 +1039,10 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasIndex("PackageId");
 
+                    b.HasIndex("BranchId", "EndsAtUtc");
+
+                    b.HasIndex("Status", "EndsAtUtc");
+
                     b.HasIndex("UserId", "Status");
 
                     b.ToTable("Memberships");
@@ -1228,6 +1238,8 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CampaignId");
+
                     b.HasIndex("CanteenOrderId");
 
                     b.HasIndex("MembershipId");
@@ -1239,6 +1251,8 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasIndex("UserId", "IdempotencyKey")
                         .IsUnique();
+
+                    b.HasIndex("Purpose", "Status", "PaidAtUtc");
 
                     b.ToTable("Payments");
                 });
@@ -1478,7 +1492,7 @@ namespace KhashayarGym.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BranchId");
+                    b.HasIndex("BranchId", "PaidAtUtc");
 
                     b.HasIndex("Status", "CreatedAtUtc");
 

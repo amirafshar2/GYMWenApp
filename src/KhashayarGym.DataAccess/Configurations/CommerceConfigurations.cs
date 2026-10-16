@@ -49,6 +49,8 @@ internal sealed class ShopOrderConfiguration : IEntityTypeConfiguration<ShopOrde
 {
     public void Configure(EntityTypeBuilder<ShopOrder> e)
     {
+        // گزارش درآمد هر شعبه بر اساس زمان پرداخت
+        e.HasIndex(x => new { x.BranchId, x.PaidAtUtc });
         e.Property(x => x.Number).HasMaxLength(30);
         e.Property(x => x.RecipientName).HasMaxLength(100);
         e.Property(x => x.RecipientPhone).HasMaxLength(11);
@@ -90,6 +92,8 @@ internal sealed class CanteenOrderConfiguration : IEntityTypeConfiguration<Cante
 {
     public void Configure(EntityTypeBuilder<CanteenOrder> e)
     {
+        // گزارش درآمد هر شعبه بر اساس زمان پرداخت
+        e.HasIndex(x => new { x.BranchId, x.PaidAtUtc });
         e.Property(x => x.TableCode).HasMaxLength(30);
         e.Property(x => x.Note).HasMaxLength(200);
         e.Property(x => x.IdempotencyKey).HasMaxLength(64);

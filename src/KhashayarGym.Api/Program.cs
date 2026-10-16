@@ -53,6 +53,7 @@ if (builder.Configuration.GetValue("Integrations:DispatcherEnabled", true))
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.IntegrationDispatcher>();
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.PendingOrderSweeper>();
     builder.Services.AddHostedService<KhashayarGym.Api.Integrations.SmsWorker>();
+    builder.Services.AddHostedService<KhashayarGym.Api.Integrations.MaintenanceWorker>();
 }
 
 // ---- فاز ۳: فروشگاه، بوفه (لحظه‌ای با SignalR)، کیف پول ----
@@ -260,7 +261,7 @@ using (var scope = app.Services.CreateScope())
     if (!app.Environment.IsProduction() && app.Configuration["Demo:StaffPhone"] is { Length: 11 } staffPhone)
     {
         var demo = scope.ServiceProvider.GetRequiredService<KhashayarGym.Business.Services.Panel.DemoSeeder>();
-        if (app.Configuration.GetValue("Demo:SeedMembers", false)) await demo.SeedAsync(staffPhone);
+        if (app.Configuration.GetValue("Demo:SeedMembers", false)) await demo.SeedAsync(staffPhone, app.Configuration.GetValue("Demo:SeedMemberCount", 200), app.Configuration.GetValue("Demo:SeedDays", 182));
         else await demo.EnsureStaffAsync(staffPhone, CancellationToken.None);
     }
 }

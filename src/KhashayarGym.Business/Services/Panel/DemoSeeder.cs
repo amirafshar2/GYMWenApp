@@ -26,14 +26,15 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
     private static readonly string[] FemaleNames = ["زهرا", "فاطمه", "مریم", "سارا", "نرگس", "الهام", "نازنین", "آیدا", "مهسا", "ریحانه", "شیما", "پریسا", "هانیه", "یاسمن", "مینا", "ترانه", "بهاره", "نگار", "سمیرا", "کیمیا"];
     private static readonly string[] LastNames = ["محمدی", "حسینی", "احمدی", "رضایی", "کریمی", "موسوی", "جعفری", "صادقی", "رحیمی", "شیرازی", "کازرونی", "فسایی", "دهقان", "نوروزی", "قاسمی", "زارع", "بهرامی", "افشار", "اکبری", "طاهری", "یزدانی", "نیک‌نام", "سعادت", "پاکزاد"];
 
-    public async Task SeedAsync(string staffPhone, CancellationToken ct = default)
+    /// <param name="members">تعداد عضو ساختگی (برای تست حجم بالا می‌شود چند هزار گذاشت)</param>
+    public async Task SeedAsync(string staffPhone, int members = 200, int days = 182, CancellationToken ct = default)
     {
         await EnsureStaffAsync(staffPhone, ct);
         if (await db.Users.AnyAsync(u => u.PhoneNumber!.StartsWith(PhonePrefix), ct)) return;
 
         var rnd = new Random(1404);
         var now = clock.UtcNow;
-        var start = now.AddDays(-182);
+        var start = now.AddDays(-days);
         var branches = await db.Branches.AsNoTracking().OrderBy(b => b.SortOrder).ToListAsync(ct);
         var packages = await db.Packages.AsNoTracking().Where(p => p.IsActive).ToListAsync(ct);
         var coaches = await db.Coaches.AsNoTracking().ToListAsync(ct);
@@ -75,7 +76,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
         foreach (var p in packages)
             weighted.AddRange(Enumerable.Repeat(p, p.Slug switch { "month-unlimited" => 6, "quarter" => 6, "month-12" => 4, "half-year" => 3, "yearly" => 1, _ => 1 }));
 
-        for (var i = 0; i < 200; i++)
+        for (var i = 0; i < members; i++)
         {
             var female = rnd.NextDouble() < 0.42;
             var pool = branches.Where(b => b.Sections.HasFlag(female ? GenderSection.Women : GenderSection.Men)).ToList();
@@ -83,7 +84,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
             var section = female ? GenderSection.Women : GenderSection.Men;
             var name = $"{(female ? FemaleNames : MaleNames)[rnd.Next(20)]} {LastNames[rnd.Next(LastNames.Length)]}";
             var phone = PhonePrefix + i.ToString("D4");
-            var joined = start.AddDays(rnd.Next(0, 175)).AddHours(rnd.Next(8, 21));
+            var joined = start.AddDays(rnd.Next(0, Math.Max(1, days - 7))).AddHours(rnd.Next(8, 21));
 
             DateOnly? birth = rnd.NextDouble() < 0.65 ? DateOnly.FromDateTime(now.AddYears(-rnd.Next(18, 50)).AddDays(-rnd.Next(0, 365))) : null;
             if (i < 2) // دو نفر امروز (به تقویم شمسی) تولدشان است تا پیامک تولد در دمو دیده شود
@@ -242,7 +243,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
         await db.SaveChangesAsync(ct);
         db.ChangeTracker.AutoDetectChangesEnabled = true;
         db.ChangeTracker.Clear();
-        logger.LogInformation("Demo data: 200 fake members with 6 months of history seeded");
+        logger.LogInformation("Demo data: {Members} fake members with {Days} days of history seeded", members, days);
     }
 
     private static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
