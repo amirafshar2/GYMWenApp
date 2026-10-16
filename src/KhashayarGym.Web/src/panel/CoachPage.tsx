@@ -43,7 +43,7 @@ export default function CoachPage() {
         {err && <Notice tone="err" className="mt-3">{err}</Notice>}
       </Panel>
       {!rows ? <p className="text-rubber">…</p> : list.length === 0 ? <Panel><p className="text-rubber">هنوز شاگردی ندارید.</p></Panel> : (
-        <div className="overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
+        <div className="relative overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
           <table className="w-full min-w-[720px] text-[14px]">
             <thead><tr className="border-b border-steel-2 bg-steel text-[13px] text-rubber">
               <th className="px-4 py-3 text-right font-bold">شاگرد</th><th className="text-right font-bold">عضویت</th><th className="font-bold">وزن</th><th className="font-bold">تغییر</th><th className="font-bold">برنامه</th><th className="font-bold">آخرین حضور</th>

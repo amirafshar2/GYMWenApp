@@ -202,7 +202,7 @@ export function CampaignsAdmin() {
           </form>
         </Panel>
       )}
-      <div className="overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
+      <div className="relative overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
         <table className="w-full min-w-[600px] text-[14px]">
           <thead><tr className="border-b border-steel-2 bg-steel text-[13px] text-rubber"><th className="px-4 py-2.5 text-right">کد</th><th>درصد</th><th>برای</th><th>استفاده</th><th>انقضا</th><th>وضعیت</th><th><span className="sr-only">ویرایش</span></th></tr></thead>
           <tbody>
@@ -494,7 +494,7 @@ export function StaffAdmin() {
           </form>
         </Panel>
       )}
-      <div className="overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
+      <div className="relative overflow-x-auto rounded-[6px] border border-steel-2 bg-white">
         <table className="w-full min-w-[640px] text-[14px]">
           <thead><tr className="border-b border-steel-2 bg-steel text-[13px] text-rubber"><th className="px-4 py-2.5 text-right">نام</th><th className="text-right">نقش</th><th className="text-right">شعبه</th><th>آخرین ورود</th><th><span className="sr-only">عملیات</span></th></tr></thead>
           <tbody>

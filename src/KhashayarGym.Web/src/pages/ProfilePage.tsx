@@ -41,7 +41,7 @@ export default function ProfilePage() {
     <PageShell eyebrow="حساب کاربری" title={p.user.fullName ? `سلام، ${p.user.fullName.split(' ')[0]}` : 'پروفایل من'}
       aside={<Btn variant="ghost" onClick={async () => { await authApi.logout(); nav('/', { replace: true }) }}><LogOut className="size-4" aria-hidden />خروج</Btn>}>
       <div className="grid items-start gap-6 lg:grid-cols-[400px_1fr] [&>*]:min-w-0">
-        <div className="grid gap-6">
+        <div className="grid gap-6 [&>*]:min-w-0">
           {m ? <MemberCard m={m} name={p.user.fullName ?? ''} /> : (
             <Panel>
               <p className="text-[18px] font-black text-chalk">عضویت فعالی ندارید</p>
@@ -73,7 +73,7 @@ export default function ProfilePage() {
           </Panel>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-6 [&>*]:min-w-0">
           <TrainingPlan section={m?.section ?? latest?.section ?? (p.user.gender === 'female' ? 'women' : 'men')} />
           <WeightChart />
           <Orders orders={orders} />
@@ -121,7 +121,7 @@ function Payments({ p }: { p: Profile }) {
     <Panel aria-labelledby="pay-h">
       <h2 id="pay-h" className="mb-4 text-[18px] font-black text-chalk">پرداخت‌ها و فاکتورها</h2>
       {p.payments.length === 0 ? <p className="text-[14px] text-rubber">هنوز پرداختی ثبت نشده است.</p> : (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full min-w-[520px] text-right text-[14px]">
             <thead className="text-[12.5px] text-rubber"><tr className="border-b border-steel-2">
               <th scope="col" className="py-2 font-bold">تاریخ</th><th scope="col" className="font-bold">پکیج</th>

@@ -79,7 +79,7 @@ export default function DashboardPage() {
             <Panel>
               <h2 className="mb-4 text-[17px] font-black text-chalk">مقایسهٔ شعبه‌ها</h2>
               <BranchBars rows={d.branches.map((b) => ({ name: b.name, ...b.revenue }))} />
-              <div className="mt-5 overflow-x-auto">
+              <div className="relative mt-5 overflow-x-auto">
                 <table className="w-full min-w-[460px] text-[13px]">
                   <thead><tr className="border-b border-steel-2 text-rubber"><th className="py-2 text-right font-bold">شعبه</th><th className="font-bold">عضو فعال</th><th className="font-bold">ورود</th><th className="font-bold">عضو جدید</th><th className="text-left font-bold">درآمد</th></tr></thead>
                   <tbody>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
               <span className="text-[13px] text-rubber">یادآوری پیامکی ۷ و ۱ روز مانده خودکار ارسال می‌شود</span>
             </div>
             {d.expiring.length === 0 ? <p className="text-[14px] text-rubber">کسی در این هفته تمام نمی‌شود.</p> : (
-              <div className="overflow-x-auto">
+              <div className="relative overflow-x-auto">
                 <table className="w-full min-w-[620px] text-[13.5px]">
                   <thead><tr className="border-b border-steel-2 text-rubber"><th className="py-2 text-right font-bold">عضو</th><th className="text-right font-bold">شعبه</th><th className="text-right font-bold">پکیج</th><th className="font-bold">پایان</th><th className="font-bold">تماس</th></tr></thead>
                   <tbody>
