@@ -121,7 +121,10 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
             .Include(x => x.Membership).ThenInclude(m => m!.Package)
             .Include(x => x.Membership).ThenInclude(m => m!.Branch)
             .FirstOrDefaultAsync(x => x.Id == paymentId && x.UserId == userId, ct);
-        if (p?.Membership is null) return null;
+        if (p is null) return null;
+        if (p.Membership is null)
+            return new PaymentResultDto(p.Id, p.Status.ToString().ToLowerInvariant(), p.AmountToman, p.BaseAmountToman, p.CampaignDiscountToman, p.CodeDiscountToman,
+                p.DiscountCode, p.TransactionCode, p.InvoiceNumber, p.CreatedAtUtc, p.PaidAtUtc, p.Description ?? "", "", "", p.GatewayMessage, null);
         var m = p.Membership;
         return new PaymentResultDto(
             p.Id, p.Status.ToString().ToLowerInvariant(), p.AmountToman, p.BaseAmountToman, p.CampaignDiscountToman, p.CodeDiscountToman,

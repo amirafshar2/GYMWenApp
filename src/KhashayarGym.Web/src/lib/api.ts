@@ -16,6 +16,7 @@ export interface Coach {
 export interface Campaign {
   id: number; title: string; description: string | null; startsAtUtc: string; endsAtUtc: string
   discountPercent: number; eligiblePackageSlugs: string[]
+  discountAmountToman: number | null; eligibleBranchSlugs: string[] | null; remainingSlots: number | null
 }
 export interface Faq { question: string; answer: string }
 export interface Stats { branches: number; members: number; yearsActive: number; instagramFollowers: number; coaches: number }
@@ -120,7 +121,9 @@ export function refreshSession(): Promise<AuthResult | null> {
 }
 
 type Opts = { body?: unknown; auth?: boolean; raw?: boolean }
-async function request<T>(method: string, path: string, { body, auth, raw }: Opts = {}, retried = false): Promise<T> {
+/** توکن فعلی برای اتصال SignalR (WebSocket هدر ندارد) */
+export const currentAccessToken = () => accessToken
+export async function request<T>(method: string, path: string, { body, auth, raw }: Opts = {}, retried = false): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json', 'X-KG-Client': 'web' }
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`

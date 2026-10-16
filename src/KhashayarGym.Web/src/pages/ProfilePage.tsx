@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Download, Dumbbell, FileText, LogOut, Plus, RefreshCcw, Scale } from 'lucide-react'
+import { Coffee, Download, Dumbbell, FileText, LogOut, Plus, RefreshCcw, Scale, ShoppingBag, Wallet as WalletIcon } from 'lucide-react'
+import { CANTEEN_STATUS, SHOP_STATUS, shopApi, walletApi, type CanteenOrder, type ShopOrder } from '@/lib/commerce'
 import { authApi, downloadBlob, memberApi, type Profile } from '@/lib/api'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
@@ -17,7 +18,14 @@ export default function ProfilePage() {
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => { document.title = `پروفایل | ${brand.name}` }, [])
-  useEffect(() => { if (ready && user) memberApi.profile().then(setP).catch((e: Error) => setErr(e.message)) }, [ready, user])
+  const [balance, setBalance] = useState<number | null>(null)
+  const [orders, setOrders] = useState<{ shop: ShopOrder[]; canteen: CanteenOrder[] } | null>(null)
+  useEffect(() => {
+    if (!ready || !user) return
+    memberApi.profile().then(setP).catch((e: Error) => setErr(e.message))
+    walletApi.get().then((w) => setBalance(w.balanceToman)).catch(() => null)
+    shopApi.myOrders().then(setOrders).catch(() => null)
+  }, [ready, user])
 
   if (err) return <PageShell title="پروفایل"><Notice tone="err">{err}</Notice></PageShell>
   if (!p) return <Spinner />
@@ -48,6 +56,11 @@ export default function ProfilePage() {
               <Btn onClick={renew}><RefreshCcw className="size-4" aria-hidden />تمدید</Btn>
             </Panel>
           )}
+          <Link to="/wallet" className="flex items-center gap-4 rounded-[6px] bg-[linear-gradient(135deg,#0b2f57,#0b5fb0)] p-5 text-white transition-shadow hover:shadow-[0_14px_40px_rgb(11_95_176/0.35)]">
+            <WalletIcon className="size-8 shrink-0" aria-hidden />
+            <span className="flex-1"><span className="block text-[13px] text-white/70">کیف پول</span><span className="text-[22px] font-black">{balance === null ? '…' : toman(balance)}</span></span>
+            <span className="rounded-[3px] bg-white/15 px-3 py-2 text-[13px] font-bold">شارژ</span>
+          </Link>
           <Panel>
             <h2 className="mb-3 text-[16px] font-black text-chalk">اطلاعات حساب</h2>
             <dl className="grid gap-2 text-[14px]">
@@ -60,11 +73,42 @@ export default function ProfilePage() {
         <div className="grid gap-6">
           <TrainingPlan section={m?.section ?? latest?.section ?? (p.user.gender === 'female' ? 'women' : 'men')} />
           <WeightChart userId={p.user.id} />
+          <Orders orders={orders} />
           <Payments p={p} />
           <Contracts p={p} />
         </div>
       </div>
     </PageShell>
+  )
+}
+
+function Orders({ orders }: { orders: { shop: ShopOrder[]; canteen: CanteenOrder[] } | null }) {
+  if (!orders || (orders.shop.length === 0 && orders.canteen.length === 0)) return (
+    <Panel className="flex flex-wrap items-center justify-between gap-3">
+      <p className="text-[15px] text-rubber">هنوز از فروشگاه یا بوفه خرید نکرده‌اید.</p>
+      <Link to="/shop" className="inline-flex h-11 items-center gap-2 rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white hover:bg-plate-hi"><ShoppingBag className="size-4" />شاپ {brand.shortName}</Link>
+    </Panel>
+  )
+  return (
+    <Panel aria-labelledby="ord-h">
+      <h2 id="ord-h" className="mb-4 text-[18px] font-black text-chalk">سفارش‌های فروشگاه و بوفه</h2>
+      <ul className="divide-y divide-steel-2">
+        {orders.shop.map((o) => (
+          <li key={`s${o.id}`}><Link to={`/shop/orders/${o.id}`} className="flex items-center gap-3 py-3 hover:text-plate">
+            <ShoppingBag className="size-5 shrink-0 text-plate" aria-hidden />
+            <span className="min-w-0 flex-1"><span className="block truncate font-bold">{o.items.map((i) => i.productName).join('، ')}</span>
+              <span className="text-[12px] text-rubber">{faDigits(o.number ?? '')} · {jalali(o.createdAtUtc, D)} · {SHOP_STATUS[o.status].text}</span></span>
+            <span className="font-bold">{toman(o.totalToman)}</span></Link></li>
+        ))}
+        {orders.canteen.map((o) => (
+          <li key={`c${o.id}`}><Link to={`/canteen/orders/${o.id}`} className="flex items-center gap-3 py-3 hover:text-plate">
+            <Coffee className="size-5 shrink-0 text-plate" aria-hidden />
+            <span className="min-w-0 flex-1"><span className="block truncate font-bold">بوفه — {o.items.map((i) => i.name).join('، ')}</span>
+              <span className="text-[12px] text-rubber">شمارهٔ {faNum(o.dailyNumber)} · {jalali(o.createdAtUtc, D)} · {CANTEEN_STATUS[o.status]}</span></span>
+            <span className="font-bold">{toman(o.totalToman)}</span></Link></li>
+        ))}
+      </ul>
+    </Panel>
   )
 }
 
@@ -177,7 +221,7 @@ function WeightChart({ userId }: { userId: number }) {
     persist([...list, { d: new Date().toISOString(), kg: Math.round(v * 10) / 10 }].slice(-24))
   }
 
-  const pts = list.length ? list : []
+  const pts = list
   const chart = useMemo(() => {
     if (pts.length < 2) return null
     const W = 600, H = 180, P = 28

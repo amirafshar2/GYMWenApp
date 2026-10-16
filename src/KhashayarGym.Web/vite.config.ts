@@ -23,6 +23,7 @@ export default defineConfig({
       // Origin هم به آدرس بک‌اند بازنویسی می‌شود تا بررسی هم‌مبدأ بودن refresh/logout در توسعه رد نشود
       '/api': { target: API, changeOrigin: true, secure: false, configure: (p) => p.on('proxyReq', (r) => { if (r.getHeader('origin')) r.setHeader('origin', API) }) },
       '/payment-sandbox': { target: API, changeOrigin: true, secure: false },
+      '/hubs': { target: API, changeOrigin: true, secure: false, ws: true },
     },
   },
   build: {

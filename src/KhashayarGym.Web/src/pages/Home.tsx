@@ -6,6 +6,7 @@ import SiteOffer from '../site/SiteOffer'
 import SiteBranches from '../site/SiteBranches'
 import SitePricing from '../site/SitePricing'
 import SiteEvents from '../site/SiteEvents'
+import SiteShop from '../site/SiteShop'
 import SiteGallery from '../site/SiteGallery'
 import SiteCoaches from '../site/SiteCoaches'
 import SiteFaq from '../site/SiteFaq'
@@ -22,6 +23,7 @@ export default function Home() {
       <SiteOffer />
       <SiteBranches />
       <SitePricing />
+      <SiteShop />
       <SiteEvents />
       <SiteGallery />
       <SiteCoaches />

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Phone, Menu, X, MapPin, Clock, LayoutGrid, UserRound } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Phone, Menu, X, MapPin, Clock, LayoutGrid, UserRound, ShoppingBag } from 'lucide-react'
+import { cartCount, useCart } from '@/lib/cart'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/lib/auth'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
@@ -15,6 +16,7 @@ const LINKS = [
   { label: 'رشته‌ها', href: '/#disciplines', id: 'disciplines' },
   { label: 'پکیج‌ها', href: '/#packages', id: 'packages' },
   { label: 'مربیان', href: '/#coaches', id: 'coaches' },
+  { label: 'شاپ', href: '/shop', id: 'shop' },
   { label: 'گالری', href: '/#gallery', id: 'gallery' },
   { label: 'تماس', href: '/#consult', id: 'consult' },
 ]
@@ -31,10 +33,13 @@ export function Logo({ light }: { light?: boolean }) {
 
 /** هدر سفید چسبان: لوگو، منوی متنی با خط زیر قرمزِ فعال، آیکون‌ها و پنل کناری */
 export default function SiteHeader() {
-  const [active, setActive] = useState('top')
+  const [activeSection, setActive] = useState('top')
+  const { pathname } = useLocation()
+  const active = pathname.startsWith('/shop') || pathname === '/cart' ? 'shop' : pathname === '/' ? activeSection : ''
   const [scrolled, setScrolled] = useState(false)
   const [panel, setPanel] = useState(false)
   const { user } = useAuth()
+  const items = cartCount(useCart())
   const account = user
     ? { to: '/profile', text: user.fullName?.split(' ')[0] ?? 'پروفایل', label: 'پروفایل من' }
     : { to: '/login', text: 'ورود', label: 'ورود یا ثبت‌نام' }
@@ -61,10 +66,10 @@ export default function SiteHeader() {
         style={{ top: 'var(--festival-h, 0px)' }}
         className={cn('kg-chrome fixed inset-x-0 z-50 border-b bg-white', scrolled ? 'border-transparent shadow-[0_6px_30px_rgb(0_0_0/0.07)]' : 'border-steel-2')}
       >
-        <div className={cn(wrap, 'flex h-[78px] items-center gap-10')}>
+        <div className={cn(wrap, 'flex h-[78px] items-center gap-6 2xl:gap-10')}>
           <Logo />
-          <nav aria-label="منوی اصلی" className="hidden flex-1 lg:block">
-            <ul className="flex items-center gap-8">
+          <nav aria-label="منوی اصلی" className="hidden flex-1 xl:block">
+            <ul className="flex items-center gap-7">
               {LINKS.map((l) => (
                 <li key={l.id}>
                   <a href={l.href} aria-current={active === l.id ? 'true' : undefined}
@@ -77,11 +82,17 @@ export default function SiteHeader() {
               ))}
             </ul>
           </nav>
-          <div className="ms-auto flex items-center gap-1 lg:ms-0">
-            <a href={`tel:${brand.phone}`} className="hidden items-center gap-2 px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate md:flex">
+          <div className="ms-auto flex items-center gap-1 xl:ms-0">
+            <a href={`tel:${brand.phone}`} className="hidden items-center gap-2 px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate md:flex xl:hidden 2xl:flex">
               <Phone className="size-[18px]" aria-hidden />
               <span dir="ltr">{faDigits(brand.phone)}</span>
             </a>
+            {items > 0 && (
+              <Link to="/cart" aria-label={`سبد خرید، ${faNum(items)} کالا`} className="relative grid size-11 place-items-center text-chalk transition-colors hover:text-plate">
+                <ShoppingBag className="size-5" aria-hidden />
+                <span className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-plate text-[11px] font-bold text-white">{faNum(items)}</span>
+              </Link>
+            )}
             <Link to={account.to} aria-label={account.label}
               className="flex h-11 items-center gap-2 rounded-[3px] px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate">
               <UserRound className="size-5" aria-hidden /><span className="hidden max-w-[110px] truncate sm:inline">{account.text}</span>
@@ -89,8 +100,8 @@ export default function SiteHeader() {
             <Link to="/join" className="ms-1 hidden h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white transition-colors hover:bg-plate-hi sm:inline-flex">ثبت‌نام آنلاین</Link>
             <button type="button" onClick={() => setPanel(true)} aria-label="باز کردن منو" aria-expanded={panel}
               className="grid size-11 cursor-pointer place-items-center text-chalk transition-colors hover:text-plate">
-              <Menu className="size-6 lg:hidden" aria-hidden />
-              <LayoutGrid className="hidden size-[22px] lg:block" aria-hidden />
+              <Menu className="size-6 xl:hidden" aria-hidden />
+              <LayoutGrid className="hidden size-[22px] xl:block" aria-hidden />
             </button>
           </div>
         </div>

@@ -16,6 +16,9 @@
 | Parbad | اتصال به درگاه‌های پرداخت ایرانی + درگاه آزمایشی | LGPL-3.0 (فقط به شکل پکیج NuGet استفاده شده، بدون تغییر) |
 | QuestPDF | ساخت PDF فاکتور و قرارداد | QuestPDF Community License (رایگان برای کسب‌وکار با درآمد سالانهٔ زیر ۱ میلیون دلار) |
 | QRCoder | QR کارت عضویت | MIT |
+| @microsoft/signalr | اتصال لحظه‌ای بوفه | MIT |
+| qrcode (npm) | برگهٔ QR میزهای بوفه | MIT |
+| تصویر کالاها و منوی بوفه (`public/media/{shop,canteen}`) | ساختهٔ همین پروژه با `scripts/make-shop-images.mjs`؛ برند مکمل‌ها ساختگی | متعلق به پروژه |
 | ASP.NET Core Identity، EF Core، FluentValidation، Serilog | هستهٔ بک‌اند | MIT / Apache-2.0 |
 
 ## عکس و ویدیوی واقعی (فاز بعد)

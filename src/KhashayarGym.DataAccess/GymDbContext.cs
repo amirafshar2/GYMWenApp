@@ -41,4 +41,20 @@ public class GymDbContext(DbContextOptions<GymDbContext> options)
         base.OnModelCreating(b);
         b.ApplyConfigurationsFromAssembly(typeof(GymDbContext).Assembly);
     }
+
+    /// <summary>
+    /// همهٔ زمان‌ها UTC ذخیره می‌شوند؛ هنگام خواندن هم Kind=Utc می‌گیرند تا در JSON با «Z» بروند
+    /// و مرورگر کاربر ایرانی آن‌ها را به وقت تهران درست نشان دهد (نه به‌عنوان وقت محلی خام).
+    /// </summary>
+    protected override void ConfigureConventions(ModelConfigurationBuilder c)
+    {
+        c.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        c.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
+
+    private sealed class UtcDateTimeConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+        v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+    private sealed class NullableUtcDateTimeConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+        v => v.HasValue && v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : v, v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
 }

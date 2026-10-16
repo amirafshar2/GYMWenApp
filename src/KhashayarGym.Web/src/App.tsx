@@ -13,6 +13,16 @@ const JoinPage = lazy(() => import('./pages/JoinPage'))
 const JoinResultPage = lazy(() => import('./pages/JoinResultPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const LegalPage = lazy(() => import('./pages/LegalPage'))
+const ShopPage = lazy(() => import('./pages/shop/ShopPage'))
+const ProductPage = lazy(() => import('./pages/shop/ProductPage'))
+const CartPage = lazy(() => import('./pages/shop/CartPage'))
+const ShopOrderPage = lazy(() => import('./pages/shop/ShopOrderPage'))
+const WalletPage = lazy(() => import('./pages/WalletPage'))
+const FestivalPage = lazy(() => import('./pages/FestivalPage'))
+const CanteenMenuPage = lazy(() => import('./pages/canteen/CanteenMenuPage'))
+const CanteenOrderPage = lazy(() => import('./pages/canteen/CanteenOrderPage'))
+const CanteenBoardPage = lazy(() => import('./pages/canteen/CanteenBoardPage'))
+const CanteenQrPage = lazy(() => import('./pages/canteen/CanteenQrPage'))
 const Lab = import.meta.env.DEV ? lazy(() => import('./lab/Lab')) : () => null
 
 export default function App() {
@@ -38,6 +48,16 @@ export default function App() {
             <Route path="/join/result" element={<JoinResultPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             {['/about', '/terms', '/privacy', '/refund'].map((p) => <Route key={p} path={p} element={<LegalPage />} />)}
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/shop/orders/:id" element={<ShopOrderPage />} />
+            <Route path="/shop/:slug" element={<ProductPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/festival" element={<FestivalPage />} />
+            <Route path="/canteen/orders/:id" element={<CanteenOrderPage />} />
+            <Route path="/canteen/:branch" element={<CanteenMenuPage />} />
+            <Route path="/panel/canteen" element={<CanteenBoardPage />} />
+            <Route path="/panel/canteen/qr" element={<CanteenQrPage />} />
             {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes>

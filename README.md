@@ -1,6 +1,7 @@
 # پلتفرم آنلاین مجموعه باشگاه‌های خشایار شیراز
 
 - **فاز ۱:** سایت عمومی با هیروی اسکرولی، نقشهٔ «نزدیک‌ترین شعبه»، پکیج‌ها با تخفیف جشنواره و فرم مشاوره.
+- **فاز ۳:** شاپ خشایار (مکمل، پوشاک و لوازم، موجودی هر شعبه)، منوی بوفه با QR و تابلوی لحظه‌ای (SignalR)، کیف پول، صفحهٔ جشنواره، اتصال به گیت/دستبند.
 - **فاز ۲:** ورود با موبایل و کد پیامکی، ثبت‌نام آنلاین چندمرحله‌ای، قرارداد دیجیتال + فرم سلامت با امضای پیامکی، پرداخت (درگاه آزمایشی)، فاکتور PDF، کارت عضویت QR و پروفایل.
 
 ## ساختار (سه‌لایه، .NET 10)
@@ -74,6 +75,20 @@ cd src\KhashayarGym.Web; npm run dev     # http://localhost:5173 ، /api به ht
 4. قرارداد و فرم سلامت، امضا با کد دوم.
 5. «پرداخت» درگاه آزمایشی Parbad را باز می‌کند: **Pay** = موفق، **Cancel** = انصراف. پولی جابه‌جا نمی‌شود.
 6. صفحهٔ نتیجه: فاکتور PDF و کارت QR؛ در `/profile`: روزهای باقی‌مانده، تمدید یک‌کلیکی، فاکتورها، PDF قرارداد، برنامهٔ تمرینی نمونه و نمودار وزن.
+
+## دموی فاز ۳ (شاپ، بوفه، کیف پول)
+- **شاپ:** `/shop` — تب «مکمل‌ها» و «پوشاک و لوازم خشایار»، انتخاب شعبه برای دیدن موجودی، رنگ و سایز، سبد خرید، تحویل حضوری یا ارسال. کد `MEMBER15` فقط برای اعضای دارای عضویت فعال.
+- **کیف پول:** `/wallet` — شارژ با درگاه آزمایشی، خرج در شاپ و بوفه.
+- **بوفه (مشتری):** `/canteen/ghoddousi-gharbi?table=میز 4` (همان آدرسی که QR میز باز می‌کند).
+- **بوفه (کارمند):** با شمارهٔ کارمند نمایشی **۰۹۱۰۰۰۰۰۰۰۰** وارد شوید و `/panel/canteen?branch=ghoddousi-gharbi` را باز کنید؛ سفارش‌ها لحظه‌ای می‌آیند و با «آماده شد» گوشی مشتری بوق می‌زند. برگهٔ چاپی QR میزها: `/panel/canteen/qr`.
+- **جشنواره:** `/festival`.
+- تصویر کالاها و آیتم‌های بوفه برداری و ساختهٔ همین پروژه است (`scripts/make-shop-images.mjs`)؛ نام برند مکمل‌ها ساختگی است.
+
+## اتصال به گیت و دستبند
+سند فنی برای شرکت گیت: [`docs/access-control-api.md`](docs/access-control-api.md). در حالت Development یک گیت نمایشی با کلید `demo-gate-key-khashayar-0001` ساخته می‌شود.
+
+## راهنمای راه‌اندازی برای مشتری
+`docs/راهنمای-راه‌اندازی-سایت-خشایار.docx` — کارهای باشگاه و تیم فنی قدم‌به‌قدم (دامنه، اینماد، مالیات، درگاه، پیامک، سرور، گیت). با `node scripts/make-launch-guide.js <خروجی>` دوباره ساخته می‌شود.
 
 برای سرور واقعی: `Otp:ExposeCodeInResponse=false`، `Sms:Provider=Kavenegar` با کلید در User Secrets، و `Payment:UseVirtualGateway=false` بعد از گرفتن درگاه به نام باشگاه (Parbad زرین‌پال، IDPay، سامان، ملت و… را پشتیبانی می‌کند).
 
@@ -176,3 +191,8 @@ cd src\KhashayarGym.Web; npm run build
 | `POST /checkout/quote` ، `POST /checkout` | پیش‌فاکتور و شروع پرداخت |
 | `GET\|POST /payments/callback` | بازگشت از درگاه |
 | `GET /me/payments/{id}` ، `…/invoice.pdf` ، `GET /me/contracts/{id}/pdf` ، `GET /me/card.svg` | نتیجه، فاکتور، قرارداد، QR کارت |
+| `GET /shop/products` ، `GET /shop/products/{slug}` ، `POST /shop/quote` ، `POST /shop/orders` | فروشگاه |
+| `GET /canteen/{branch}/menu` ، `POST /canteen/orders` | بوفه (مشتری) |
+| `GET /canteen/staff/{branch}/orders` ، `POST /canteen/staff/orders/{id}/status` ، Hub `/hubs/canteen` | بوفه (کارکنان، لحظه‌ای) |
+| `GET /me/wallet` ، `POST /me/wallet/topups` ، `GET /me/orders` | کیف پول و سفارش‌ها |
+| `POST /access/check` ، `GET /access/whitelist` ، `POST /access/events` | گیت/دستبند (کلید دستگاه) |

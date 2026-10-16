@@ -67,6 +67,8 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 
         Assert.Equal(500_000, w.GetProperty("balanceToman").GetInt64());
         Assert.Single(w.GetProperty("transactions").EnumerateArray());
+        // زمان‌ها با Z (UTC) می‌روند تا مرورگر به وقت تهران تبدیل کند
+        Assert.EndsWith("Z", w.GetProperty("transactions")[0].GetProperty("createdAtUtc").GetString());
     }
 
     [Fact]
