@@ -2,10 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { BellRing, ChefHat, Clock, HandPlatter, QrCode, Volume2, VolumeX, X } from 'lucide-react'
-import { api } from '@/lib/api'
+import { panelApi, type BranchRef } from '@/lib/panel'
 import { canteenApi, type CanteenOrder } from '@/lib/commerce'
 import { beep, useCanteenHub } from '@/lib/hub'
-import { useData } from '@/lib/useData'
 import { faNum, jalali } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { useRequireAuth } from '@/member/MemberCard'
@@ -22,7 +21,8 @@ const COLS = [
 export default function CanteenBoardPage() {
   const { ready, user } = useRequireAuth()
   const [params, setParams] = useSearchParams()
-  const { data: branches = [] } = useData('branches', api.branches)
+  // فقط شعبه‌هایی که کارمند به آن‌ها دسترسی دارد
+  const [branches, setBranches] = useState<BranchRef[]>([])
   const branch = params.get('branch') ?? ''
   const [orders, setOrders] = useState<CanteenOrder[] | null>(null)
   const [sound, setSound] = useState(true)
@@ -31,6 +31,13 @@ export default function CanteenBoardPage() {
   const soundRef = useRef(sound)
   useEffect(() => { soundRef.current = sound }, [sound])
   const isStaff = !!user?.roles.some((r) => STAFF.includes(r))
+  useEffect(() => {
+    if (!isStaff) return
+    panelApi.me().then((m) => {
+      setBranches(m.branches)
+      if (!params.get('branch') && m.branches.length === 1) setParams({ branch: m.branches[0].slug }, { replace: true })
+    }).catch((e: Error) => setErr(e.message))
+  }, [isStaff]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { document.title = 'تابلوی بوفه' }, [])
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(t) }, [])

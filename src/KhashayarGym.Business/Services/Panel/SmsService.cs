@@ -30,18 +30,21 @@ public sealed class SmsOptions
 /// <summary>متن پیامک‌ها. سامانهٔ واقعی فقط نام الگو و توکن‌ها را می‌گیرد؛ Preview برای گزارش پنل است.</summary>
 public static class SmsTexts
 {
+    /// <summary>آدرس سایت در پیامک‌ها (از تنظیم Sms:SiteUrl، مثلاً example.ir/join). تا دامنه تعیین نشده، متن عمومی.</summary>
+    public static string Site { get; set; } = "سایت باشگاه";
+
     public static string Token(string? s) => string.IsNullOrWhiteSpace(s) ? "عضو" : s.Trim().Replace(' ', '‌');
 
     public static string Welcome(string name, string branch, string until, bool renewal) => renewal
         ? $"{name} عزیز، عضویتت در خشایار {branch} تمدید شد و تا {until} اعتبار دارد. ممنون که همراه ما هستی."
         : $"{name} عزیز، به باشگاه خشایار {branch} خوش آمدی! عضویتت تا {until} فعال است. کارت ورود در پروفایلت است.";
     public static string Renew(string name, int days, string date) => days <= 1
-        ? $"{name} عزیز، عضویتت در خشایار فردا ({date}) تمام می‌شود. برای تمدید: khashayar.club/join"
-        : $"{name} عزیز، {PersianText.FaDigits(days.ToString())} روز دیگر ({date}) عضویتت در خشایار تمام می‌شود. تمدید آنلاین: khashayar.club/join";
+        ? $"{name} عزیز، عضویتت در خشایار فردا ({date}) تمام می‌شود. برای تمدید: {Site}"
+        : $"{name} عزیز، {PersianText.FaDigits(days.ToString())} روز دیگر ({date}) عضویتت در خشایار تمام می‌شود. تمدید آنلاین: {Site}";
     public static string Birthday(string name, string code, int percent) =>
         $"{name} عزیز، تولدت مبارک! هدیهٔ خشایار: کد {code} با {PersianText.FaDigits(percent.ToString())}٪ تخفیف شاپ تا یک هفته.";
     public static string Campaign(string name, string title, string offer, string until) =>
-        $"{name} عزیز، دلمان برایت تنگ شده! {title}: {offer} تا {until}. khashayar.club/join لغو۱۱";
+        $"{name} عزیز، دلمان برایت تنگ شده! {title}: {offer} تا {until}. {Site} لغو11";
 }
 
 public interface ISmsService

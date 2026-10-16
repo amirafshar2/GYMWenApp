@@ -1,12 +1,14 @@
-import { useEffect, useId, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useId, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Coffee, Download, Dumbbell, FileText, LogOut, Plus, RefreshCcw, Scale, ShoppingBag, Wallet as WalletIcon } from 'lucide-react'
+import { Cake, Coffee, Download, Dumbbell, FileText, LogOut, Plus, RefreshCcw, Salad, Scale, ShoppingBag, Wallet as WalletIcon } from 'lucide-react'
 import { CANTEEN_STATUS, SHOP_STATUS, shopApi, walletApi, type CanteenOrder, type ShopOrder } from '@/lib/commerce'
 import { authApi, downloadBlob, memberApi, type Profile } from '@/lib/api'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import MemberCard, { useRequireAuth } from '@/member/MemberCard'
+import { myCoachingApi, type BodyMetric, type Preferences as Prefs, type TrainingPlan as CoachPlan } from '@/lib/panel'
+import { WeightLine } from '@/panel/charts'
 import { Btn, inputCls, Notice, PageShell, Panel, Spinner, statusLabel, toLatinDigits } from '@/member/ui'
 
 const D = { year: 'numeric', month: 'short', day: 'numeric' } as const
@@ -61,6 +63,7 @@ export default function ProfilePage() {
             <span className="flex-1"><span className="block text-[13px] text-white/70">کیف پول</span><span className="text-[22px] font-black">{balance === null ? '…' : toman(balance)}</span></span>
             <span className="rounded-[3px] bg-white/15 px-3 py-2 text-[13px] font-bold">شارژ</span>
           </Link>
+          <Preferences />
           <Panel>
             <h2 className="mb-3 text-[16px] font-black text-chalk">اطلاعات حساب</h2>
             <dl className="grid gap-2 text-[14px]">
@@ -72,7 +75,7 @@ export default function ProfilePage() {
 
         <div className="grid gap-6">
           <TrainingPlan section={m?.section ?? latest?.section ?? (p.user.gender === 'female' ? 'women' : 'men')} />
-          <WeightChart userId={p.user.id} />
+          <WeightChart />
           <Orders orders={orders} />
           <Payments p={p} />
           <Contracts p={p} />
@@ -169,7 +172,7 @@ function Contracts({ p }: { p: Profile }) {
   )
 }
 
-/** برنامهٔ تمرینی نمونه تا وقتی مربی برنامهٔ اختصاصی را در پنل مربی (فاز ۴) ثبت کند */
+/** برنامهٔ تمرینی نمونه تا وقتی مربی برنامهٔ اختصاصی را در پنل مربی ثبت کند */
 const PLAN: Record<'men' | 'women', { day: string; focus: string; items: string[] }[]> = {
   men: [
     { day: 'شنبه', focus: 'سینه و پشت بازو', items: ['پرس سینه هالتر ۴×۸', 'پرس بالاسینه دمبل ۳×۱۰', 'دیپ ۳×حداکثر', 'پشت بازو سیم‌کش ۳×۱۲'] },
@@ -184,54 +187,54 @@ const PLAN: Record<'men' | 'women', { day: string; focus: string; items: string[
 }
 
 function TrainingPlan({ section }: { section: 'men' | 'women' }) {
+  const [plan, setPlan] = useState<CoachPlan | null | undefined>(undefined)
+  useEffect(() => { myCoachingApi.plan().then(setPlan).catch(() => setPlan(null)) }, [])
+  const days = plan?.days.length ? plan.days : PLAN[section]
   return (
     <Panel aria-labelledby="tp-h">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="tp-h" className="flex items-center gap-2 text-[18px] font-black text-chalk"><Dumbbell className="size-5 text-plate" aria-hidden />برنامهٔ تمرینی این هفته</h2>
-        <span className="rounded-full bg-steel px-3 py-1 text-[12px] font-bold text-rubber">نمونه — مربی برنامهٔ شما را جایگزین می‌کند</span>
+        <h2 id="tp-h" className="flex items-center gap-2 text-[18px] font-black text-chalk"><Dumbbell className="size-5 text-plate" aria-hidden />{plan ? plan.title : 'برنامهٔ تمرینی این هفته'}</h2>
+        {plan === undefined ? null : plan
+          ? <span className="rounded-full bg-[#ecf8f1] px-3 py-1 text-[12px] font-bold text-[#14532d]">مربی شما: {plan.coachName} – {jalali(plan.updatedAtUtc, D)}</span>
+          : <span className="rounded-full bg-steel px-3 py-1 text-[12px] font-bold text-rubber">نمونه — مربی برنامهٔ شما را جایگزین می‌کند</span>}
       </div>
       <div className="grid gap-3 md:grid-cols-3">
-        {PLAN[section].map((d) => (
-          <div key={d.day} className="rounded-[6px] bg-steel p-4">
+        {days.map((d, i) => (
+          <div key={`${d.day}-${i}`} className="rounded-[6px] bg-steel p-4">
             <p className="text-[13px] font-bold text-plate">{d.day}</p>
             <p className="mb-2 text-[15px] font-black text-chalk">{d.focus}</p>
             <ul className="grid gap-1 text-[13.5px] text-rubber">{d.items.map((x) => <li key={x}>• {x}</li>)}</ul>
           </div>
         ))}
       </div>
+      {plan?.nutrition && (
+        <div className="mt-4 flex gap-3 rounded-[6px] border border-steel-2 p-4">
+          <Salad className="size-5 shrink-0 text-[#1f7a46]" aria-hidden />
+          <div><p className="mb-1 text-[14px] font-black text-chalk">برنامهٔ تغذیه</p><p className="whitespace-pre-line text-[13.5px] leading-7 text-rubber">{plan.nutrition}</p></div>
+        </div>
+      )}
     </Panel>
   )
 }
 
-/** نمودار وزن: داده‌ها فقط در همین مرورگر ذخیره می‌شوند (ثبت سمت سرور در فاز ۴ با پنل مربی) */
-type W = { d: string; kg: number }
-function WeightChart({ userId }: { userId: number }) {
+/** روند وزن: روی سرور ذخیره می‌شود و مربی هم می‌بیند */
+function WeightChart() {
   const uid = useId()
-  const key = `kg-weights-${userId}`
-  const [list, setList] = useState<W[]>(() => { try { return JSON.parse(localStorage.getItem(key) ?? '[]') as W[] } catch { return [] } })
+  const [list, setList] = useState<BodyMetric[] | null>(null)
   const [kg, setKg] = useState('')
   const [err, setErr] = useState<string | null>(null)
-  const persist = (l: W[]) => { setList(l); try { localStorage.setItem(key, JSON.stringify(l)) } catch { /* */ } }
+  const load = () => myCoachingApi.metrics().then(setList).catch(() => setList([]))
+  useEffect(() => { void load() }, [])
 
-  const add = (e: FormEvent) => {
+  const add = async (e: FormEvent) => {
     e.preventDefault()
     const v = Number(toLatinDigits(kg).replace('/', '.').replace('٫', '.'))
     if (!(v >= 30 && v <= 250)) return setErr('وزن را بین ۳۰ تا ۲۵۰ کیلوگرم وارد کنید.')
-    setErr(null); setKg('')
-    persist([...list, { d: new Date().toISOString(), kg: Math.round(v * 10) / 10 }].slice(-24))
+    setErr(null)
+    try { await myCoachingApi.addMetric(Math.round(v * 10) / 10); setKg(''); void load() } catch (x) { setErr((x as Error).message) }
   }
-
-  const pts = list
-  const chart = useMemo(() => {
-    if (pts.length < 2) return null
-    const W = 600, H = 180, P = 28
-    const ys = pts.map((p) => p.kg), min = Math.min(...ys) - 1, max = Math.max(...ys) + 1
-    const x = (i: number) => P + (i * (W - 2 * P)) / (pts.length - 1)
-    const y = (v: number) => H - P - ((v - min) / (max - min)) * (H - 2 * P)
-    const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.kg).toFixed(1)}`).join(' ')
-    return { W, H, line, area: `${line} L${x(pts.length - 1)},${H - P} L${x(0)},${H - P} Z`, dots: pts.map((p, i) => ({ cx: x(i), cy: y(p.kg), p })) }
-  }, [pts])
-  const delta = pts.length >= 2 ? pts[pts.length - 1].kg - pts[0].kg : 0
+  const pts = list ?? []
+  const delta = pts.length >= 2 ? pts[pts.length - 1].weightKg - pts[0].weightKg : 0
 
   return (
     <Panel aria-labelledby={`${uid}-h`}>
@@ -240,17 +243,7 @@ function WeightChart({ userId }: { userId: number }) {
         {pts.length >= 2 && <span className={cn('rounded-full px-3 py-1 text-[12px] font-bold', delta <= 0 ? 'bg-[#ecf8f1] text-[#14532d]' : 'bg-steel text-chalk')}>
           {delta === 0 ? 'بدون تغییر' : `${delta < 0 ? '−' : '+'}${faNum(Math.abs(Math.round(delta * 10) / 10))} کیلو از شروع`}</span>}
       </div>
-      {chart ? (
-        <svg viewBox={`0 0 ${chart.W} ${chart.H}`} className="h-auto w-full" role="img" aria-label={`نمودار وزن: از ${faNum(pts[0].kg)} تا ${faNum(pts[pts.length - 1].kg)} کیلوگرم`}>
-          <defs><linearGradient id={`${uid}-g`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#0b5fb0" stopOpacity=".25" /><stop offset="1" stopColor="#0b5fb0" stopOpacity="0" /></linearGradient></defs>
-          <path d={chart.area} fill={`url(#${uid}-g)`} />
-          <path d={chart.line} fill="none" stroke="#0b5fb0" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-          {chart.dots.map(({ cx, cy, p }, i) => (
-            <g key={i}><circle cx={cx} cy={cy} r="5" fill="#fff" stroke="#2c2c2c" strokeWidth="2" />
-              <text x={cx} y={cy - 12} textAnchor="middle" fontSize="13" fontWeight="700" fill="#2c2c2c">{faNum(p.kg)}</text></g>
-          ))}
-        </svg>
-      ) : <p className="rounded-[3px] bg-steel px-4 py-8 text-center text-[14px] text-rubber">حداقل دو وزن ثبت کنید تا نمودار ساخته شود.</p>}
+      {list === null ? <p className="text-rubber">…</p> : <WeightLine points={pts.map((p) => ({ label: jalali(p.measuredOn + 'T12:00:00Z', { day: 'numeric', month: 'short' }), kg: p.weightKg }))} />}
       <form onSubmit={add} noValidate className="mt-4 flex flex-wrap items-start gap-2">
         <label htmlFor={`${uid}-kg`} className="sr-only">وزن امروز (کیلوگرم)</label>
         <input id={`${uid}-kg`} value={kg} onChange={(e) => setKg(e.target.value)} inputMode="decimal" placeholder="وزن امروز، مثلاً ۷۸٫۵" aria-invalid={!!err || undefined}
@@ -258,7 +251,93 @@ function WeightChart({ userId }: { userId: number }) {
         <Btn type="submit" variant="dark"><Plus className="size-4" aria-hidden />ثبت</Btn>
         {err && <p role="alert" className="w-full text-[13px] text-danger">{err}</p>}
       </form>
-      <p className="mt-2 text-[12px] text-rubber">این اعداد فقط روی همین دستگاه ذخیره می‌شوند.</p>
+      <p className="mt-2 text-[12px] text-rubber">وزن‌ها در حساب شما ذخیره می‌شوند و مربی‌تان هم می‌بیند.</p>
     </Panel>
   )
+}
+
+/** تاریخ تولد (برای تبریک و کد هدیه) و رضایت پیامک تبلیغاتی */
+const J_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+function Preferences() {
+  const [p, setP] = useState<Prefs | null>(null)
+  const [j, setJ] = useState<{ y: string; m: string; d: string }>({ y: '', m: '', d: '' })
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  useEffect(() => {
+    myCoachingApi.preferences().then((x) => {
+      setP(x)
+      if (x.birthDate) { const [y, m, d] = toJalali(x.birthDate); setJ({ y: String(y), m: String(m), d: String(d) }) }
+    }).catch(() => null)
+  }, [])
+  if (!p) return null
+  const thisJy = toJalali(new Date().toISOString().slice(0, 10))[0]
+  const save = async (next: Prefs) => {
+    setMsg(null)
+    try { setP(await myCoachingApi.savePreferences(next)); setMsg({ ok: true, text: 'ذخیره شد.' }) } catch (x) { setMsg({ ok: false, text: (x as Error).message }) }
+  }
+  const setBirth = (n: typeof j) => {
+    setJ(n)
+    if (n.y && n.m && n.d) void save({ ...p, birthDate: toGregorian(+n.y, +n.m, +n.d) })
+  }
+  const sel = 'h-11 cursor-pointer rounded-[3px] border border-steel-2 bg-white px-2 text-[14px]'
+  return (
+    <Panel>
+      <h2 className="mb-3 flex items-center gap-2 text-[16px] font-black text-chalk"><Cake className="size-5 text-plate" aria-hidden />تولد و پیامک‌ها</h2>
+      <fieldset>
+        <legend className="mb-2 text-[13px] text-rubber">تاریخ تولد — روز تولدت یک کد هدیهٔ تخفیف شاپ برایت پیامک می‌شود</legend>
+        <div className="flex gap-2">
+          <select aria-label="روز" value={j.d} onChange={(e) => setBirth({ ...j, d: e.target.value })} className={sel}><option value="">روز</option>{Array.from({ length: 31 }, (_, i) => <option key={i} value={i + 1}>{faNum(i + 1)}</option>)}</select>
+          <select aria-label="ماه" value={j.m} onChange={(e) => setBirth({ ...j, m: e.target.value })} className={`${sel} flex-1`}><option value="">ماه</option>{J_MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}</select>
+          <select aria-label="سال" value={j.y} onChange={(e) => setBirth({ ...j, y: e.target.value })} className={sel}><option value="">سال</option>{Array.from({ length: 80 }, (_, i) => thisJy - 10 - i).map((y) => <option key={y} value={y}>{faNum(y).replace('٬', '')}</option>)}</select>
+        </div>
+      </fieldset>
+      <label className="mt-4 flex cursor-pointer items-start gap-3 text-[14px] leading-7 text-chalk">
+        <input type="checkbox" checked={p.marketingSmsOptIn} onChange={(e) => void save({ ...p, marketingSmsOptIn: e.target.checked })} className="mt-1.5 size-4 accent-[var(--color-plate)]" />
+        خبر جشنواره‌ها و تخفیف‌ها را پیامک کنید (هر وقت خواستید از همین‌جا یا با «لغو11» قطعش کنید)
+      </label>
+      {msg && <p role="status" className={cn('mt-2 text-[13px]', msg.ok ? 'text-[#1f7a46]' : 'text-danger')}>{msg.text}</p>}
+    </Panel>
+  )
+}
+
+// ---- تبدیل شمسی ↔ میلادی (الگوریتم استاندارد jalaali)
+function div(a: number, b: number) { return ~~(a / b) }
+function jalCal(jy: number) {
+  const breaks = [-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178]
+  const gy = jy + 621
+  let leapJ = -14, jp = breaks[0], jump = 0
+  for (let i = 1; i < breaks.length; i++) {
+    const jm = breaks[i]; jump = jm - jp
+    if (jy < jm) break
+    leapJ += div(jump, 33) * 8 + div(jump % 33, 4); jp = jm
+  }
+  let n = jy - jp
+  leapJ += div(n, 33) * 8 + div((n % 33) + 3, 4)
+  if (jump % 33 === 4 && jump - n === 4) leapJ++
+  const leapG = div(gy, 4) - div((div(gy, 100) + 1) * 3, 4) - 150
+  const march = 20 + leapJ - leapG
+  if (jump - n < 6) n = n - jump + div(jump + 4, 33) * 33
+  return { gy, march }
+}
+function g2d(gy: number, gm: number, gd: number) {
+  let d = div((gy + div(gm - 8, 6) + 100100) * 1461, 4) + div(153 * ((gm + 9) % 12) + 2, 5) + gd - 34840408
+  d = d - div(div(gy + 100100 + div(gm - 8, 6), 100) * 3, 4) + 752
+  return d
+}
+function d2g(jdn: number) {
+  let j = 4 * jdn + 139361631
+  j = j + div(div(4 * jdn + 183187720, 146097) * 3, 4) * 4 - 3908
+  const i = div(j % 1461, 4) * 5 + 308
+  const gd = div(i % 153, 5) + 1, gm = (div(i, 153) % 12) + 1, gy = div(j, 1461) - 100100 + div(8 - gm, 6)
+  return [gy, gm, gd]
+}
+function toGregorian(jy: number, jm: number, jd: number) {
+  const r = jalCal(jy)
+  const jdn = g2d(r.gy, 3, r.march) + (jm - 1) * 31 - div(jm, 7) * (jm - 7) + jd - 1
+  const [gy, gm, gd] = d2g(jdn)
+  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`
+}
+function toJalali(iso: string): [number, number, number] {
+  const parts = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC' }).formatToParts(new Date(iso + 'T12:00:00Z'))
+  const g = (t: string) => Number(parts.find((p) => p.type === t)?.value)
+  return [g('year'), g('month'), g('day')]
 }

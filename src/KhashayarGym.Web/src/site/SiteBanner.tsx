@@ -18,6 +18,7 @@ export default function SiteBanner() {
   const show = !!c && !hidden && ms > 0
   useLayoutEffect(() => {
     document.documentElement.style.setProperty('--festival-h', `${show && box.current ? box.current.offsetHeight : 0}px`)
+    return () => document.documentElement.style.setProperty('--festival-h', '0px')
   }, [show])
   if (!show || !c) return null
 

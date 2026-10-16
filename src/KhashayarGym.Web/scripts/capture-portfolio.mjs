@@ -51,7 +51,27 @@ async function memberWithMembership(page) {
   await page.waitForURL(/join\/result/, { timeout: 20000 })
 }
 
+/** یک بار ورود کارمند نمایشی برای همهٔ عکس‌های پنل (هر شماره هر ۶۰ ثانیه یک کد می‌گیرد) */
+let staffPage = null
+async function staff() {
+  if (staffPage) return staffPage
+  staffPage = await newPage('desktop')
+  await staffPage.goto(`${base}/login?next=%2Fpanel`); await login(staffPage, '09100000000'); await staffPage.waitForURL(/panel\//)
+  return staffPage
+}
+
 async function capture(id, c) {
+  if (c.page.startsWith('panel:')) {
+    const p = await staff()
+    for (const vp of ['desktop', 'mobile']) {
+      await p.setViewportSize(VPS[vp])
+      await p.goto(`${base}${c.page.slice(6)}`, { waitUntil: 'networkidle' })
+      if (c.selector) { await p.locator(c.selector).first().click(); await p.waitForLoadState('networkidle') }
+      await p.mouse.move(0, 0); await p.waitForTimeout(1500)
+      await p.screenshot({ path: out(id, vp) })
+    }
+    return
+  }
   if (c.page === 'board') {
     // مشتری: شارژ کیف پول و دو سفارش؛ کارمند: تابلو
     const m = await newPage('mobile')
@@ -106,4 +126,5 @@ for (const [id, c] of Object.entries(cfg)) {
   if (!existsSync(join(root, id, 'item.json'))) { console.warn('⚠ item.json ندارد:', id); continue }
   try { await capture(id, c); console.log('✓', id) } catch (e) { console.error('✗', id, e.message.split('\n')[0]) }
 }
+if (staffPage) await staffPage.context().close()
 await browser.close()

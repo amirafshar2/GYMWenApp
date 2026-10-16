@@ -17,7 +17,7 @@ export function tomanShort(n: number): { value: string; unit: string } {
 
 /** تاریخ شمسی */
 export const jalali = (d: Date | string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }) =>
-  new Intl.DateTimeFormat('fa-IR-u-ca-persian', opts).format(typeof d === 'string' ? new Date(d) : d)
+  new Intl.DateTimeFormat('fa-IR-u-ca-persian', { timeZone: 'Asia/Tehran', ...opts }).format(typeof d === 'string' ? new Date(d) : d)
 
 /** تبدیل ارقام لاتین داخل یک رشته به فارسی (مثلاً شماره تلفن) */
 export const faDigits = (s: string) => s.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[+d])

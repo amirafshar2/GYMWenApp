@@ -4,6 +4,7 @@ import SiteBanner from './site/SiteBanner'
 import SiteHeader from './site/SiteHeader'
 import SiteFooter from './site/SiteFooter'
 import Home from './pages/Home'
+import PresentationBar from './panel/PresentationBar'
 
 const BranchesPage = lazy(() => import('./pages/BranchesPage'))
 const PackagesPage = lazy(() => import('./pages/PackagesPage'))
@@ -23,10 +24,19 @@ const CanteenMenuPage = lazy(() => import('./pages/canteen/CanteenMenuPage'))
 const CanteenOrderPage = lazy(() => import('./pages/canteen/CanteenOrderPage'))
 const CanteenBoardPage = lazy(() => import('./pages/canteen/CanteenBoardPage'))
 const CanteenQrPage = lazy(() => import('./pages/canteen/CanteenQrPage'))
+const PanelLayout = lazy(() => import('./panel/PanelLayout'))
+const DashboardPage = lazy(() => import('./panel/DashboardPage'))
+const ReceptionPage = lazy(() => import('./panel/ReceptionPage'))
+const CoachPage = lazy(() => import('./panel/CoachPage'))
+const admin = (k: 'PackagesAdmin' | 'CampaignsAdmin' | 'ContractAdmin' | 'ShopAdmin' | 'CanteenMenuAdmin' | 'StaffAdmin' | 'SmsAdmin') =>
+  lazy(() => import('./panel/AdminPages').then((m) => ({ default: m[k] })))
+const PackagesAdmin = admin('PackagesAdmin'), CampaignsAdmin = admin('CampaignsAdmin'), ContractAdmin = admin('ContractAdmin'), ShopAdmin = admin('ShopAdmin')
+const CanteenMenuAdmin = admin('CanteenMenuAdmin'), StaffAdmin = admin('StaffAdmin'), SmsAdmin = admin('SmsAdmin')
 const Lab = import.meta.env.DEV ? lazy(() => import('./lab/Lab')) : () => null
 
 export default function App() {
   const { pathname, hash } = useLocation()
+  const inPanel = pathname.startsWith('/panel')
   useEffect(() => {
     if (hash) setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' }), 80)
     else window.scrollTo(0, 0)
@@ -35,9 +45,9 @@ export default function App() {
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100] rounded-full bg-primary px-4 py-2 text-primary-foreground">پرش به محتوا</a>
-      <SiteBanner />
+      {!inPanel && <SiteBanner />}
       <SiteHeader />
-      <main id="main" style={{ paddingTop: 'calc(78px + var(--festival-h, 0px))' }}>
+      <main id="main" style={{ paddingTop: inPanel ? 78 : 'calc(78px + var(--festival-h, 0px))' }}>
         <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -58,12 +68,25 @@ export default function App() {
             <Route path="/canteen/:branch" element={<CanteenMenuPage />} />
             <Route path="/panel/canteen" element={<CanteenBoardPage />} />
             <Route path="/panel/canteen/qr" element={<CanteenQrPage />} />
+            <Route path="/panel" element={<PanelLayout />}>
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="reception" element={<ReceptionPage />} />
+              <Route path="coach" element={<CoachPage />} />
+              <Route path="packages" element={<PackagesAdmin />} />
+              <Route path="campaigns" element={<CampaignsAdmin />} />
+              <Route path="contract" element={<ContractAdmin />} />
+              <Route path="shop" element={<ShopAdmin />} />
+              <Route path="menu" element={<CanteenMenuAdmin />} />
+              <Route path="staff" element={<StaffAdmin />} />
+              <Route path="sms" element={<SmsAdmin />} />
+            </Route>
             {import.meta.env.DEV && <Route path="/lab" element={<Lab />} />}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
-      <SiteFooter />
+      {!inPanel && <SiteFooter />}
+      <PresentationBar />
     </>
   )
 }

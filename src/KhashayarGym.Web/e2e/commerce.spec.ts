@@ -6,6 +6,10 @@ const phone = () => '0917' + String(Math.floor(1_000_000 + Math.random() * 8_999
 async function login(page: Page, mobile: string) {
   await page.getByLabel('شمارهٔ موبایل').first().fill(mobile)
   await page.getByRole('button', { name: 'دریافت کد ورود' }).click()
+  // کارمند نمایشی در چند تست وارد می‌شود و هر شماره هر ۶۰ ثانیه فقط یک کد می‌گیرد
+  const code = page.locator('b[dir=ltr]').first()
+  await code.or(page.getByText(/ثانیه صبر کنید/)).first().waitFor()
+  if (!(await code.isVisible())) { await page.waitForTimeout(61_000); await page.getByRole('button', { name: 'دریافت کد ورود' }).click() }
   await page.locator('input[autocomplete=one-time-code]').fill(toLatin(await page.locator('b[dir=ltr]').first().innerText()))
 }
 async function paySandbox(page: Page) {
@@ -35,7 +39,7 @@ test('خرید از شاپ: انتخاب رنگ و سایز ← سبد ← پر�
 })
 
 test('بوفه: سفارش از QR میز، نمایش لحظه‌ای روی تابلو و «آماده است» روی گوشی مشتری', async ({ browser }) => {
-  test.setTimeout(120_000)
+  test.setTimeout(180_000)
   const staff = await (await browser.newContext()).newPage()
   await staff.goto('/login?next=%2Fpanel%2Fcanteen%3Fbranch%3Dghoddousi-gharbi')
   await login(staff, '09100000000')

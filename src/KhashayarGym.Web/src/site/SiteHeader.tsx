@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Phone, Menu, X, MapPin, Clock, LayoutGrid, UserRound, ShoppingBag } from 'lucide-react'
+import { Phone, Menu, X, MapPin, Clock, LayoutGrid, UserRound, ShoppingBag, LayoutDashboard } from 'lucide-react'
 import { cartCount, useCart } from '@/lib/cart'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/lib/auth'
@@ -91,6 +91,11 @@ export default function SiteHeader() {
               <Link to="/cart" aria-label={`سبد خرید، ${faNum(items)} کالا`} className="relative grid size-11 place-items-center text-chalk transition-colors hover:text-plate">
                 <ShoppingBag className="size-5" aria-hidden />
                 <span className="absolute right-0.5 top-0.5 grid size-5 place-items-center rounded-full bg-plate text-[11px] font-bold text-white">{faNum(items)}</span>
+              </Link>
+            )}
+            {user?.roles.some((r) => r !== 'Member') && (
+              <Link to="/panel" className="hidden h-11 items-center gap-2 rounded-[3px] px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate md:flex">
+                <LayoutDashboard className="size-5" aria-hidden />پنل
               </Link>
             )}
             <Link to={account.to} aria-label={account.label}

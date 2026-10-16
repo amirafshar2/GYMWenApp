@@ -105,6 +105,7 @@ builder.Services.AddSingleton<IPrivateFileStore, PrivateFileStore>();
 // ---- پیامک: Log (دمو) یا Kavenegar ----
 builder.Services.Configure<KhashayarGym.Business.Services.Panel.SmsOptions>(builder.Configuration.GetSection(KhashayarGym.Business.Services.Panel.SmsOptions.Section));
 builder.Services.AddScoped<KhashayarGym.Business.Services.Panel.DemoSeeder>();
+if (builder.Configuration["Sms:SiteUrl"] is { Length: > 3 } smsSite) KhashayarGym.Business.Services.Panel.SmsTexts.Site = smsSite;
 if (builder.Configuration["Sms:Provider"]?.Equals("Kavenegar", StringComparison.OrdinalIgnoreCase) == true)
 {
     builder.Services.Configure<KavenegarOptions>(builder.Configuration.GetSection("Sms:Kavenegar"));

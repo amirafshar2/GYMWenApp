@@ -42,5 +42,17 @@
   "khashayar-member-card": {
     "page": "profile",
     "selector": null
+  },
+  "khashayar-admin-dashboard": {
+    "page": "panel:/panel/dashboard",
+    "selector": null
+  },
+  "khashayar-reception-desk": {
+    "page": "panel:/panel/reception",
+    "selector": null
+  },
+  "khashayar-coach-panel": {
+    "page": "panel:/panel/coach",
+    "selector": "tbody tr"
   }
 }
