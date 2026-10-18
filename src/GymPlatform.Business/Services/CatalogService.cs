@@ -24,6 +24,7 @@ public sealed class CatalogService(
     IRepository<Campaign> campaigns,
     IRepository<FaqItem> faq,
     IPricingService pricing,
+    Site.ISiteService site,
     IClock clock) : ICatalogService
 {
     public async Task<IReadOnlyList<BranchDto>> GetBranchesAsync(GenderSection? section, CancellationToken ct)
@@ -90,8 +91,10 @@ public sealed class CatalogService(
     {
         var branchCount = (await branches.ListAsync(b => b.IsActive, null, ct)).Count;
         var coachCount = (await coaches.ListAsync(c => c.IsActive, null, ct)).Count;
-        // اعداد اعضا و سابقه تا دریافت آمار واقعی از باشگاه، مقدار نمونه هستند.
-        return new SiteStatsDto(branchCount, Members: 8500, YearsActive: 15, InstagramFollowers: 52000, Coaches: coachCount);
+        // تعداد شاگرد و سال تأسیس را مالک در «تنظیمات سایت» می‌نویسد؛ خالی یعنی نمایش داده نشود
+        var why = (await site.GetAsync(ct)).Home.Why;
+        int? years = why.FoundedYear is { } y ? Math.Max(1, new System.Globalization.PersianCalendar().GetYear(Jalali.ToTehran(clock.UtcNow)) - y) : null;
+        return new SiteStatsDto(branchCount, why.Members, years, coachCount);
     }
 
     private static BranchDto ToDto(Branch b) => new(

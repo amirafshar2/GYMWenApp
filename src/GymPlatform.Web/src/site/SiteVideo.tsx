@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { brand } from '@/lib/brand'
 import TokyoSkylineHero from '@/components/ui/sunset-skyline-hero'
+import { fill, site } from '@/lib/site'
 
 /**
- * ویدیوی خود باشگاه: public/media/video/gym.mp4 (با scripts/make-scrub-video بهینه شده؛ حدود ۳٫۵ مگابایت).
- * پوستر: gym-poster.webp و gym-poster-mobile.webp — فریمی از همین ویدیو.
+ * ویدیو و پوستر از «تنظیمات سایت» (پیش‌فرض: public/media/video/gym.mp4 که با scripts/make-scrub-video بهینه شده،
+ * و فریمی از همان ویدیو به‌عنوان پوستر). فایل‌های پیش‌فرض قالب ?v= می‌گیرند تا کش قدیمی مرورگر دور زده شود.
  */
-// ?v= با هر ویدیوی تازه عوض شود تا کش قدیمی مرورگر دور زده شود
-const GYM_VIDEO = '/media/video/gym.mp4?v=owner-2'
-const POSTER = '/media/video/gym-poster.webp?v=photo-1'
-const POSTER_MOBILE = '/media/video/gym-poster-mobile.webp?v=photo-1'
-const TITLE = 'هر روز، یک تکرار بیشتر.'
+const bust = (u: string | null | undefined, v: string) => (u && u.startsWith('/media/video/gym') ? `${u}?v=${v}` : u || '')
+const cfg = () => {
+  const v = site.home.video
+  const poster = bust(v.posterUrl, 'photo-1') || '/media/video/gym-poster.webp'
+  return { video: bust(v.videoUrl, 'owner-2'), poster, posterMobile: bust(v.mobilePosterUrl, 'photo-1') || poster, title: fill(v.title) }
+}
 
 type Conn = { saveData?: boolean; effectiveType?: string }
 
@@ -35,7 +37,8 @@ function prefersLite(): boolean {
  * ویدیو اول کامل در حافظه دانلود می‌شود و بعد اسکرول فعال می‌شود، تا جلو/عقب رفتن بدون مکث باشد.
  */
 export default function SiteVideo() {
-  const [lite] = useState(prefersLite)
+  const { video: GYM_VIDEO, poster: POSTER, title: TITLE } = cfg()
+  const [lite] = useState(() => prefersLite() || !GYM_VIDEO)
   const [src, setSrc] = useState<string | null | undefined>(undefined)
   const [near, setNear] = useState(false)
   const box = useRef<HTMLDivElement>(null)
@@ -57,7 +60,7 @@ export default function SiteVideo() {
       .then((b) => { if (!alive) return; url = b ? URL.createObjectURL(b) : null; setSrc(url) })
       .catch(() => alive && setSrc(null))
     return () => { alive = false; if (url) URL.revokeObjectURL(url) }
-  }, [near])
+  }, [near]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (lite || src === null) return <PosterSection />
   if (src === undefined) {
@@ -89,6 +92,7 @@ export default function SiteVideo() {
 
 /** نسخهٔ سبک: یک عکس از همان ویدیو با شعار، بدون اسکرول قفل‌شده و بدون دانلود ویدیو */
 function PosterSection() {
+  const { poster: POSTER, posterMobile: POSTER_MOBILE, title: TITLE } = cfg()
   return (
     <section aria-label={`تمرین در سالن ${brand.shortName}`} className="relative h-[78svh] min-h-[460px] overflow-hidden bg-[#151514]">
       <picture>

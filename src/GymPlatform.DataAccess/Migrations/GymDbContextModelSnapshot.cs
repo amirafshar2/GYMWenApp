@@ -1297,7 +1297,7 @@ namespace GymPlatform.DataAccess.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsKhashayarBrand")
+                    b.Property<bool>("IsHouseBrand")
                         .HasColumnType("bit");
 
                     b.Property<int>("Kind")
@@ -1614,6 +1614,29 @@ namespace GymPlatform.DataAccess.Migrations
                     b.HasIndex("UserId", "Version");
 
                     b.ToTable("SignedContracts");
+                });
+
+            modelBuilder.Entity("GymPlatform.Domain.Entities.SiteContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Json")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteContents", (string)null);
                 });
 
             modelBuilder.Entity("GymPlatform.Domain.Entities.SmsMessage", b =>

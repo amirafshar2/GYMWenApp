@@ -21,7 +21,7 @@ public interface IShopService
 }
 
 /// <summary>
-/// شاپ خشایار: موجودی به تفکیک شعبه. هنگام ثبت سفارش موجودی کنار گذاشته می‌شود (کم کردن شرطی)،
+/// فروشگاه: موجودی به تفکیک شعبه. هنگام ثبت سفارش موجودی کنار گذاشته می‌شود (کم کردن شرطی)،
 /// با پرداخت موفق قطعی و با شکست/انقضا برمی‌گردد. قیمت‌ها فقط سمت سرور حساب می‌شوند.
 /// </summary>
 public sealed class ShopService(GymDbContext db, IClock clock, IOptions<CommerceOptions> options, ILogger<ShopService> logger) : IShopService
@@ -37,7 +37,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
     public async Task<ShopCatalogDto> CatalogAsync(ShopFilter f, CancellationToken ct)
     {
         var q = db.Products.AsNoTracking().Where(p => p.IsActive);
-        // «مکمل‌ها» یک بخش و «پوشاک و لوازم خشایار» بخش دیگر
+        // «مکمل‌ها» یک بخش و «پوشاک و لوازم برند باشگاه» بخش دیگر
         if (f.Kind == "merch") q = q.Where(p => p.Kind != ProductKind.Supplement);
         else if (ParseKind(f.Kind) is { } kind) q = q.Where(p => p.Kind == kind);
         var all = await q.Include(p => p.Variants).ThenInclude(v => v.Stocks).ThenInclude(s => s.Branch).AsSplitQuery()
@@ -66,7 +66,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         {
             var prices = p.Variants.Where(v => v.PriceToman is not null).Select(v => v.PriceToman!.Value).ToList();
             return new ProductCardDto(p.Id, p.Slug, p.Name, p.BrandName, KindName(p.Kind), p.Category, p.ImagePath, p.PriceToman,
-                prices.Count > 0 ? Math.Min(prices.Min(), p.PriceToman) : null, p.IsKhashayarBrand, Stock(p) > 0,
+                prices.Count > 0 ? Math.Min(prices.Min(), p.PriceToman) : null, p.IsHouseBrand, Stock(p) > 0,
                 p.Variants.Where(v => v.Color != null).Select(v => v.ColorHex ?? v.Color!).Distinct().ToList(),
                 p.Variants.Where(v => v.Size != null).Select(v => v.Size!).Distinct().ToList(),
                 p.Variants.Where(v => v.Flavor != null).Select(v => v.Flavor!).Distinct().ToList());
@@ -80,7 +80,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
             .Include(x => x.Variants).ThenInclude(v => v.Stocks).ThenInclude(s => s.Branch).AsSplitQuery().FirstOrDefaultAsync(ct);
         if (p is null) return null;
         return new ProductDetailDto(p.Id, p.Slug, p.Name, p.BrandName, KindName(p.Kind), p.Category, p.Description, p.ImagePath, p.PriceToman,
-            p.IsKhashayarBrand, p.Highlights,
+            p.IsHouseBrand, p.Highlights,
             p.Variants.OrderBy(v => v.Id).Select(v => new VariantDto(v.Id, v.Sku, v.Size, v.Color, v.ColorHex, v.Flavor, v.Label, v.PriceToman ?? p.PriceToman,
                 v.Stocks.Sum(s => s.Quantity),
                 v.Stocks.OrderBy(s => s.Branch!.SortOrder).Select(s => new VariantStockDto(s.Branch!.Slug, s.Branch.Name, s.Quantity)).ToList())).ToList());

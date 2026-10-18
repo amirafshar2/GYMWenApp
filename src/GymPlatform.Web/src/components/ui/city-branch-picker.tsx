@@ -3,7 +3,7 @@
 import * as React from "react";
 
 /* ----------------------------------------------------------------------------
- * Shiraz Branch Picker
+ * City Branch Picker
  * بازسازی ساختار «Nepal Address Picker» (21st.dev) برای شعبه‌های یک شهر:
  * روی منطقه کلیک کن تا زوم شود، روی حوزهٔ شعبه کلیک کن تا انتخاب شود،
  * یا نام محله را بنویس تا نقشه روی شعبه‌های مطابق کوچک شود.
@@ -374,7 +374,7 @@ export function CityBranchPicker<B extends PickerBranch>({
         </nav>
         <label htmlFor={`${uid}-q`} className="sbp-inline">
           <span className="sbp-label">محله</span>
-          <input id={`${uid}-q`} className="sbp-input" type="search" placeholder="مثلاً فرهنگ‌شهر" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input id={`${uid}-q`} className="sbp-input" type="search" placeholder="نام محله یا شعبه" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
       </div>
 

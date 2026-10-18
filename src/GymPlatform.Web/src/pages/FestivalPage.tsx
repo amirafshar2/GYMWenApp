@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { CalendarClock, MapPin, Users } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useData } from '@/lib/useData'
-import { brand, rebrand } from '@/lib/brand'
+import { brand } from '@/lib/brand'
 import { faNum, jalali, toman } from '@/lib/fa'
 import { Spinner } from '@/member/ui'
 
@@ -16,7 +16,7 @@ export default function FestivalPage() {
   const { data: branches = [] } = useData('branches', api.branches)
   const [now, setNow] = useState(Date.now())
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t) }, [])
-  useEffect(() => { document.title = c ? `${rebrand(c.title)} | ${brand.name}` : `جشنواره | ${brand.name}` }, [c])
+  useEffect(() => { document.title = c ? `${c.title} | ${brand.name}` : `جشنواره | ${brand.name}` }, [c])
 
   if (loading) return <Spinner />
   if (!c) return (
@@ -39,8 +39,8 @@ export default function FestivalPage() {
         <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 size-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-plate/40 blur-[140px]" />
         <div className="relative mx-auto max-w-[1100px] px-5 py-16 text-center sm:py-24">
           <p className="text-[14px] font-bold text-plate-lt">جشنوارهٔ تخفیف</p>
-          <h1 className="mt-3 text-[34px] font-black leading-tight sm:text-[56px]">{rebrand(c.title)}</h1>
-          {c.description && <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-8 text-white/70">{rebrand(c.description)}</p>}
+          <h1 className="mt-3 text-[34px] font-black leading-tight sm:text-[56px]">{c.title}</h1>
+          {c.description && <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-8 text-white/70">{c.description}</p>}
           <motion.p initial={reduced ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 120 }}
             className="mt-8 text-[72px] font-black leading-none text-white sm:text-[110px]">{off}<span className="text-[28px] sm:text-[40px]"> تخفیف</span></motion.p>
           <div role="timer" aria-label="زمان باقی‌مانده" className="mx-auto mt-10 grid max-w-xl grid-cols-4 gap-2 sm:gap-4">

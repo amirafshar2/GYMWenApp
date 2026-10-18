@@ -33,7 +33,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         var b = new Browser(factory);
         await b.LoginAsync();
         await CheckoutFlowTests.SignContractAsync(b, "کاوه رستمی", "male");
-        var order = new { branchSlug = "ghoddousi-gharbi", packageSlug = package, section = "men", discountCode = (string?)null, idempotencyKey = Guid.NewGuid().ToString("N") };
+        var order = new { branchSlug = "markazi", packageSlug = package, section = "men", discountCode = (string?)null, idempotencyKey = Guid.NewGuid().ToString("N") };
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", order));
         await CheckoutFlowTests.PayInSandboxAsync(b, g, pay: true);
         var me = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, "/api/v1/me/profile"));
@@ -52,7 +52,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
             await users.AddToRoleAsync(u, Roles.Reception);
             // پذیرش فقط اعضای شعبهٔ خودش را می‌بیند
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "ghoddousi-gharbi").Select(x => x.Id).FirstAsync() });
+            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "markazi").Select(x => x.Id).FirstAsync() });
             await db.SaveChangesAsync();
         }
         // توکن تازه با نقش جدید (refresh نقش‌ها را دوباره می‌خواند)
@@ -126,7 +126,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             db.Memberships.Add(new Membership
             {
-                UserId = userId, BranchId = await db.Branches.Where(b => b.Slug == "ghoddousi-gharbi").Select(b => b.Id).FirstAsync(),
+                UserId = userId, BranchId = await db.Branches.Where(b => b.Slug == "markazi").Select(b => b.Id).FirstAsync(),
                 PackageId = await db.Packages.Select(p => p.Id).FirstAsync(), Section = GymPlatform.Domain.Enums.GenderSection.Men,
                 Status = GymPlatform.Domain.Enums.MembershipStatus.Expired, StartsAtUtc = DateTime.UtcNow.AddDays(-60), EndsAtUtc = DateTime.UtcNow.AddDays(-30),
                 CardToken = Guid.NewGuid().ToString("N"),

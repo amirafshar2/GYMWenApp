@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { ContainerScroll } from '@/components/ui/container-scroll-animation'
 import { api, type Coach } from '@/lib/api'
 import { useData } from '@/lib/useData'
+import { fill, site, splitAccent } from '@/lib/site'
 import { faNum } from '@/lib/fa'
-import { rebrand } from '@/lib/brand'
 
 /**
  * عکس‌های موقت (Unsplash، مجوز آزاد) تا عکس واقعی مربی‌ها برسد — نام‌ها هم نمونه‌اند.
@@ -39,7 +39,7 @@ function CoachCard({ c }: { c: Coach }) {
       <div className="absolute inset-x-0 bottom-0 p-4 text-white">
         <h3 className="text-[19px] font-black leading-tight">{c.fullName}</h3>
         <p className="mt-1 text-[13px] font-bold text-white/85">{c.specialty}</p>
-        <p className="mt-0.5 text-[12px] text-white/60">{faNum(c.yearsOfExperience)} سال سابقه – {rebrand(c.branchName)}</p>
+        <p className="mt-0.5 text-[12px] text-white/60">{faNum(c.yearsOfExperience)} سال سابقه – {c.branchName}</p>
         <span aria-hidden className="mt-3 block h-[3px] w-10 origin-right rounded-full bg-plate transition-[width] duration-500 group-hover:w-20" />
       </div>
     </article>
@@ -49,16 +49,19 @@ function CoachCard({ c }: { c: Coach }) {
 /** مربیان — داخل Container Scroll Animation از 21st.dev: قاب کج با اسکرول صاف می‌شود */
 export default function SiteCoaches() {
   const { data: coaches = [] } = useData('coaches', api.coaches)
+  const sec = site.home.coaches
+  const [title, accent] = splitAccent(sec.title)
+  if (!coaches.length) return null
   return (
     <section id="coaches" aria-labelledby="coaches-title" className="overflow-hidden bg-steel">
       <ContainerScroll
         titleComponent={
           <div className="px-4">
-            <p className="text-[13px] font-bold text-plate">مربیان {coaches.length ? `– ${faNum(coaches.length)} نفر` : ''}</p>
+            <p className="text-[13px] font-bold text-plate">{fill(sec.eyebrow) || 'مربیان'} {coaches.length ? `– ${faNum(coaches.length)} نفر` : ''}</p>
             <h2 id="coaches-title" className="mt-3 text-[clamp(1.9rem,4vw,3.2rem)] font-bold leading-[1.3] text-chalk">
-              کسانی که <span className="text-plate">کنارت تمرین می‌کنند</span>
+              {title} {accent && <span className="text-plate">{accent}</span>}
             </h2>
-            <p className="mx-auto mt-4 mb-6 max-w-xl text-[15px] leading-7 text-rubber">مربی آقایان برای سالن آقایان، مربی بانوان برای سالن بانوان؛ همه با مدرک فدراسیون.</p>
+            <p className="mx-auto mt-4 mb-6 max-w-xl text-[15px] leading-7 text-rubber">{fill(sec.text)}</p>
           </div>
         }
       >

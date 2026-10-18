@@ -74,3 +74,12 @@ internal sealed class FaqConfiguration : IEntityTypeConfiguration<FaqItem>
         e.Property(x => x.Answer).HasMaxLength(2000);
     }
 }
+
+internal sealed class SiteContentConfiguration : IEntityTypeConfiguration<SiteContent>
+{
+    public void Configure(EntityTypeBuilder<SiteContent> b)
+    {
+        b.ToTable("SiteContents");
+        b.Property(x => x.Json).IsRequired();
+    }
+}

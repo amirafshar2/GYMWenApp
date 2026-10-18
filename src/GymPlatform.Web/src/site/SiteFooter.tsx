@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
+import { fill, site } from '@/lib/site'
 import { Logo } from './SiteHeader'
 import { Link } from 'react-router-dom'
 import { wrap } from './ui/SectionHead'
@@ -17,10 +18,13 @@ const mostCommon = (xs: (string | null)[]) => {
   return [...m.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
 }
 
-const LINKS = [
-  { text: 'خانه', href: '/#top' }, { text: 'شعبه‌ها', href: '/#branches' }, { text: 'رشته‌ها', href: '/#disciplines' },
-  { text: 'پکیج‌ها', href: '/#packages' }, { text: 'مربیان', href: '/#coaches' }, { text: 'گالری', href: '/#gallery' }, { text: 'مشاورهٔ رایگان', href: '/#consult' },
-]
+/** لینک‌هایی که بخش یا ماژولشان خاموش است حذف می‌شوند */
+const links = () => [
+  { text: 'خانه', href: '/#top', on: true }, { text: 'شعبه‌ها', href: '/#branches', on: true }, { text: 'رشته‌ها', href: '/#disciplines', on: on('intro') },
+  { text: 'پکیج‌ها', href: '/#packages', on: on('pricing') }, { text: 'مربیان', href: '/#coaches', on: site.modules.coaches && on('coaches') },
+  { text: 'گالری', href: '/#gallery', on: on('gallery') }, { text: 'مشاورهٔ رایگان', href: '/#consult', on: site.modules.consultation && on('contact') },
+].filter((l) => l.on)
+const on = (k: string) => site.home.sections.find((s) => s.key === k)?.enabled ?? true
 
 /** فوتر تیرهٔ چهارستونه مثل صفحهٔ مرجع: ساعات کاری، دفتر، لینک‌ها، در تماس باشید */
 export default function SiteFooter() {
@@ -58,15 +62,16 @@ export default function SiteFooter() {
         </div>
         <div>
           <h2 className={h}>{brand.name}</h2>
-          <p className={t}>{faNum(12)} شعبه در {brand.city}<br />سالن‌های جدای آقایان و بانوان</p>
-          <a href={`tel:${brand.phone}`} className="mt-3 inline-flex items-center gap-2 text-[17px] font-bold text-white transition-colors hover:text-plate-lt">
+          <p className={t}>{faNum(branches.length)} شعبه{brand.city ? ` در ${brand.city}` : ''}{site.home.footerNote && <><br />{fill(site.home.footerNote)}</>}</p>
+          {site.contact.address && <p className={`${t} mt-1`}>{site.contact.address}</p>}
+          {brand.phone && <a href={`tel:${brand.phone}`} className="mt-3 inline-flex items-center gap-2 text-[17px] font-bold text-white transition-colors hover:text-plate-lt">
             <Phone className="size-4" aria-hidden /><span dir="ltr">{faDigits(brand.phone)}</span>
-          </a>
+          </a>}
         </div>
         <nav aria-label="لینک‌های فوتر">
           <h2 className={h}>لینک‌ها</h2>
           <ul className="grid gap-1.5">
-            {LINKS.map((l) => <li key={l.text}><a href={l.href} className="text-[15px] text-white/60 transition-colors hover:text-white">{l.text}</a></li>)}
+            {links().map((l) => <li key={l.text}><a href={l.href} className="text-[15px] text-white/60 transition-colors hover:text-white">{l.text}</a></li>)}
           </ul>
         </nav>
         <div>
@@ -87,7 +92,8 @@ export default function SiteFooter() {
               <a href={brand.instagram} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام"
                 className="grid size-11 place-items-center rounded-full bg-white/[.07] transition-colors hover:bg-plate"><Instagram className="size-5" /></a>
             )}
-            <a href={`tel:${brand.phone}`} aria-label={`تماس ${faDigits(brand.phone)}`} className="grid size-11 place-items-center rounded-full bg-white/[.07] transition-colors hover:bg-plate"><Phone className="size-5" aria-hidden /></a>
+            {site.contact.telegram && <a href={site.contact.telegram} target="_blank" rel="noopener noreferrer" aria-label="تلگرام" className="grid size-11 place-items-center rounded-full bg-white/[.07] transition-colors hover:bg-plate"><Send className="size-5 -scale-x-100" aria-hidden /></a>}
+            {brand.phone && <a href={`tel:${brand.phone}`} aria-label={`تماس ${faDigits(brand.phone)}`} className="grid size-11 place-items-center rounded-full bg-white/[.07] transition-colors hover:bg-plate"><Phone className="size-5" aria-hidden /></a>}
           </div>
         </div>
       </div>

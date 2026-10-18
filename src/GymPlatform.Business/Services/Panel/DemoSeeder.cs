@@ -24,7 +24,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
 
     private static readonly string[] MaleNames = ["علی", "محمد", "رضا", "حسین", "امیر", "مهدی", "سجاد", "آرش", "پویا", "کیان", "سینا", "میلاد", "بهراد", "فرهاد", "نیما", "پارسا", "عرفان", "یاسین", "کوروش", "داریوش"];
     private static readonly string[] FemaleNames = ["زهرا", "فاطمه", "مریم", "سارا", "نرگس", "الهام", "نازنین", "آیدا", "مهسا", "ریحانه", "شیما", "پریسا", "هانیه", "یاسمن", "مینا", "ترانه", "بهاره", "نگار", "سمیرا", "کیمیا"];
-    private static readonly string[] LastNames = ["محمدی", "حسینی", "احمدی", "رضایی", "کریمی", "موسوی", "جعفری", "صادقی", "رحیمی", "شیرازی", "کازرونی", "فسایی", "دهقان", "نوروزی", "قاسمی", "زارع", "بهرامی", "افشار", "اکبری", "طاهری", "یزدانی", "نیک‌نام", "سعادت", "پاکزاد"];
+    private static readonly string[] LastNames = ["محمدی", "حسینی", "احمدی", "رضایی", "کریمی", "موسوی", "جعفری", "صادقی", "رحیمی", "نیکخواه", "کاظمی", "فرهادی", "دهقان", "نوروزی", "قاسمی", "زارع", "بهرامی", "افشار", "اکبری", "طاهری", "یزدانی", "نیک‌نام", "سعادت", "پاکزاد"];
 
     /// <param name="members">تعداد عضو ساختگی (برای تست حجم بالا می‌شود چند هزار گذاشت)</param>
     public async Task SeedAsync(string staffPhone, int members = 200, int days = 182, CancellationToken ct = default)
@@ -46,7 +46,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
         // جشنوارهٔ گذشته برای نمایش «اثر جشنواره»
         var summer = new Campaign
         {
-            Title = "جشنوارهٔ تابستانی خشایار", Description = "۱۵٪ تخفیف پکیج‌های سه و شش‌ماهه",
+            Title = "جشنوارهٔ تابستانی", Description = "۱۵٪ تخفیف پکیج‌های سه و شش‌ماهه",
             StartsAtUtc = now.AddDays(-95).Date, EndsAtUtc = now.AddDays(-80).Date, DiscountPercent = 15,
             EligiblePackageSlugs = ["quarter", "half-year"], IsActive = true, CreatedAtUtc = now.AddDays(-100),
         };
@@ -196,7 +196,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                     {
                         Number = $"KS-D-{tracking % 100000:D5}", UserId = user.Id, BranchId = branch.Id, Fulfillment = pickup ? Fulfillment.Pickup : Fulfillment.Delivery,
                         Status = paid < now.AddDays(-4) ? OrderStatus.Completed : pickup ? OrderStatus.ReadyForPickup : OrderStatus.Paid,
-                        RecipientName = name, RecipientPhone = phone, Address = pickup ? null : "شیراز، آدرس نمایشی", SubtotalToman = price * qty,
+                        RecipientName = name, RecipientPhone = phone, Address = pickup ? null : "آدرس نمایشی", SubtotalToman = price * qty,
                         ShippingToman = pickup ? 0 : 150_000, TotalToman = price * qty + (pickup ? 0 : 150_000), PayMethod = PayMethod.Gateway,
                         IdempotencyKey = $"demo-shop-{tracking++}", PaidAtUtc = paid, CreatedAtUtc = paid,
                         Items = [new ShopOrderItem { VariantId = v.Id, ProductName = v.Product!.Name, VariantLabel = v.Label, ImagePath = v.Product.ImagePath, UnitPriceToman = price, Quantity = qty, CreatedAtUtc = paid }],

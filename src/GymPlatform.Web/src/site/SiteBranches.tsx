@@ -4,29 +4,38 @@ import { SectionHead, wrap } from './ui/SectionHead'
 import { api, type Branch } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
-import { distanceKm, faDigits, faNum, formatDistance } from '@/lib/fa'
+import { distanceKm, faDigits, formatDistance } from '@/lib/fa'
+import { fill, fillCount, site } from '@/lib/site'
 import { cn } from '@/lib/utils'
 
 import CityBranchPicker, { type PickerArea } from '@/components/ui/city-branch-picker'
 
-/** چهار منطقهٔ شهر با رنگ‌های تم سایت */
-const DEMO = brand.key === 'demo'
-const AREAS: PickerArea[] = [
-  { id: 'nw', name: 'شمال‌غرب', sub: DEMO ? 'محله‌های شمالی' : 'شهرک گلستان', color: '#2C2C2C' },
-  { id: 'w', name: 'غرب', sub: DEMO ? 'محله‌های غربی' : 'معالی‌آباد و قدوسی', color: '#0B5FB0' },
-  { id: 'c', name: 'مرکز', sub: DEMO ? 'مرکز شهر' : 'فرهنگ‌شهر، نیایش، سروناز', color: '#FFB400' },
-  { id: 'e', name: 'شرق و جنوب', sub: 'شعبه‌های تازه', color: '#8A8A8A' },
-]
-const areaOf = (b: Branch) =>
-  b.latitude > 29.69 ? 'nw' : b.longitude < 52.495 ? 'w' : b.longitude < 52.515 && b.latitude > 29.62 ? 'c' : 'e'
+const AREA_COLORS = ['#2C2C2C', 'var(--color-plate)', 'var(--color-sun)', '#8A8A8A']
+const AREA_NAMES: Record<string, string> = { nw: 'شمال‌غرب', ne: 'شمال‌شرق', sw: 'جنوب‌غرب', se: 'جنوب‌شرق' }
+const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)] }
 
-/** طرح کلی شماتیک شیراز [lat, lng] — دره‌ای کشیده از شمال‌غرب به جنوب‌شرق (مرز رسمی شهرداری نیست) */
-const SHIRAZ_OUTLINE: [number, number][] = [
-  [29.742, 52.418], [29.748, 52.447], [29.722, 52.462], [29.700, 52.478], [29.684, 52.500], [29.672, 52.530],
-  [29.660, 52.560], [29.643, 52.585], [29.618, 52.603], [29.590, 52.612], [29.567, 52.596], [29.566, 52.565],
-  [29.574, 52.534], [29.582, 52.505], [29.589, 52.478], [29.600, 52.455], [29.618, 52.443], [29.640, 52.444],
-  [29.660, 52.440], [29.684, 52.425], [29.708, 52.410], [29.728, 52.406],
-]
+/** هر شهری: منطقه‌ها چهار ربع اطراف میانهٔ شعبه‌ها، و طرح شهر پوستهٔ محدب شعبه‌ها با کمی حاشیه (شماتیک، نه نقشهٔ رسمی) */
+function cityLayout(branches: Branch[]) {
+  const lat0 = median(branches.map((b) => b.latitude)), lng0 = median(branches.map((b) => b.longitude))
+  const areaOf = (b: Branch) => (b.latitude >= lat0 ? 'n' : 's') + (b.longitude <= lng0 ? 'w' : 'e')
+  const groups = new Map<string, Branch[]>()
+  branches.forEach((b) => groups.set(areaOf(b), [...(groups.get(areaOf(b)) ?? []), b]))
+  const areas: PickerArea[] = [...groups.entries()].map(([id, list], k) => ({
+    id, name: AREA_NAMES[id], color: AREA_COLORS[k % AREA_COLORS.length],
+    sub: [...new Set(list.map((b) => b.district))].slice(0, 3).join('، '),
+  }))
+  // طرح شهر: بیضی کمی موج‌دار دور همهٔ شعبه‌ها (هر شعبه داخلش می‌افتد؛ با یک شعبهٔ دور هم تیز نمی‌شود)
+  const lats = branches.map((b) => b.latitude), lngs = branches.map((b) => b.longitude)
+  const cLat = (Math.min(...lats) + Math.max(...lats)) / 2, cLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
+  const rLat = Math.max(0.01, (Math.max(...lats) - Math.min(...lats)) / 2) * 1.3 + 0.008
+  const rLng = Math.max(0.01, (Math.max(...lngs) - Math.min(...lngs)) / 2) * 1.3 + 0.008
+  const outline = Array.from({ length: 28 }, (_, i) => {
+    const t = (i / 28) * Math.PI * 2, w = 1 + 0.05 * Math.sin(3 * t + 1) + 0.035 * Math.cos(5 * t)
+    return [cLat + Math.sin(t) * rLat * w, cLng + Math.cos(t) * rLng * w] as [number, number]
+  })
+  return { areas, areaOf, outline: outline.length >= 3 ? outline : null }
+}
+
 type Filter = 'all' | 'men' | 'women'
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'همه' }, { key: 'men', label: 'آقایان' }, { key: 'women', label: 'بانوان' },
@@ -37,7 +46,7 @@ const routes = (b: Branch) => [
   { label: 'گوگل‌مپ', href: `https://www.google.com/maps/dir/?api=1&destination=${b.latitude},${b.longitude}` },
 ]
 
-/** «هرکجا هستی، خشایار نزدیکته» — نقشهٔ روشن + فهرست مویی شعبه‌ها، هم‌سبک هیرو */
+/** «هرکجا هستی، یک سالن نزدیکته» — نقشهٔ شماتیک شهر + فهرست شعبه‌ها (کمتر از سه شعبه یا نقشهٔ خاموش: فهرست ساده) */
 export default function SiteBranches() {
   const { data: branches = [], error } = useData('branches', api.branches)
   const [filter, setFilter] = useState<Filter>('all')
@@ -87,15 +96,16 @@ export default function SiteBranches() {
     return () => window.removeEventListener('kg:locate', f)
   }, [])
 
-  const [nearSlogan1, nearSlogan2] = brand.nearSlogan.split('،').map((x) => x.trim())
+  const layout = useMemo(() => (branches.length >= 3 && site.modules.cityMap ? cityLayout(branches) : null), [branches])
+  const sec = site.home.branches
   return (
     <section id="branches" aria-labelledby="branches-title" className="relative bg-steel py-[clamp(80px,9vw,130px)]">
       <div className={wrap}>
       <SectionHead
         id="branches-title"
-        eyebrow={`${faNum(branches.length || 12)} شعبه در ${brand.city}`}
-        title={`${nearSlogan1}، ${nearSlogan2}`}
-        body="موقعیتت را بده تا نزدیک‌ترین سالن را نشانت بدهیم. موقعیت فقط در مرورگر خودت می‌ماند."
+        eyebrow={fillCount(sec.eyebrow)}
+        title={fill(sec.title) || fill(brand.nearSlogan) || 'شعبه‌ها'}
+        body={`${fill(sec.text)} موقعیت فقط در مرورگر خودت می‌ماند.`.trim()}
         aside={
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={locate} disabled={geo.status === 'locating'}
@@ -121,11 +131,11 @@ export default function SiteBranches() {
       </div>
 
       <div className="mt-4">
-        <CityBranchPicker
+        {layout?.outline ? <CityBranchPicker
           branches={branches}
-          areas={AREAS}
-          areaOf={areaOf}
-          outline={SHIRAZ_OUTLINE}
+          areas={layout.areas}
+          areaOf={layout.areaOf}
+          outline={layout.outline}
           cityName={brand.city}
           selected={active}
           onSelect={setActive}
@@ -137,10 +147,29 @@ export default function SiteBranches() {
           renderDetails={(b) => b ? <BranchDetails b={b} /> : (
             <p className="text-[14px] text-rubber">یک منطقه را روی نقشه باز کن و شعبه را انتخاب کن؛ ساعت سانس‌ها، تلفن و مسیریابی همین‌جا می‌آید.</p>
           )}
-        />
+        /> : <BranchList ranked={ranked.filter(({ b }) => matches(b))} active={active} onSelect={setActive} nearest={nearest} />}
       </div>
       </div>
     </section>
+  )
+}
+
+/** فهرست ساده (بدون نقشه): کارت هر شعبه، با کلیک جزئیات باز می‌شود */
+function BranchList({ ranked, active, onSelect, nearest }: { ranked: { b: Branch; d: number | null }[]; active: string | null; onSelect: (s: string | null) => void; nearest: string | null }) {
+  if (ranked.length === 0) return <p className="rounded-[3px] bg-white p-6 text-center text-[15px] text-rubber">به‌زودی شعبه‌ها این‌جا معرفی می‌شوند.</p>
+  return (
+    <ul className="grid gap-3">
+      {ranked.map(({ b, d }) => (
+        <li key={b.slug} className={cn('rounded-[3px] border-2 bg-white transition-colors', active === b.slug ? 'border-plate' : 'border-transparent')}>
+          <button type="button" onClick={() => onSelect(active === b.slug ? null : b.slug)} aria-expanded={active === b.slug}
+            className="flex w-full cursor-pointer items-center justify-between gap-3 p-5 text-start">
+            <span><span className="block text-[17px] font-bold text-chalk">{b.name}</span><span className="text-[14px] text-rubber">{b.district}</span></span>
+            <span className="shrink-0 text-[13px] font-bold text-plate">{nearest === b.slug ? 'نزدیک‌ترین' : d != null ? formatDistance(d) : ''}</span>
+          </button>
+          {active === b.slug && <div className="border-t border-steel-2 p-5"><BranchDetails b={b} /></div>}
+        </li>
+      ))}
+    </ul>
   )
 }
 

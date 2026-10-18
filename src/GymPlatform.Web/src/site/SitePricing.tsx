@@ -2,8 +2,8 @@ import { CalendarDays, Dumbbell, Infinity as InfinityIcon, Salad, UserRound } fr
 import PricingSection, { type PricingGroup, type PricingPlan } from '@/components/ui/pricing-section'
 import { api, type Pkg } from '@/lib/api'
 import { useData } from '@/lib/useData'
+import { fill, site, splitAccent } from '@/lib/site'
 import { faNum, tomanShort } from '@/lib/fa'
-import { rebrand } from '@/lib/brand'
 import { useNavigate } from 'react-router-dom'
 
 const short = (n: number) => tomanShort(n)
@@ -30,7 +30,7 @@ const toPlan = (p: Pkg): PricingPlan => {
       ...(p.includesPersonalCoach ? [{ text: 'مربی اختصاصی', icon: <UserRound size={20} aria-hidden /> }] : []),
       ...(p.includesNutritionPlan ? [{ text: 'برنامهٔ تغذیه', icon: <Salad size={20} aria-hidden /> }] : []),
     ],
-    includes: ['شامل:', ...p.features.map(rebrand)],
+    includes: ['شامل:', ...p.features],
   }
 }
 
@@ -39,20 +39,22 @@ export default function SitePricing() {
   const nav = useNavigate()
   const { data: pkgs = [] } = useData('packages', api.packages)
   if (!pkgs.length) return <section id="packages" className="h-[900px]" />
-  const membership = pkgs.filter((p) => p.category === 'Gym' && p.slug !== 'month-12')
-  const special = pkgs.filter((p) => p.category !== 'Gym' || p.slug === 'month-12')
+  // عضویت سالن نامحدود در گروه اول؛ پکیج‌های جلسه‌ای و تخصصی (مربی، تغذیه، …) در گروه دوم
+  const membership = pkgs.filter((p) => p.category === 'Gym' && !p.sessions)
+  const special = pkgs.filter((p) => p.category !== 'Gym' || !!p.sessions)
+  const [title, accent] = splitAccent(site.home.pricing.title)
   const maxOff = Math.max(0, ...membership.map((p) => p.discountPercent ?? 0))
   const groups: PricingGroup[] = [
     { key: 'gym', label: 'عضویت سالن', tag: maxOff ? `تا ${faNum(maxOff)}٪ تخفیف` : undefined, plans: membership.map(toPlan) },
     { key: 'special', label: 'پکیج‌های تخصصی', plans: special.map(toPlan) },
-  ]
+  ].filter((g) => g.plans.length > 0)
   return (
     <section id="packages" aria-labelledby="packages-title">
       <PricingSection
         id="packages-grid"
-        title={<span id="packages-title">عضویتی که با</span>}
-        accent="برنامه‌ات جور است"
-        subtitle="قیمت‌ها به تومان است و تخفیف جشنوارهٔ فعال خودکار روی پکیج‌های مشمول اعمال شده. پکیج‌های تخصصی: مربی خصوصی، تغذیه و صخره‌نوردی."
+        title={<span id="packages-title">{title}</span>}
+        accent={accent}
+        subtitle={fill(site.home.pricing.text)}
         groups={groups}
         onSelect={(plan) => {
           try { sessionStorage.setItem('chosen-package', plan.id) } catch { /* */ }

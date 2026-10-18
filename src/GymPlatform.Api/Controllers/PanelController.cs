@@ -1,3 +1,4 @@
+using GymPlatform.Business.Services.Site;
 using GymPlatform.Api.Auth;
 using GymPlatform.Api.Infrastructure;
 using GymPlatform.Business.Dtos;
@@ -148,6 +149,66 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return r;
     }
 
+    // ---- تنظیمات سایت (هویت، رنگ، متن و عکس صفحه‌ها، ماژول‌ها) و دستیار راه‌اندازی
+    [HttpGet("site"), PanelAccess(R.Super)]
+    public async Task<IActionResult> SiteSettings([FromServices] ISiteService site, CancellationToken ct) => Ok(await site.GetAsync(ct));
+
+    [HttpPut("site"), PanelAccess(R.Super)]
+    [RequestSizeLimit(160 * 1024)]
+    public async Task<IActionResult> SaveSiteSettings([FromBody] SiteConfig r, [FromServices] ISiteService site, CancellationToken ct) =>
+        await Fresh((await site.SaveAsync(r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    [HttpGet("setup"), PanelAccess(R.Super)]
+    public async Task<IActionResult> Setup([FromServices] ISiteService site, CancellationToken ct) => Ok(await site.GetSetupStatusAsync(ct));
+
+    [HttpPut("setup"), PanelAccess(R.Super)]
+    public async Task<IActionResult> UpdateSetup([FromBody] SetupUpdateRequest r, [FromServices] ISiteService site, CancellationToken ct) =>
+        await Fresh((await site.UpdateSetupAsync(r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    /// <summary>بستهٔ محتوا (zip): شعبه‌ها، پکیج‌ها، مربیان، سؤالات، قرارداد، کالاها، منو، تنظیمات سایت و عکس‌های آپلودی — بدون هیچ اطلاعات عضو</summary>
+    [HttpGet("content/export"), PanelAccess(R.Super)]
+    [EnableRateLimiting("payment")]
+    public async Task<IActionResult> ExportContent([FromServices] SiteInstaller installer, CancellationToken ct)
+    {
+        var zip = await installer.ExportAsync(images.Root, ct);
+        return File(zip, "application/zip", $"site-content-{DateTime.UtcNow:yyyyMMdd}.zip");
+    }
+
+    // ---- شعبه‌ها و سؤالات پرتکرار
+    [HttpGet("branches"), PanelAccess(R.Super)]
+    public async Task<IActionResult> Branches(CancellationToken ct) => Ok(await admin.BranchesAsync(ct));
+
+    [HttpPost("branches"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreateBranch([FromBody] SaveBranchRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveBranchAsync(null, r, User.UserId(), ct)).ToActionResult(this, b => StatusCode(201, b)), ct);
+
+    [HttpPut("branches/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditBranch(int id, [FromBody] SaveBranchRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveBranchAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    [HttpDelete("branches/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> DeleteBranch(int id, CancellationToken ct) =>
+        await Fresh((await admin.DeleteBranchAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
+
+    [HttpPut("branches/order"), PanelAccess(R.Super)]
+    public async Task<IActionResult> ReorderBranches([FromBody] ReorderRequest r, CancellationToken ct) =>
+        await Fresh((await admin.ReorderBranchesAsync(r.Ids ?? [], User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
+
+    [HttpGet("faq"), PanelAccess(R.Super)]
+    public async Task<IActionResult> Faq(CancellationToken ct) => Ok(await admin.FaqAsync(ct));
+
+    [HttpPost("faq"), PanelAccess(R.Super)]
+    public async Task<IActionResult> CreateFaq([FromBody] SaveFaqRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveFaqAsync(null, r, User.UserId(), ct)).ToActionResult(this, f => StatusCode(201, f)), ct);
+
+    [HttpPut("faq/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> EditFaq(int id, [FromBody] SaveFaqRequest r, CancellationToken ct) =>
+        await Fresh((await admin.SaveFaqAsync(id, r, User.UserId(), ct)).ToActionResult(this), ct);
+
+    [HttpDelete("faq/{id:int}"), PanelAccess(R.Super)]
+    public async Task<IActionResult> DeleteFaq(int id, CancellationToken ct) =>
+        await Fresh((await admin.DeleteFaqAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
+
     // ---- عکس‌ها: کتابخانهٔ عکس‌های سایت + آپلود (فقط مدیر کل)
     [HttpGet("images"), PanelAccess(R.Super)]
     public IActionResult ImageLibrary()
@@ -158,7 +219,10 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return Ok(new ImageLibraryDto(List(Path.Combine(web, "media", "canteen"), "/media/canteen", "*.svg"),
             List(Path.Combine(web, "media", "shop"), "/media/shop", "*.svg")
                 .Concat(List(Path.Combine(web, "media", "coaches"), "/media/coaches", "*.*")).ToList(),
-            Directory.GetFiles(images.Root).OrderByDescending(System.IO.File.GetCreationTimeUtc).Take(60).Select(f => $"{PublicImageStore.RequestPath}/{Path.GetFileName(f)}").ToList()));
+            Directory.GetFiles(images.Root).OrderByDescending(System.IO.File.GetCreationTimeUtc).Take(60).Select(f => $"{PublicImageStore.RequestPath}/{Path.GetFileName(f)}").ToList(),
+            // عکس‌های خود قالب (هیرو، سالن، گالری، پوستر ویدیو، لوگوی نمونه) برای تنظیمات سایت
+            new[] { "hero", "gym", "gallery", "video" }.SelectMany(d => List(Path.Combine(web, "media", d), $"/media/{d}", "*.webp"))
+                .Concat(List(Path.Combine(web, "brand"), "/brand", "*.svg")).ToList()));
     }
 
     [HttpPost("images"), PanelAccess(R.Super)]

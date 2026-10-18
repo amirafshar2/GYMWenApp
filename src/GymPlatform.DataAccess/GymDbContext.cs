@@ -23,6 +23,7 @@ public class GymDbContext(DbContextOptions<GymDbContext> options)
     public DbSet<ContractTemplate> ContractTemplates => Set<ContractTemplate>();
     public DbSet<SignedContract> SignedContracts => Set<SignedContract>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<SiteContent> SiteContents => Set<SiteContent>();
     public DbSet<AccessCredential> AccessCredentials => Set<AccessCredential>();
     public DbSet<AccessDevice> AccessDevices => Set<AccessDevice>();
     public DbSet<CheckIn> CheckIns => Set<CheckIn>();

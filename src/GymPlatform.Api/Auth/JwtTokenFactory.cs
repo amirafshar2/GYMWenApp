@@ -11,8 +11,8 @@ namespace GymPlatform.Api.Auth;
 public sealed class JwtOptions
 {
     public const string Section = "Jwt";
-    public string Issuer { get; set; } = "khashayar-gym";
-    public string Audience { get; set; } = "khashayar-gym-web";
+    public string Issuer { get; set; } = "gym-platform";
+    public string Audience { get; set; } = "gym-platform-web";
     /// <summary>حداقل ۳۲ بایت؛ فقط از User Secrets / متغیر محیطی Jwt__SigningKey.</summary>
     public string SigningKey { get; set; } = "";
     /// <summary>عمر کوتاه توکن دسترسی.</summary>

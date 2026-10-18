@@ -80,14 +80,14 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     }
 
     [Fact]
-    public async Task Catalog_has_supplements_and_khashayar_merch()
+    public async Task Catalog_has_supplements_and_house_brand_merch()
     {
         var b = new Browser(factory);
         var sup = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, "/api/v1/shop/products?kind=supplement"));
         var merch = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, "/api/v1/shop/products?kind=merch"));
         Assert.Equal(25, sup.GetProperty("products").GetArrayLength());
         Assert.Equal(12, merch.GetProperty("products").GetArrayLength());
-        Assert.All(merch.GetProperty("products").EnumerateArray(), p => Assert.True(p.GetProperty("isKhashayarBrand").GetBoolean()));
+        Assert.All(merch.GetProperty("products").EnumerateArray(), p => Assert.True(p.GetProperty("isHouseBrand").GetBoolean()));
     }
 
     [Fact]
@@ -182,7 +182,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
             await users.AddToRoleAsync(u, Roles.CanteenStaff);
             // کارمند بوفه فقط تابلوی شعبهٔ خودش را می‌بیند
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "ghoddousi-gharbi").Select(x => x.Id).FirstAsync() });
+            db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "markazi").Select(x => x.Id).FirstAsync() });
             await db.SaveChangesAsync();
         }
         b.AccessToken = null;
@@ -210,16 +210,16 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         var member = await MemberAsync();
         await TopUpAsync(member, 1_000_000);
         var staff = await CanteenStaffAsync();
-        var menu = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/ghoddousi-gharbi/menu?table=میز ۴"));
+        var menu = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/markazi/menu?table=میز ۴"));
         var shake = menu.GetProperty("items").EnumerateArray().First(i => i.GetProperty("slug").GetString() == "shake-chocolate").GetProperty("id").GetInt32();
 
         await using var staffHub = await HubAsync(staff);
         var staffSaw = new TaskCompletionSource<CanteenOrderDto>(TaskCreationOptions.RunContinuationsAsynchronously);
         staffHub.On<CanteenOrderDto>("OrderChanged", o => staffSaw.TrySetResult(o));
-        await staffHub.InvokeAsync("WatchBranch", "ghoddousi-gharbi");
+        await staffHub.InvokeAsync("WatchBranch", "markazi");
 
         var placed = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/canteen/orders",
-            new { branchSlug = "ghoddousi-gharbi", tableCode = "میز ۴", items = new[] { new { itemId = shake, quantity = 2 } }, note = "بدون شکر", payMethod = "wallet", idempotencyKey = Key() }));
+            new { branchSlug = "markazi", tableCode = "میز ۴", items = new[] { new { itemId = shake, quantity = 2 } }, note = "بدون شکر", payMethod = "wallet", idempotencyKey = Key() }));
         var orderId = placed.GetProperty("orderId").GetInt32();
         var live = await staffSaw.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
@@ -232,7 +232,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         await staff.SendAsync(HttpMethod.Post, $"/api/v1/canteen/staff/orders/{orderId}/status", new { status = "preparing" });
         await staff.SendAsync(HttpMethod.Post, $"/api/v1/canteen/staff/orders/{orderId}/status", new { status = "ready" });
         var ready = await memberSaw.Task.WaitAsync(TimeSpan.FromSeconds(10));
-        var memberCannotManage = await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/staff/ghoddousi-gharbi/orders");
+        var memberCannotManage = await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/staff/markazi/orders");
 
         Assert.True(placed.GetProperty("completed").GetBoolean());
         Assert.Equal(orderId, live.Id);
@@ -251,7 +251,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         var member = await MemberAsync();
         await TopUpAsync(member, 300_000);
         var placed = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/canteen/orders",
-            new { branchSlug = "ghoddousi-gharbi", items = new[] { new { itemId = 1, quantity = 1 } }, payMethod = "wallet", idempotencyKey = Key() }));
+            new { branchSlug = "markazi", items = new[] { new { itemId = 1, quantity = 1 } }, payMethod = "wallet", idempotencyKey = Key() }));
         var orderId = placed.GetProperty("orderId").GetInt32();
         var staff = await CanteenStaffAsync();
         await staff.SendAsync(HttpMethod.Post, $"/api/v1/canteen/staff/orders/{orderId}/status", new { status = "cancelled" });

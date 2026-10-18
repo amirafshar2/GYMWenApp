@@ -16,7 +16,7 @@ namespace GymPlatform.Tests;
 /// <summary>فاز ۴: پنل مدیر، پذیرش، مربی، مدیریت محتوا و پیامک خودکار — به‌ویژه محدودیت شعبه.</summary>
 public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
-    private const string Home = "ghoddousi-gharbi", Other = "maaliabad";
+    private const string Home = "markazi", Other = "azadi";
 
     /// <summary>کارمند با نقش‌ها و شعبه‌های داده‌شده (نقش‌های پنل هر بار از دیتابیس خوانده می‌شوند؛ توکن تازه لازم نیست)</summary>
     private async Task<(Browser b, int userId)> StaffAsync(string[] roles, params string[] branches)
@@ -221,7 +221,7 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
                 Status = endDaysAgo > 0 ? MembershipStatus.Expired : MembershipStatus.Active,
             };
             db.Memberships.AddRange(M(users[0], 120, 30), M(users[1], 120, 30), M(users[2], 60, -7)); // سومی هنوز فعال است (۷ روز مانده)
-            var c = new Campaign { Title = "بازگشت به خشایار", StartsAtUtc = DateTime.UtcNow.AddDays(-1), EndsAtUtc = DateTime.UtcNow.AddDays(10), DiscountPercent = 25, IsActive = true };
+            var c = new Campaign { Title = "بازگشت به باشگاه", StartsAtUtc = DateTime.UtcNow.AddDays(-1), EndsAtUtc = DateTime.UtcNow.AddDays(10), DiscountPercent = 25, IsActive = true };
             db.Campaigns.Add(c);
             await db.SaveChangesAsync();
             (optIn, optOut, active, campaignId) = (users[0].Id, users[1].Id, users[2].Id, c.Id);

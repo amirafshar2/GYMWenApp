@@ -25,7 +25,7 @@ internal static class PurchaseResults
     }
 }
 
-/// <summary>شاپ خشایار: فهرست و جزئیات کالا (عمومی)، پیش‌فاکتور، سفارش (نیازمند ورود)</summary>
+/// <summary>فروشگاه: فهرست و جزئیات کالا (عمومی)، پیش‌فاکتور، سفارش (نیازمند ورود)</summary>
 [ApiController]
 [Route("api/v1/shop")]
 [Produces("application/json")]

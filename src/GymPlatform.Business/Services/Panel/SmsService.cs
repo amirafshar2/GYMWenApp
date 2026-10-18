@@ -16,10 +16,10 @@ public sealed class SmsOptions
 {
     public const string Section = "Sms";
     /// <summary>نام الگوها در پنل سامانهٔ پیامک (کاوه‌نگار: Verify Lookup). هر الگو ۳ توکن می‌گیرد.</summary>
-    public string WelcomeTemplate { get; set; } = "khashayar-welcome";
-    public string RenewTemplate { get; set; } = "khashayar-renew";
-    public string BirthdayTemplate { get; set; } = "khashayar-birthday";
-    public string CampaignTemplate { get; set; } = "khashayar-campaign";
+    public string WelcomeTemplate { get; set; } = "gym-welcome";
+    public string RenewTemplate { get; set; } = "gym-renew";
+    public string BirthdayTemplate { get; set; } = "gym-birthday";
+    public string CampaignTemplate { get; set; } = "gym-campaign";
     /// <summary>پیامک‌های یادآوری/تبلیغی فقط در این بازه (ساعت تهران) ارسال می‌شوند.</summary>
     public int QuietBeforeHour { get; set; } = 9;
     public int QuietAfterHour { get; set; } = 21;
@@ -32,17 +32,19 @@ public static class SmsTexts
 {
     /// <summary>آدرس سایت در پیامک‌ها (از تنظیم Sms:SiteUrl، مثلاً example.ir/join). تا دامنه تعیین نشده، متن عمومی.</summary>
     public static string Site { get; set; } = "سایت باشگاه";
+    /// <summary>نام کوتاه باشگاه (از تنظیمات سایت، با هر ذخیره به‌روز می‌شود)</summary>
+    public static string Brand { get; set; } = "باشگاه";
 
     public static string Token(string? s) => string.IsNullOrWhiteSpace(s) ? "عضو" : s.Trim().Replace(' ', '‌');
 
     public static string Welcome(string name, string branch, string until, bool renewal) => renewal
-        ? $"{name} عزیز، عضویتت در خشایار {branch} تمدید شد و تا {until} اعتبار دارد. ممنون که همراه ما هستی."
-        : $"{name} عزیز، به باشگاه خشایار {branch} خوش آمدی! عضویتت تا {until} فعال است. کارت ورود در پروفایلت است.";
+        ? $"{name} عزیز، عضویتت در {Brand} {branch} تمدید شد و تا {until} اعتبار دارد. ممنون که همراه ما هستی."
+        : $"{name} عزیز، به {Brand} {branch} خوش آمدی! عضویتت تا {until} فعال است. کارت ورود در پروفایلت است.";
     public static string Renew(string name, int days, string date) => days <= 1
-        ? $"{name} عزیز، عضویتت در خشایار فردا ({date}) تمام می‌شود. برای تمدید: {Site}"
-        : $"{name} عزیز، {PersianText.FaDigits(days.ToString())} روز دیگر ({date}) عضویتت در خشایار تمام می‌شود. تمدید آنلاین: {Site}";
+        ? $"{name} عزیز، عضویتت در {Brand} فردا ({date}) تمام می‌شود. برای تمدید: {Site}"
+        : $"{name} عزیز، {PersianText.FaDigits(days.ToString())} روز دیگر ({date}) عضویتت در {Brand} تمام می‌شود. تمدید آنلاین: {Site}";
     public static string Birthday(string name, string code, int percent) =>
-        $"{name} عزیز، تولدت مبارک! هدیهٔ خشایار: کد {code} با {PersianText.FaDigits(percent.ToString())}٪ تخفیف شاپ تا یک هفته.";
+        $"{name} عزیز، تولدت مبارک! هدیهٔ {Brand}: کد {code} با {PersianText.FaDigits(percent.ToString())}٪ تخفیف شاپ تا یک هفته.";
     public static string Campaign(string name, string title, string offer, string until) =>
         $"{name} عزیز، دلمان برایت تنگ شده! {title}: {offer} تا {until}. {Site} لغو11";
 }

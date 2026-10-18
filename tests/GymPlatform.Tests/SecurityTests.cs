@@ -17,7 +17,7 @@ namespace GymPlatform.Tests;
 /// <summary>فاز ۵: رگرسیون یافته‌های ممیزی امنیت (هم‌زمانی پرداخت، حدس کد، دسترسی شعبه، سقف کد تخفیف، تنظیمات production).</summary>
 public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
-    private const string Home = "ghoddousi-gharbi", Other = "maaliabad";
+    private const string Home = "markazi", Other = "azadi";
     private static string Key() => Guid.NewGuid().ToString("N");
 
     private async Task<(Browser b, int userId, string phone)> PaidMemberAsync(string branch = Home)

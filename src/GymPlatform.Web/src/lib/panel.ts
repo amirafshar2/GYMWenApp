@@ -1,3 +1,4 @@
+import type { SiteConfig } from './site'
 import { currentAccessToken, refreshSession, request, type Membership } from './api'
 
 // ---------------- انواع (هم‌نام با DTOهای سرور)
@@ -60,7 +61,15 @@ export interface AdminCoach {
   branchSlug: string; branchName: string; photoUrl: string | null; achievements: string[]; isActive: boolean; linkedPhone: string | null; linkedName: string | null; trainees: number
 }
 export interface SaveCoach { fullName: string; specialty: string; bio: string | null; yearsOfExperience: number; section: string; branchSlug: string; photoUrl: string | null; achievements: string[]; isActive: boolean; linkedPhone: string | null }
-export interface ImageLibrary { canteen: string[]; shop: string[]; uploads: string[] }
+export interface SetupStep { key: string; title: string; hint: string; link: string; done: boolean; optional: boolean }
+export interface SetupStatus { mode: string; published: boolean; guideHidden: boolean; steps: SetupStep[]; doneCount: number; requiredCount: number }
+export interface AdminBranch {
+  id: number; slug: string; name: string; district: string; address: string; phone: string | null; latitude: number; longitude: number
+  section: 'men' | 'women' | 'both'; menHours: string | null; womenHours: string | null; disciplines: string[]; isActive: boolean; addressConfirmed: boolean; sortOrder: number; memberships: number
+}
+export type SaveBranch = Omit<AdminBranch, 'id' | 'slug' | 'addressConfirmed' | 'sortOrder' | 'memberships'>
+export interface AdminFaq { id: number; question: string; answer: string; sortOrder: number }
+export interface ImageLibrary { canteen: string[]; shop: string[]; uploads: string[]; site: string[] }
 export interface StaffRow { userId: number; fullName: string | null; phone: string; roles: string[]; branches: BranchRef[]; lastLoginAtUtc: string | null }
 export interface SmsRow { id: number; phone: string; kind: string; preview: string; status: 'queued' | 'sent' | 'failed'; createdAtUtc: string; sentAtUtc: string | null; error: string | null }
 export interface SmsStats { queued: number; sentToday: number; failed: number; recent: SmsRow[] }
@@ -125,6 +134,19 @@ export const panelApi = {
   saveCoach: (id: number | null, body: SaveCoach) => send<AdminCoach>(id ? 'PUT' : 'POST', id ? `${A}/coaches/${id}` : `${A}/coaches`, body),
   deleteCoach: (id: number) => send<null>('DELETE', `${A}/coaches/${id}`),
   images: () => get<ImageLibrary>(`${A}/images`),
+  // تنظیمات سایت و دستیار راه‌اندازی
+  site: () => get<SiteConfig & { setup: unknown }>(`${A}/site`),
+  saveSite: (body: SiteConfig) => send<SiteConfig>('PUT', `${A}/site`, body),
+  setup: () => get<SetupStatus>(`${A}/setup`),
+  updateSetup: (body: { step?: string; stepDone?: boolean; publish?: boolean; guideHidden?: boolean }) => send<SetupStatus>('PUT', `${A}/setup`, body),
+  exportContent: () => request<Blob>('GET', `${A}/content/export`, { auth: true, raw: true }),
+  branches: () => get<AdminBranch[]>(`${A}/branches`),
+  saveBranch: (id: number | null, body: SaveBranch) => send<AdminBranch>(id ? 'PUT' : 'POST', id ? `${A}/branches/${id}` : `${A}/branches`, body),
+  deleteBranch: (id: number) => send<null>('DELETE', `${A}/branches/${id}`),
+  reorderBranches: (ids: number[]) => send<null>('PUT', `${A}/branches/order`, { ids }),
+  faq: () => get<AdminFaq[]>(`${A}/faq`),
+  saveFaq: (id: number | null, body: { question: string; answer: string; sortOrder?: number }) => send<AdminFaq>(id ? 'PUT' : 'POST', id ? `${A}/faq/${id}` : `${A}/faq`, body),
+  deleteFaq: (id: number) => send<null>('DELETE', `${A}/faq/${id}`),
   /** آپلود عکس (JPG/PNG/WebP تا ۲ مگابایت)؛ مسیر عکس را برمی‌گرداند */
   uploadImage: async (file: File): Promise<string> => {
     const send = () => {

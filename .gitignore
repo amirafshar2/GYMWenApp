@@ -38,3 +38,6 @@ src/GymPlatform.Api/App_Data/
 *.zip
 .sync*/
 *.bundle
+
+# محتوای واقعی یک باشگاه (بستهٔ محتوا برای Setup:Mode=Content) — هرگز در گیت
+private/

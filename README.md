@@ -3,13 +3,13 @@
 > [!IMPORTANT]
 > **Dies ist ein Demo- und Lernprojekt.** Die Marke „Ahankooh“ ist frei erfunden; alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
 >
-> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/?brand=demo)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
+> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
 
 Eine Web-Plattform für eine (fiktive) Fitnessstudio-Kette mit 12 Standorten: öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Leitung. Die Oberfläche ist auf Persisch (Rechts-nach-links) – ein bewusst gewählter Härtetest für Layout und Typografie.
 
 ## Live-Demo
 
-**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/?brand=demo)**
+**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)**
 
 - **Ein-Klick-Login:** Auf der Login-Seite gibt es die Schaltflächen „Gesamtleitung“, „Standortleitung“ und „Mitglied“ – ohne Nummer und Code direkt ins Panel bzw. ins Mitgliedskonto.
 - Alternativ mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) anmelden – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
@@ -50,6 +50,7 @@ Ich habe die Ideen, die Anforderungen und jede Phase in natürlicher Sprache bes
 - **Phase 3 – Shop & Kantine:** Shop (Supplements, Kleidung, Zubehör, Bestand pro Standort), Kantinen-Menü per QR-Code am Tisch mit Live-Bestelltafel (SignalR), Wallet, Aktionsseite, Anbindung an Drehkreuz/Armband.
 - **Phase 4 – Mitarbeiter-Panel:** Dashboard für die Leitung (Umsatz der 12 Standorte nach Quelle, Verlängerungsrate, Stoßzeiten, auslaufende Mitgliedschaften, Aktionswirkung, Excel-Export), Empfang mit Scanner/Kamera/Armband, Trainer-Panel (Trainings- und Ernährungsplan, Gewichtsverlauf), Verwaltung von Preisen, Aktionen, Rabattcodes, Vertrag, Lager, Kantinen-Menü, Trainern und Mitarbeitern, automatische SMS, Präsentationsmodus.
 - **Phase 5 – Qualität:** unabhängiges Sicherheits-Audit mit behobenen Befunden, Performance-Optimierung, Barrierefreiheit, Health-Checks, CI.
+- **Phase 6 – Vorlage (Template):** Alles auf der Website ist im Panel änderbar – Name, Logo, Farben, Kontakt, jeder Text und jedes Bild der Startseite, Reihenfolge und Sichtbarkeit der Abschnitte, Rechtstexte, Module (Shop, Kantine, Wallet …), Standorte und FAQ. Drei Installationsmodi (leer / Demo / Inhaltspaket) und ein Einrichtungsassistent, der Schritt für Schritt durch die Ersteinrichtung führt.
 
 ## Technologien
 
@@ -304,7 +305,7 @@ Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check 
 |---|---|
 | `ASPNETCORE_ENVIRONMENT` | `Staging` |
 | `PORT` | `8080` |
-| `VITE_BRAND` | `demo` (fiktive Marke „Ahankooh“ im Build) |
+| `Setup__Mode` | `Demo` (fiktive Marke „Ahankooh“ + Demo-Daten) |
 | `Database__Provider` / `ConnectionStrings__Default` | `Sqlite` / `Data Source=/data/private/kg.db` |
 | `Jwt__SigningKey`, `Otp__Pepper` | von Render zufällig erzeugt |
 | `Otp__ExposeCodeInResponse` | `true` (Code auf der Seite) |
@@ -332,19 +333,38 @@ Für komplette Playwright-Läufe das Rate-Limit in der Entwicklung anheben (alle
 $env:RateLimiting__PermitMultiplier = "20"   # nur Development/Testing; in Production ignoriert
 ```
 
-Aktuell 110 automatisierte Tests: 77 Server-Tests und 33 Browser-Tests (Desktop und Mobil).
+Aktuell 114 automatisierte Tests: 81 Server-Tests und 33 Browser-Tests (Desktop und Mobil).
 
-## Daten bearbeiten
+## Vorlage: Installationsmodi und Einrichtungsassistent
 
-- **Standorte:** `src/GymPlatform.DataAccess/Seed/branches.json` – Einträge mit `addressConfirmed: false` haben ungefähre Koordinaten.
-- Pakete, Trainer und FAQ: weitere Dateien im selben Ordner (oder später direkt im Panel).
-- Seed-Daten werden nur in eine leere Datenbank geschrieben; nach Änderungen die Demo-Datenbank (`gym-demo.db`) löschen bzw. die LocalDB-Datenbank droppen.
-- **Marke:** Name, Logo, Slogan und Kontaktdaten stehen in `src/GymPlatform.Web/src/lib/brand.ts`.
-- **Farben:** nur im `@theme`-Block von `src/GymPlatform.Web/src/index.css`.
+Die Anwendung ist eine **Vorlage**: Jede Installation ist eine eigene Website mit eigener Datenbank, und alles Sichtbare kommt aus den Einstellungen im Panel (**Panel → Website → Website-Einstellungen**). Im Code steht kein Markenname.
+
+Beim allerersten Start legt `Setup:Mode` fest, womit die Installation beginnt:
+
+| Modus | Inhalt | Typischer Einsatz |
+|---|---|---|
+| `Blank` | leere Datenbank, nur Rollen und das Konto des Inhabers (`Setup:OwnerPhone`). Besucher sehen „Website im Aufbau“, bis der Inhaber im Assistenten auf **Veröffentlichen** klickt. | neue Installation, die der Betreiber selbst befüllt |
+| `Demo` | fiktive Marke „Ahankooh“, 12 Beispielstandorte, Pakete, Trainer, Shop, Kantine, Aktion und Rabattcodes | Vorführung, öffentliche Demo |
+| `Content` | ein **Inhaltspaket** (`Setup:ContentFile`, ZIP oder Ordner) | Website mit fertigen Inhalten ausliefern, Umzug, Wiederherstellung |
+
+Ohne Angabe gilt: außerhalb von Production `Demo`, in Production `Blank` (`Demo` ist in Production gesperrt).
+
+```powershell
+# leere Vorlage, Inhaber meldet sich mit seiner Handynummer an
+$env:Setup__Mode = "Blank"; $env:Setup__OwnerPhone = "09121234567"
+# mit fertigem Inhalt
+$env:Setup__Mode = "Content"; $env:Setup__ContentFile = "C:\inhalte\site-content.zip"
+```
+
+**Einrichtungsassistent** (für den Inhaber automatisch geöffnet): Name & Logo → Farben → Kontakt → Standorte → Pakete → Trainer → Startseite → Vertrag → Rechtstexte → Mitarbeiter → Veröffentlichen. Jeder Schritt zeigt, ob er erledigt ist, und führt per Klick genau an die richtige Stelle; ein schwebender Helfer im Panel zeigt immer den nächsten Schritt.
+
+**Inhaltspaket:** *Website-Einstellungen → Inhaltspaket* lädt ein ZIP mit Standorten, Paketen, Trainern, FAQ, Vertrag, Produkten, Kantinen-Menü, allen Website-Einstellungen und den hochgeladenen Bildern herunter – ohne Mitglieder-, Zahlungs- oder Mitarbeiterdaten. Das Format entspricht den Seed-Dateien in `src/GymPlatform.DataAccess/Seed`.
+
+Die Seed-Dateien im Repository enthalten nur fiktive Demo-Daten. Seed- und Paketdaten werden nur bei der Erstinstallation geschrieben; danach wird alles im Panel gepflegt.
 
 ## Frontend
 
-Layout und Stil orientieren sich an einer Referenzseite (Vorlage „GYM Store – Sports Complex“); Code, Texte und Bilder dieser Vorlage wurden nicht kopiert, alles ist neu mit React/Tailwind gebaut. Tokens und Regeln: `design-system/khashayar-gym/MASTER.md`.
+Layout und Stil orientieren sich an einer Referenzseite (Vorlage „GYM Store – Sports Complex“); Code, Texte und Bilder dieser Vorlage wurden nicht kopiert, alles ist neu mit React/Tailwind gebaut. Tokens und Regeln: `design-system/gym-platform/MASTER.md`.
 
 | Bereich | Datei | Quelle |
 |---|---|---|
@@ -376,10 +396,6 @@ cd src\GymPlatform.Web; npm run build
 ```
 
 Das Skript macht jeden Frame zum Keyframe, damit Vor- und Zurückspulen beim Scrollen flüssig ist.
-
-### Fiktive Demo-Marke
-
-Mit `?brand=demo` in der Adresse (oder `VITE_BRAND=demo` beim Build) erscheint die erfundene Marke „Ahankooh“: Name, Logo, Slogan, Kontaktdaten sowie Standort- und Ortsnamen werden durch neutrale Beispielwerte ersetzt.
 
 ## Sicherheit
 

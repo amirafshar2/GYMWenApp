@@ -31,7 +31,7 @@ export function Drawer({ title, onClose, children }: { title: string; onClose: (
   )
 }
 
-function Field({ label, hint, children, className }: { label: string; hint?: string; children: ReactNode; className?: string }) {
+export function Field({ label, hint, children, className }: { label: string; hint?: string; children: ReactNode; className?: string }) {
   return (
     <label className={cn('grid gap-1 text-[13px] font-bold text-chalk', className)}>
       {label}{children}{hint && <span className="text-[12px] font-normal text-rubber">{hint}</span>}
@@ -40,7 +40,7 @@ function Field({ label, hint, children, className }: { label: string; hint?: str
 }
 
 /** انتخاب عکس: آپلود (JPG/PNG/WebP تا ۲ مگابایت) یا از عکس‌های موجود سایت */
-export function ImagePicker({ value, onChange, prefer }: { value: string; onChange: (v: string) => void; prefer: 'canteen' | 'shop' | 'uploads' }) {
+export function ImagePicker({ value, onChange, prefer, hint, wide }: { value: string; onChange: (v: string) => void; prefer: 'canteen' | 'shop' | 'uploads' | 'site'; hint?: string; wide?: boolean }) {
   const [lib, setLib] = useState<ImageLibrary | null>(null)
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -53,12 +53,12 @@ export function ImagePicker({ value, onChange, prefer }: { value: string; onChan
     setBusy(true); setErr(null)
     try { onChange(await panelApi.uploadImage(f)); setLib(null) } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
-  const all = lib ? (prefer === 'uploads' ? lib.uploads : [...lib.uploads, ...(prefer === 'canteen' ? lib.canteen : lib.shop), ...(prefer === 'canteen' ? lib.shop : lib.canteen)]) : []
+  const all = lib ? (prefer === 'uploads' ? lib.uploads : prefer === 'site' ? [...lib.uploads, ...lib.site] : [...lib.uploads, ...(prefer === 'canteen' ? lib.canteen : lib.shop), ...(prefer === 'canteen' ? lib.shop : lib.canteen)]) : []
   return (
     <div className="grid gap-2">
       <div className="flex items-center gap-3">
-        <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-[8px] border border-steel-2 bg-steel">
-          {value ? <img src={value} alt="عکس انتخاب‌شده" className="size-full object-cover" /> : <ImagePlus className="size-6 text-rubber" aria-hidden />}
+        <div className={cn('grid h-20 shrink-0 place-items-center overflow-hidden rounded-[8px] border border-steel-2 bg-steel', wide ? 'w-32' : 'w-20')}>
+          {value ? <img src={value} alt="عکس انتخاب‌شده" className={cn('size-full', prefer === 'site' && value.endsWith('.svg') ? 'object-contain p-1' : 'object-cover')} /> : <ImagePlus className="size-6 text-rubber" aria-hidden />}
         </div>
         <div className="flex flex-wrap gap-2">
           <Btn type="button" variant="dark" className="h-10" busy={busy} onClick={() => input.current?.click()}>آپلود عکس</Btn>
@@ -67,7 +67,7 @@ export function ImagePicker({ value, onChange, prefer }: { value: string; onChan
         <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label="فایل عکس"
           onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
       </div>
-      <p className="text-[12px] text-rubber">JPG، PNG یا WebP تا ۲ مگابایت. عکس مربعی بهتر دیده می‌شود.</p>
+      <p className="text-[12px] text-rubber">{hint ?? 'JPG، PNG یا WebP تا ۲ مگابایت. عکس مربعی بهتر دیده می‌شود.'}</p>
       {err && <p role="alert" className="text-[13px] text-danger">{err}</p>}
       {open && (
         <div className="grid max-h-64 auto-rows-[76px] grid-cols-4 gap-2 overflow-y-auto rounded-[8px] bg-steel p-2 sm:grid-cols-5">
@@ -107,7 +107,7 @@ export function DeleteButton({ onDelete, label = 'حذف' }: { onDelete: () => P
   )
 }
 
-const errText = (e: unknown) => {
+export const errText = (e: unknown) => {
   const x = e as Error & { errors?: Record<string, string[]> }
   const first = x.errors && Object.values(x.errors)[0]?.[0]
   return first ?? x.message

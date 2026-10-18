@@ -23,7 +23,7 @@ test('خرید از شاپ: انتخاب رنگ و سایز ← سبد ← پر�
   test.setTimeout(90_000)
   await page.goto('/shop?kind=merch')
   await page.getByRole('link', { name: /تیشرت دری‌فیت/ }).click()
-  await page.getByRole('button', { name: 'آبی خشایار' }).click()
+  await page.getByRole('button', { name: 'آبی آهن‌کوه' }).click()
   await page.getByRole('button', { name: 'L', exact: true }).click()
   await page.locator('li:has(span.text-\\[\\#1f7a46\\]) button').first().click() // شعبه‌ای با موجودی
   await page.getByRole('button', { name: 'افزودن به سبد' }).click()
@@ -41,14 +41,14 @@ test('خرید از شاپ: انتخاب رنگ و سایز ← سبد ← پر�
 test('بوفه: سفارش از QR میز، نمایش لحظه‌ای روی تابلو و «آماده است» روی گوشی مشتری', async ({ browser }) => {
   test.setTimeout(180_000)
   const staff = await (await browser.newContext()).newPage()
-  await staff.goto('/login?next=%2Fpanel%2Fcanteen%3Fbranch%3Dghoddousi-gharbi')
+  await staff.goto('/login?next=%2Fpanel%2Fcanteen%3Fbranch%3Dmarkazi')
   await login(staff, '09100000000')
   await expect(staff.getByText('● لحظه‌ای')).toBeVisible({ timeout: 15_000 })
 
   const member = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage()
-  await member.goto('/login?next=' + encodeURIComponent('/canteen/ghoddousi-gharbi?table=میز 7'))
+  await member.goto('/login?next=' + encodeURIComponent('/canteen/markazi?table=میز 7'))
   await login(member, phone())
-  await member.waitForURL(/\/canteen\/ghoddousi/)
+  await member.waitForURL(/\/canteen\/markazi/)
   await member.getByRole('button', { name: 'افزودن' }).first().click()
   await member.getByRole('button', { name: /مشاهده و پرداخت/ }).click()
   await member.getByRole('button', { name: /درگاه بانکی/ }).click()

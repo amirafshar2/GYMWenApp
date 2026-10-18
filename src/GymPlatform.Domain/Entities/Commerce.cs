@@ -2,7 +2,7 @@ using GymPlatform.Domain.Enums;
 
 namespace GymPlatform.Domain.Entities;
 
-// ================================================================ شاپ خشایار
+// ================================================================ فروشگاه
 /// <summary>کالای فروشگاه: مکمل، پوشاک یا لوازم. قیمت پایه روی کالا و در صورت نیاز روی هر مدل (سایز/رنگ/طعم).</summary>
 public class Product : BaseEntity
 {
@@ -15,7 +15,7 @@ public class Product : BaseEntity
     public string? Description { get; set; }
     public required string ImagePath { get; set; }
     public long PriceToman { get; set; }
-    public bool IsKhashayarBrand { get; set; }
+    public bool IsHouseBrand { get; set; }
     public bool IsActive { get; set; } = true;
     public int SortOrder { get; set; }
     public List<string> Highlights { get; set; } = [];

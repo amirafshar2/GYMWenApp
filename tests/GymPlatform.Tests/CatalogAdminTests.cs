@@ -49,7 +49,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
             name = "شیک خرما و بادام", description = "با شیر کم‌چرب", category = "shake", priceToman = 210_000, kcal = 380, proteinG = 22, imagePath = path, isAvailable = true,
         });
         var item = await admin.JsonAsync<JsonElement>(created);
-        var menu = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/canteen/maaliabad/menu"));
+        var menu = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/canteen/azadi/menu"));
         var removed = await admin.SendAsync(HttpMethod.Delete, $"/api/v1/panel/admin/canteen-items/{item.GetProperty("id").GetInt32()}");
 
         Assert.Equal(HttpStatusCode.Created, up.StatusCode);
@@ -80,7 +80,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
     [Fact]
     public async Task Branch_manager_can_toggle_availability_but_cannot_add_edit_or_price_menu_items()
     {
-        var mgr = await StaffAsync(Roles.BranchManager, "ghoddousi-gharbi");
+        var mgr = await StaffAsync(Roles.BranchManager, "markazi");
         var items = await mgr.JsonAsync<JsonElement>(await mgr.SendAsync(HttpMethod.Get, "/api/v1/panel/admin/canteen-items"));
         var first = items[0];
         var id = first.GetProperty("id").GetInt32();
@@ -104,7 +104,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var admin = await StaffAsync(Roles.SuperAdmin);
         var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/products", new
         {
-            name = "هودی زمستانی تست", brandName = "خشایار", kind = "apparel", category = "هودی", description = (string?)null, priceToman = 1_450_000,
+            name = "هودی زمستانی تست", brandName = "برند باشگاه", kind = "apparel", category = "هودی", description = (string?)null, priceToman = 1_450_000,
             imagePath = "/media/shop/bottle-1l.svg", isActive = true, highlights = new[] { "پنبهٔ ضخیم" },
             variants = new[]
             {
@@ -151,7 +151,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var coachPhone = "0913" + Random.Shared.Next(1_000_000, 9_999_999);
         var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/coaches", new
         {
-            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "farhangshahr-women",
+            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
             photoUrl = (string?)null, achievements = new[] { "مربی درجهٔ ۲ فدراسیون" }, isActive = true, linkedPhone = coachPhone,
         });
         var coach = await admin.JsonAsync<JsonElement>(created);
@@ -165,7 +165,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         var hide = await admin.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/coaches/{coach.GetProperty("id").GetInt32()}", new
         {
-            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "farhangshahr-women",
+            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
             photoUrl = (string?)null, achievements = Array.Empty<string>(), isActive = false, linkedPhone = (string?)null,
         });
         var afterHide = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/coaches"));

@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { cart, useCart } from '@/lib/cart'
 import { continuePurchase, newKey, shopApi, walletApi, type PayMethod, type ShopQuote } from '@/lib/commerce'
 import { useData } from '@/lib/useData'
-import { brand, rebrand } from '@/lib/brand'
+import { brand } from '@/lib/brand'
 import { faNum, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { Btn, inputCls, Notice, PageShell, Panel } from '@/member/ui'
@@ -78,7 +78,7 @@ export default function CartPage() {
                   <li key={i.variantId} className="flex gap-4 py-4 first:pt-0 last:pb-0">
                     <Link to={`/shop/${i.slug}`} className="shrink-0"><img src={i.imagePath} alt="" className="size-20 rounded-[6px] bg-[#EEF3F9] object-contain sm:size-24" /></Link>
                     <div className="min-w-0 flex-1">
-                      <Link to={`/shop/${i.slug}`} className="text-[15px] font-bold text-chalk hover:text-plate">{rebrand(i.name)}</Link>
+                      <Link to={`/shop/${i.slug}`} className="text-[15px] font-bold text-chalk hover:text-plate">{i.name}</Link>
                       {i.label && <p className="text-[13px] text-rubber">{i.label}</p>}
                       <p className="mt-1 text-[14px] font-bold text-chalk">{toman(q?.unitPriceToman ?? i.priceToman)}</p>
                       {q?.problem && <p role="alert" className="mt-1 text-[13px] text-danger">{q.problem}</p>}

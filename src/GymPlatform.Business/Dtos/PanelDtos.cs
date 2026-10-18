@@ -75,7 +75,7 @@ public sealed record ShopOrderStatusRequest(string Status);
 public sealed record AdminCanteenItemDto(int Id, string Name, string Category, long PriceToman, bool IsAvailable, string ImagePath, string? Description = null, int? Kcal = null, int? ProteinG = null);
 /// <summary>ساخت/ویرایش کامل آیتم منو (فقط مدیر کل؛ منو برای همهٔ شعبه‌ها یکی است)</summary>
 public sealed record SaveCanteenItemRequest(string Name, string? Description, string Category, long PriceToman, int? Kcal, int? ProteinG, string ImagePath, bool IsAvailable);
-public sealed record ImageLibraryDto(IReadOnlyList<string> Canteen, IReadOnlyList<string> Shop, IReadOnlyList<string> Uploads);
+public sealed record ImageLibraryDto(IReadOnlyList<string> Canteen, IReadOnlyList<string> Shop, IReadOnlyList<string> Uploads, IReadOnlyList<string> Site);
 public sealed record UpdateCanteenItemRequest(long PriceToman, bool IsAvailable);
 
 // ---- کارکنان ----
@@ -92,3 +92,12 @@ public sealed record AdminCoachDto(int Id, string Slug, string FullName, string 
 /// <summary>LinkedPhone: موبایل حساب ورود مربی به پنل مربی (خالی = هنوز حساب ندارد)</summary>
 public sealed record SaveCoachRequest(string FullName, string Specialty, string? Bio, int YearsOfExperience, string Section, string BranchSlug,
     string? PhotoUrl, IReadOnlyList<string>? Achievements, bool IsActive, string? LinkedPhone);
+
+public sealed record AdminBranchDto(int Id, string Slug, string Name, string District, string Address, string? Phone, double Latitude, double Longitude,
+    string Section, string? MenHours, string? WomenHours, IReadOnlyList<string> Disciplines, bool IsActive, bool AddressConfirmed, int SortOrder, int Memberships);
+/// <param name="Section">men | women | both</param>
+public sealed record SaveBranchRequest(string Name, string District, string Address, string? Phone, double Latitude, double Longitude,
+    string Section, string? MenHours, string? WomenHours, IReadOnlyList<string>? Disciplines, bool IsActive = true);
+public sealed record ReorderRequest(IReadOnlyList<int> Ids);
+public sealed record AdminFaqDto(int Id, string Question, string Answer, int SortOrder);
+public sealed record SaveFaqRequest(string Question, string Answer, int? SortOrder = null);

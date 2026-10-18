@@ -121,7 +121,7 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         {
             var renewal = await db.Memberships.AnyAsync(x => x.UserId == payment.UserId && x.Id != m.Id && (x.Status == MembershipStatus.Active || x.Status == MembershipStatus.Expired), ct);
             var name = Panel.SmsTexts.Token(Panel.SmsService.FirstName(who.FullName)); var until = Jalali.Date(m.EndsAtUtc!.Value);
-            Panel.SmsService.Add(db, payment.UserId, who.PhoneNumber, SmsKind.Welcome, "khashayar-welcome", [name, Panel.SmsTexts.Token(branchName), until],
+            Panel.SmsService.Add(db, payment.UserId, who.PhoneNumber, SmsKind.Welcome, "gym-welcome", [name, Panel.SmsTexts.Token(branchName), until],
                 Panel.SmsTexts.Welcome(name, branchName, until, renewal), $"welcome:{m.Id}");
         }
 

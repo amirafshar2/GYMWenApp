@@ -12,6 +12,8 @@ public sealed class GymApiFactory : WebApplicationFactory<Program>
 {
     public const string DeviceKey = "test-gate-key-0000000000000001";
     private readonly string _db = Path.Combine(Path.GetTempPath(), $"kg-test-{Guid.NewGuid():N}.db");
+    /// <summary>تنظیمات اضافه (مثلاً Setup:Mode=Blank برای نصب خام)؛ قبل از اولین درخواست مقدار بگیرد</summary>
+    public (string Key, string Value)[] Extra { get; init; } = [];
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -25,6 +27,8 @@ public sealed class GymApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Access:DemoDeviceKey", DeviceKey);
         builder.UseSetting("Integrations:DispatcherEnabled", "false");
         builder.UseSetting("Storage:PrivateRoot", Path.Combine(Path.GetTempPath(), $"kg-test-files-{Guid.NewGuid():N}"));
+        builder.UseSetting("Storage:PublicUploads", Path.Combine(Path.GetTempPath(), $"kg-test-up-{Guid.NewGuid():N}"));
+        foreach (var (k, v) in Extra) builder.UseSetting(k, v);
     }
 
     protected override void Dispose(bool disposing)
@@ -210,7 +214,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
 {
     internal static object Order(string key, string section = "men") => new
     {
-        branchSlug = "ghoddousi-gharbi", packageSlug = "yearly", section, discountCode = "KHASHAYAR10", idempotencyKey = key,
+        branchSlug = "markazi", packageSlug = "yearly", section, discountCode = "START10", idempotencyKey = key,
     };
 
     internal static async Task SignContractAsync(Browser b, string name, string gender)
@@ -252,7 +256,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var b = new Browser(factory);
         await b.InitAsync();
         var q = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout/quote",
-            new { branchSlug = "ghoddousi-gharbi", packageSlug = "yearly", section = "men", discountCode = "KHASHAYAR10" }));
+            new { branchSlug = "markazi", packageSlug = "yearly", section = "men", discountCode = "START10" }));
         var total = q.GetProperty("totalToman").GetInt64();
         Assert.Equal(0, total % 1000);
         Assert.True(total < q.GetProperty("baseAmountToman").GetInt64());
@@ -265,7 +269,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var b = new Browser(factory);
         await b.InitAsync();
         var res = await b.SendAsync(HttpMethod.Post, "/api/v1/checkout/quote",
-            new { branchSlug = "ghoddousi-gharbi", packageSlug = "yearly", section = "men", discountCode = "NOPE" });
+            new { branchSlug = "markazi", packageSlug = "yearly", section = "men", discountCode = "NOPE" });
         var q = await b.JsonAsync<JsonElement>(res);
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
         Assert.Equal(JsonValueKind.String, q.GetProperty("discountCodeError").ValueKind);

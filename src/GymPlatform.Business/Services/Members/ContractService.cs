@@ -24,9 +24,9 @@ public interface IContractService
 /// زمان، IP، User-Agent، نسخه و هش متن امضاشده ثبت و PDF بیرون از wwwroot ذخیره می‌شود.
 /// </summary>
 public sealed class ContractService(
-    GymDbContext db, IOtpService otp, IPdfService pdf, IPrivateFileStore files, IClock clock) : IContractService
+    GymDbContext db, IOtpService otp, IPdfService pdf, IPrivateFileStore files, Site.ISiteService site, IClock clock) : IContractService
 {
-    private const string Brand = "مجموعه باشگاه‌های خشایار";
+    private async Task<string> BrandAsync(CancellationToken ct) => Site.SiteService.DisplayName(await site.GetAsync(ct));
 
     public async Task<ContractDto?> GetActiveAsync(CancellationToken ct) =>
         await db.ContractTemplates.AsNoTracking().Where(t => t.IsActive).OrderByDescending(t => t.Version)
@@ -42,6 +42,7 @@ public sealed class ContractService(
 
     public async Task<Result<SignedContractDto>> SignAsync(int userId, SignContractRequest r, RequestContext rc, CancellationToken ct)
     {
+        var Brand = await BrandAsync(ct);
         var template = await db.ContractTemplates.AsNoTracking().Where(t => t.IsActive).OrderByDescending(t => t.Version).FirstOrDefaultAsync(ct);
         if (template is null) return Result<SignedContractDto>.Fail("contract", "قرارداد فعالی وجود ندارد.", ErrorType.NotFound);
 
@@ -87,11 +88,12 @@ public sealed class ContractService(
         var s = await db.SignedContracts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
         if (s?.PdfPath is null) return null;
         var bytes = await files.ReadAsync(s.PdfPath, ct);
-        return bytes is null ? null : (bytes, $"khashayar-contract-v{s.Version}.pdf");
+        return bytes is null ? null : (bytes, $"contract-v{s.Version}.pdf");
     }
 
     public async Task<(byte[] Pdf, string FileName)?> GetInvoicePdfAsync(int userId, int paymentId, CancellationToken ct)
     {
+        var Brand = await BrandAsync(ct);
         var p = await db.Payments.AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.Membership).ThenInclude(m => m!.Package)
@@ -103,12 +105,12 @@ public sealed class ContractService(
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == paymentId && x.UserId == userId && x.Status == PaymentStatus.Succeeded, ct);
         if (p?.User is null) return null;
-        var model = BuildInvoice(p);
+        var model = BuildInvoice(p, Brand);
         if (model is null) return null;
-        return (pdf.Invoice(model), $"khashayar-invoice-{p.InvoiceNumber}.pdf");
+        return (pdf.Invoice(model), $"invoice-{p.InvoiceNumber}.pdf");
     }
 
-    private static InvoicePdfModel? BuildInvoice(Payment p)
+    private static InvoicePdfModel? BuildInvoice(Payment p, string Brand)
     {
         var no = p.InvoiceNumber ?? p.Id.ToString();
         var at = p.PaidAtUtc ?? p.CreatedAtUtc;

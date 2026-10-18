@@ -35,6 +35,9 @@ public static class BusinessExtensions
         services.AddScoped<Services.Panel.ISmsService, Services.Panel.SmsService>();
         services.AddScoped<Services.Panel.IReportService, Services.Panel.ReportService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
+        services.AddSingleton<Services.Site.SiteConfigCache>();
+        services.AddScoped<Services.Site.ISiteService, Services.Site.SiteService>();
+        services.AddScoped<Services.Site.SiteInstaller>();
         services.AddValidatorsFromAssemblyContaining<CreateConsultationValidator>(ServiceLifetime.Singleton);
         return services;
     }

@@ -6,6 +6,7 @@ import { api, ApiError } from '@/lib/api'
 import { useData } from '@/lib/useData'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
+import { fill, site, splitAccent } from '@/lib/site'
 import { cn } from '@/lib/utils'
 import { Eyebrow, useFadeUp, wrap } from './ui/SectionHead'
 
@@ -24,6 +25,8 @@ export default function SiteContact() {
   const uid = useId()
   const fadeA = useFadeUp()
   const fadeB = useFadeUp(0.15)
+  const sec = site.home.contact
+  const [title, accent] = splitAccent(sec.title)
 
   const [name, setName] = useState('')
   const [mobile, setMobile] = useState('')
@@ -69,28 +72,26 @@ export default function SiteContact() {
 
       <div className={`${wrap} grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20`}>
         <motion.div {...fadeA}>
-          <Eyebrow className="text-plate-lt">مشاورهٔ رایگان</Eyebrow>
+          {sec.eyebrow && <Eyebrow className="text-plate-lt">{fill(sec.eyebrow)}</Eyebrow>}
           <h2 id="consult-title" className="mt-3 text-[clamp(2rem,3.8vw,3.4rem)] font-black leading-[1.25]">
-            قبل از ثبت‌نام<br />با ما مشورت کن
+            {title}{accent && <><br />{accent}</>}
           </h2>
-          <p className="mt-5 max-w-lg text-[16px] leading-8 text-white/70">
-            بگو هدفت چیست و کدام محله‌ای؛ همکاران ما تماس می‌گیرند و پکیج و شعبهٔ مناسب را پیشنهاد می‌دهند. مشاوره رایگان است و تعهدی ندارد.
-          </p>
+          <p className="mt-5 max-w-lg text-[16px] leading-8 text-white/70">{fill(sec.text)}</p>
 
           <ul className="mt-10 grid gap-3 sm:grid-cols-2">
-            <li>
+            {brand.phone && <li>
               <a href={`tel:${brand.phone}`} className="group flex items-center gap-4 rounded-[4px] border border-white/10 bg-white/[.04] p-4 transition-colors hover:border-plate hover:bg-plate">
                 <span className="grid size-11 place-items-center rounded-full bg-plate text-white transition-colors group-hover:bg-white group-hover:text-plate"><Phone className="size-5" aria-hidden /></span>
                 <span><span className="block text-[12px] text-white/60 group-hover:text-white/80">تماس مستقیم</span><span dir="ltr" className="block text-[17px] font-bold">{faDigits(brand.phone)}</span></span>
               </a>
-            </li>
+            </li>}
             <li className="flex items-center gap-4 rounded-[4px] border border-white/10 bg-white/[.04] p-4">
               <span className="grid size-11 place-items-center rounded-full bg-white/10"><Clock className="size-5" aria-hidden /></span>
-              <span><span className="block text-[12px] text-white/60">پاسخ‌گویی</span><span className="block text-[15px] font-bold">معمولاً همان روز</span></span>
+              <span><span className="block text-[12px] text-white/60">پاسخ‌گویی</span><span className="block text-[15px] font-bold">{site.contact.responseTime || 'معمولاً همان روز'}</span></span>
             </li>
             <li className="flex items-center gap-4 rounded-[4px] border border-white/10 bg-white/[.04] p-4">
               <span className="grid size-11 place-items-center rounded-full bg-white/10"><MapPin className="size-5" aria-hidden /></span>
-              <span><span className="block text-[12px] text-white/60">{brand.city}</span><span className="block text-[15px] font-bold">{faNum(branches.length || 12)} شعبهٔ آقایان و بانوان</span></span>
+              <span><span className="block text-[12px] text-white/60">{brand.city}</span><span className="block text-[15px] font-bold">{faNum(branches.length)} شعبه{site.home.footerNote ? ` – ${fill(site.home.footerNote)}` : ''}</span></span>
             </li>
             {brand.instagram && (
               <li>

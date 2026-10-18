@@ -284,7 +284,7 @@ function PackageStep({ pkgs, draft, set, quote, quoteErr, onBack, onNext }: {
       <form onSubmit={apply} className="mt-7 grid gap-2">
         <label htmlFor={`${uid}-code`} className="flex items-center gap-1.5 text-[14px] font-bold text-chalk"><TicketPercent className="size-4" aria-hidden />کد تخفیف (اختیاری)</label>
         <div className="flex gap-2">
-          <input id={`${uid}-code`} value={code} onChange={(e) => setCode(e.target.value)} dir="ltr" placeholder={brand.key === 'demo' ? 'CODE10' : 'KHASHAYAR10'} autoComplete="off"
+          <input id={`${uid}-code`} value={code} onChange={(e) => setCode(e.target.value)} dir="ltr" placeholder="START10" autoComplete="off"
             aria-describedby={`${uid}-cm`} aria-invalid={!!quote?.discountCodeError || undefined} className={`${inputCls} text-left uppercase`} />
           <Btn type="submit" variant="dark" className="shrink-0">اعمال</Btn>
         </div>

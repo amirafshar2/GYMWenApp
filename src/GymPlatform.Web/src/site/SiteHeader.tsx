@@ -6,26 +6,29 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/lib/auth'
 import { brand } from '@/lib/brand'
 import { faDigits, faNum } from '@/lib/fa'
+import { site } from '@/lib/site'
 import { Instagram } from '@/components/ui/brand-icons'
 import { cn } from '@/lib/utils'
 import { wrap } from './ui/SectionHead'
 
-const LINKS = [
-  { label: 'خانه', href: '/#top', id: 'top' },
-  { label: 'شعبه‌ها', href: '/#branches', id: 'branches' },
-  { label: 'رشته‌ها', href: '/#disciplines', id: 'disciplines' },
-  { label: 'پکیج‌ها', href: '/#packages', id: 'packages' },
-  { label: 'مربیان', href: '/#coaches', id: 'coaches' },
-  { label: 'شاپ', href: '/shop', id: 'shop' },
-  { label: 'گالری', href: '/#gallery', id: 'gallery' },
-  { label: 'تماس', href: '/#consult', id: 'consult' },
-]
+const sectionOn = (k: string) => site.home?.sections.find((s) => s.key === k)?.enabled ?? true
+/** منوی اصلی؛ بخش یا ماژولی که در «تنظیمات سایت» خاموش است، از منو هم حذف می‌شود */
+const links = () => [
+  { label: 'خانه', href: '/#top', id: 'top', on: true },
+  { label: 'شعبه‌ها', href: '/#branches', id: 'branches', on: sectionOn('branches') },
+  { label: 'رشته‌ها', href: '/#disciplines', id: 'disciplines', on: sectionOn('intro') },
+  { label: 'پکیج‌ها', href: '/#packages', id: 'packages', on: sectionOn('pricing') },
+  { label: 'مربیان', href: '/#coaches', id: 'coaches', on: site.modules?.coaches && sectionOn('coaches') },
+  { label: 'شاپ', href: '/shop', id: 'shop', on: site.modules?.shop },
+  { label: 'گالری', href: '/#gallery', id: 'gallery', on: sectionOn('gallery') },
+  { label: 'تماس', href: '/#consult', id: 'consult', on: site.modules?.consultation && sectionOn('contact') },
+].filter((l) => l.on)
 
 /** لوگو + نام برند با فونت سیاه و کج، همان جای لوگوی «GYM» در صفحهٔ مرجع */
 export function Logo({ light }: { light?: boolean }) {
   return (
     <a href="/#top" className="flex shrink-0 items-center gap-2.5" aria-label={`${brand.name} — صفحهٔ اصلی`}>
-      <img src={brand.logo} alt="" width={44} height={44} className="size-11 rounded-full" />
+      <img src={brand.logo} alt="" width={44} height={44} className="size-11 rounded-full object-contain" />
       <span className={cn('inline-block -skew-x-[8deg] text-[28px] font-black leading-none', light ? 'text-white' : 'text-chalk')}>{brand.shortName}</span>
     </a>
   )
@@ -39,6 +42,9 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [panel, setPanel] = useState(false)
   const { user } = useAuth()
+  // سایت منتشرنشده: برای بازدیدکننده فقط لوگو و «ورود»
+  const closed = !site.published && !user?.roles.some((r) => r !== 'Member')
+  const LINKS = closed ? [] : links()
   const items = cartCount(useCart())
   const account = user
     ? { to: '/profile', text: user.fullName?.split(' ')[0] ?? 'پروفایل', label: 'پروفایل من' }
@@ -51,7 +57,7 @@ export default function SiteHeader() {
     // بخش‌ها ممکن است کمی دیرتر بار شوند (فایل جدا)؛ چند بار تلاش تا همه دیده شوند
     const seen = new Set<string>()
     const t = setInterval(() => {
-      LINKS.forEach((l) => { const el = document.getElementById(l.id); if (el && !seen.has(l.id)) { seen.add(l.id); io.observe(el) } })
+      links().forEach((l) => { const el = document.getElementById(l.id); if (el && !seen.has(l.id)) { seen.add(l.id); io.observe(el) } })
       if (seen.size === LINKS.length) clearInterval(t)
     }, 500)
     const stop = setTimeout(() => clearInterval(t), 10000)
@@ -89,10 +95,10 @@ export default function SiteHeader() {
             </ul>
           </nav>
           <div className="ms-auto flex items-center gap-1 xl:ms-0">
-            <a href={`tel:${brand.phone}`} className="hidden items-center gap-2 px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate md:flex xl:hidden 2xl:flex">
+            {brand.phone && <a href={`tel:${brand.phone}`} className="hidden items-center gap-2 px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate md:flex xl:hidden 2xl:flex">
               <Phone className="size-[18px]" aria-hidden />
               <span dir="ltr">{faDigits(brand.phone)}</span>
-            </a>
+            </a>}
             {items > 0 && (
               <Link to="/cart" aria-label={`سبد خرید، ${faNum(items)} کالا`} className="relative grid size-11 place-items-center text-chalk transition-colors hover:text-plate">
                 <ShoppingBag className="size-5" aria-hidden />
@@ -108,12 +114,12 @@ export default function SiteHeader() {
               className="flex h-11 items-center gap-2 rounded-[3px] px-3 text-[15px] font-bold text-chalk transition-colors hover:text-plate">
               <UserRound className="size-5" aria-hidden /><span className="hidden max-w-[110px] truncate sm:inline">{account.text}</span>
             </Link>
-            <Link to="/join" className="ms-1 hidden h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white transition-colors hover:bg-plate-hi sm:inline-flex">ثبت‌نام آنلاین</Link>
-            <button type="button" onClick={() => setPanel(true)} aria-label="باز کردن منو" aria-expanded={panel}
+            {!closed && <Link to="/join" className="ms-1 hidden h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white transition-colors hover:bg-plate-hi sm:inline-flex">ثبت‌نام آنلاین</Link>}
+            {!closed && <button type="button" onClick={() => setPanel(true)} aria-label="باز کردن منو" aria-expanded={panel}
               className="grid size-11 cursor-pointer place-items-center text-chalk transition-colors hover:text-plate">
               <Menu className="size-6 xl:hidden" aria-hidden />
               <LayoutGrid className="hidden size-[22px] xl:block" aria-hidden />
-            </button>
+            </button>}
           </div>
         </div>
       </header>
@@ -137,10 +143,10 @@ export default function SiteHeader() {
                   ))}
                 </ul>
               </nav>
-              <p className="mt-8 text-[15px] leading-8 text-rubber">{faNum(12)} شعبه در {brand.city} با سالن‌های جدای آقایان و بانوان. {brand.nearSlogan}.</p>
+              <p className="mt-8 text-[15px] leading-8 text-rubber">{faNum(site.branches ?? 0)} شعبه{brand.city ? ` در ${brand.city}` : ''}. {brand.nearSlogan}</p>
               <ul className="mt-6 grid gap-4 text-[15px] text-chalk">
                 <li className="flex items-center gap-3"><Phone className="size-5 text-plate" aria-hidden /><a href={`tel:${brand.phone}`} dir="ltr" className="font-bold hover:text-plate">{faDigits(brand.phone)}</a></li>
-                <li className="flex items-center gap-3"><MapPin className="size-5 text-plate" aria-hidden />{brand.city}، {faNum(12)} شعبه</li>
+                <li className="flex items-center gap-3"><MapPin className="size-5 text-plate" aria-hidden />{brand.city ? `${brand.city}، ` : ''}{faNum(site.branches ?? 0)} شعبه</li>
                 <li className="flex items-center gap-3"><Clock className="size-5 text-plate" aria-hidden />ساعت کاری هر شعبه در فهرست شعبه‌ها</li>
               </ul>
               <div className="mt-auto flex items-center gap-3 pt-10">

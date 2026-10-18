@@ -19,7 +19,7 @@ export interface Campaign {
   discountAmountToman: number | null; eligibleBranchSlugs: string[] | null; remainingSlots: number | null
 }
 export interface Faq { question: string; answer: string }
-export interface Stats { branches: number; members: number; yearsActive: number; instagramFollowers: number; coaches: number }
+export interface Stats { branches: number; members: number | null; yearsActive: number | null; coaches: number }
 
 // ---- فاز ۲: عضویت ----
 export type Section = 'men' | 'women'
@@ -52,39 +52,6 @@ export interface Contract { id: number; version: number; title: string; clauses:
 export interface SignedContract { id: number; version: number; signedAtUtc: string; contentHash: string; healthWarning: boolean }
 export interface GatewayRedirect { paymentId: number; alreadyPaid: boolean; method: string | null; url: string | null; form: Record<string, string> | null }
 
-import { brand } from './brand'
-
-/**
- * برند دمو (نسخهٔ نمایشی و نمونه‌کار): نام واقعی مجموعه، شهر و شعبه‌ها در هیچ پاسخی از سرور دیده نمی‌شود.
- * جایگزینی روی متن JSON انجام می‌شود تا همهٔ صفحه‌ها (سایت، پنل، بوفه) یکدست باشند.
- */
-const DEMO_BRANCH_NAMES: [string, string][] = [
-  ["شعبهٔ قدوسی غربی", "شعبهٔ ۱"],
-  ["شعبهٔ فرهنگ‌شهر — کسائی (آقایان)", "شعبهٔ ۲"],
-  ["شعبهٔ فرهنگ‌شهر (بانوان)", "شعبهٔ ۳"],
-  ["شعبهٔ فرهنگ‌شهر (آقایان)", "شعبهٔ ۴"],
-  ["شعبهٔ شهرک گلستان (بانوان)", "شعبهٔ ۵"],
-  ["شعبهٔ معالی‌آباد", "شعبهٔ ۶"],
-  ["شعبهٔ نیایش", "شعبهٔ ۷"],
-  ["شعبهٔ سروناز", "شعبهٔ ۸"],
-]
-const DEMO_TEXT: [RegExp, string][] = [
-  ...DEMO_BRANCH_NAMES.sort((a, b) => b[0].length - a[0].length).map(([from, to]) => [new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to] as [RegExp, string]),
-  [/قدوسی غربی|فرهنگ‌شهر|کسائی|شهرک گلستان|معالی‌آباد|نیایش|سروناز/g, 'نمونه'],
-  [/خشایار/g, 'آهن‌کوه'], [/KHASHAYAR/g, 'AHANKOOH'], [/Khashayar/g, 'Ahankooh'], [/شیراز(?!ی)/g, 'شهر'],
-]
-const demoText = (s: string) => DEMO_TEXT.reduce((t, [re, to]) => t.replace(re, to), s)
-/** کد تخفیف نمایش‌داده‌شده (AHANKOOH10) موقع ارسال به همان کد واقعی دیتابیس برمی‌گردد */
-const demoBody = (s: string) => s.replace(/AHANKOOH/g, 'KHASHAYAR')
-
-/** در حالت برند دمو آدرس و تلفن واقعی شعبه‌ها هم نمایش داده نمی‌شود. */
-const anonymize = (list: Branch[]): Branch[] =>
-  brand.key !== 'demo' ? list : list.map((b) => ({
-    ...b,
-    district: 'محلهٔ نمونه',
-    address: 'آدرس نمونه برای نمایش',
-    phone: b.phone ? '09000000000' : null,
-  }))
 
 export class ApiError extends Error {
   status: number
@@ -150,9 +117,7 @@ export async function request<T>(method: string, path: string, { body, auth, raw
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
   else if (method !== 'GET') headers['X-XSRF-TOKEN'] = await csrfToken()
-  const demo = brand.key === 'demo'
-  const json = body === undefined ? undefined : JSON.stringify(body)
-  const res = await fetch(BASE + path, { method, credentials: 'same-origin', headers, body: json === undefined ? undefined : demo ? demoBody(json) : json })
+  const res = await fetch(BASE + path, { method, credentials: 'same-origin', headers, body: body === undefined ? undefined : JSON.stringify(body) })
 
   // توکن دسترسی کوتاه‌عمر است؛ یک بار تازه‌سازی و تکرار
   if (res.status === 401 && auth && !retried && await refreshSession()) return request<T>(method, path, { body, auth, raw }, true)
@@ -164,19 +129,19 @@ export async function request<T>(method: string, path: string, { body, auth, raw
   if (res.status === 204) return null as T
   if (!res.ok) throw await toError(res)
   if (raw) return res.blob() as Promise<T>
-  return (demo ? JSON.parse(demoText(await res.text())) : res.json()) as Promise<T>
+  return res.json() as Promise<T>
 }
 
 const get = <T>(path: string) => request<T>('GET', path)
 
 export const api = {
-  branches: () => get<Branch[]>('/branches').then((x) => anonymize(x ?? [])),
+  branches: () => get<Branch[]>('/branches').then((x) => x ?? []),
   packages: () => get<Pkg[]>('/packages').then((x) => x ?? []),
   coaches: () => get<Coach[]>('/coaches').then((x) => x ?? []),
   campaign: () => get<Campaign | null>('/campaigns/active'),
   faq: () => get<Faq[]>('/faq').then((x) => x ?? []),
   stats: () => get<Stats>('/stats'),
-  site: () => get<{ demo: boolean }>('/site'),
+  site: () => get<import('./site').SiteInfo>('/site'),
   consult: (body: { fullName: string; mobile: string; goal: string | null; message: string | null; branchId: number | null }) =>
     request<{ id: number; message: string }>('POST', '/consultations', { body }),
 }

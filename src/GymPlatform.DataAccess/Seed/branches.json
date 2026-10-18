@@ -1,128 +1,195 @@
 [
   {
-    "slug": "ghoddousi-gharbi",
-    "name": "شعبهٔ قدوسی غربی",
-    "district": "قدوسی غربی",
-    "address": "قدوسی غربی، حدفاصل کوچهٔ ۱۴ و ۱۶",
-    "phone": "07136304781",
-    "latitude": 29.6262, "longitude": 52.4911,
-    "sections": "Both", "addressConfirmed": true,
+    "slug": "markazi",
+    "name": "شعبهٔ مرکزی",
+    "district": "مرکز شهر",
+    "address": "خیابان اصلی، پلاک ۱۲ (آدرس نمایشی)",
+    "phone": "02100000000",
+    "latitude": 35.8262,
+    "longitude": 50.9611,
+    "sections": "Both",
+    "addressConfirmed": true,
     "menHours": "شنبه تا پنجشنبه ۶:۰۰ تا ۱۲:۰۰ و ۱۶:۰۰ تا ۲۳:۰۰",
     "womenHours": "شنبه تا پنجشنبه ۱۲:۰۰ تا ۱۶:۰۰",
-    "disciplines": ["بدنسازی", "فیتنس فانکشنال", "TRX", "ایروبیک"]
+    "disciplines": [
+      "بدنسازی",
+      "فیتنس فانکشنال",
+      "TRX",
+      "ایروبیک"
+    ]
   },
   {
-    "slug": "farhangshahr-kasaei",
-    "name": "شعبهٔ فرهنگ‌شهر — کسائی (آقایان)",
-    "district": "فرهنگ‌شهر",
-    "address": "فرهنگ‌شهر، بعد از کوچهٔ ۳۶، نبش کسائی",
-    "phone": "07136327052",
-    "latitude": 29.6335, "longitude": 52.5055,
-    "sections": "Men", "addressConfirmed": true,
+    "slug": "bahar-men",
+    "name": "شعبهٔ بهار (آقایان)",
+    "district": "بلوار بهار",
+    "address": "بلوار بهار، نبش کوچهٔ ۸ (آدرس نمایشی)",
+    "phone": "02100000001",
+    "latitude": 35.8335,
+    "longitude": 50.9755,
+    "sections": "Men",
+    "addressConfirmed": true,
     "menHours": "همه‌روزه ۶:۰۰ تا ۲۴:۰۰",
-    "disciplines": ["بدنسازی", "کراس‌فیت", "فیتنس فانکشنال"]
+    "disciplines": [
+      "بدنسازی",
+      "کراس‌فیت",
+      "فیتنس فانکشنال"
+    ]
   },
   {
-    "slug": "farhangshahr-women",
-    "name": "شعبهٔ فرهنگ‌شهر (بانوان)",
-    "district": "فرهنگ‌شهر",
-    "address": "فرهنگ‌شهر، حدفاصل کوچهٔ ۲۹ و ۳۱",
-    "phone": "07136333726",
-    "latitude": 29.6298, "longitude": 52.5012,
-    "sections": "Women", "addressConfirmed": true,
+    "slug": "bahar-women",
+    "name": "شعبهٔ بهار (بانوان)",
+    "district": "بلوار بهار",
+    "address": "بلوار بهار، کوچهٔ ۵ (آدرس نمایشی)",
+    "phone": "02100000002",
+    "latitude": 35.8298,
+    "longitude": 50.9712,
+    "sections": "Women",
+    "addressConfirmed": true,
     "womenHours": "شنبه تا پنجشنبه ۷:۰۰ تا ۲۱:۰۰",
-    "disciplines": ["بدنسازی", "پیلاتس", "یوگا", "ایروبیک", "CX WORX"]
+    "disciplines": [
+      "بدنسازی",
+      "پیلاتس",
+      "یوگا",
+      "ایروبیک",
+      "CX WORX"
+    ]
   },
   {
-    "slug": "farhangshahr-men",
-    "name": "شعبهٔ فرهنگ‌شهر (آقایان)",
-    "district": "فرهنگ‌شهر",
-    "address": "فرهنگ‌شهر، حدفاصل کوچهٔ ۳۰ و ۳۲",
-    "phone": "07136300528",
-    "latitude": 29.6305, "longitude": 52.5031,
-    "sections": "Men", "addressConfirmed": true,
+    "slug": "nastaran-men",
+    "name": "شعبهٔ نسترن (آقایان)",
+    "district": "خیابان نسترن",
+    "address": "خیابان نسترن، پلاک ۴۰ (آدرس نمایشی)",
+    "phone": "02100000003",
+    "latitude": 35.8305,
+    "longitude": 50.9731,
+    "sections": "Men",
+    "addressConfirmed": true,
     "menHours": "همه‌روزه ۶:۰۰ تا ۲۴:۰۰",
-    "disciplines": ["بدنسازی", "TRX", "فیتنس فانکشنال"]
+    "disciplines": [
+      "بدنسازی",
+      "TRX",
+      "فیتنس فانکشنال"
+    ]
   },
   {
-    "slug": "shahrak-golestan-women",
-    "name": "شعبهٔ شهرک گلستان (بانوان)",
-    "district": "شهرک گلستان",
-    "address": "شهرک گلستان، بلوار فرصتیان، ساختمان A+",
-    "phone": "07136511673",
-    "latitude": 29.7235, "longitude": 52.4412,
-    "sections": "Women", "addressConfirmed": true,
+    "slug": "sarv-women",
+    "name": "شعبهٔ شهرک سرو (بانوان)",
+    "district": "شهرک سرو",
+    "address": "شهرک سرو، بلوار اصلی (آدرس نمایشی)",
+    "phone": "02100000004",
+    "latitude": 35.9235,
+    "longitude": 50.9112,
+    "sections": "Women",
+    "addressConfirmed": true,
     "womenHours": "شنبه تا پنجشنبه ۷:۰۰ تا ۲۱:۰۰",
-    "disciplines": ["بدنسازی", "پیلاتس", "یوگا", "ایروبیک"]
+    "disciplines": [
+      "بدنسازی",
+      "پیلاتس",
+      "یوگا",
+      "ایروبیک"
+    ]
   },
   {
-    "slug": "maaliabad",
-    "name": "شعبهٔ معالی‌آباد",
-    "district": "معالی‌آباد",
-    "address": "معالی‌آباد — آدرس دقیق به‌زودی",
-    "latitude": 29.6372, "longitude": 52.4868,
-    "sections": "Both", "addressConfirmed": false,
-    "menHours": "به‌زودی", "womenHours": "به‌زودی",
-    "disciplines": ["بدنسازی", "کراس‌فیت", "صخره‌نوردی"]
-  },
-  {
-    "slug": "niayesh",
-    "name": "شعبهٔ نیایش",
-    "district": "نیایش",
-    "address": "نیایش — آدرس دقیق به‌زودی",
-    "latitude": 29.6431, "longitude": 52.4975,
-    "sections": "Men", "addressConfirmed": false,
+    "slug": "azadi",
+    "name": "شعبهٔ آزادی",
+    "district": "میدان آزادی",
+    "address": "میدان آزادی — آدرس دقیق به‌زودی",
+    "latitude": 35.8372,
+    "longitude": 50.9568,
+    "sections": "Both",
+    "addressConfirmed": false,
     "menHours": "به‌زودی",
-    "disciplines": ["بدنسازی"]
+    "womenHours": "به‌زودی",
+    "disciplines": [
+      "بدنسازی",
+      "کراس‌فیت",
+      "صخره‌نوردی"
+    ]
   },
   {
-    "slug": "sarvnaz",
-    "name": "شعبهٔ سروناز",
-    "district": "سروناز",
-    "address": "سروناز — آدرس دقیق به‌زودی",
-    "latitude": 29.6475, "longitude": 52.5089,
-    "sections": "Men", "addressConfirmed": false,
+    "slug": "park",
+    "name": "شعبهٔ پارک",
+    "district": "بلوار پارک",
+    "address": "بلوار پارک — آدرس دقیق به‌زودی",
+    "latitude": 35.8431,
+    "longitude": 50.9675,
+    "sections": "Men",
+    "addressConfirmed": false,
     "menHours": "به‌زودی",
-    "disciplines": ["بدنسازی"]
+    "disciplines": [
+      "بدنسازی"
+    ]
+  },
+  {
+    "slug": "daneshgah",
+    "name": "شعبهٔ دانشگاه",
+    "district": "خیابان دانشگاه",
+    "address": "خیابان دانشگاه — آدرس دقیق به‌زودی",
+    "latitude": 35.8475,
+    "longitude": 50.9789,
+    "sections": "Men",
+    "addressConfirmed": false,
+    "menHours": "به‌زودی",
+    "disciplines": [
+      "بدنسازی"
+    ]
   },
   {
     "slug": "sample-9",
-    "name": "شعبهٔ نمونهٔ ۹",
-    "district": "محله — به‌زودی",
-    "address": "آدرس به‌زودی",
-    "latitude": 29.6178, "longitude": 52.5402,
-    "sections": "Men", "addressConfirmed": false,
+    "name": "شعبهٔ نور",
+    "district": "شهرک نور",
+    "address": "شهرک نور — آدرس دقیق به‌زودی",
+    "latitude": 35.8178,
+    "longitude": 51.0102,
+    "sections": "Men",
+    "addressConfirmed": false,
     "menHours": "به‌زودی",
-    "disciplines": ["بدنسازی"]
+    "disciplines": [
+      "بدنسازی"
+    ]
   },
   {
     "slug": "sample-10",
-    "name": "شعبهٔ نمونهٔ ۱۰",
-    "district": "محله — به‌زودی",
-    "address": "آدرس به‌زودی",
-    "latitude": 29.5985, "longitude": 52.5121,
-    "sections": "Women", "addressConfirmed": false,
+    "name": "شعبهٔ امید (بانوان)",
+    "district": "بلوار امید",
+    "address": "بلوار امید — آدرس دقیق به‌زودی",
+    "latitude": 35.7985,
+    "longitude": 50.9821,
+    "sections": "Women",
+    "addressConfirmed": false,
     "womenHours": "به‌زودی",
-    "disciplines": ["بدنسازی", "یوگا"]
+    "disciplines": [
+      "بدنسازی",
+      "یوگا"
+    ]
   },
   {
     "slug": "sample-11",
-    "name": "شعبهٔ نمونهٔ ۱۱",
-    "district": "محله — به‌زودی",
-    "address": "آدرس به‌زودی",
-    "latitude": 29.6362, "longitude": 52.5236,
-    "sections": "Both", "addressConfirmed": false,
-    "menHours": "به‌زودی", "womenHours": "به‌زودی",
-    "disciplines": ["بدنسازی"]
+    "name": "شعبهٔ لاله",
+    "district": "خیابان لاله",
+    "address": "خیابان لاله — آدرس دقیق به‌زودی",
+    "latitude": 35.8362,
+    "longitude": 50.9936,
+    "sections": "Both",
+    "addressConfirmed": false,
+    "menHours": "به‌زودی",
+    "womenHours": "به‌زودی",
+    "disciplines": [
+      "بدنسازی"
+    ]
   },
   {
     "slug": "sample-12",
-    "name": "شعبهٔ نمونهٔ ۱۲",
-    "district": "محله — به‌زودی",
-    "address": "آدرس به‌زودی",
-    "latitude": 29.6089, "longitude": 52.4795,
-    "sections": "Men", "addressConfirmed": false,
+    "name": "شعبهٔ ستاره",
+    "district": "کوی ستاره",
+    "address": "کوی ستاره — آدرس دقیق به‌زودی",
+    "latitude": 35.8089,
+    "longitude": 50.9495,
+    "sections": "Men",
+    "addressConfirmed": false,
     "menHours": "به‌زودی",
-    "disciplines": ["بدنسازی"]
+    "disciplines": [
+      "بدنسازی"
+    ]
   }
 ]

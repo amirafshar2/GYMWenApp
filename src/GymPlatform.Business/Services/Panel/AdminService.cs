@@ -36,6 +36,13 @@ public interface IAdminService
     Task<IReadOnlyList<AdminCoachDto>> CoachesAsync(CancellationToken ct);
     Task<Result<AdminCoachDto>> SaveCoachAsync(int? id, SaveCoachRequest r, int staffId, CancellationToken ct);
     Task<Result<bool>> DeleteCoachAsync(int id, int staffId, CancellationToken ct);
+    Task<IReadOnlyList<AdminBranchDto>> BranchesAsync(CancellationToken ct);
+    Task<Result<AdminBranchDto>> SaveBranchAsync(int? id, SaveBranchRequest r, int staffId, CancellationToken ct);
+    Task<Result<bool>> DeleteBranchAsync(int id, int staffId, CancellationToken ct);
+    Task<Result<bool>> ReorderBranchesAsync(IReadOnlyList<int> ids, int staffId, CancellationToken ct);
+    Task<IReadOnlyList<AdminFaqDto>> FaqAsync(CancellationToken ct);
+    Task<Result<AdminFaqDto>> SaveFaqAsync(int? id, SaveFaqRequest r, int staffId, CancellationToken ct);
+    Task<Result<bool>> DeleteFaqAsync(int id, int staffId, CancellationToken ct);
     Task<Result<StaffRowDto>> SaveStaffAsync(SaveStaffRequest r, int byUserId, CancellationToken ct);
 }
 

@@ -22,7 +22,7 @@ public sealed record CampaignDto(
 
 public sealed record FaqDto(string Question, string Answer);
 
-public sealed record SiteStatsDto(int Branches, int Members, int YearsActive, int InstagramFollowers, int Coaches);
+public sealed record SiteStatsDto(int Branches, int? Members, int? YearsActive, int Coaches);
 
 public sealed record CreateConsultationRequest(
     string FullName, string Mobile, string? Goal, string? Message, int? BranchId);

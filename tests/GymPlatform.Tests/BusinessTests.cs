@@ -100,7 +100,8 @@ public sealed class ServiceTests : IDisposable
 
     private CatalogService Catalog() => new(
         new Repository<Branch>(_db), new Repository<MembershipPackage>(_db), new Repository<Coach>(_db),
-        new Repository<Campaign>(_db), new Repository<FaqItem>(_db), new PricingService(), new FixedClock(_now));
+        new Repository<Campaign>(_db), new Repository<FaqItem>(_db), new PricingService(),
+        new GymPlatform.Business.Services.Site.SiteService(_db, new GymPlatform.Business.Services.Site.SiteConfigCache(), new FixedClock(_now)), new FixedClock(_now));
 
     [Fact]
     public async Task Women_filter_includes_mixed_branches()

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDownLeft, ArrowUpLeft, CalendarClock, Download, Phone, Repeat, Users, DoorOpen, Wallet } from 'lucide-react'
 import { downloadBlob } from '@/lib/api'
-import { rebrand } from '@/lib/brand'
 import { panelApi, type Dashboard } from '@/lib/panel'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
@@ -29,7 +28,7 @@ export default function DashboardPage() {
 
   const exportXlsx = async () => {
     setBusy(true)
-    try { await downloadBlob(() => panelApi.exportDashboard(branch || undefined, days), `khashayar-report-${branch || 'all'}.xlsx`) }
+    try { await downloadBlob(() => panelApi.exportDashboard(branch || undefined, days), `report-${branch || 'all'}.xlsx`) }
     catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
 
@@ -106,7 +105,7 @@ export default function DashboardPage() {
                   <ul className="grid gap-3">
                     {d.campaigns.map((c) => (
                       <li key={c.id} className="rounded-[6px] bg-steel p-3">
-                        <p className="flex items-center justify-between gap-2 text-[14px] font-black text-chalk">{rebrand(c.title)}
+                        <p className="flex items-center justify-between gap-2 text-[14px] font-black text-chalk">{c.title}
                           {c.isRunning && <span className="rounded-full bg-[#ecf8f1] px-2 py-0.5 text-[11px] text-[#14532d]">در حال اجرا</span>}</p>
                         <p className="text-[12px] text-rubber">{jalali(c.startsAtUtc)} تا {jalali(c.endsAtUtc)}</p>
                         <p className="mt-1 text-[13px] text-chalk">{faNum(c.registrations)} ثبت‌نام – فروش {short(c.revenueToman)} – تخفیف داده‌شده {short(c.discountGivenToman)}</p>

@@ -242,7 +242,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.Coaches.AnyAsync(c => c.IsActive); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
+        try { _ = await db.SiteContents.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();
@@ -250,9 +250,17 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    if (app.Configuration.GetValue("Database:SeedDemoData", true))
-        await scope.ServiceProvider.GetRequiredService<DbSeeder>()
-            .SeedAsync(Path.Combine(AppContext.BaseDirectory, "Seed"), includeDemoCodes: !app.Environment.IsProduction());
+    // نصب اولیه (فقط بار اول): Setup:Mode = Blank (خالی، برای مشتری تازه) | Demo (برند و دادهٔ نمایشی) | Content (بستهٔ محتوای خروجی‌گرفته از پنل)
+    var setupMode = app.Configuration["Setup:Mode"] is { Length: > 0 } m ? m
+        : !app.Configuration.GetValue("Database:SeedDemoData", true) || app.Environment.IsProduction() ? "Blank" : "Demo";
+    var installed = await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().InstallAsync(
+        setupMode, Path.Combine(AppContext.BaseDirectory, "Seed"), app.Configuration["Setup:ContentFile"],
+        app.Services.GetRequiredService<PublicImageStore>().Root, app.Configuration["Setup:OwnerPhone"], CancellationToken.None);
+    // مالک را می‌شود بعداً هم با Setup:OwnerPhone اضافه کرد (مثلاً اگر بار اول جا افتاده)
+    if (installed is null && app.Configuration["Setup:OwnerPhone"] is { Length: > 0 } owner)
+        await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().EnsureOwnerAsync(owner, CancellationToken.None);
+    // تنظیمات سایت از همین ابتدا در حافظه (نام باشگاه در پیامک‌های زمان‌بندی‌شده هم لازم است)
+    await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.ISiteService>().GetAsync(CancellationToken.None);
 
     // گیت نمایشی برای تست اتصال (هرگز در production)
     if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)

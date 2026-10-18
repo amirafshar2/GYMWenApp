@@ -1,15 +1,15 @@
 import { createContext, Suspense, useContext, useEffect, useState } from 'react'
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BarChart3, Coffee, Dumbbell, FileSignature, MessageSquareText, Package, Presentation, UserCog, ScanLine, ShoppingBag, Tags, UsersRound, UtensilsCrossed, type LucideIcon } from 'lucide-react'
+import { BarChart3, Coffee, Dumbbell, FileSignature, HelpCircle, MapPin, MessageSquareText, Package, Paintbrush, Presentation, Rocket, UserCog, ScanLine, ShoppingBag, Tags, UsersRound, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 import { can, panelApi, ROLE_LABEL, type PanelMe } from '@/lib/panel'
 import { faNum } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { useRequireAuth } from '@/member/MemberCard'
 import { Notice, Spinner } from '@/member/ui'
 import { presentation } from './PresentationBar'
-import { api } from '@/lib/api'
-import { useData } from '@/lib/useData'
+import { site } from '@/lib/site'
 import { DemoStrip } from '@/site/SiteBanner'
+import { SetupGuide } from './SetupGuide'
 
 const Ctx = createContext<PanelMe | null>(null)
 /** کارمند فعلی (نقش‌ها و شعبه‌ها از سرور) */
@@ -23,6 +23,10 @@ export const NAV: NavItem[] = [
   { to: '/panel/coach', label: 'شاگردهای من', icon: Dumbbell, roles: ['Coach'], group: 'روزانه' },
   { to: '/panel/shop', label: 'فروشگاه و انبار', icon: ShoppingBag, roles: ['ShopStaff', 'BranchManager'], group: 'فروش' },
   { to: '/panel/menu', label: 'منوی بوفه', icon: UtensilsCrossed, roles: ['CanteenStaff', 'BranchManager'], group: 'فروش' },
+  { to: '/panel/setup', label: 'دستیار راه‌اندازی', icon: Rocket, roles: ['SuperAdmin'], group: 'سایت' },
+  { to: '/panel/site', label: 'تنظیمات سایت', icon: Paintbrush, roles: ['SuperAdmin'], group: 'سایت' },
+  { to: '/panel/branches', label: 'شعبه‌ها', icon: MapPin, roles: ['SuperAdmin'], group: 'سایت' },
+  { to: '/panel/faq', label: 'سؤالات پرتکرار', icon: HelpCircle, roles: ['SuperAdmin'], group: 'سایت' },
   { to: '/panel/packages', label: 'پکیج‌ها و قیمت', icon: Package, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/campaigns', label: 'جشنواره و کد تخفیف', icon: Tags, roles: ['SuperAdmin'], group: 'مدیریت' },
   { to: '/panel/contract', label: 'قرارداد عضویت', icon: FileSignature, roles: ['SuperAdmin'], group: 'مدیریت' },
@@ -36,7 +40,6 @@ export default function PanelLayout() {
   const [me, setMe] = useState<PanelMe | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const { pathname } = useLocation()
-  const { data: site } = useData('site', api.site)
 
   // در موبایل منوی افقی است؛ گزینهٔ فعال را در دید نگه دار
   useEffect(() => { document.querySelector('nav[aria-label="منوی پنل"] a[aria-current="page"]')?.scrollIntoView({ inline: 'center', block: 'nearest' }) }, [pathname, me])
@@ -44,8 +47,13 @@ export default function PanelLayout() {
   if (err) return <div className="mx-auto max-w-lg p-10"><Notice tone="err">{err}</Notice></div>
   if (!me) return <Spinner />
 
-  const items = NAV.filter((n) => can(me, ...n.roles))
-  if (pathname === '/panel' || pathname === '/panel/') return <Navigate to={items[0]?.to ?? '/profile'} replace />
+  // ماژول خاموش (فروشگاه، بوفه) از منوی پنل هم حذف می‌شود
+  const off = (to: string) => (!site.modules.shop && to === '/panel/shop') || (!site.modules.canteen && (to === '/panel/canteen' || to === '/panel/menu'))
+  const items = NAV.filter((n) => can(me, ...n.roles) && !off(n.to))
+  const isSuper = me.roles.includes('SuperAdmin')
+  // مدیر کلِ سایتی که هنوز منتشر نشده مستقیم به دستیار راه‌اندازی می‌رود
+  const home = isSuper && !site.published ? '/panel/setup' : items[0]?.to ?? '/profile'
+  if (pathname === '/panel' || pathname === '/panel/') return <Navigate to={home} replace />
   const current = NAV.find((n) => pathname.startsWith(n.to))
   const groups = [...new Set(items.map((i) => i.group))]
 
@@ -82,7 +90,8 @@ export default function PanelLayout() {
           </div>
         </aside>
         <div className="min-w-0 px-4 py-6 sm:px-8 sm:py-8">
-          {site?.demo && <DemoStrip className="mb-5 rounded-[6px]" />}
+          {site.demo && <DemoStrip className="mb-5 rounded-[6px]" />}
+          {isSuper && <SetupGuide />}
           {current && !can(me, ...current.roles) ? <Notice tone="err">به این بخش دسترسی ندارید.</Notice> : <Suspense fallback={<Spinner />}><Outlet /></Suspense>}
         </div>
       </div>

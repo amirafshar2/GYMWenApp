@@ -52,11 +52,14 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
     /// (یا Site:DemoBanner=true)، سایت دمو حساب می‌شود.
     /// </summary>
     [HttpGet("site")]
-    public ActionResult<SiteInfoDto> Site([FromServices] IConfiguration cfg, [FromServices] IHostEnvironment env)
+    public async Task<ActionResult<SiteInfoDto>> Site([FromServices] IConfiguration cfg, [FromServices] IHostEnvironment env,
+        [FromServices] GymPlatform.Business.Services.Site.ISiteService site, CancellationToken ct)
     {
         var demo = !env.IsProduction() && (cfg.GetValue("Site:DemoBanner", false)
             || cfg.GetValue("Otp:ExposeCodeInResponse", false) || cfg.GetValue("Payment:UseVirtualGateway", false));
-        return Ok(new SiteInfoDto(demo));
+        var c = await site.GetAsync(ct);
+        var branches = (await catalog.GetBranchesAsync(null, ct)).Count;
+        return Ok(new SiteInfoDto(demo, c.Setup.Published, c.Setup.Mode, branches, c.Brand, c.Contact, c.Theme, c.Home, c.Legal, c.Modules));
     }
 
     [HttpGet("stats")]
@@ -64,4 +67,8 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
         Ok(await catalog.GetStatsAsync(ct));
 }
 
-public sealed record SiteInfoDto(bool Demo);
+/// <summary>همهٔ تنظیمات عمومی سایت (نام، لوگو، رنگ، متن‌ها، ماژول‌ها) + وضعیت انتشار</summary>
+public sealed record SiteInfoDto(bool Demo, bool Published, string Mode, int Branches,
+    GymPlatform.Business.Services.Site.BrandSettings Brand, GymPlatform.Business.Services.Site.ContactSettings Contact,
+    GymPlatform.Business.Services.Site.ThemeSettings Theme, GymPlatform.Business.Services.Site.HomeSettings Home,
+    GymPlatform.Business.Services.Site.LegalSettings Legal, GymPlatform.Business.Services.Site.ModuleSettings Modules);

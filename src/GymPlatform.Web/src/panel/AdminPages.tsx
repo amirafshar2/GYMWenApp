@@ -6,7 +6,6 @@ import {
   panelApi, ROLE_LABEL, STAFF_ROLES, type AdminCampaign, type AdminCanteenItem, type AdminCode, type AdminContract, type AdminPackage,
   type AdminCoach, type AdminProduct, type AdminShopOrder, type Audience, type SaveCampaign, type SmsStats, type StaffRow,
 } from '@/lib/panel'
-import { rebrand } from '@/lib/brand'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { Btn, inputCls, Notice, Panel, toLatinDigits } from '@/member/ui'
@@ -159,7 +158,7 @@ export function CampaignsAdmin() {
           <Panel key={x.id} className="p-4 sm:p-5">
             <div className="flex flex-wrap items-center gap-3">
               <div className="min-w-[220px] flex-1">
-                <p className="flex items-center gap-2 text-[16px] font-black text-chalk">{rebrand(x.title)}
+                <p className="flex items-center gap-2 text-[16px] font-black text-chalk">{x.title}
                   {x.isRunning ? <span className="rounded-full bg-[#ecf8f1] px-2 py-0.5 text-[11px] text-[#14532d]">در حال اجرا</span> : <span className="rounded-full bg-steel px-2 py-0.5 text-[11px] text-rubber">{x.isActive ? 'خارج از بازه' : 'غیرفعال'}</span>}</p>
                 <p className="text-[13px] text-rubber">{jalali(x.startsAtUtc)} تا {jalali(x.endsAtUtc)} – {x.discountAmountToman ? toman(x.discountAmountToman) : `${faNum(x.discountPercent)}٪`} تخفیف
                   – {faNum(x.redemptionCount)}{x.maxRedemptions ? ` از ${faNum(x.maxRedemptions)}` : ''} ثبت‌نام</p>
@@ -170,7 +169,7 @@ export function CampaignsAdmin() {
             {aud?.id === x.id && (
               <div className="mt-4 rounded-[6px] bg-steel p-4 text-[14px]">
                 <p><b>{faNum(aud.a.recipients)}</b> نفر پیامک می‌گیرند — از {faNum(aud.a.expiredMembers)} عضو منقضی‌شده، {faNum(aud.a.optedOut)} نفر پیامک تبلیغاتی را نخواسته‌اند و پیامک نمی‌گیرند.</p>
-                <p className="mt-2 rounded-[6px] bg-white p-3 text-[13px] leading-7 text-chalk">{rebrand(aud.a.preview)}</p>
+                <p className="mt-2 rounded-[6px] bg-white p-3 text-[13px] leading-7 text-chalk">{aud.a.preview}</p>
                 {aud.sent !== undefined
                   ? <Notice tone="ok" className="mt-3">{faNum(aud.sent)} پیامک در صف ارسال قرار گرفت (بین ۹ صبح تا ۹ شب فرستاده می‌شوند). ارسال دوباره به همان افراد تکرار نمی‌شود.</Notice>
                   : <Btn className="mt-3 h-11" disabled={aud.a.recipients === 0 || !x.isRunning} onClick={sendSms}><Send className="size-4" aria-hidden />ارسال برای {faNum(aud.a.recipients)} نفر</Btn>}
@@ -311,7 +310,7 @@ function ShopOrders() {
               <span className="ms-auto text-[15px] font-black">{toman(o.totalToman)}</span>
             </div>
             <p className="mt-2 text-[14px]">{o.customerName ?? '—'} <span dir="ltr" className="text-rubber">{faDigits(o.customerPhone)}</span>{o.address && <span className="text-rubber"> – {o.address}</span>}</p>
-            <p className="mt-1 text-[13px] text-rubber">{o.items.map((i) => `${rebrand(i.productName)}${i.variantLabel ? ` (${i.variantLabel})` : ''} × ${faNum(i.quantity)}`).join('، ')}</p>
+            <p className="mt-1 text-[13px] text-rubber">{o.items.map((i) => `${i.productName}${i.variantLabel ? ` (${i.variantLabel})` : ''} × ${faNum(i.quantity)}`).join('، ')}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {o.status === 'paid' && o.fulfillment === 'pickup' && <Btn className="h-10" onClick={() => move(o, 'ready')}>آماده شد</Btn>}
               {o.status === 'paid' && o.fulfillment === 'delivery' && <Btn className="h-10" onClick={() => move(o, 'shipped')}>ارسال شد</Btn>}
@@ -338,7 +337,7 @@ function Stock() {
   const savePrice = async (p: AdminProduct, patch: { priceToman?: number; isActive?: boolean }) => {
     try { await panelApi.updateProduct(p.id, { priceToman: patch.priceToman ?? p.priceToman, isActive: patch.isActive ?? p.isActive }); setPrice({}); void reload() } catch (x) { setErr((x as Error).message) }
   }
-  const list = (data ?? []).filter((p) => !q || rebrand(p.name).includes(q) || p.category.includes(q))
+  const list = (data ?? []).filter((p) => !q || p.name.includes(q) || p.category.includes(q))
   const superAdmin = me.roles.includes('SuperAdmin')
   return (
     <>
@@ -354,7 +353,7 @@ function Stock() {
           <Panel key={p.id} className="p-4">
             <div className="flex flex-wrap items-center gap-3">
               <img src={p.imagePath} alt="" className="size-14 rounded-[6px] bg-steel object-contain" />
-              <div className="min-w-[180px] flex-1"><p className="font-black text-chalk">{rebrand(p.name)}</p><p className="text-[12px] text-rubber">{p.category}</p></div>
+              <div className="min-w-[180px] flex-1"><p className="font-black text-chalk">{p.name}</p><p className="text-[12px] text-rubber">{p.category}</p></div>
               {superAdmin ? (price[p.id] !== undefined
                 ? <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void savePrice(p, { priceToman: money(price[p.id]) }) }}>
                     <input autoFocus dir="ltr" value={price[p.id]} onChange={(e) => setPrice({ [p.id]: e.target.value })} aria-label="قیمت" className={`${sm} w-36 text-left`} /><Btn type="submit" className="h-11">ذخیره</Btn></form>
@@ -549,7 +548,7 @@ export function SmsAdmin() {
               <span className={cn('font-bold', s.status === 'sent' ? 'text-[#1f7a46]' : s.status === 'failed' ? 'text-danger' : 'text-[#7a5600]')}>{s.status === 'sent' ? 'ارسال شد' : s.status === 'failed' ? 'ناموفق' : 'در صف'}</span>
               <span className="ms-auto">{jalali(s.sentAtUtc ?? s.createdAtUtc, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
             </p>
-            <p className="mt-1 text-[14px] leading-7 text-chalk">{rebrand(s.preview)}</p>
+            <p className="mt-1 text-[14px] leading-7 text-chalk">{s.preview}</p>
             {s.error && <p className="text-[12px] text-danger">{s.error}</p>}
           </div>
         ))}

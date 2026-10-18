@@ -1,11 +1,11 @@
-# Render Blueprint – öffentliche Demo der Khashayar-Plattform
+# Render Blueprint – öffentliche Demo der Gym-Plattform
 # Render → New → Blueprint → dieses Repository wählen → Apply.
 # Die Demo läuft bewusst als "Staging": Login-Code auf der Seite, Test-Gateway, Demo-Daten.
 # In "Production" würde der ProductionGuard diese Einstellungen ablehnen (so gewollt).
 # Free-Tarif: keine persistente Festplatte – die SQLite-Demo-Datenbank wird bei jedem Neustart neu erzeugt.
 services:
   - type: web
-    name: khashayar-gym-demo
+    name: gym-platform-demo
     runtime: docker
     plan: free
     region: frankfurt
@@ -19,9 +19,9 @@ services:
         value: Staging
       - key: PORT
         value: "8080"
-      # Build mit der fiktiven Marke „Ahankooh“
-      - key: VITE_BRAND
-        value: demo
+      # Installationsmodus: fiktive Marke „Ahankooh“ + Demo-Daten (Blank = leere Vorlage, Content = Inhaltspaket)
+      - key: Setup__Mode
+        value: Demo
       - key: Database__Provider
         value: Sqlite
       - key: ConnectionStrings__Default

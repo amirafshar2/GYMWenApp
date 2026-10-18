@@ -29,7 +29,7 @@ public sealed class ReportService(IDashboardService dashboard, IClock clock) : I
 
         // ---- خلاصه
         var s = Sheet(wb, "خلاصه");
-        s.Cell(1, 1).Value = "گزارش باشگاه خشایار"; s.Cell(1, 1).Style.Font.SetBold().Font.SetFontSize(16);
+        s.Cell(1, 1).Value = $"گزارش {SmsTexts.Brand}"; s.Cell(1, 1).Style.Font.SetBold().Font.SetFontSize(16);
         s.Cell(2, 1).Value = $"بازه: {d.Days} روز تا {J(clock.UtcNow)}" + (d.Branch is null ? " — همهٔ شعبه‌های در دسترس" : "");
         var rows = new (string, object)[]
         {
@@ -101,7 +101,7 @@ public sealed class ReportService(IDashboardService dashboard, IClock clock) : I
         using var ms = new MemoryStream();
         wb.SaveAs(ms);
         var t = Jalali.ToTehran(clock.UtcNow);
-        var name = $"khashayar-report-{Pc.GetYear(t):0000}-{Pc.GetMonth(t):00}-{Pc.GetDayOfMonth(t):00}{(d.Branch is null ? "" : "-" + d.Branch)}.xlsx";
+        var name = $"report-{Pc.GetYear(t):0000}-{Pc.GetMonth(t):00}-{Pc.GetDayOfMonth(t):00}{(d.Branch is null ? "" : "-" + d.Branch)}.xlsx";
         return Result<(byte[], string)>.Ok((ms.ToArray(), name));
     }
 

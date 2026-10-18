@@ -5,7 +5,7 @@ import { api } from '@/lib/api'
 import { shopApi, type ProductCard, type ShopCatalog } from '@/lib/commerce'
 import { cart, cartCount, useCart } from '@/lib/cart'
 import { useData } from '@/lib/useData'
-import { brand, rebrand } from '@/lib/brand'
+import { brand } from '@/lib/brand'
 import { faNum, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { inputCls, Spinner } from '@/member/ui'
@@ -15,7 +15,7 @@ const TABS = [
   { key: 'merch', label: `پوشاک و لوازم ${brand.shortName}` },
 ] as const
 
-/** شاپ خشایار: مکمل‌ها + پوشاک و لوازم با برند باشگاه، با موجودی هر شعبه */
+/** فروشگاه: مکمل‌ها + پوشاک و لوازم با برند باشگاه، با موجودی هر شعبه */
 export default function ShopPage() {
   const [params, setParams] = useSearchParams()
   const kind = params.get('kind') === 'merch' ? 'merch' : 'supplement'
@@ -128,12 +128,12 @@ function Card({ p }: { p: ProductCard }) {
     <Link to={`/shop/${p.slug}`} className="group flex h-full flex-col overflow-hidden rounded-[8px] border border-steel-2 bg-white transition-shadow hover:shadow-[0_14px_40px_rgb(0_0_0/0.08)]">
       <div className="relative aspect-square bg-[#EEF3F9]">
         <img src={p.imagePath} alt="" loading="lazy" className={cn('size-full object-contain transition-transform duration-500 group-hover:scale-105', !p.inStock && 'opacity-50 grayscale')} />
-        {p.isKhashayarBrand && <span className="absolute right-3 top-3 rounded-full bg-plate px-2.5 py-1 text-[11px] font-bold text-white">برند {brand.shortName}</span>}
+        {p.isHouseBrand && <span className="absolute right-3 top-3 rounded-full bg-plate px-2.5 py-1 text-[11px] font-bold text-white">برند {brand.shortName}</span>}
         {!p.inStock && <span className="absolute inset-x-3 bottom-3 rounded-[3px] bg-white/90 py-1.5 text-center text-[12px] font-bold text-rubber">ناموجود</span>}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <p className="text-[12px] text-rubber">{p.brandName} – {p.category}</p>
-        <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-chalk sm:text-[15px]">{rebrand(p.name)}</h2>
+        <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-chalk sm:text-[15px]">{p.name}</h2>
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <p className="text-[15px] font-black text-chalk sm:text-[16px]">{toman(p.priceToman)}</p>
           {p.colors.length > 0 && (

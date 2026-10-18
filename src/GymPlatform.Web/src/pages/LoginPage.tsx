@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { BarChart3, ShieldCheck, Store, UserRound } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
-import { api, authApi } from '@/lib/api'
-import { useData } from '@/lib/useData'
+import { authApi } from '@/lib/api'
+import { site } from '@/lib/site'
 import { faDigits } from '@/lib/fa'
 import { brand } from '@/lib/brand'
 import OtpLogin from '@/member/OtpLogin'
@@ -49,17 +49,16 @@ export default function LoginPage() {
 }
 
 const DEMO_ACCOUNTS = [
-  { phone: '09100000000', label: 'مدیر کل', hint: 'همهٔ بخش‌های پنل و ۱۲ شعبه', to: '/panel', Icon: BarChart3 },
+  { phone: '09100000000', label: 'مدیر کل', hint: 'همهٔ بخش‌های پنل و همهٔ شعبه‌ها', to: '/panel', Icon: BarChart3 },
   { phone: '09100000001', label: 'مدیر شعبه', hint: 'فقط یک شعبه', to: '/panel', Icon: Store },
   { phone: '09391000001', label: 'عضو باشگاه', hint: 'کارت عضویت، برنامه و سفارش‌ها', to: null, Icon: UserRound },
 ] as const
 
 /** فقط در نسخهٔ نمایشی: ورود با یک کلیک به‌جای واردکردن شماره و کد */
 function DemoQuickLogin({ next, onPick }: { next: string; onPick: (to: string) => void }) {
-  const { data: site } = useData('site', api.site)
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
-  if (!site?.demo) return null
+  if (!site.demo) return null
   const go = async (a: (typeof DEMO_ACCOUNTS)[number]) => {
     setBusy(a.phone); setErr(null)
     try {

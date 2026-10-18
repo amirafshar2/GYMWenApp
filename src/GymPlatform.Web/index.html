@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFFFFF" />
-    <title>باشگاه‌های خشایار شیراز — ۱۲ شعبه، نزدیک تو</title>
-    <meta name="description" content="مجموعه باشگاه‌های خشایار شیراز: بدنسازی، کراس‌فیت، فانکشنال، پیلاتس، یوگا و صخره‌نوردی در ۱۲ شعبهٔ آقایان و بانوان. نزدیک‌ترین شعبه را پیدا کن و آنلاین ثبت‌نام کن." />
-    <meta property="og:title" content="باشگاه‌های خشایار شیراز" />
-    <meta property="og:description" content="ورزش کن؛ حتی اگه خشایار نمیای. ۱۲ شعبه در شیراز." />
+    <!-- نام و توضیح واقعی از «تنظیمات سایت» در پنل می‌آید (lib/site.ts) -->
+    <title>باشگاه ورزشی</title>
+    <meta name="description" content="عضویت آنلاین باشگاه، سالن‌های آقایان و بانوان، مربیان و فروشگاه ورزشی." />
+    <meta property="og:title" content="باشگاه ورزشی" />
+    <meta property="og:description" content="عضویت آنلاین، نزدیک‌ترین شعبه و پکیج‌ها." />
     <meta property="og:locale" content="fa_IR" />
     <link rel="icon" href="/brand/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/brand/favicon-64.png" />
@@ -21,9 +22,12 @@
           document.documentElement.style.setProperty('--festival-h', innerWidth < 640 ? '64px' : '44px')
       } catch (e) { /* حالت خصوصی */ }
       // فقط در صفحهٔ اصلی: تصویر هیرو (بزرگ‌ترین المان صفحه) با بالاترین اولویت
+      // (تصویر از تنظیمات ذخیره‌شدهٔ سایت در همین مرورگر؛ بار اول تصویر پیش‌فرض قالب)
       if (location.pathname === '/') {
+        var hero = null
+        try { hero = (JSON.parse(localStorage.getItem('site-config-v1') || 'null') || {}).home.hero } catch (e) { /* بار اول */ }
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.fetchPriority = 'high'
-        l.href = innerWidth < 640 ? '/media/hero/dumbbell-mobile.webp' : '/media/hero/dumbbell.webp'
+        l.href = innerWidth < 640 ? (hero && hero.mobileImageUrl) || '/media/hero/dumbbell-mobile.webp' : (hero && hero.imageUrl) || '/media/hero/dumbbell.webp'
         document.head.appendChild(l)
       }
     </script>

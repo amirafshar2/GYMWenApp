@@ -12,14 +12,14 @@ public sealed record PurchaseStartedDto(int? PaymentId, long TrackingNumber, lon
 public sealed record ShopFilter(string? Kind, string? Category, string? Q, string? Branch, bool? InStock, string? Sort);
 public sealed record ProductCardDto(
     int Id, string Slug, string Name, string BrandName, string Kind, string Category, string ImagePath, long PriceToman,
-    long? MinVariantPriceToman, bool IsKhashayarBrand, bool InStock, IReadOnlyList<string> Colors, IReadOnlyList<string> Sizes, IReadOnlyList<string> Flavors);
+    long? MinVariantPriceToman, bool IsHouseBrand, bool InStock, IReadOnlyList<string> Colors, IReadOnlyList<string> Sizes, IReadOnlyList<string> Flavors);
 public sealed record ShopCatalogDto(IReadOnlyList<ProductCardDto> Products, IReadOnlyList<ShopFacetDto> Categories, IReadOnlyList<string> Brands);
 public sealed record ShopFacetDto(string Kind, string Category, int Count);
 public sealed record VariantStockDto(string BranchSlug, string BranchName, int Quantity);
 public sealed record VariantDto(int Id, string Sku, string? Size, string? Color, string? ColorHex, string? Flavor, string Label, long PriceToman, int TotalStock, IReadOnlyList<VariantStockDto> Stock);
 public sealed record ProductDetailDto(
     int Id, string Slug, string Name, string BrandName, string Kind, string Category, string? Description, string ImagePath,
-    long PriceToman, bool IsKhashayarBrand, IReadOnlyList<string> Highlights, IReadOnlyList<VariantDto> Variants);
+    long PriceToman, bool IsHouseBrand, IReadOnlyList<string> Highlights, IReadOnlyList<VariantDto> Variants);
 
 public sealed record CartLine(int VariantId, int Quantity);
 public sealed record ShopQuoteRequest(IReadOnlyList<CartLine> Items, string BranchSlug, string Fulfillment, string? DiscountCode);

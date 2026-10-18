@@ -21,6 +21,7 @@ public static class ProductionGuard
         if (string.IsNullOrWhiteSpace(c["AllowedHosts"]) || c["AllowedHosts"]!.Trim() == "*") p.Add("AllowedHosts را روی دامنهٔ سایت بگذارید (مثل example.ir;www.example.ir).");
         if (!string.IsNullOrEmpty(c["Access:DemoDeviceKey"])) p.Add("Access:DemoDeviceKey باید خالی باشد.");
         if (c.GetValue("Demo:SeedMembers", false) || !string.IsNullOrEmpty(c["Demo:StaffPhone"])) p.Add("تنظیمات Demo:* باید خالی باشند.");
+        if (string.Equals(c["Setup:Mode"], "Demo", StringComparison.OrdinalIgnoreCase)) p.Add("Setup:Mode=Demo فقط برای نسخهٔ نمایشی است؛ در production از Blank یا Content استفاده کنید.");
         return p;
     }
 

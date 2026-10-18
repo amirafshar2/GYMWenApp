@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Check, ChevronRight, MapPin, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { shopApi, type ProductDetail, type Variant } from '@/lib/commerce'
 import { cart, useCart } from '@/lib/cart'
-import { brand, rebrand } from '@/lib/brand'
+import { brand } from '@/lib/brand'
 import { faNum, toman } from '@/lib/fa'
 import { cn } from '@/lib/utils'
 import { Btn, Notice, Spinner } from '@/member/ui'
@@ -52,17 +52,17 @@ export default function ProductPage() {
         </Link>
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="relative overflow-hidden rounded-[10px] bg-white">
-            <img src={p.imagePath} alt={rebrand(p.name)} className="aspect-square w-full object-contain" />
-            {p.isKhashayarBrand && <span className="absolute right-4 top-4 rounded-full bg-plate px-3 py-1 text-[12px] font-bold text-white">برند {brand.shortName}</span>}
+            <img src={p.imagePath} alt={p.name} className="aspect-square w-full object-contain" />
+            {p.isHouseBrand && <span className="absolute right-4 top-4 rounded-full bg-plate px-3 py-1 text-[12px] font-bold text-white">برند {brand.shortName}</span>}
           </div>
 
           <div>
             <p className="text-[14px] text-rubber">{p.brandName} – {p.category}</p>
-            <h1 className="mt-1 text-[28px] font-black leading-tight text-chalk sm:text-[34px]">{rebrand(p.name)}</h1>
+            <h1 className="mt-1 text-[28px] font-black leading-tight text-chalk sm:text-[34px]">{p.name}</h1>
             <p className="mt-4 text-[28px] font-black text-chalk">{toman(variant?.priceToman ?? p.priceToman)}</p>
-            {p.description && <p className="mt-4 text-[15px] leading-8 text-rubber">{rebrand(p.description)}</p>}
+            {p.description && <p className="mt-4 text-[15px] leading-8 text-rubber">{p.description}</p>}
             {p.highlights.length > 0 && (
-              <ul className="mt-4 grid gap-2">{p.highlights.map((h) => <li key={h} className="flex items-center gap-2 text-[14px] text-chalk"><Check className="size-4 text-plate" aria-hidden />{rebrand(h)}</li>)}</ul>
+              <ul className="mt-4 grid gap-2">{p.highlights.map((h) => <li key={h} className="flex items-center gap-2 text-[14px] text-chalk"><Check className="size-4 text-plate" aria-hidden />{h}</li>)}</ul>
             )}
 
             <div className="mt-8 grid gap-6">

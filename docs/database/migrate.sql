@@ -1668,3 +1668,38 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261018154236_SiteTemplate'
+)
+BEGIN
+    EXEC sp_rename N'[Products].[IsKhashayarBrand]', N'IsHouseBrand', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261018154236_SiteTemplate'
+)
+BEGIN
+    CREATE TABLE [SiteContents] (
+        [Id] int NOT NULL IDENTITY,
+        [Json] nvarchar(max) NOT NULL,
+        [UpdatedAtUtc] datetime2 NOT NULL,
+        [UpdatedByUserId] int NULL,
+        CONSTRAINT [PK_SiteContents] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261018154236_SiteTemplate'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261018154236_SiteTemplate', N'10.0.13');
+END;
+
+COMMIT;
+GO
+

@@ -3,23 +3,23 @@ import { test, expect } from '@playwright/test'
 test('هیرو شعار برند را نشان می‌دهد و صفحه RTL است', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
-  await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('ورزش کن')
+  await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('تمرین کن')
 })
 
 test('نزدیک‌ترین شعبه با موقعیت کاربر پیدا می‌شود', async ({ page, context }) => {
   await context.grantPermissions(['geolocation'])
-  await context.setGeolocation({ latitude: 29.7236, longitude: 52.4413 }) // کنار شهرک گلستان
+  await context.setGeolocation({ latitude: 35.9236, longitude: 50.9113 }) // کنار شعبهٔ شهرک سرو (دادهٔ نمایشی)
   await page.goto('/branches')
   await page.getByRole('button', { name: 'نزدیک‌ترین شعبه به من' }).click()
   await expect(page.getByText('نزدیک‌ترین،').first()).toBeVisible()
-  await expect(page.locator('#branch-shahrak-golestan-women')).toContainText('نزدیک‌ترین')
+  await expect(page.locator('#branch-sarv-women')).toContainText('نزدیک‌ترین')
 })
 
 test('فیلتر بانوان فقط شعبه‌های دارای سالن بانوان را نشان می‌دهد', async ({ page }) => {
   await page.goto('/branches')
   await page.getByRole('radio', { name: 'بانوان' }).click()
-  await expect(page.locator('#branch-farhangshahr-kasaei')).toHaveCount(0)
-  await expect(page.locator('#branch-farhangshahr-women')).toBeVisible()
+  await expect(page.locator('#branch-bahar-men')).toHaveCount(0)
+  await expect(page.locator('#branch-bahar-women')).toBeVisible()
 })
 
 test('پکیج‌ها با تخفیف جشنواره نمایش داده می‌شوند', async ({ page }) => {

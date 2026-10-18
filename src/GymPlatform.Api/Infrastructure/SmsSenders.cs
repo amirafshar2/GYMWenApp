@@ -22,7 +22,7 @@ public sealed class KavenegarOptions
 {
     public string ApiKey { get; set; } = "";
     /// <summary>نام الگوی Verify Lookup در پنل کاوه‌نگار.</summary>
-    public string Template { get; set; } = "khashayar-otp";
+    public string Template { get; set; } = "gym-otp";
 }
 
 /// <summary>ارسال واقعی با Verify Lookup کاوه‌نگار. کلید فقط از User Secrets / متغیر محیطی Sms__Kavenegar__ApiKey.</summary>

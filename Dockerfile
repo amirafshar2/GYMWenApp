@@ -6,9 +6,6 @@ WORKDIR /src/src/GymPlatform.Web
 COPY src/GymPlatform.Web/package*.json ./
 RUN npm install --no-audit --no-fund
 COPY src/GymPlatform.Web/ ./
-# VITE_BRAND=demo: ساخت با برند ساختگی (برای دمو و نمونه‌کار)
-ARG VITE_BRAND=
-ENV VITE_BRAND=$VITE_BRAND
 RUN npm run build
 
 # ---- ۲. بک‌اند ----

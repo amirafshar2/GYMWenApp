@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CheckCircle2, Printer, Store, Truck, XCircle } from 'lucide-react'
 import { cart } from '@/lib/cart'
-import { brand, rebrand } from '@/lib/brand'
+import { brand } from '@/lib/brand'
 import { SHOP_STATUS, shopApi, type ShopOrder } from '@/lib/commerce'
 import { faDigits, faNum, jalali, toman } from '@/lib/fa'
 import { useRequireAuth } from '@/member/MemberCard'
@@ -47,7 +47,7 @@ export default function ShopOrderPage() {
             {o.items.map((i, n) => (
               <li key={n} className="flex items-center gap-3 py-3">
                 <img src={i.imagePath} alt="" className="size-14 rounded-[6px] bg-[#EEF3F9] object-contain" />
-                <div className="min-w-0 flex-1"><p className="font-bold text-chalk">{rebrand(i.productName)}</p>{i.variantLabel && <p className="text-[13px] text-rubber">{i.variantLabel}</p>}</div>
+                <div className="min-w-0 flex-1"><p className="font-bold text-chalk">{i.productName}</p>{i.variantLabel && <p className="text-[13px] text-rubber">{i.variantLabel}</p>}</div>
                 <p className="text-[14px] text-rubber">{faNum(i.quantity)} ×</p>
                 <p className="w-32 text-left font-bold">{toman(i.unitPriceToman * i.quantity)}</p>
               </li>

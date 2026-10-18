@@ -17,7 +17,7 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
             BearerFormat = "JWT",
             Description = "توکن دسترسی از POST /api/v1/auth/verify",
         };
-        document.Info.Title = "Khashayar Gym API";
+        document.Info.Title = "Gym Platform API";
         document.Info.Version = "v1";
         return Task.CompletedTask;
     }

@@ -1,4 +1,4 @@
-لوگوی باشگاه:
-- logo.png — لوگوی کامل (دایرهٔ آبی با نوشتهٔ KHASHAYAR FITNESS CLUB)، فوتر
-- logo-mark.png — فقط نماد، برای هدر و جاهای کوچک
-- favicon.ico / favicon-64.png / apple-touch-icon.png — آیکون مرورگر و موبایل
+آیکن‌های پیش‌فرض قالب (بی‌نام):
+- placeholder-logo.svg — لوگوی موقت تا مالک لوگوی خودش را در «تنظیمات سایت» آپلود کند
+- favicon.ico / favicon-64.png / apple-touch-icon.png — آیکن پیش‌فرض مرورگر (با آپلود لوگو، آیکن صفحه هم عوض می‌شود)
+- demo-logo.svg — لوگوی برند ساختگی نسخهٔ نمایشی

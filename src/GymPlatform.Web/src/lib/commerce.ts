@@ -6,14 +6,14 @@ export interface Wallet { balanceToman: number; transactions: WalletTx[]; topUpP
 
 export interface ProductCard {
   id: number; slug: string; name: string; brandName: string; kind: 'supplement' | 'apparel' | 'gear'; category: string; imagePath: string
-  priceToman: number; minVariantPriceToman: number | null; isKhashayarBrand: boolean; inStock: boolean; colors: string[]; sizes: string[]; flavors: string[]
+  priceToman: number; minVariantPriceToman: number | null; isHouseBrand: boolean; inStock: boolean; colors: string[]; sizes: string[]; flavors: string[]
 }
 export interface ShopCatalog { products: ProductCard[]; categories: { kind: string; category: string; count: number }[]; brands: string[] }
 export interface VariantStock { branchSlug: string; branchName: string; quantity: number }
 export interface Variant { id: number; sku: string; size: string | null; color: string | null; colorHex: string | null; flavor: string | null; label: string; priceToman: number; totalStock: number; stock: VariantStock[] }
 export interface ProductDetail {
   id: number; slug: string; name: string; brandName: string; kind: string; category: string; description: string | null; imagePath: string
-  priceToman: number; isKhashayarBrand: boolean; highlights: string[]; variants: Variant[]
+  priceToman: number; isHouseBrand: boolean; highlights: string[]; variants: Variant[]
 }
 export interface QuoteLine { variantId: number; productSlug: string; productName: string; variantLabel: string | null; imagePath: string; unitPriceToman: number; quantity: number; lineToman: number; availableInBranch: number; problem: string | null }
 export interface ShopQuote {
