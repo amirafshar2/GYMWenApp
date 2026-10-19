@@ -255,7 +255,8 @@ using (var scope = app.Services.CreateScope())
         : !app.Configuration.GetValue("Database:SeedDemoData", true) || app.Environment.IsProduction() ? "Blank" : "Demo";
     var installed = await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().InstallAsync(
         setupMode, Path.Combine(AppContext.BaseDirectory, "Seed"), app.Configuration["Setup:ContentFile"],
-        app.Services.GetRequiredService<PublicImageStore>().Root, app.Configuration["Setup:OwnerPhone"], CancellationToken.None);
+        app.Services.GetRequiredService<PublicImageStore>().Root, app.Configuration["Setup:OwnerPhone"], CancellationToken.None,
+        demoData: !app.Environment.IsProduction() && app.Configuration.GetValue("Setup:DemoData", false));
     // مالک را می‌شود بعداً هم با Setup:OwnerPhone اضافه کرد (مثلاً اگر بار اول جا افتاده)
     if (installed is null && app.Configuration["Setup:OwnerPhone"] is { Length: > 0 } owner)
         await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().EnsureOwnerAsync(owner, CancellationToken.None);

@@ -26,7 +26,8 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
     /// <param name="contentFile">بستهٔ محتوا (zip یا پوشه) برای حالت Content</param>
     /// <param name="uploadsRoot">پوشهٔ عکس‌های آپلودی؛ عکس‌های داخل بسته این‌جا کپی می‌شوند</param>
     /// <returns>حالتی که واقعاً نصب شد، یا null اگر سایت قبلاً نصب شده بود</returns>
-    public async Task<string?> InstallAsync(string mode, string demoSeedDir, string? contentFile, string uploadsRoot, string? ownerPhone, CancellationToken ct)
+    /// <param name="demoData">در حالت Content هم دادهٔ نمایشی (موجودی انبار، کد تخفیف، جشنوارهٔ فعال) ساخته شود — برای پرزنت با محتوای واقعی یک باشگاه</param>
+    public async Task<string?> InstallAsync(string mode, string demoSeedDir, string? contentFile, string uploadsRoot, string? ownerPhone, CancellationToken ct, bool demoData = false)
     {
         if (await db.SiteContents.AnyAsync(ct)) return null;
         mode = Modes.FirstOrDefault(m => m.Equals(mode, StringComparison.OrdinalIgnoreCase))
@@ -54,14 +55,14 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
                 if (File.Exists(contentFile))
                 {
                     temp = Path.Combine(Path.GetTempPath(), "gym-content-" + Guid.NewGuid().ToString("N"));
-                    ZipFile.ExtractToDirectory(contentFile, temp);
+                    using (var zip = OpenPackage(contentFile)) zip.ExtractToDirectory(temp);
                     dir = temp;
                 }
                 else if (!Directory.Exists(contentFile)) throw new FileNotFoundException("Setup:ContentFile not found.", contentFile);
                 try
                 {
                     CopyUploads(Path.Combine(dir, "uploads"), uploadsRoot);
-                    await seeder.SeedAsync(dir, demo: false, ct);
+                    await seeder.SeedAsync(dir, demo: demoData, ct);
                     var cfg = File.Exists(Path.Combine(dir, "site.json"))
                         ? SiteService.Parse(await File.ReadAllTextAsync(Path.Combine(dir, "site.json"), ct))
                         : new SiteConfig();
@@ -96,6 +97,15 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
         }
         var missing = new[] { Roles.Member, Roles.SuperAdmin }.Except(await users.GetRolesAsync(u)).ToList();
         if (missing.Count > 0) await users.AddToRolesAsync(u, missing);
+    }
+
+    /// <summary>بستهٔ zip، یا همان zip به‌صورت متن base64 (برای «Secret File» در سرویس‌های میزبانی که فقط متن می‌گیرند)</summary>
+    private static ZipArchive OpenPackage(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        if (bytes.Length < 2 || bytes[0] != 'P' || bytes[1] != 'K')
+            bytes = Convert.FromBase64String(System.Text.Encoding.ASCII.GetString(bytes).Trim());
+        return new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read);
     }
 
     private static void CopyUploads(string from, string to)

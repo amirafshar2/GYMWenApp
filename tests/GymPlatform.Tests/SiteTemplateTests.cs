@@ -176,4 +176,27 @@ public sealed class SiteTemplateTests
         }
         finally { File.Delete(zipPath); }
     }
+
+    [Fact]
+    public async Task Content_package_as_base64_text_with_demo_data_for_a_presentation()
+    {
+        var b64Path = Path.Combine(Path.GetTempPath(), $"kg-content-{Guid.NewGuid():N}.b64");
+        using (var src = new GymApiFactory())
+        {
+            var admin = await SuperAsync(src);
+            var zip = await (await admin.SendAsync(HttpMethod.Get, "/api/v1/panel/admin/content/export")).Content.ReadAsByteArrayAsync();
+            await File.WriteAllTextAsync(b64Path, Convert.ToBase64String(zip) + "\n");
+        }
+        try
+        {
+            using var twin = new GymApiFactory { Extra = [("Setup:Mode", "Content"), ("Setup:ContentFile", b64Path), ("Setup:DemoData", "true")] };
+            var anon = new Browser(twin);
+            var site = await anon.JsonAsync<JsonElement>(await anon.SendAsync(HttpMethod.Get, "/api/v1/site"));
+            Assert.Equal("Content", site.GetProperty("mode").GetString());
+            Assert.Equal(HttpStatusCode.OK, (await anon.SendAsync(HttpMethod.Get, "/api/v1/campaigns/active")).StatusCode);
+            using var scope = twin.Services.CreateScope();
+            Assert.True(await scope.ServiceProvider.GetRequiredService<GymDbContext>().DiscountCodes.AnyAsync());
+        }
+        finally { File.Delete(b64Path); }
+    }
 }
