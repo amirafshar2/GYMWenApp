@@ -329,7 +329,7 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
 app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 app.MapControllers();
 // ویدیوهای آپلودی و نسخه‌های بهینه‌شده‌شان: فقط نام‌های مجاز، با Range (جلو/عقب رفتن) و کش یک‌ساعته
-app.MapGet(GymPlatform.Api.Video.VideoStore.RequestPath + "/{name}", (string name, GymPlatform.Api.Video.VideoStore videos, HttpContext http) =>
+app.MapMethods(GymPlatform.Api.Video.VideoStore.RequestPath + "/{name}", ["GET", "HEAD"], (string name, GymPlatform.Api.Video.VideoStore videos, HttpContext http) =>
 {
     if (!GymPlatform.Api.Video.VideoStore.PublicName().IsMatch(name)) return Results.NotFound();
     var path = Path.Combine(videos.Root, name);

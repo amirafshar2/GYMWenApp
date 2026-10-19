@@ -82,8 +82,10 @@ public sealed class VideoTests
             }
             var range = new HttpRequestMessage(HttpMethod.Get, $"/media/videos/{id}-scrub.mp4");
             range.Headers.Range = new RangeHeaderValue(0, 99);
-            var part = await f.CreateClient(new() { BaseAddress = new Uri("https://localhost") }).SendAsync(range);
+            var http = f.CreateClient(new() { BaseAddress = new Uri("https://localhost") });
+            var part = await http.SendAsync(range);
             Assert.Equal(HttpStatusCode.PartialContent, part.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, (await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, $"/media/videos/{id}.jpg"))).StatusCode);
             // نام‌های غیرمجاز سرو نمی‌شوند (نسخهٔ اصلی و فایل وضعیت)
             Assert.Equal(HttpStatusCode.NotFound, (await admin.SendAsync(HttpMethod.Get, $"/media/videos/{id}.orig.mp4")).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await admin.SendAsync(HttpMethod.Get, $"/media/videos/{id}.ready")).StatusCode);
