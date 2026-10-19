@@ -3,7 +3,7 @@
 # -Crop: نوارهای سیاه کناری را می‌بُرد (پیش‌فرض برای ویدیوی فعلی). خالی = بدون برش
 param(
   [string]$Video = (Join-Path $PSScriptRoot '..\src\GymPlatform.Web\public\media\video\gym-source.mp4'),
-  [string]$Crop = '1344:1080:288:0'
+  [string]$Crop = ''
 )
 $dir = Split-Path $Video
 $pre = if ($Crop) { "crop=$Crop," } else { '' }

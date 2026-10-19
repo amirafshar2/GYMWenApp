@@ -27,7 +27,7 @@ export function pickVariant(): Variant {
 }
 
 /** فایل‌های پیش‌فرض قالب ?v= می‌گیرند تا کش قدیمی مرورگرها دور زده شود */
-const BUILTIN_VERSION = 'scrub-3'
+const BUILTIN_VERSION = 'scrub-4'
 const withVersion = (u: string) => (u.startsWith('/media/video/') ? `${u}?v=${BUILTIN_VERSION}` : u)
 const photoVersion = (u: string) => (u.startsWith('/media/video/') ? `${u}?v=photo-1` : u)
 
@@ -61,6 +61,10 @@ export default function SiteVideo() {
   return c.mode === 'loop' ? <LoopVideo src={c.urls.loop} frame={c.frame} title={c.title} /> : <ScrubVideo src={c.urls.scrub[variant]} frame={c.frame} title={c.title} />
 }
 
+/** هدر ثابت (۷۸ پیکسل + خط ۱ پیکسلی) + نوار جشنواره/دمو؛ قاب ویدیو دقیقاً زیر آن‌ها و به اندازهٔ بقیهٔ صفحه */
+const BAR = 'calc(79px + var(--festival-h, 0px))'
+const STAGE = { top: BAR, height: `calc(100vh - ${BAR})` }
+
 const clamp = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
 
 /**
@@ -71,6 +75,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
   const section = useRef<HTMLElement>(null)
   const video = useRef<HTMLVideoElement>(null)
   const text = useRef<HTMLDivElement>(null)
+  const stick = useRef<HTMLDivElement>(null)
   const [blobSrc, setBlobSrc] = useState<string | null>(null)
   const [near, setNear] = useState(false)
 
@@ -111,9 +116,12 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
     const tick = () => {
       raf = 0
       if (!visible) return
+      // قاب ویدیو زیر هدر ثابت می‌چسبد (نه زیر آن): ابتدای اسکرول وقتی است که بالای بخش به پایین هدر برسد
       const r = el.getBoundingClientRect()
-      const span = r.height - window.innerHeight
-      const progress = clamp(span > 0 ? -r.top / span : 0)
+      const stage = stick.current
+      const offset = stage ? parseFloat(getComputedStyle(stage).top) || 0 : 0
+      const span = r.height - (stage?.offsetHeight ?? window.innerHeight)
+      const progress = clamp(span > 0 ? (offset - r.top) / span : 0)
       if (text.current) {
         const t = clamp((progress - 0.08) / 0.25)
         text.current.style.opacity = String(t)
@@ -141,7 +149,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
 
   return (
     <section ref={section} aria-label={`ویدیوی تمرین در سالن ${brand.shortName}`} className="relative h-[320vh] bg-[#151514]">
-      <div className="sticky top-0 h-[100vh] overflow-hidden">
+      <div ref={stick} className="sticky overflow-hidden" style={STAGE}>
         <img src={frame} alt="" decoding="async" className="absolute inset-0 size-full object-cover" />
         {blobSrc && (
           <video ref={video} src={blobSrc} muted playsInline preload="auto" disablePictureInPicture aria-hidden
@@ -151,7 +159,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
       </div>
       {/* متن روی ویدیو در لایهٔ جدا با sticky خودش */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="sticky top-0 flex h-[100vh] items-end justify-center px-6 pb-[12vh] text-center">
+        <div className="sticky flex items-end justify-center px-6 pb-[12vh] text-center" style={STAGE}>
           <div ref={text} style={{ opacity: 0 }}>
             <p className="text-[15px] font-bold tracking-wide text-[#fff4e8]/80">{brand.shortName}</p>
             <h2 className="mt-2 text-[34px] font-black leading-tight text-[#fff4e8] sm:text-[56px]">{title}</h2>

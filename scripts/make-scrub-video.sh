@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # نسخه‌های ویدیوی پیش‌فرض قالب، با همان تنظیمات بهینه‌سازی خودکار آپلودهای پنل (Video/VideoOptimizer.cs):
 #   gym-scrub.mp4 (1080، اسکرولی)  gym-scrub-720.mp4  gym-scrub-540.mp4  gym.mp4 (پخش تکراری)  gym.jpg  gym-960.jpg
-# استفاده: ./scripts/make-scrub-video.sh [ورودی] [crop]   پیش‌فرض: gym-source.mp4 و برش نوارهای سیاه 1344:1080:288:0
+# استفاده: ./scripts/make-scrub-video.sh [ورودی] [crop]   پیش‌فرض: gym-source.mp4 بدون برش (برای برش نوار سیاه: 1344:1080:288:0)
 set -euo pipefail
 DIR="$(dirname "$0")/../src/GymPlatform.Web/public/media/video"
 IN="${1:-$DIR/gym-source.mp4}"
-CROP="${2-1344:1080:288:0}"
+CROP="${2-}"
 PRE=""; [ -n "$CROP" ] && PRE="crop=$CROP,"
 COMMON=(-threads 1 -filter_threads 1 -an -sn -dn -map_metadata -1 -pix_fmt yuv420p -movflags +faststart
         -x264-params threads=1:lookahead-threads=1:rc-lookahead=4:ref=1)
