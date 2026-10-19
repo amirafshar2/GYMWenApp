@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Check, Download, Eye, EyeOff, Plus, Trash2 } from 'lucide-react'
 import { panelApi } from '@/lib/panel'
@@ -263,12 +263,8 @@ function HomeTab({ c, setHome, err, errKeys }: { c: SiteConfig; setHome: (v: Par
     </>,
     video: <>
       <F label="شعار روی ویدیو" error={err('home.video.title')}><Text value={h.video.title} onChange={(v) => sec('video')({ title: v })} max={80} /></F>
-      <F label="ویدیو" hint="ویدیوی اسکرولی فقط روی کامپیوترهای سریع پخش می‌شود؛ بقیه عکس را می‌بینند.">
-        <select value={h.video.videoUrl ? 'on' : 'off'} onChange={(e) => sec('video')({ videoUrl: e.target.value === 'on' ? '/media/video/gym.mp4' : null })} className={cn(inputCls, 'h-11 cursor-pointer')}>
-          <option value="on">ویدیوی قالب</option><option value="off">بدون ویدیو (فقط عکس)</option>
-        </select>
-      </F>
-      <F label="عکس (به‌جای ویدیو)" error={err('home.video.posterUrl')}><ImagePicker prefer="site" wide value={h.video.posterUrl} onChange={(v) => sec('video')({ posterUrl: v })} /></F>
+      <VideoField className="sm:col-span-2" value={h.video} onChange={(v) => sec('video')(v)} err={err('home.video.videoUrl')} />
+      <F label="عکس (برای حالت کم‌مصرف و اینترنت کند)" error={err('home.video.posterUrl')}><ImagePicker prefer="site" wide value={h.video.posterUrl} onChange={(v) => sec('video')({ posterUrl: v })} /></F>
       <F label="عکس در موبایل" error={err('home.video.mobilePosterUrl')}><ImagePicker prefer="site" value={h.video.mobilePosterUrl ?? ''} onChange={(v) => sec('video')({ mobilePosterUrl: v })} hint="عمودی؛ خالی = همان عکس" /></F>
     </>,
     offer: <>
@@ -327,6 +323,82 @@ function HomeTab({ c, setHome, err, errKeys }: { c: SiteConfig; setHome: (v: Par
         <F label="یک خط معرفی کوتاه" hint="کنار تعداد شعبه‌ها، مثل «سالن‌های جدای آقایان و بانوان»" error={err('home.footerNote')}><Text value={h.footerNote} onChange={(v) => setHome({ footerNote: v })} max={120} /></F>
       </Card>
     </>
+  )
+}
+
+/** ویدیو: قالب / آپلود خود مالک / بدون ویدیو؛ بعد از آپلود هر ۴ ثانیه وضعیت بهینه‌سازی پرسیده می‌شود */
+function VideoField({ value, onChange, err, className }: { value: SiteConfig['home']['video']; onChange: (v: Partial<SiteConfig['home']['video']>) => void; err?: string; className?: string }) {
+  const input = useRef<HTMLInputElement>(null)
+  const [pct, setPct] = useState<number | null>(null)
+  const [job, setJob] = useState<{ id: string; state: 'optimizing' | 'ready' | 'failed'; msg?: string } | null>(null)
+  const [upErr, setUpErr] = useState<string | null>(null)
+  const kind = !value.videoUrl ? 'none' : value.videoUrl.startsWith('/media/videos/') ? 'upload' : 'builtin'
+  const pending = /^\/media\/videos\/([a-f0-9]{32})\.mp4$/.exec(value.videoUrl ?? '')?.[1]
+
+  // ویدیوی آپلودی که هنوز بهینه نشده (مثلاً صفحه دوباره باز شده): پیگیری ادامه پیدا کند
+  useEffect(() => { if (pending && value.optimized === false && !job) setJob({ id: pending, state: 'optimizing' }) }, [pending]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (job?.state !== 'optimizing') return
+    let stop = false
+    const poll = async () => {
+      try {
+        const s = await panelApi.videoStatus(job.id)
+        if (stop) return
+        if (s.ready) {
+          setJob({ id: job.id, state: 'ready' })
+          onChange({ optimized: true, ...(value.posterUrl ? {} : { posterUrl: s.poster ?? '' }) })
+        } else if (s.failed) setJob({ id: job.id, state: 'failed', msg: s.failed })
+        else t = window.setTimeout(poll, 4000)
+      } catch { if (!stop) t = window.setTimeout(poll, 4000) }
+    }
+    let t = window.setTimeout(poll, 1500)
+    return () => { stop = true; clearTimeout(t) }
+  }, [job?.id, job?.state]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const upload = async (f: File | undefined) => {
+    if (!f) return
+    setUpErr(null); setPct(0)
+    try {
+      const r = await panelApi.uploadVideo(f, setPct)
+      onChange({ videoUrl: r.url, optimized: false })
+      setJob({ id: r.video, state: 'optimizing' })
+    } catch (e) { setUpErr((e as Error).message) } finally { setPct(null) }
+  }
+
+  return (
+    <div className={cn('grid gap-3 rounded-[6px] border border-steel-2 bg-steel/50 p-4', className)}>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-[13px] font-bold text-chalk">ویدیو</span>
+        <select value={kind} aria-label="ویدیو" onChange={(e) => onChange(e.target.value === 'none' ? { videoUrl: null } : e.target.value === 'builtin' ? { videoUrl: '/media/video/gym.mp4', optimized: true } : {})}
+          className={cn(inputCls, 'h-10 w-auto cursor-pointer')}>
+          <option value="builtin">ویدیوی قالب</option>
+          {kind === 'upload' && <option value="upload">ویدیوی آپلودشده</option>}
+          <option value="none">بدون ویدیو (فقط عکس)</option>
+        </select>
+        <Btn type="button" variant="dark" className="h-10" busy={pct !== null} onClick={() => input.current?.click()}>آپلود ویدیوی خودتان</Btn>
+        <input ref={input} type="file" accept="video/mp4,video/quicktime" className="sr-only" aria-label="فایل ویدیو"
+          onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
+      </div>
+      <p className="text-[12px] leading-5 text-rubber">MP4 یا MOV، حداکثر ۸۰ مگابایت، ۶۰ ثانیه و 4K. سرور خودش نسخه‌های سبک برای گوشی، تبلت و کامپیوتر می‌سازد؛ صدا حذف می‌شود.</p>
+      {pct !== null && (
+        <div className="grid gap-1" role="status">
+          <div className="h-2 overflow-hidden rounded-full bg-steel-2"><div className="h-full bg-plate transition-[width]" style={{ width: `${pct}%` }} /></div>
+          <span className="text-[12px] text-rubber">در حال آپلود… {pct}٪</span>
+        </div>
+      )}
+      {job?.state === 'optimizing' && <Notice tone="info">در حال بهینه‌سازی… (چند دقیقه؛ می‌توانید ذخیره کنید و صفحه را ببندید)</Notice>}
+      {job?.state === 'ready' && <Notice tone="ok">ویدیو آماده است. برای اعمال روی سایت «ذخیره» را بزنید.</Notice>}
+      {job?.state === 'failed' && <Notice tone="err">{job.msg}</Notice>}
+      {(upErr || err) && <Notice tone="err">{upErr ?? err}</Notice>}
+      {value.videoUrl && (
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="نحوهٔ پخش">
+          {([['scrub', 'با اسکرول جلو و عقب برود'], ['loop', 'خودکار و تکراری پخش شود']] as const).map(([k, l]) => (
+            <button key={k} type="button" role="radio" aria-checked={(value.mode ?? 'scrub') === k} onClick={() => onChange({ mode: k })}
+              className={cn('h-10 cursor-pointer rounded-full border-2 px-4 text-[13px] font-bold', (value.mode ?? 'scrub') === k ? 'border-plate bg-plate text-white' : 'border-steel-2 bg-white text-chalk')}>{l}</button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

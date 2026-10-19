@@ -333,7 +333,7 @@ Für komplette Playwright-Läufe das Rate-Limit in der Entwicklung anheben (alle
 $env:RateLimiting__PermitMultiplier = "20"   # nur Development/Testing; in Production ignoriert
 ```
 
-Aktuell 114 automatisierte Tests: 81 Server-Tests und 33 Browser-Tests (Desktop und Mobil).
+Aktuell 124 automatisierte Tests: 86 Server-Tests und 38 Browser-Tests (Desktop und Mobil, inkl. Scroll-Video auf fünf Geräteprofilen).
 
 ## Vorlage: Installationsmodi und Einrichtungsassistent
 
@@ -386,16 +386,21 @@ Layout und Stil orientieren sich an einer Referenzseite (Vorlage „GYM Store �
 
 Änderungen an den Originalkomponenten: feste englische Texte wurden zu persischen Props, dazu RTL-Anpassungen (kein letter-spacing bei Persisch, Pfeilrichtungen). Jede Datei beschreibt oben ihre Änderungen. Die Lizenz dieser Komponenten ist auf 21st.dev „unknown“ – vor kommerzieller Übergabe prüfen. Originaldemos im Entwicklungsmodus: `npm run dev`, dann `http://localhost:5173/lab`.
 
-### Scroll-Video austauschen
+### Scroll-Video
 
-Neues Rohvideo als `gym-source.mp4` in `src/GymPlatform.Web/public/media/video/` legen und ausführen:
+**Im Panel** (Website-Einstellungen → Startseite → Video) lädt der Betreiber ein eigenes MP4/MOV hoch (max. 80 MB, 60 s, 4K). Der Upload wird direkt auf die Festplatte gestreamt; eine Hintergrund-Warteschlange (immer nur ein Auftrag, ffmpeg mit einem Thread und niedriger CPU-Priorität) erzeugt daraus:
 
-```powershell
-.\scripts\make-scrub-video.ps1
-cd src\GymPlatform.Web; npm run build
-```
+| Datei | Breite | Zweck |
+|---|---|---|
+| `-scrub.mp4` / `-scrub-720.mp4` / `-scrub-540.mp4` | 1920 / 1280 / 960 | Scrollen (alle 4 Frames ein Keyframe, keine B-Frames) |
+| `.mp4` | 1920 | automatische Endlos-Wiedergabe |
+| `.jpg` / `-960.jpg` | 1920 / 960 | erstes Bild – die Seite ist nie leer |
 
-Das Skript macht jeden Frame zum Keyframe, damit Vor- und Zurückspulen beim Scrollen flüssig ist.
+Der Browser wählt die Fassung nach Gerät (Datensparmodus/2G/„weniger Bewegung“ → Bild, ≤ 2 Kerne/2 GB/3G → 540, ≤ 4 Kerne/4 GB oder Breite < 1280 → 720, sonst 1080), lädt sie als Blob, wärmt den Decoder an und folgt dem Scrollen in einer `requestAnimationFrame`-Schleife mit Glättung und höchstens einem Seek gleichzeitig.
+
+Gemessen (Playwright, CPU 4–6× gedrosselt, Median Abstand Scroll-Ziel ↔ Videozeit): schwacher PC 0,18 s, normaler PC 0,20 s, starker PC 0,16 s, Tablet 0,14 s, Handy 0,22 s. Arbeitsspeicher während der Optimierung bei gleichzeitigem Verkehr (PSS, Server + ffmpeg): 382 MB mit 1080p-Quelle, 475 MB mit 4K-Quelle – unter 512 MB (`DOTNET_GCHeapHardLimit=0x8000000`, `DOTNET_GCConserveMemory=7` im Dockerfile). Ohne ffmpeg läuft alles weiter, das Video wird dann nur nicht optimiert.
+
+**Standardvideo der Vorlage** neu erzeugen: Rohvideo als `gym-source.mp4` in `src/GymPlatform.Web/public/media/video/` legen und `.\scripts\make-scrub-video.ps1` (oder `.sh`) ausführen – gleiche Einstellungen wie die automatische Optimierung.
 
 ## Sicherheit
 

@@ -105,6 +105,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAccessTokenFactory, JwtTokenFactory>();
 builder.Services.AddSingleton<IPrivateFileStore, PrivateFileStore>();
 builder.Services.AddSingleton<PublicImageStore>();
+builder.Services.AddSingleton<GymPlatform.Api.Video.VideoStore>();
+builder.Services.AddSingleton<GymPlatform.Business.Services.Site.IVideoLibrary>(sp => sp.GetRequiredService<GymPlatform.Api.Video.VideoStore>());
+builder.Services.AddSingleton<GymPlatform.Api.Video.VideoOptimizer>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<GymPlatform.Api.Video.VideoOptimizer>());
 
 // ---- پیامک: Log (دمو) یا Kavenegar ----
 builder.Services.Configure<GymPlatform.Business.Services.Panel.SmsOptions>(builder.Configuration.GetSection(GymPlatform.Business.Services.Panel.SmsOptions.Section));
@@ -324,6 +328,15 @@ app.UseAuthorization();
 app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 app.MapControllers();
+// ویدیوهای آپلودی و نسخه‌های بهینه‌شده‌شان: فقط نام‌های مجاز، با Range (جلو/عقب رفتن) و کش یک‌ساعته
+app.MapGet(GymPlatform.Api.Video.VideoStore.RequestPath + "/{name}", (string name, GymPlatform.Api.Video.VideoStore videos, HttpContext http) =>
+{
+    if (!GymPlatform.Api.Video.VideoStore.PublicName().IsMatch(name)) return Results.NotFound();
+    var path = Path.Combine(videos.Root, name);
+    if (!File.Exists(path)) return Results.NotFound();
+    http.Response.Headers.CacheControl = "public, max-age=3600";
+    return Results.File(path, name.EndsWith(".mp4") ? "video/mp4" : "image/jpeg", enableRangeProcessing: true);
+}).ExcludeFromDescription();
 app.MapHub<GymPlatform.Api.Hubs.CanteenHub>(GymPlatform.Api.Hubs.CanteenHub.Path);
 app.MapFallbackToFile("index.html");
 

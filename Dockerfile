@@ -29,10 +29,16 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     DOTNET_RUNNING_IN_CONTAINER=true \
     Storage__PrivateRoot=/data/private \
     Storage__PublicUploads=/data/uploads \
-    DataProtection__KeysPath=/data/private/keys
+    DataProtection__KeysPath=/data/private/keys \
+    Storage__Videos=/data/videos \
+    DOTNET_gcServer=0 \
+    DOTNET_GCConserveMemory=7 \
+    DOTNET_GCHeapHardLimit=0x8000000
+# ffmpeg برای بهینه‌سازی خودکار ویدیوهای آپلودی (بدون آن برنامه کار می‌کند، فقط ویدیو بهینه نمی‌شود)
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app ./
 # فایل‌های خصوصی (PDF قراردادها) در volume جدا، با مالکیت کاربر غیر root ایمیج (app، UID 1654)
-RUN mkdir -p /data/private /data/uploads && chown -R $APP_UID /data
+RUN mkdir -p /data/private /data/uploads /data/videos && chown -R $APP_UID /data
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "GymPlatform.Api.dll"]

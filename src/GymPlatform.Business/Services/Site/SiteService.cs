@@ -30,7 +30,7 @@ public sealed record SetupStatusDto(string Mode, bool Published, bool GuideHidde
 /// <param name="Step">مرحله‌ای که دستی «انجام شد» یا «برگرداندن» می‌شود</param>
 public sealed record SetupUpdateRequest(string? Step, bool? StepDone, bool? Publish, bool? GuideHidden);
 
-public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, IClock clock) : ISiteService
+public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, IClock clock, IVideoLibrary? videos = null) : ISiteService
 {
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
@@ -224,9 +224,10 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
             Video = new VideoSettings
             {
                 Title = T(h.Video?.Title, 80, "home.video.title", "شعار ویدیو"),
-                VideoUrl = h.Video?.VideoUrl is { Length: > 0 } v ? (VideoPath().IsMatch(v) ? v : Err(e, "home.video.videoUrl", "ویدیو فقط از پوشهٔ ویدیوی سایت.")) : null,
+                VideoUrl = h.Video?.VideoUrl is { Length: > 0 } v ? (ValidVideo(v) ? v : Err(e, "home.video.videoUrl", "ویدیو فقط از پوشهٔ ویدیوی سایت یا آپلود.")) : null,
                 PosterUrl = Img(h.Video?.PosterUrl, "home.video.posterUrl") ?? "",
                 MobilePosterUrl = Img(h.Video?.MobilePosterUrl, "home.video.mobilePosterUrl"),
+                Mode = h.Video?.Mode == "loop" ? "loop" : "scrub",
             },
             Offer = new OfferSettings
             {
@@ -270,11 +271,15 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         c.Modules = r.Modules ?? new();
 
         if (e.Count > 0) return Result<SiteConfig>.Fail(e);
+        // بهینه بودن ویدیو را سرور از روی فایل {id}.ready تعیین می‌کند، نه فرم
+        c.Home.Video.Optimized = c.Home.Video.VideoUrl is { } vu && (videos?.IsOptimized(vu) ?? VideoPath().IsMatch(vu));
         await SaveRawAsync(c, staffId, ct);
         db.AuditLogs.Add(new AuditLog { Action = "site.updated", EntityType = "Site", EntityId = "1", UserId = staffId });
         await db.SaveChangesAsync(ct);
         return Result<SiteConfig>.Ok(await GetAsync(ct));
     }
+
+    private bool ValidVideo(string v) => videos?.IsValidUrl(v) ?? VideoPath().IsMatch(v);
 
     private static string? Err(Dictionary<string, string[]> e, string key, string msg) { e[key] = [msg]; return null; }
 

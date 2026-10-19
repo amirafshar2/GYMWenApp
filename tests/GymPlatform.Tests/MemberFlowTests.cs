@@ -28,6 +28,7 @@ public sealed class GymApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Integrations:DispatcherEnabled", "false");
         builder.UseSetting("Storage:PrivateRoot", Path.Combine(Path.GetTempPath(), $"kg-test-files-{Guid.NewGuid():N}"));
         builder.UseSetting("Storage:PublicUploads", Path.Combine(Path.GetTempPath(), $"kg-test-up-{Guid.NewGuid():N}"));
+        builder.UseSetting("Storage:Videos", Path.Combine(Path.GetTempPath(), $"kg-test-vid-{Guid.NewGuid():N}"));
         foreach (var (k, v) in Extra) builder.UseSetting(k, v);
     }
 

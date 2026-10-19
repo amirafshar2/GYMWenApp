@@ -148,6 +148,10 @@ public sealed class VideoSettings
     public string? VideoUrl { get; set; } = "/media/video/gym.mp4";
     public string PosterUrl { get; set; } = "/media/video/gym-poster.webp";
     public string? MobilePosterUrl { get; set; } = "/media/video/gym-poster-mobile.webp";
+    /// <summary>scrub = با اسکرول جلو/عقب می‌رود؛ loop = خودکار و تکراری پخش می‌شود</summary>
+    public string Mode { get; set; } = "scrub";
+    /// <summary>نسخه‌های اسکرولی (-scrub، -720، -540) و عکس‌ها ساخته شده‌اند؛ سرور هنگام ذخیره خودش تعیین می‌کند</summary>
+    public bool Optimized { get; set; } = true;
 }
 
 public sealed class OfferSettings

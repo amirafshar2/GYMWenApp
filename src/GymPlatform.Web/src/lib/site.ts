@@ -27,7 +27,7 @@ export interface SiteConfig {
     hero: { eyebrow: string; body: string; primaryCta: string; secondaryCta: string; imageUrl: string; mobileImageUrl: string }
     intro: { eyebrow: string; title: string; cards: CardItem[] }
     why: { title: string; text: string; imageUrl: string; imageCta: string; points: CardItem[]; foundedYear?: number | null; members?: number | null }
-    video: { title: string; videoUrl?: string | null; posterUrl: string; mobilePosterUrl?: string | null }
+    video: { title: string; videoUrl?: string | null; posterUrl: string; mobilePosterUrl?: string | null; mode?: 'scrub' | 'loop'; optimized?: boolean }
     offer: { eyebrow: string; title: string; items: CardItem[] }
     branches: SimpleSection; pricing: SimpleSection; shop: SimpleSection
     events: { eyebrow: string; title: string; text: string; imageUrl: string; secondImageUrl: string }

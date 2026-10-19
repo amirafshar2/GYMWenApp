@@ -174,6 +174,27 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return File(zip, "application/zip", $"site-content-{DateTime.UtcNow:yyyyMMdd}.zip");
     }
 
+    // ---- ویدیو: آپلود مستقیم روی دیسک، بهینه‌سازی در صف پس‌زمینه
+    [HttpPost("videos"), PanelAccess(R.Super)]
+    [RequestSizeLimit(GymPlatform.Api.Video.VideoStore.MaxBytes + 1024 * 1024)]
+    [GymPlatform.Api.Video.DisableFormValueModelBinding]
+    [EnableRateLimiting("payment")]
+    public async Task<IActionResult> UploadVideo([FromServices] GymPlatform.Api.Video.VideoStore videos, [FromServices] GymPlatform.Api.Video.VideoOptimizer optimizer, CancellationToken ct)
+    {
+        var (id, error) = await videos.SaveAsync(Request, ct);
+        if (id is null) return Problem(statusCode: 400, title: error);
+        optimizer.Enqueue(id);
+        return StatusCode(201, new { url = $"{GymPlatform.Api.Video.VideoStore.RequestPath}/{id}.mp4", video = id, optimizing = true });
+    }
+
+    [HttpGet("uploads/{id:regex(^[[a-f0-9]]{{32}}$)}/status"), PanelAccess(R.Super)]
+    public IActionResult VideoStatus(string id, [FromServices] GymPlatform.Api.Video.VideoStore videos)
+    {
+        if (!videos.Exists(id)) return NotFound();
+        var s = videos.GetStatus(id);
+        return Ok(new { ready = s.Ready, poster = s.Poster, failed = s.Failed });
+    }
+
     // ---- شعبه‌ها و سؤالات پرتکرار
     [HttpGet("branches"), PanelAccess(R.Super)]
     public async Task<IActionResult> Branches(CancellationToken ct) => Ok(await admin.BranchesAsync(ct));

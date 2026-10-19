@@ -160,6 +160,25 @@ export const panelApi = {
     if (!res.ok || !body.path) throw new Error(body.title ?? 'آپلود عکس انجام نشد.')
     return body.path
   },
+  /** آپلود ویدیو (MP4/MOV تا ۸۰ مگابایت) با درصد پیشرفت؛ بهینه‌سازی بعدش در سرور انجام می‌شود */
+  uploadVideo: async (file: File, onProgress: (pct: number) => void): Promise<{ url: string; video: string; optimizing: boolean }> => {
+    const once = () => new Promise<{ status: number; body: { url?: string; video?: string; optimizing?: boolean; title?: string } }>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', `/api/v1${A}/videos`)
+      xhr.setRequestHeader('X-KG-Client', 'web')
+      const t = currentAccessToken()
+      if (t) xhr.setRequestHeader('Authorization', `Bearer ${t}`)
+      xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100)) }
+      xhr.onload = () => { let body = {}; try { body = JSON.parse(xhr.responseText) } catch { /* */ } resolve({ status: xhr.status, body }) }
+      xhr.onerror = () => reject(new Error('ارتباط قطع شد؛ دوباره امتحان کنید.'))
+      const fd = new FormData(); fd.append('file', file); xhr.send(fd)
+    })
+    let r = await once()
+    if (r.status === 401 && await refreshSession()) r = await once()
+    if (r.status !== 201 || !r.body.url) throw new Error(r.body.title ?? (r.status === 413 ? 'حجم ویدیو حداکثر ۸۰ مگابایت باشد.' : 'آپلود ویدیو انجام نشد.'))
+    return r.body as { url: string; video: string; optimizing: boolean }
+  },
+  videoStatus: (id: string) => get<{ ready: boolean; poster: string | null; failed: string | null }>(`${A}/uploads/${id}/status`),
   staff: () => get<StaffRow[]>(`${A}/staff`),
   saveStaff: (body: { phone: string; fullName: string | null; roles: string[]; branchSlugs: string[] }) => send<StaffRow>('PUT', `${A}/staff`, body),
   sms: (kind?: string) => get<SmsStats>(`${A}/sms${q({ kind })}`),
