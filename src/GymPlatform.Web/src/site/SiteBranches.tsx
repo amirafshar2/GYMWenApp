@@ -14,6 +14,18 @@ const AREA_COLORS = ['#2C2C2C', 'var(--color-plate)', 'var(--color-sun)', '#8A8A
 const AREA_NAMES: Record<string, string> = { nw: 'شمال‌غرب', ne: 'شمال‌شرق', sw: 'جنوب‌غرب', se: 'جنوب‌شرق' }
 const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)] }
 
+/** طرح ساده‌شدهٔ مرز ایران [عرض، طول] — شماتیک، نه نقشهٔ رسمی؛ وقتی شعبه‌ها در چند شهر پخش‌اند */
+const IRAN_OUTLINE: [number, number][] = [
+  [39.78, 44.6], [39.0, 44.3], [38.3, 44.3], [37.1, 44.8], [36.6, 45.0], [35.8, 46.0], [35.1, 46.2], [34.5, 45.6],
+  [33.7, 45.9], [33.0, 46.2], [32.0, 47.6], [31.0, 47.7], [30.0, 48.0], [29.9, 48.6], [29.0, 50.6], [27.8, 51.5],
+  [27.4, 52.6], [26.6, 54.6], [26.8, 55.6], [27.1, 56.3], [26.0, 57.2], [25.6, 57.8], [25.3, 59.5], [25.2, 61.6],
+  [26.2, 61.9], [26.6, 63.2], [27.2, 62.8], [28.3, 62.0], [29.4, 60.9], [29.9, 60.9], [31.0, 61.8], [31.4, 60.9],
+  [33.5, 60.6], [34.6, 61.0], [35.6, 61.3], [36.6, 61.2], [37.3, 60.0], [37.6, 59.0], [38.2, 57.3], [37.9, 55.5],
+  [37.3, 54.0], [36.8, 53.9], [36.7, 52.5], [36.9, 50.6], [37.5, 49.5], [38.4, 48.9], [39.4, 48.3], [39.7, 47.9],
+  [39.15, 47.0], [38.9, 46.5], [39.0, 45.6], [39.65, 44.8],
+]
+const isNationwide = (lats: number[], lngs: number[]) => Math.max(...lats) - Math.min(...lats) > 2 || Math.max(...lngs) - Math.min(...lngs) > 2
+
 /** هر شهری: منطقه‌ها چهار ربع اطراف میانهٔ شعبه‌ها، و طرح شهر پوستهٔ محدب شعبه‌ها با کمی حاشیه (شماتیک، نه نقشهٔ رسمی) */
 function cityLayout(branches: Branch[]) {
   const lat0 = median(branches.map((b) => b.latitude)), lng0 = median(branches.map((b) => b.longitude))
@@ -26,6 +38,8 @@ function cityLayout(branches: Branch[]) {
   }))
   // طرح شهر: بیضی کمی موج‌دار دور همهٔ شعبه‌ها (هر شعبه داخلش می‌افتد؛ با یک شعبهٔ دور هم تیز نمی‌شود)
   const lats = branches.map((b) => b.latitude), lngs = branches.map((b) => b.longitude)
+  // شعبه‌ها در چند شهر: همان نقشهٔ شماتیک، ولی روی طرح کل ایران
+  if (isNationwide(lats, lngs)) return { areas, areaOf, outline: IRAN_OUTLINE }
   const cLat = (Math.min(...lats) + Math.max(...lats)) / 2, cLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
   const rLat = Math.max(0.01, (Math.max(...lats) - Math.min(...lats)) / 2) * 1.3 + 0.008
   const rLng = Math.max(0.01, (Math.max(...lngs) - Math.min(...lngs)) / 2) * 1.3 + 0.008
