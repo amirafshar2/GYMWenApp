@@ -3,9 +3,9 @@ using Microsoft.Extensions.FileProviders;
 namespace GymPlatform.Api.Infrastructure;
 
 /// <summary>
-/// عکس‌هایی که مدیر برای منوی بوفه، کالا یا پکیج آپلود می‌کند.
-/// بیرون از wwwroot ذخیره می‌شوند (بیلد بعدی پاکشان نکند؛ در Docker روی volume) و از /media/uploads سرو می‌شوند.
-/// فقط JPEG/PNG/WebP واقعی (بررسی امضای فایل، نه پسوند)، حداکثر ۲ مگابایت؛ SVG پذیرفته نمی‌شود چون می‌تواند اسکریپت داشته باشد.
+/// Bilder, die der Admin für Bistro-Karte, Produkte oder Pakete hochlädt.
+/// Gespeichert außerhalb von wwwroot (damit der nächste Build sie nicht löscht; in Docker auf einem Volume) und über /media/uploads ausgeliefert.
+/// Nur echte JPEG/PNG/WebP (Prüfung der Dateisignatur, nicht der Endung), höchstens 2 MB; SVG wird abgelehnt, weil es Skripte enthalten kann.
 /// </summary>
 public sealed class PublicImageStore
 {
@@ -32,13 +32,13 @@ public sealed class PublicImageStore
 
     public async Task<(string? Path, string? Error)> SaveAsync(IFormFile? file, CancellationToken ct)
     {
-        if (file is null || file.Length == 0) return (null, "فایلی انتخاب نشده است.");
-        if (file.Length > MaxBytes) return (null, "حجم عکس حداکثر ۲ مگابایت باشد.");
+        if (file is null || file.Length == 0) return (null, "Keine Datei ausgewählt.");
+        if (file.Length > MaxBytes) return (null, "Das Bild darf höchstens 2 MB groß sein.");
         using var ms = new MemoryStream();
         await file.CopyToAsync(ms, ct);
         var bytes = ms.ToArray();
         var ext = Sniff(bytes);
-        if (ext is null) return (null, "فقط عکس JPG، PNG یا WebP پذیرفته می‌شود.");
+        if (ext is null) return (null, "Nur JPG-, PNG- oder WebP-Bilder werden akzeptiert.");
         var name = $"{Guid.NewGuid():N}.{ext}";
         await File.WriteAllBytesAsync(Path.Combine(Root, name), bytes, ct);
         return ($"{RequestPath}/{name}", null);

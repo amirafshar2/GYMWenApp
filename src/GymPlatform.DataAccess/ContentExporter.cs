@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace GymPlatform.DataAccess;
 
 /// <summary>
-/// «بستهٔ محتوا»: همان فایل‌های پوشهٔ Seed، ساخته‌شده از دادهٔ فعلی دیتابیس.
-/// با این بسته یک نصب تازه با همین شعبه‌ها، پکیج‌ها، مربیان، محصولات و متن‌ها بالا می‌آید
-/// (بدون عضو، پرداخت یا اطلاعات شخصی).
+/// „Inhaltspaket“: dieselben Dateien wie im Ordner Seed, erzeugt aus den aktuellen Datenbankdaten.
+/// Mit diesem Paket startet eine neue Installation mit denselben Filialen, Paketen, Trainern, Produkten und Texten
+/// (ohne Mitglieder, Zahlungen oder persönliche Daten).
 /// </summary>
 public static class ContentExporter
 {

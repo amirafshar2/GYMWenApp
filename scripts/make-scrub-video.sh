@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# نسخه‌های ویدیوی پیش‌فرض قالب، با همان تنظیمات بهینه‌سازی خودکار آپلودهای پنل (Video/VideoOptimizer.cs):
-#   gym-scrub.mp4 (1080، اسکرولی)  gym-scrub-720.mp4  gym-scrub-540.mp4  gym.mp4 (پخش تکراری)  gym.jpg  gym-960.jpg
-# استفاده: ./scripts/make-scrub-video.sh [ورودی] [crop]   پیش‌فرض: gym-source.mp4 بدون برش (برای برش نوار سیاه: 1344:1080:288:0)
+# Versionen des Standardvideos der Vorlage, mit denselben Optimierungseinstellungen wie Panel-Uploads (Video/VideoOptimizer.cs):
+#   gym-scrub.mp4 (1080, Scroll)  gym-scrub-720.mp4  gym-scrub-540.mp4  gym.mp4 (Schleife)  gym.jpg  gym-960.jpg
+# Nutzung: ./scripts/make-scrub-video.sh [Eingabe] [crop]   Standard: gym-source.mp4 ohne Zuschnitt (für schwarze Balken: 1344:1080:288:0)
 set -euo pipefail
 DIR="$(dirname "$0")/../src/GymPlatform.Web/public/media/video"
 IN="${1:-$DIR/gym-source.mp4}"
@@ -22,4 +22,4 @@ enc gym.mp4 1920 21 high
 ffmpeg -v error -y -threads 1 -i "$IN" -frames:v 1 -vf "${PRE}scale='min(1920,iw)':-2:flags=lanczos" -q:v 3 "$DIR/gym.jpg"
 ffmpeg -v error -y -threads 1 -i "$IN" -frames:v 1 -vf "${PRE}scale='min(960,iw)':-2:flags=lanczos" -q:v 4 "$DIR/gym-960.jpg"
 ls -la "$DIR"/gym*
-echo "✓ در SiteVideo.tsx مقدار ?v= نسخهٔ پیش‌فرض را عوض کنید تا کش قدیمی مرورگرها دور زده شود."
+echo "✓ In SiteVideo.tsx den ?v=-Wert der Standardversion ändern, damit alte Browser-Caches umgangen werden."

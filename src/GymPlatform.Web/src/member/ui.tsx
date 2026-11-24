@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/** کلاس‌های مشترک صفحه‌های عضویت (هم‌سبک فرم مشاوره: گوشهٔ ۳px، قرمز تم) */
+/** Gemeinsame Klassen der Mitgliedsseiten (im Stil des Beratungsformulars: 3px-Ecken, rotes Theme) */
 export const inputCls =
   'h-[52px] w-full rounded-[3px] border border-steel-2 bg-white px-4 text-[15px] text-chalk outline-none transition-colors placeholder:text-rubber/60 hover:border-chalk/30 focus:border-plate focus:ring-2 focus:ring-plate/15 aria-[invalid=true]:border-danger disabled:bg-steel'
 
@@ -27,7 +27,7 @@ export function Panel({ className, children, ...p }: ComponentProps<'section'>) 
 export function Notice({ tone = 'info', children, className }: { tone?: 'info' | 'ok' | 'err' | 'warn'; children: ReactNode; className?: string }) {
   return (
     <div role={tone === 'err' ? 'alert' : 'status'}
-      className={cn('rounded-[3px] border-r-4 px-4 py-3 text-[14px] leading-7',
+      className={cn('rounded-[3px] border-l-4 px-4 py-3 text-[14px] leading-7',
         tone === 'info' && 'border-chalk bg-steel text-chalk',
         tone === 'ok' && 'border-[#1f9d55] bg-[#ecf8f1] text-[#14532d]',
         tone === 'err' && 'border-danger bg-[#fdecee] text-[#8a1020]',
@@ -55,7 +55,7 @@ export function PageShell({ title, eyebrow, children, aside }: { title: string; 
   )
 }
 
-export function Spinner({ label = 'در حال بارگذاری…' }: { label?: string }) {
+export function Spinner({ label = 'Wird geladen…' }: { label?: string }) {
   return (
     <div role="status" className="grid min-h-[40vh] place-items-center text-rubber">
       <span className="flex items-center gap-2"><Loader2 className="size-5 animate-spin" aria-hidden />{label}</span>
@@ -66,10 +66,10 @@ export function Spinner({ label = 'در حال بارگذاری…' }: { label?:
 export const toLatinDigits = (s: string) =>
   s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
 
-export const sectionLabel = (s: string) => (s === 'women' ? 'سالن بانوان' : 'سالن آقایان')
+export const sectionLabel = (s: string) => (s === 'women' ? 'Damenbereich' : 'Herrenbereich')
 
 export const statusLabel: Record<string, { text: string; cls: string }> = {
-  succeeded: { text: 'موفق', cls: 'bg-[#ecf8f1] text-[#14532d]' },
-  failed: { text: 'ناموفق', cls: 'bg-[#fdecee] text-[#8a1020]' },
-  pending: { text: 'در انتظار', cls: 'bg-[#fff6e0] text-[#5c4300]' },
+  succeeded: { text: 'Erfolgreich', cls: 'bg-[#ecf8f1] text-[#14532d]' },
+  failed: { text: 'Fehlgeschlagen', cls: 'bg-[#fdecee] text-[#8a1020]' },
+  pending: { text: 'Ausstehend', cls: 'bg-[#fff6e0] text-[#5c4300]' },
 }

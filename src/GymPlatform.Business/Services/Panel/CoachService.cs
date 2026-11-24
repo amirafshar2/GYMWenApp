@@ -16,7 +16,7 @@ public interface ICoachService
     Task<Result<TraineeDetailDto>> DetailAsync(int coachUserId, int memberId, CancellationToken ct);
     Task<Result<TrainingPlanDto>> SavePlanAsync(int coachUserId, int memberId, SavePlanRequest request, CancellationToken ct);
     Task<Result<BodyMetricDto>> AddMetricAsync(int? coachUserId, int memberId, AddMetricRequest request, CancellationToken ct);
-    // سمت عضو
+    // Mitgliederseite
     Task<TrainingPlanDto?> MyPlanAsync(int userId, CancellationToken ct);
     Task<IReadOnlyList<BodyMetricDto>> MetricsAsync(int userId, CancellationToken ct);
     Task<bool> DeleteMetricAsync(int userId, int metricId, CancellationToken ct);
@@ -24,7 +24,7 @@ public interface ICoachService
     Task<Result<PreferencesDto>> SavePreferencesAsync(int userId, PreferencesRequest r, CancellationToken ct);
 }
 
-/// <summary>پنل مربی: شاگردها، روند وزن و برنامهٔ تمرینی/غذایی که در پروفایل شاگرد دیده می‌شود.</summary>
+/// <summary>Trainerpanel: Schüler, Gewichtsverlauf und Trainings-/Ernährungsplan, der im Profil des Schülers erscheint.</summary>
 public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
@@ -69,13 +69,13 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
     public async Task<Result<TraineeRowDto>> AddTraineeAsync(int coachUserId, string phone, CancellationToken ct)
     {
         var coach = await CoachOf(coachUserId, ct);
-        if (coach is null) return Result<TraineeRowDto>.Fail("coach", "حساب شما به پروفایل مربی وصل نیست.", ErrorType.Forbidden);
+        if (coach is null) return Result<TraineeRowDto>.Fail("coach", "Ihr Konto ist mit keinem Trainerprofil verbunden.", ErrorType.Forbidden);
         var p = PersianText.NormalizeMobile(phone);
         var now = clock.UtcNow;
-        // فقط عضو دارای عضویت فعال در شعبه و سالن همین مربی؛ پیام یکسان تا با این فرم نشود شماره‌ها را استعلام کرد
+        // Nur Mitglieder mit aktiver Mitgliedschaft in Filiale und Bereich dieses Trainers; gleiche Meldung, damit sich Nummern nicht abfragen lassen
         var user = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == p && db.Memberships.Any(m => m.UserId == u.Id && m.BranchId == coach.BranchId
             && m.Status == MembershipStatus.Active && m.StartsAtUtc <= now && m.EndsAtUtc > now && (m.Section & coach.Section) != 0), ct);
-        if (user is null) return Result<TraineeRowDto>.Fail("phone", "عضوی با این شماره در شعبه و سالن شما عضویت فعال ندارد.", ErrorType.NotFound);
+        if (user is null) return Result<TraineeRowDto>.Fail("phone", "Kein Mitglied mit dieser Nummer hat eine aktive Mitgliedschaft in Ihrer Filiale und Ihrem Bereich.", ErrorType.NotFound);
         var a = await db.CoachAssignments.FirstOrDefaultAsync(x => x.CoachId == coach.Id && x.MemberUserId == user.Id, ct);
         if (a is null) db.CoachAssignments.Add(new CoachAssignment { CoachId = coach.Id, MemberUserId = user.Id, CreatedAtUtc = clock.UtcNow });
         else a.IsActive = true;
@@ -86,7 +86,7 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
     public async Task<Result<TraineeDetailDto>> DetailAsync(int coachUserId, int memberId, CancellationToken ct)
     {
         var coach = await CoachOf(coachUserId, ct);
-        if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<TraineeDetailDto>.Fail("member", "این عضو شاگرد شما نیست.", ErrorType.NotFound);
+        if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<TraineeDetailDto>.Fail("member", "Dieses Mitglied ist nicht Ihr Schüler.", ErrorType.NotFound);
         var row = (await RowsAsync([memberId], ct))[0];
         var now = clock.UtcNow;
         var m = await db.Memberships.AsNoTracking().Include(x => x.Branch).Include(x => x.Package)
@@ -99,12 +99,12 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
     public async Task<Result<TrainingPlanDto>> SavePlanAsync(int coachUserId, int memberId, SavePlanRequest r, CancellationToken ct)
     {
         var coach = await CoachOf(coachUserId, ct);
-        if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<TrainingPlanDto>.Fail("member", "این عضو شاگرد شما نیست.", ErrorType.NotFound);
+        if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<TrainingPlanDto>.Fail("member", "Dieses Mitglied ist nicht Ihr Schüler.", ErrorType.NotFound);
         var title = PersianText.CleanText(r.Title);
-        if (title is null || title.Length > 100) return Result<TrainingPlanDto>.Fail("title", "عنوان برنامه را بنویسید (حداکثر ۱۰۰ حرف).");
+        if (title is null || title.Length > 100) return Result<TrainingPlanDto>.Fail("title", "Bitte einen Plantitel angeben (höchstens 100 Zeichen).");
         var days = (r.Days ?? []).Select(d => new PlanDayDto(Clip(d.Day, 20), Clip(d.Focus, 60),
             (d.Items ?? []).Select(i => Clip(i, 120)).Where(i => i.Length > 0).Take(15).ToList())).Where(d => d.Day.Length > 0).Take(7).ToList();
-        if (days.Count == 0) return Result<TrainingPlanDto>.Fail("days", "حداقل یک روز تمرین اضافه کنید.");
+        if (days.Count == 0) return Result<TrainingPlanDto>.Fail("days", "Bitte mindestens einen Trainingstag hinzufügen.");
         var nutrition = PersianText.CleanText(r.Nutrition);
         if (nutrition?.Length > 3000) nutrition = nutrition[..3000];
 
@@ -122,11 +122,11 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
         if (coachUserId is { } cu)
         {
             var coach = await CoachOf(cu, ct);
-            if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<BodyMetricDto>.Fail("member", "این عضو شاگرد شما نیست.", ErrorType.NotFound);
+            if (coach is null || !await IsTrainee(coach.Id, memberId, ct)) return Result<BodyMetricDto>.Fail("member", "Dieses Mitglied ist nicht Ihr Schüler.", ErrorType.NotFound);
         }
-        if (r.WeightKg is < 30 or > 250) return Result<BodyMetricDto>.Fail("weightKg", "وزن را بین ۳۰ تا ۲۵۰ کیلوگرم وارد کنید.");
-        if (r.BodyFatPercent is < 3 or > 60) return Result<BodyMetricDto>.Fail("bodyFatPercent", "درصد چربی معتبر نیست.");
-        if (r.WaistCm is < 40 or > 200) return Result<BodyMetricDto>.Fail("waistCm", "دور کمر معتبر نیست.");
+        if (r.WeightKg is < 30 or > 250) return Result<BodyMetricDto>.Fail("weightKg", "Gewicht bitte zwischen 30 und 250 kg eingeben.");
+        if (r.BodyFatPercent is < 3 or > 60) return Result<BodyMetricDto>.Fail("bodyFatPercent", "Ungültiger Körperfettanteil.");
+        if (r.WaistCm is < 40 or > 200) return Result<BodyMetricDto>.Fail("waistCm", "Ungültiger Taillenumfang.");
         var today = DateOnly.FromDateTime(Jalali.ToTehran(clock.UtcNow));
         var on = r.MeasuredOn is { } d && d <= today && d > today.AddYears(-2) ? d : today;
         var m = new BodyMetric { UserId = memberId, MeasuredOn = on, WeightKg = Math.Round(r.WeightKg, 1), BodyFatPercent = r.BodyFatPercent, WaistCm = r.WaistCm, RecordedByUserId = coachUserId ?? memberId, CreatedAtUtc = clock.UtcNow };
@@ -156,7 +156,7 @@ public sealed class CoachService(GymDbContext db, IClock clock) : ICoachService
     {
         var today = DateOnly.FromDateTime(clock.UtcNow);
         if (r.BirthDate is { } b && (b > today.AddYears(-10) || b < today.AddYears(-100)))
-            return Result<PreferencesDto>.Fail("birthDate", "تاریخ تولد معتبر نیست.");
+            return Result<PreferencesDto>.Fail("birthDate", "Ungültiges Geburtsdatum.");
         var u = await db.Users.FirstAsync(x => x.Id == userId, ct);
         u.BirthDate = r.BirthDate; u.MarketingSmsOptIn = r.MarketingSmsOptIn;
         db.AuditLogs.Add(new AuditLog { Action = "member.preferences", EntityType = "User", EntityId = userId.ToString(), UserId = userId, Data = $"optIn={r.MarketingSmsOptIn}" });

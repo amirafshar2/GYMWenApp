@@ -4,7 +4,7 @@ import { faNum } from '@/lib/fa'
 import { fill, site } from '@/lib/site'
 import { Btn, Eyebrow, useFadeUp, wrap } from './ui/SectionHead'
 
-/** «چه می‌کنیم»: نقل‌قول بزرگ وسط‌چین + چهار کارت تصویری شماره‌دار */
+/** „Was wir tun“: großes zentriertes Zitat + vier nummerierte Bildkarten */
 export default function SiteWhatWeDo() {
   const fade = useFadeUp()
   const reduced = useReducedMotion()
@@ -18,7 +18,7 @@ export default function SiteWhatWeDo() {
           {x.eyebrow && <Eyebrow>{fill(x.eyebrow)}</Eyebrow>}
           <h2 id="wwd-title" className="mt-4 text-[clamp(1.8rem,3.4vw,3rem)] font-bold leading-[1.35] text-chalk">{fill(x.title)}</h2>
           <p className="mt-6 text-[17px] font-bold text-chalk">{brand.name}</p>
-          {site.branches > 0 && <p className="mt-1 text-[14px] text-rubber">{faNum(site.branches)} شعبه{site.home.footerNote ? ` – ${fill(site.home.footerNote)}` : ''}</p>}
+          {site.branches > 0 && <p className="mt-1 text-[14px] text-rubber">{faNum(site.branches)} {site.branches === 1 ? 'Filiale' : 'Filialen'}{site.home.footerNote ? ` – ${fill(site.home.footerNote)}` : ''}</p>}
         </motion.div>
 
         <ul className="mt-16 grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-[30px]">
@@ -29,18 +29,18 @@ export default function SiteWhatWeDo() {
                 <img src={c.imageUrl!} alt={c.title} loading="lazy" width={720} height={960}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(.2,.7,.2,1)] group-hover:scale-110" />
                 <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                <span className="absolute top-5 right-5 text-[15px] font-bold text-white/85">{faNum(k + 1).padStart(2, '۰')}.</span>
+                <span className="absolute top-5 left-5 text-[15px] font-bold text-white/85">{faNum(k + 1).padStart(2, '0')}.</span>
                 <span className="absolute inset-x-5 bottom-5 text-white">
-                  <span className="block text-[13px] text-white/75">رشته</span>
+                  <span className="block text-[13px] text-white/75">Angebot</span>
                   <span className="block text-[clamp(1.25rem,2vw,1.75rem)] font-bold">{c.title}</span>
                 </span>
-                <span aria-hidden className="absolute inset-x-0 bottom-0 h-1 origin-right scale-x-0 bg-plate transition-transform duration-500 group-hover:scale-x-100" />
+                <span aria-hidden className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-plate transition-transform duration-500 group-hover:scale-x-100" />
               </a>
             </motion.li>
           ))}
         </ul>
         <motion.div {...fade2} className="mt-14 text-center">
-          <Btn href="#packages">پکیج‌های تمرینی</Btn>
+          <Btn href="#packages">Trainingspakete</Btn>
         </motion.div>
       </div>
     </section>

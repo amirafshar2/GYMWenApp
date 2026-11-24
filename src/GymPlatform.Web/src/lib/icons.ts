@@ -1,21 +1,21 @@
 import { Bike, CalendarCheck, Clock, Dumbbell, Flame, Heart, Mountain, Salad, Scale, ShieldCheck, ShoppingBag, Trophy, UserRound, Users, Waves, type LucideIcon } from 'lucide-react'
 
-/** آیکن‌هایی که مالک در «تنظیمات سایت» برای کارت‌ها انتخاب می‌کند (همین فهرست در سرور هم بررسی می‌شود) */
+/** Icons, die der Inhaber in den „Website-Einstellungen“ für Karten wählt (dieselbe Liste prüft auch der Server) */
 export const ICONS: Record<string, { icon: LucideIcon; label: string }> = {
-  dumbbell: { icon: Dumbbell, label: 'دمبل' },
-  scale: { icon: Scale, label: 'ترازو' },
-  salad: { icon: Salad, label: 'تغذیه' },
-  calendar: { icon: CalendarCheck, label: 'تقویم' },
-  user: { icon: UserRound, label: 'مربی' },
-  users: { icon: Users, label: 'گروه' },
-  mountain: { icon: Mountain, label: 'کوه' },
-  bag: { icon: ShoppingBag, label: 'فروشگاه' },
-  heart: { icon: Heart, label: 'قلب' },
-  trophy: { icon: Trophy, label: 'جام' },
-  clock: { icon: Clock, label: 'ساعت' },
-  shield: { icon: ShieldCheck, label: 'ایمنی' },
-  flame: { icon: Flame, label: 'چربی‌سوزی' },
-  bike: { icon: Bike, label: 'دوچرخه' },
-  waves: { icon: Waves, label: 'استخر' },
+  dumbbell: { icon: Dumbbell, label: 'Hantel' },
+  scale: { icon: Scale, label: 'Waage' },
+  salad: { icon: Salad, label: 'Ernährung' },
+  calendar: { icon: CalendarCheck, label: 'Kalender' },
+  user: { icon: UserRound, label: 'Trainer' },
+  users: { icon: Users, label: 'Gruppe' },
+  mountain: { icon: Mountain, label: 'Berg' },
+  bag: { icon: ShoppingBag, label: 'Shop' },
+  heart: { icon: Heart, label: 'Herz' },
+  trophy: { icon: Trophy, label: 'Pokal' },
+  clock: { icon: Clock, label: 'Uhr' },
+  shield: { icon: ShieldCheck, label: 'Sicherheit' },
+  flame: { icon: Flame, label: 'Fettverbrennung' },
+  bike: { icon: Bike, label: 'Fahrrad' },
+  waves: { icon: Waves, label: 'Schwimmbad' },
 }
 export const iconOf = (k?: string | null) => ICONS[k ?? '']?.icon ?? Dumbbell

@@ -1,195 +1,195 @@
 [
   {
     "slug": "markazi",
-    "name": "شعبهٔ مرکزی",
-    "district": "مرکز شهر",
-    "address": "خیابان اصلی، پلاک ۱۲ (آدرس نمایشی)",
-    "phone": "02100000000",
-    "latitude": 35.8262,
-    "longitude": 50.9611,
+    "name": "Filiale Mitte",
+    "district": "Stadtmitte",
+    "address": "Königstraße 12 (Demo-Adresse)",
+    "phone": "07110000000",
+    "latitude": 48.7784,
+    "longitude": 9.18,
     "sections": "Both",
     "addressConfirmed": true,
-    "menHours": "شنبه تا پنجشنبه ۶:۰۰ تا ۱۲:۰۰ و ۱۶:۰۰ تا ۲۳:۰۰",
-    "womenHours": "شنبه تا پنجشنبه ۱۲:۰۰ تا ۱۶:۰۰",
+    "menHours": "Mo–Sa 6:00–12:00 und 16:00–23:00",
+    "womenHours": "Mo–Sa 12:00–16:00",
     "disciplines": [
-      "بدنسازی",
-      "فیتنس فانکشنال",
+      "Bodybuilding",
+      "Functional Fitness",
       "TRX",
-      "ایروبیک"
+      "Aerobic"
     ]
   },
   {
     "slug": "bahar-men",
-    "name": "شعبهٔ بهار (آقایان)",
-    "district": "بلوار بهار",
-    "address": "بلوار بهار، نبش کوچهٔ ۸ (آدرس نمایشی)",
-    "phone": "02100000001",
-    "latitude": 35.8335,
-    "longitude": 50.9755,
+    "name": "Filiale Bad Cannstatt (Herren)",
+    "district": "Bad Cannstatt",
+    "address": "Marktstraße 8 (Demo-Adresse)",
+    "phone": "07110000001",
+    "latitude": 48.805,
+    "longitude": 9.214,
     "sections": "Men",
     "addressConfirmed": true,
-    "menHours": "همه‌روزه ۶:۰۰ تا ۲۴:۰۰",
+    "menHours": "Täglich 6:00–24:00",
     "disciplines": [
-      "بدنسازی",
-      "کراس‌فیت",
-      "فیتنس فانکشنال"
+      "Bodybuilding",
+      "CrossFit",
+      "Functional Fitness"
     ]
   },
   {
     "slug": "bahar-women",
-    "name": "شعبهٔ بهار (بانوان)",
-    "district": "بلوار بهار",
-    "address": "بلوار بهار، کوچهٔ ۵ (آدرس نمایشی)",
-    "phone": "02100000002",
-    "latitude": 35.8298,
-    "longitude": 50.9712,
+    "name": "Filiale Bad Cannstatt (Damen)",
+    "district": "Bad Cannstatt",
+    "address": "Marktstraße 5 (Demo-Adresse)",
+    "phone": "07110000002",
+    "latitude": 48.8032,
+    "longitude": 9.2195,
     "sections": "Women",
     "addressConfirmed": true,
-    "womenHours": "شنبه تا پنجشنبه ۷:۰۰ تا ۲۱:۰۰",
+    "womenHours": "Mo–Sa 7:00–21:00",
     "disciplines": [
-      "بدنسازی",
-      "پیلاتس",
-      "یوگا",
-      "ایروبیک",
+      "Bodybuilding",
+      "Pilates",
+      "Yoga",
+      "Aerobic",
       "CX WORX"
     ]
   },
   {
     "slug": "nastaran-men",
-    "name": "شعبهٔ نسترن (آقایان)",
-    "district": "خیابان نسترن",
-    "address": "خیابان نسترن، پلاک ۴۰ (آدرس نمایشی)",
-    "phone": "02100000003",
-    "latitude": 35.8305,
-    "longitude": 50.9731,
+    "name": "Filiale Vaihingen (Herren)",
+    "district": "Vaihingen",
+    "address": "Hauptstraße 40 (Demo-Adresse)",
+    "phone": "07110000003",
+    "latitude": 48.73,
+    "longitude": 9.108,
     "sections": "Men",
     "addressConfirmed": true,
-    "menHours": "همه‌روزه ۶:۰۰ تا ۲۴:۰۰",
+    "menHours": "Täglich 6:00–24:00",
     "disciplines": [
-      "بدنسازی",
+      "Bodybuilding",
       "TRX",
-      "فیتنس فانکشنال"
+      "Functional Fitness"
     ]
   },
   {
     "slug": "sarv-women",
-    "name": "شعبهٔ شهرک سرو (بانوان)",
-    "district": "شهرک سرو",
-    "address": "شهرک سرو، بلوار اصلی (آدرس نمایشی)",
-    "phone": "02100000004",
-    "latitude": 35.9235,
-    "longitude": 50.9112,
+    "name": "Filiale West (Damen)",
+    "district": "Stuttgart-West",
+    "address": "Rotebühlstraße 90 (Demo-Adresse)",
+    "phone": "07110000004",
+    "latitude": 48.772,
+    "longitude": 9.153,
     "sections": "Women",
     "addressConfirmed": true,
-    "womenHours": "شنبه تا پنجشنبه ۷:۰۰ تا ۲۱:۰۰",
+    "womenHours": "Mo–Sa 7:00–21:00",
     "disciplines": [
-      "بدنسازی",
-      "پیلاتس",
-      "یوگا",
-      "ایروبیک"
+      "Bodybuilding",
+      "Pilates",
+      "Yoga",
+      "Aerobic"
     ]
   },
   {
     "slug": "azadi",
-    "name": "شعبهٔ آزادی",
-    "district": "میدان آزادی",
-    "address": "میدان آزادی — آدرس دقیق به‌زودی",
-    "latitude": 35.8372,
-    "longitude": 50.9568,
+    "name": "Filiale Feuerbach",
+    "district": "Feuerbach",
+    "address": "Feuerbach — genaue Adresse folgt",
+    "latitude": 48.829,
+    "longitude": 9.166,
     "sections": "Both",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
-    "womenHours": "به‌زودی",
+    "menHours": "Demnächst",
+    "womenHours": "Demnächst",
     "disciplines": [
-      "بدنسازی",
-      "کراس‌فیت",
-      "صخره‌نوردی"
+      "Bodybuilding",
+      "CrossFit",
+      "Klettern"
     ]
   },
   {
     "slug": "park",
-    "name": "شعبهٔ پارک",
-    "district": "بلوار پارک",
-    "address": "بلوار پارک — آدرس دقیق به‌زودی",
-    "latitude": 35.8431,
-    "longitude": 50.9675,
+    "name": "Filiale Degerloch",
+    "district": "Degerloch",
+    "address": "Degerloch — genaue Adresse folgt",
+    "latitude": 48.747,
+    "longitude": 9.17,
     "sections": "Men",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
+    "menHours": "Demnächst",
     "disciplines": [
-      "بدنسازی"
+      "Bodybuilding"
     ]
   },
   {
     "slug": "daneshgah",
-    "name": "شعبهٔ دانشگاه",
-    "district": "خیابان دانشگاه",
-    "address": "خیابان دانشگاه — آدرس دقیق به‌زودی",
-    "latitude": 35.8475,
-    "longitude": 50.9789,
+    "name": "Filiale Universität",
+    "district": "Universität",
+    "address": "Universität — genaue Adresse folgt",
+    "latitude": 48.782,
+    "longitude": 9.173,
     "sections": "Men",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
+    "menHours": "Demnächst",
     "disciplines": [
-      "بدنسازی"
+      "Bodybuilding"
     ]
   },
   {
     "slug": "sample-9",
-    "name": "شعبهٔ نور",
-    "district": "شهرک نور",
-    "address": "شهرک نور — آدرس دقیق به‌زودی",
-    "latitude": 35.8178,
-    "longitude": 51.0102,
+    "name": "Filiale Zuffenhausen",
+    "district": "Zuffenhausen",
+    "address": "Zuffenhausen — genaue Adresse folgt",
+    "latitude": 48.84,
+    "longitude": 9.155,
     "sections": "Men",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
+    "menHours": "Demnächst",
     "disciplines": [
-      "بدنسازی"
+      "Bodybuilding"
     ]
   },
   {
     "slug": "sample-10",
-    "name": "شعبهٔ امید (بانوان)",
-    "district": "بلوار امید",
-    "address": "بلوار امید — آدرس دقیق به‌زودی",
-    "latitude": 35.7985,
-    "longitude": 50.9821,
+    "name": "Filiale Möhringen (Damen)",
+    "district": "Möhringen",
+    "address": "Möhringen — genaue Adresse folgt",
+    "latitude": 48.723,
+    "longitude": 9.149,
     "sections": "Women",
     "addressConfirmed": false,
-    "womenHours": "به‌زودی",
+    "womenHours": "Demnächst",
     "disciplines": [
-      "بدنسازی",
-      "یوگا"
+      "Bodybuilding",
+      "Yoga"
     ]
   },
   {
     "slug": "sample-11",
-    "name": "شعبهٔ لاله",
-    "district": "خیابان لاله",
-    "address": "خیابان لاله — آدرس دقیق به‌زودی",
-    "latitude": 35.8362,
-    "longitude": 50.9936,
+    "name": "Filiale Ost",
+    "district": "Stuttgart-Ost",
+    "address": "Stuttgart-Ost — genaue Adresse folgt",
+    "latitude": 48.785,
+    "longitude": 9.205,
     "sections": "Both",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
-    "womenHours": "به‌زودی",
+    "menHours": "Demnächst",
+    "womenHours": "Demnächst",
     "disciplines": [
-      "بدنسازی"
+      "Bodybuilding"
     ]
   },
   {
     "slug": "sample-12",
-    "name": "شعبهٔ ستاره",
-    "district": "کوی ستاره",
-    "address": "کوی ستاره — آدرس دقیق به‌زودی",
-    "latitude": 35.8089,
-    "longitude": 50.9495,
+    "name": "Filiale Weilimdorf",
+    "district": "Weilimdorf",
+    "address": "Weilimdorf — genaue Adresse folgt",
+    "latitude": 48.815,
+    "longitude": 9.109,
     "sections": "Men",
     "addressConfirmed": false,
-    "menHours": "به‌زودی",
+    "menHours": "Demnächst",
     "disciplines": [
-      "بدنسازی"
+      "Bodybuilding"
     ]
   }
 ]

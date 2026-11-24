@@ -13,9 +13,9 @@ public sealed class JwtOptions
     public const string Section = "Jwt";
     public string Issuer { get; set; } = "gym-platform";
     public string Audience { get; set; } = "gym-platform-web";
-    /// <summary>حداقل ۳۲ بایت؛ فقط از User Secrets / متغیر محیطی Jwt__SigningKey.</summary>
+    /// <summary>Mindestens 32 Bytes; nur aus User Secrets / Umgebungsvariable Jwt__SigningKey.</summary>
     public string SigningKey { get; set; } = "";
-    /// <summary>عمر کوتاه توکن دسترسی.</summary>
+    /// <summary>Kurze Lebensdauer des Zugriffstokens.</summary>
     public int AccessTokenMinutes { get; set; } = 15;
 
     public SymmetricSecurityKey Key() => new(Encoding.UTF8.GetBytes(SigningKey));

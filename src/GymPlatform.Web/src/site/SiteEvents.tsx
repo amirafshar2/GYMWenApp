@@ -8,7 +8,7 @@ import { faNum, jalali } from '@/lib/fa'
 import { fill, site } from '@/lib/site'
 import { Btn, Eyebrow, useFadeUp, wrap } from './ui/SectionHead'
 
-/** «فراتر از تمرین»: دو تصویر بلند که با اسکرول در جهت مخالف بالا و پایین می‌روند + متن جشنواره */
+/** „Mehr als Training“: zwei hohe Bilder, die beim Scrollen gegenläufig wandern + Aktionstext */
 export default function SiteEvents() {
   const { data: c } = useData('campaign', api.campaign)
   const reduced = useReducedMotion()
@@ -20,9 +20,9 @@ export default function SiteEvents() {
   const ev = site.home.events
 
   const points = [
-    c ? `${c.title} — ${faNum(c.discountPercent)}٪ تخفیف تا ${jalali(c.endsAtUtc)}` : 'جشنوارهٔ تخفیف فصلی روی پکیج‌های منتخب',
-    'تخفیف جشنواره خودکار روی پکیج‌های مشمول اعمال می‌شود',
-    'خبر جشنواره‌های بعدی با پیامک به عضوهای خبرنامه می‌رسد',
+    c ? `${c.title} — ${faNum(c.discountPercent)}% Rabatt bis ${jalali(c.endsAtUtc)}` : 'Saisonale Rabattaktion auf ausgewählte Pakete',
+    'Der Aktionsrabatt wird bei berechtigten Paketen automatisch abgezogen',
+    'News zu kommenden Aktionen kommen per SMS an Newsletter-Abonnenten',
   ]
 
   return (
@@ -30,10 +30,10 @@ export default function SiteEvents() {
       <div className={`${wrap} grid items-center gap-16 lg:grid-cols-2 lg:gap-[70px]`}>
         <div ref={box} className="grid grid-cols-2 gap-5 lg:gap-[30px]">
           <motion.div style={{ y: up }} className="aspect-[3/5] overflow-hidden bg-chalk">
-            <img src={ev.imageUrl || '/media/gym/grip-tall.webp'} alt={`تمرین در ${brand.shortName}`} loading="lazy" width={720} height={960} className="h-full w-full object-cover" />
+            <img src={ev.imageUrl || '/media/gym/grip-tall.webp'} alt={`Training bei ${brand.shortName}`} loading="lazy" width={720} height={960} className="h-full w-full object-cover" />
           </motion.div>
           <motion.div style={{ y: down }} className="mt-16 aspect-[3/5] overflow-hidden bg-chalk">
-            <img src={ev.secondImageUrl || '/media/gym/empty-tall.webp'} alt={`سالن تجهیزات ${brand.shortName}`} loading="lazy" width={720} height={960} className="h-full w-full object-cover" />
+            <img src={ev.secondImageUrl || '/media/gym/empty-tall.webp'} alt={`Gerätebereich ${brand.shortName}`} loading="lazy" width={720} height={960} className="h-full w-full object-cover" />
           </motion.div>
         </div>
         <motion.div {...fade}>
@@ -48,7 +48,7 @@ export default function SiteEvents() {
               </li>
             ))}
           </ul>
-          <Btn href="#packages" className="mt-10">پکیج‌های جشنواره</Btn>
+          <Btn href="#packages" className="mt-10">Aktionspakete</Btn>
         </motion.div>
       </div>
     </section>

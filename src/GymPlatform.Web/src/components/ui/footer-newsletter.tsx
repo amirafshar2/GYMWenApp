@@ -1,12 +1,12 @@
-// 21st.dev — دموی Footer Column (FooterNewsletter)
+// 21st.dev — Demo Footer Column (FooterNewsletter)
 'use client';
 
-// lucide-react جدید آیکون برندها را ندارد؛ از فایل محلی هم‌سبک
+// Das neue lucide-react hat keine Markenicons; aus einer lokalen Datei im gleichen Stil
 import { Instagram, Linkedin, Twitter, Youtube } from '@/components/ui/brand-icons';
 import { useId, useState, type ReactNode } from 'react';
 
-// تغییر برای پروژه: همهٔ محتوا (متن‌ها، ستون‌ها، شبکه‌های اجتماعی، فرم خبرنامه) به‌صورت props؛
-// چیدمان و کلاس‌ها همان کد اصلی است. پیش‌فرض‌ها همان محتوای نمونه هستند.
+// Änderung fürs Projekt: aller Inhalt (Texte, Spalten, soziale Netzwerke, Newsletter-Formular) als props;
+// Layout und Klassen sind der Originalcode. Standardwerte sind der Beispielinhalt.
 export interface FooterLink { text: string; href: string }
 export interface FooterNewsletterProps {
   newsletterTitle?: ReactNode;

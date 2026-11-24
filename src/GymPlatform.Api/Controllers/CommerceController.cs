@@ -14,7 +14,7 @@ namespace GymPlatform.Api.Controllers;
 
 internal static class PurchaseResults
 {
-    /// <summary>کیف پول ← نتیجهٔ نهایی؛ درگاه ← فرم رفتن به بانک</summary>
+    /// <summary>Guthaben → Endergebnis; Gateway → Formular zur Bank</summary>
     public static async Task<IActionResult> ToResponseAsync(this Result<PurchaseStartedDto> r, ControllerBase c, PaymentGateway gateway, CancellationToken ct)
     {
         if (!r.Succeeded) return r.ToActionResult(c);
@@ -25,7 +25,7 @@ internal static class PurchaseResults
     }
 }
 
-/// <summary>فروشگاه: فهرست و جزئیات کالا (عمومی)، پیش‌فاکتور، سفارش (نیازمند ورود)</summary>
+/// <summary>Shop: Liste und Produktdetails (öffentlich), Preisvorschau, Bestellung (Login nötig)</summary>
 [ApiController]
 [Route("api/v1/shop")]
 [Produces("application/json")]
@@ -57,7 +57,7 @@ public sealed class ShopController(IShopService shop, PaymentGateway gateway) : 
         await (await shop.CheckoutAsync(User.UserId(), request, ct)).ToResponseAsync(this, gateway, ct);
 }
 
-/// <summary>بوفه: منوی هر شعبه (عمومی، از QR)، ثبت سفارش، پیگیری؛ و تابلوی کارکنان بوفه</summary>
+/// <summary>Bistro: Karte je Filiale (öffentlich, per QR), Bestellung, Verfolgung; und Tafel für Bistro-Mitarbeiter</summary>
 [ApiController]
 [Route("api/v1/canteen")]
 [Produces("application/json")]
@@ -75,7 +75,7 @@ public sealed class CanteenController(ICanteenService canteen, PaymentGateway ga
     public async Task<IActionResult> Place([FromBody] CanteenOrderRequest request, CancellationToken ct) =>
         await (await canteen.PlaceAsync(User.UserId(), request, ct)).ToResponseAsync(this, gateway, ct);
 
-    /// <summary>تابلوی بوفه فقط برای شعبه‌هایی که کارمند به آن‌ها وصل است</summary>
+    /// <summary>Bistro-Tafel nur für Filialen, mit denen der Mitarbeiter verbunden ist</summary>
     [Authorize]
     [PanelAccess(Roles.CanteenStaff, Roles.BranchManager)]
     [HttpGet("staff/{branchSlug}/orders")]
@@ -83,7 +83,7 @@ public sealed class CanteenController(ICanteenService canteen, PaymentGateway ga
     {
         var id = await scopes.BranchIdAsync(branchSlug, ct);
         if (id is null) return NotFound();
-        if (!this.Scope().Can(id.Value)) return Problem(statusCode: 403, title: "به بوفهٔ این شعبه دسترسی ندارید.");
+        if (!this.Scope().Can(id.Value)) return Problem(statusCode: 403, title: "Kein Zugriff auf das Bistro dieser Filiale.");
         return Ok(await canteen.BoardAsync(branchSlug, ct));
     }
 
@@ -100,7 +100,7 @@ public sealed class CanteenController(ICanteenService canteen, PaymentGateway ga
     }
 }
 
-/// <summary>خریدها و کیف پول عضو</summary>
+/// <summary>Käufe und Guthaben des Mitglieds</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/me")]

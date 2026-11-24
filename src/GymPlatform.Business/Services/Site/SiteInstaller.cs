@@ -10,11 +10,11 @@ using Microsoft.Extensions.Logging;
 namespace GymPlatform.Business.Services.Site;
 
 /// <summary>
-/// نصب اولیهٔ یک سایت تازه (فقط وقتی هنوز ردیف تنظیمات سایت وجود ندارد):
+/// Erstinstallation einer neuen Seite (nur solange noch keine Zeile mit Seiteneinstellungen existiert):
 /// <list type="bullet">
-/// <item><b>Blank</b> — دیتابیس خالی؛ فقط نقش‌ها و حساب مالک (Setup:OwnerPhone). سایت تا «انتشار» صفحهٔ «در حال راه‌اندازی» نشان می‌دهد.</item>
-/// <item><b>Demo</b> — برند ساختگی و دادهٔ نمایشی کامل برای معرفی.</item>
-/// <item><b>Content</b> — بستهٔ محتوایی که از پنل یک سایت دیگر گرفته شده (Setup:ContentFile، zip یا پوشه).</item>
+/// <item><b>Blank</b> — leere Datenbank; nur Rollen und das Inhaberkonto (Setup:OwnerPhone). Bis zum „Veröffentlichen“ zeigt die Seite „Im Aufbau“.</item>
+/// <item><b>Demo</b> — fiktive Marke und vollständige Demodaten zur Präsentation.</item>
+/// <item><b>Content</b> — Inhaltspaket aus dem Panel einer anderen Seite (Setup:ContentFile, zip oder Ordner).</item>
 /// </list>
 /// </summary>
 public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService site, UserManager<AppUser> users, IClock clock, ILogger<SiteInstaller> logger)
@@ -22,18 +22,18 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
     public static readonly string[] Modes = ["Blank", "Demo", "Content"];
 
     /// <param name="mode">Blank | Demo | Content</param>
-    /// <param name="demoSeedDir">پوشهٔ دادهٔ نمایشی (Seed کنار برنامه)</param>
-    /// <param name="contentFile">بستهٔ محتوا (zip یا پوشه) برای حالت Content</param>
-    /// <param name="uploadsRoot">پوشهٔ عکس‌های آپلودی؛ عکس‌های داخل بسته این‌جا کپی می‌شوند</param>
-    /// <returns>حالتی که واقعاً نصب شد، یا null اگر سایت قبلاً نصب شده بود</returns>
-    /// <param name="demoData">در حالت Content هم دادهٔ نمایشی (موجودی انبار، کد تخفیف، جشنوارهٔ فعال) ساخته شود — برای پرزنت با محتوای واقعی یک باشگاه</param>
+    /// <param name="demoSeedDir">Ordner mit Demodaten (Seed neben der Anwendung)</param>
+    /// <param name="contentFile">Inhaltspaket (zip oder Ordner) für den Modus Content</param>
+    /// <param name="uploadsRoot">Ordner für hochgeladene Bilder; Bilder aus dem Paket werden hierher kopiert</param>
+    /// <returns>Tatsächlich installierter Modus, oder null, wenn die Seite schon installiert war</returns>
+    /// <param name="demoData">Auch im Modus Content Demodaten erzeugen (Lagerbestand, Rabattcode, aktive Aktion) — für Präsentationen mit echtem Studioinhalt</param>
     public async Task<string?> InstallAsync(string mode, string demoSeedDir, string? contentFile, string uploadsRoot, string? ownerPhone, CancellationToken ct, bool demoData = false)
     {
         if (await db.SiteContents.AnyAsync(ct)) return null;
         mode = Modes.FirstOrDefault(m => m.Equals(mode, StringComparison.OrdinalIgnoreCase))
             ?? throw new InvalidOperationException($"Setup:Mode must be one of {string.Join(", ", Modes)}.");
 
-        // دیتابیس نسخه‌های قبل از قالب: داده دارد ولی تنظیمات ندارد → همان داده منتشرشده می‌ماند
+        // Datenbank aus Versionen vor der Vorlage: Daten vorhanden, aber keine Einstellungen → die Daten bleiben veröffentlicht
         if (await db.Branches.AnyAsync(ct))
         {
             await site.SaveRawAsync(new SiteConfig { Setup = new SetupSettings { Mode = "Content", Published = true, PublishedAtUtc = clock.UtcNow } }, null, ct);
@@ -73,7 +73,7 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
                 break;
 
             default:
-                await seeder.SeedAsync(Path.Combine(Path.GetTempPath(), "gym-blank-none"), demo: false, ct); // فقط نقش‌ها
+                await seeder.SeedAsync(Path.Combine(Path.GetTempPath(), "gym-blank-none"), demo: false, ct); // nur Rollen
                 await site.SaveRawAsync(new SiteConfig(), null, ct);
                 break;
         }
@@ -83,15 +83,15 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
         return mode;
     }
 
-    /// <summary>مالک سایت: مدیر کل با شمارهٔ موبایل خودش (ورود با کد پیامکی)</summary>
+    /// <summary>Seiteninhaber: Gesamtadmin mit eigener Handynummer (Login per SMS-Code)</summary>
     public async Task EnsureOwnerAsync(string phone, CancellationToken ct)
     {
         phone = PersianText.ToLatinDigits(phone).Trim();
-        if (!System.Text.RegularExpressions.Regex.IsMatch(phone, @"^09\d{9}$")) throw new InvalidOperationException("Setup:OwnerPhone must look like 09121234567.");
+        if (!System.Text.RegularExpressions.Regex.IsMatch(phone, @"^01[5-7]\d{8,9}$")) throw new InvalidOperationException("Setup:OwnerPhone must look like 015112345678.");
         var u = await users.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone, ct);
         if (u is null)
         {
-            u = new AppUser { UserName = phone, PhoneNumber = phone, PhoneNumberConfirmed = true, FullName = "مدیر سایت", CreatedAtUtc = clock.UtcNow };
+            u = new AppUser { UserName = phone, PhoneNumber = phone, PhoneNumberConfirmed = true, FullName = "Seitenadmin", CreatedAtUtc = clock.UtcNow };
             var r = await users.CreateAsync(u);
             if (!r.Succeeded) throw new InvalidOperationException(string.Join("; ", r.Errors.Select(e => e.Description)));
         }
@@ -99,7 +99,7 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
         if (missing.Count > 0) await users.AddToRolesAsync(u, missing);
     }
 
-    /// <summary>بستهٔ zip، یا همان zip به‌صورت متن base64 (برای «Secret File» در سرویس‌های میزبانی که فقط متن می‌گیرند)</summary>
+    /// <summary>zip-Paket, oder dasselbe zip als base64-Text (für „Secret File“ bei Hostern, die nur Text akzeptieren)</summary>
     private static ZipArchive OpenPackage(string path)
     {
         var bytes = File.ReadAllBytes(path);
@@ -121,7 +121,7 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
         }
     }
 
-    /// <summary>بستهٔ محتوا به‌شکل zip: فایل‌های Seed + site.json + عکس‌های آپلودی استفاده‌شده</summary>
+    /// <summary>Inhaltspaket als zip: Seed-Dateien + site.json + verwendete hochgeladene Bilder</summary>
     public async Task<byte[]> ExportAsync(string uploadsRoot, CancellationToken ct)
     {
         var files = await ContentExporter.ExportAsync(db, ct);
@@ -139,7 +139,7 @@ public sealed class SiteInstaller(GymDbContext db, DbSeeder seeder, ISiteService
                 await using var w = new StreamWriter(e.Open());
                 await w.WriteAsync(json);
             }
-            // فقط عکس‌های آپلودی که در محتوا ارجاع شده‌اند
+            // Nur hochgeladene Bilder, auf die der Inhalt verweist
             var all = string.Join("\n", files.Values);
             foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(all, @"/media/uploads/([A-Za-z0-9._-]+\.(?:webp|png|jpe?g))"))
             {

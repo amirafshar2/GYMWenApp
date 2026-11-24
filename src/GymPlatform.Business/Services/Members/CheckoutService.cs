@@ -15,8 +15,8 @@ public interface ICheckoutService
 }
 
 /// <summary>
-/// محاسبهٔ قیمت (تخفیف جشنواره ← کد تخفیف) و ساخت پرداخت در انتظار.
-/// قیمت همیشه سمت سرور محاسبه می‌شود؛ مبلغی که کلاینت می‌فرستد پذیرفته نمی‌شود.
+/// Preisberechnung (Aktionsrabatt → Rabattcode) und Anlage einer offenen Zahlung.
+/// Der Preis wird immer serverseitig berechnet; ein vom Client gesendeter Betrag wird nicht akzeptiert.
 /// </summary>
 public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IClock clock) : ICheckoutService
 {
@@ -30,40 +30,40 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
     {
         var key = (request.IdempotencyKey ?? "").Trim();
         if (key.Length is < 8 or > 64)
-            return Result<CheckoutStartedDto>.Fail("idempotencyKey", "شناسهٔ درخواست نامعتبر است.");
+            return Result<CheckoutStartedDto>.Fail("idempotencyKey", "Ungültige Anfrage-ID.");
 
-        // همان درخواست دوباره آمده (دوبار کلیک، رفرش): همان پرداخت برگردانده می‌شود
+        // Dieselbe Anfrage kam erneut (Doppelklick, Neuladen): dieselbe Zahlung wird zurückgegeben
         var existing = await db.Payments.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId && p.IdempotencyKey == key, ct);
         if (existing is not null)
             return Result<CheckoutStartedDto>.Ok(new CheckoutStartedDto(existing.Id, existing.TrackingNumber, existing.AmountToman, existing.Status == PaymentStatus.Succeeded));
 
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId, ct);
-        if (user is null) return Result<CheckoutStartedDto>.Fail("user", "کاربر پیدا نشد.", ErrorType.Unauthorized);
+        if (user is null) return Result<CheckoutStartedDto>.Fail("user", "Benutzer nicht gefunden.", ErrorType.Unauthorized);
         if (string.IsNullOrWhiteSpace(user.FullName))
-            return Result<CheckoutStartedDto>.Fail("fullName", "قبل از پرداخت نام و نام خانوادگی را وارد کنید.");
+            return Result<CheckoutStartedDto>.Fail("fullName", "Bitte vor der Zahlung Vor- und Nachnamen eingeben.");
 
         var activeVersion = await db.ContractTemplates.Where(t => t.IsActive).Select(t => (int?)t.Version).MaxAsync(ct);
         if (activeVersion is not null &&
             !await db.SignedContracts.AnyAsync(s => s.UserId == userId && s.Version == activeVersion, ct))
-            return Result<CheckoutStartedDto>.Fail("contract", "قبل از پرداخت، قرارداد را بخوانید و امضا کنید.", ErrorType.Forbidden);
+            return Result<CheckoutStartedDto>.Fail("contract", "Bitte vor der Zahlung den Vertrag lesen und unterschreiben.", ErrorType.Forbidden);
 
         var priced = await PriceAsync(request.BranchSlug, request.PackageSlug, request.Section, request.DiscountCode, ct);
         if (!priced.Succeeded) return Result<CheckoutStartedDto>.Fail(priced.Errors.ToDictionary(), priced.ErrorType);
         var p = priced.Value!;
-        // سالن‌ها جدا هستند: جنسیت ثبت‌شده باید با سالن انتخابی بخواند
+        // Getrennte Bereiche: das erfasste Geschlecht muss zum gewählten Bereich passen
         if (user.Gender == Gender.Female && p.Section != GenderSection.Women)
-            return Result<CheckoutStartedDto>.Fail("section", "برای بانوان فقط سالن بانوان قابل انتخاب است.");
+            return Result<CheckoutStartedDto>.Fail("section", "Für Frauen ist nur der Damenbereich wählbar.");
         if (user.Gender == Gender.Male && p.Section != GenderSection.Men)
-            return Result<CheckoutStartedDto>.Fail("section", "برای آقایان فقط سالن آقایان قابل انتخاب است.");
+            return Result<CheckoutStartedDto>.Fail("section", "Für Männer ist nur der Herrenbereich wählbar.");
         if (p.Quote.DiscountCodeError is not null)
             return Result<CheckoutStartedDto>.Fail("discountCode", p.Quote.DiscountCodeError);
 
         var now = clock.UtcNow;
-        // سقف کد (با احتساب پرداخت‌های در انتظار)، یک‌بار برای هر نفر، «فقط اعضا»، و ظرفیت جشنواره
+        // Code-Limit (inkl. offener Zahlungen), einmal pro Person, „nur Mitglieder“ und Kapazität der Aktion
         if (p.Quote.DiscountCode is { } usedCode && await db.DiscountCodes.AsNoTracking().FirstOrDefaultAsync(d => d.Code == usedCode, ct) is { } dc)
         {
             if (dc.MembersOnly && !await DiscountGuard.IsActiveMemberAsync(db, userId, now, ct))
-                return Result<CheckoutStartedDto>.Fail("discountCode", "این کد فقط برای اعضای دارای عضویت فعال است.");
+                return Result<CheckoutStartedDto>.Fail("discountCode", "Dieser Code gilt nur für Mitglieder mit aktiver Mitgliedschaft.");
             if (await DiscountGuard.CodeErrorAsync(db, dc, userId, now, ct) is { } codeLimit)
                 return Result<CheckoutStartedDto>.Fail("discountCode", codeLimit, ErrorType.Conflict);
         }
@@ -90,7 +90,7 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException)
         {
-            // دو درخواست هم‌زمان با یک کلید: یکی ثبت شده؛ همان را برگردان
+            // Zwei gleichzeitige Anfragen mit demselben Schlüssel: eine ist gespeichert; diese zurückgeben
             db.ChangeTracker.Clear();
             var again = await db.Payments.AsNoTracking().FirstAsync(x => x.UserId == userId && x.IdempotencyKey == key, ct);
             return Result<CheckoutStartedDto>.Ok(new CheckoutStartedDto(again.Id, again.TrackingNumber, again.AmountToman, again.Status == PaymentStatus.Succeeded));
@@ -106,11 +106,11 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == branchSlug && b.IsActive, ct);
         var package = await db.Packages.AsNoTracking().FirstOrDefaultAsync(x => x.Slug == packageSlug && x.IsActive, ct);
         GenderSection? sec = section?.ToLowerInvariant() switch { "men" => GenderSection.Men, "women" => GenderSection.Women, _ => null };
-        if (branch is null) errors["branchSlug"] = ["شعبه را انتخاب کنید."];
-        if (package is null) errors["packageSlug"] = ["پکیج را انتخاب کنید."];
-        if (sec is null) errors["section"] = ["سالن آقایان یا بانوان را انتخاب کنید."];
+        if (branch is null) errors["branchSlug"] = ["Bitte eine Filiale wählen."];
+        if (package is null) errors["packageSlug"] = ["Bitte ein Paket wählen."];
+        if (sec is null) errors["section"] = ["Bitte Herren- oder Damenbereich wählen."];
         else if (branch is not null && !branch.Sections.HasFlag(sec.Value))
-            errors["section"] = [sec == GenderSection.Women ? "این شعبه سالن بانوان ندارد." : "این شعبه سالن آقایان ندارد."];
+            errors["section"] = [sec == GenderSection.Women ? "Diese Filiale hat keinen Damenbereich." : "Diese Filiale hat keinen Herrenbereich."];
         if (errors.Count > 0) return Result<Priced>.Fail(errors);
 
         var now = clock.UtcNow;
@@ -123,7 +123,7 @@ public sealed class CheckoutService(GymDbContext db, IPricingService pricing, IC
         if (code is not null)
         {
             var dc = await db.DiscountCodes.AsNoTracking().FirstOrDefaultAsync(d => d.Code == code, ct);
-            if (dc is null || !dc.IsUsableAt(now) || !dc.AppliesTo(DiscountScope.Membership)) codeError = "کد تخفیف معتبر نیست یا منقضی شده است.";
+            if (dc is null || !dc.IsUsableAt(now) || !dc.AppliesTo(DiscountScope.Membership)) codeError = "Rabattcode ungültig oder abgelaufen.";
             else { codePercent = dc.Percent; total = pricing.ApplyDiscount(afterCampaign, dc.Percent); }
         }
 

@@ -1,8 +1,8 @@
 namespace GymPlatform.Domain.Entities;
 
 /// <summary>
-/// تنظیمات و محتوای قابل‌ویرایش سایت (هویت، رنگ، متن و عکس صفحه‌ها، ماژول‌ها، وضعیت راه‌اندازی).
-/// فقط یک ردیف دارد؛ محتوا به‌صورت JSON نگه داشته می‌شود تا افزودن یک متن تازه مایگریشن نخواهد.
+/// Bearbeitbare Einstellungen und Inhalte der Seite (Identität, Farben, Texte und Bilder, Module, Einrichtungsstatus).
+/// Nur eine Zeile; der Inhalt liegt als JSON vor, damit ein neuer Text keine Migration braucht.
 /// </summary>
 public class SiteContent
 {

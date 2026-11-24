@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-// تغییر برای پروژه: محتوا، لینک و بستن به‌صورت props (طراحی و کلاس‌ها دست‌نخورده)
+// Änderung fürs Projekt: Inhalt, Link und Schließen als props (Design und Klassen unverändert)
 export interface Banner1Props {
   children?: ReactNode;
   href?: string;
@@ -15,7 +15,7 @@ export interface Banner1Props {
   className?: string;
 }
 
-export function Banner1({ children, href = "#", label = "Promotion announcement", closeLabel = "Close announcement", onClose, className }: Banner1Props = {}) {
+export function Banner1({ children, href = "#", label = "Aktion", closeLabel = "Schließen", onClose, className }: Banner1Props = {}) {
   return (
     <aside
       role="region"
@@ -41,7 +41,7 @@ export function Banner1({ children, href = "#", label = "Promotion announcement"
         size="icon"
       >
         <X className="text-white" />
-        <span className="sr-only">Close</span>
+        <span className="sr-only">Schließen</span>
       </Button>
     </aside>
   );

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace GymPlatform.DataAccess;
 
-/// <summary>فقط برای dotnet ef (ساخت Migration روی SQL Server).</summary>
+/// <summary>Nur für dotnet ef (Migration auf SQL Server erstellen).</summary>
 public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<GymDbContext>
 {
     public GymDbContext CreateDbContext(string[] args)

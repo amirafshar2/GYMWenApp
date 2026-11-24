@@ -8,20 +8,20 @@ namespace GymPlatform.DataAccess;
 public static class DataAccessExtensions
 {
     /// <summary>
-    /// Database:Provider = SqlServer (پیش‌فرض، با Migration) یا Sqlite (دموی سریع بدون نصب SQL Server).
-    /// رشتهٔ اتصال از ConnectionStrings:Default (User Secrets / متغیر محیطی) خوانده می‌شود.
+    /// Database:Provider = SqlServer (Standard, mit Migration) oder Sqlite (schnelle Demo ohne SQL Server).
+    /// Die Verbindungszeichenfolge kommt aus ConnectionStrings:Default (User Secrets / Umgebungsvariable).
     /// </summary>
     public static IServiceCollection AddDataAccess(this IServiceCollection services, IConfiguration config)
     {
         var provider = config["Database:Provider"] ?? "SqlServer";
         var cs = config.GetConnectionString("Default")
-                 ?? throw new InvalidOperationException("ConnectionStrings:Default تنظیم نشده است.");
+                 ?? throw new InvalidOperationException("ConnectionStrings:Default ist nicht gesetzt.");
 
         services.AddDbContext<GymDbContext>(o =>
         {
-            // فهرست‌های بزرگ در کوئری (مثلاً هزاران عضو در فهرست سفید گیت یا مخاطبان پیامک جشنواره)
-            // به‌صورت یک پارامتر JSON فرستاده می‌شوند، نه یک پارامتر برای هر عضو؛
-            // SQL Server حداکثر ۲۱۰۰ پارامتر می‌پذیرد و با رشد اعضا کوئری خطا می‌داد.
+            // Große Listen in Abfragen (z. B. Tausende Mitglieder in der Gate-Whitelist oder Empfänger der Aktions-SMS)
+            // werden als ein JSON-Parameter gesendet, nicht als ein Parameter pro Mitglied;
+            // SQL Server akzeptiert höchstens 2100 Parameter und die Abfrage würde mit wachsender Mitgliederzahl scheitern.
             if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
                 o.UseSqlite(cs, sql => sql.UseParameterizedCollectionMode(ParameterTranslationMode.Parameter));
             else

@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.OutputCaching;
 
 namespace GymPlatform.Api.Controllers;
 
-/// <summary>داده‌های عمومی سایت (فقط خواندنی، کش‌شده).</summary>
+/// <summary>Öffentliche Daten der Seite (nur lesend, gecacht).</summary>
 [ApiController]
 [Route("api/v1")]
 [OutputCache(PolicyName = "public")]
 public sealed class PublicController(ICatalogService catalog) : ControllerBase
 {
-    /// <param name="section">men | women | (خالی = همه)</param>
+    /// <param name="section">men | women | (leer = alle)</param>
     [HttpGet("branches")]
     public async Task<ActionResult<IReadOnlyList<BranchDto>>> Branches([FromQuery] string? section, CancellationToken ct)
     {
@@ -23,7 +23,7 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
             null or "" or "all" => null,
             _ => (GenderSection?)(-1)
         };
-        if (s == (GenderSection)(-1)) return ValidationProblem("section باید men یا women باشد.");
+        if (s == (GenderSection)(-1)) return ValidationProblem("section muss men oder women sein.");
         return Ok(await catalog.GetBranchesAsync(s, ct));
     }
 
@@ -48,8 +48,8 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
         Ok(await catalog.GetFaqAsync(ct));
 
     /// <summary>
-    /// وضعیت نسخه برای نمایش نوار «نسخهٔ نمایشی». خارج از Production، وقتی کد ورود روی صفحه یا درگاه آزمایشی فعال است
-    /// (یا Site:DemoBanner=true)، سایت دمو حساب می‌شود.
+    /// Versionsstatus für die Leiste „Demo-Version“. Außerhalb von Production gilt die Seite als Demo, wenn der Login-Code auf der Seite erscheint oder das Test-Gateway aktiv ist
+    /// (oder Site:DemoBanner=true).
     /// </summary>
     [HttpGet("site")]
     public async Task<ActionResult<SiteInfoDto>> Site([FromServices] IConfiguration cfg, [FromServices] IHostEnvironment env,
@@ -67,7 +67,7 @@ public sealed class PublicController(ICatalogService catalog) : ControllerBase
         Ok(await catalog.GetStatsAsync(ct));
 }
 
-/// <summary>همهٔ تنظیمات عمومی سایت (نام، لوگو، رنگ، متن‌ها، ماژول‌ها) + وضعیت انتشار</summary>
+/// <summary>Alle öffentlichen Einstellungen der Seite (Name, Logo, Farben, Texte, Module) + Veröffentlichungsstatus</summary>
 public sealed record SiteInfoDto(bool Demo, bool Published, string Mode, int Branches,
     GymPlatform.Business.Services.Site.BrandSettings Brand, GymPlatform.Business.Services.Site.ContactSettings Contact,
     GymPlatform.Business.Services.Site.ThemeSettings Theme, GymPlatform.Business.Services.Site.HomeSettings Home,

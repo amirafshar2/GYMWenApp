@@ -1,31 +1,31 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="de" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFFFFF" />
-    <!-- نام و توضیح واقعی از «تنظیمات سایت» در پنل می‌آید (lib/site.ts) -->
-    <title>باشگاه ورزشی</title>
-    <meta name="description" content="عضویت آنلاین باشگاه، سالن‌های آقایان و بانوان، مربیان و فروشگاه ورزشی." />
-    <meta property="og:title" content="باشگاه ورزشی" />
-    <meta property="og:description" content="عضویت آنلاین، نزدیک‌ترین شعبه و پکیج‌ها." />
+    <!-- Echter Name und Beschreibung kommen aus den „Website-Einstellungen“ im Panel (lib/site.ts) -->
+    <title>Fitnessstudio</title>
+    <meta name="description" content="Online-Mitgliedschaft, Herren- und Damenbereiche, Trainer und Sportshop." />
+    <meta property="og:title" content="Fitnessstudio" />
+    <meta property="og:description" content="Online-Mitgliedschaft, nächstes Studio und Pakete." />
     <meta property="og:locale" content="fa_IR" />
     <link rel="icon" href="/brand/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/brand/favicon-64.png" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
-    <!-- سرعت: فونت فارسی زودتر دانلود شود تا متن هیرو بعد از نمایش جابه‌جا نشود -->
+    <!-- Performance: Schrift früh laden, damit der Hero-Text nach dem Rendern nicht springt -->
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/vazirmatn/files/vazirmatn-arabic-wght-normal.woff2" />
     <script>
-      // جای نوار جشنواره از قبل رزرو شود تا با رسیدن آن، صفحه پایین نپرد (اگر جشنواره‌ای نباشد صفر می‌شود)
+      // Platz für die Aktionsleiste vorab reservieren, damit die Seite beim Eintreffen nicht springt (ohne Aktion 0)
       try {
         if (location.pathname.indexOf('/panel') !== 0 && sessionStorage.getItem('festival-hidden') !== '1')
           document.documentElement.style.setProperty('--festival-h', innerWidth < 640 ? '64px' : '44px')
-      } catch (e) { /* حالت خصوصی */ }
-      // فقط در صفحهٔ اصلی: تصویر هیرو (بزرگ‌ترین المان صفحه) با بالاترین اولویت
-      // (تصویر از تنظیمات ذخیره‌شدهٔ سایت در همین مرورگر؛ بار اول تصویر پیش‌فرض قالب)
+      } catch (e) { /* privater Modus */ }
+      // Nur auf der Startseite: Hero-Bild (größtes Element) mit höchster Priorität
+      // (Bild aus den in diesem Browser gespeicherten Einstellungen; beim ersten Mal das Standardbild der Vorlage)
       if (location.pathname === '/') {
         var hero = null
-        try { hero = (JSON.parse(localStorage.getItem('site-config-v1') || 'null') || {}).home.hero } catch (e) { /* بار اول */ }
+        try { hero = (JSON.parse(localStorage.getItem('site-config-v1') || 'null') || {}).home.hero } catch (e) { /* erstes Mal */ }
         var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image'; l.fetchPriority = 'high'
         l.href = innerWidth < 640 ? (hero && hero.mobileImageUrl) || '/media/hero/dumbbell-mobile.webp' : (hero && hero.imageUrl) || '/media/hero/dumbbell.webp'
         document.head.appendChild(l)

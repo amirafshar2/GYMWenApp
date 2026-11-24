@@ -1,4 +1,4 @@
-// جایگزین next/image: یک <img> ساده با lazy-load
+// Ersatz für next/image: ein einfaches <img> mit lazy-load
 import { forwardRef, type ImgHTMLAttributes } from 'react'
 
 type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> & {

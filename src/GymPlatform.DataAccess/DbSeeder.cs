@@ -8,8 +8,8 @@ using Microsoft.Extensions.Logging;
 namespace GymPlatform.DataAccess;
 
 /// <summary>
-/// دادهٔ نمونهٔ دمو را از فایل‌های JSON پوشهٔ Seed می‌خواند.
-/// برای اصلاح شعبه‌ها فقط Seed/branches.json را ویرایش کنید.
+/// Liest die Demodaten aus den JSON-Dateien im Ordner Seed.
+/// Zum Korrigieren der Filialen nur Seed/branches.json bearbeiten.
 /// </summary>
 public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
 {
@@ -19,7 +19,7 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
         Converters = { new JsonStringEnumConverter() }
     };
 
-    /// <param name="demo">نسخهٔ نمایشی: کد تخفیف، جشنواره و موجودی نمونه هم ساخته شود</param>
+    /// <param name="demo">Demo-Version: auch Rabattcode, Aktion und Beispielbestand anlegen</param>
     public async Task SeedAsync(string seedDir, bool demo = true, CancellationToken ct = default)
     {
         bool Has(string f) => File.Exists(Path.Combine(seedDir, f));
@@ -90,11 +90,11 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
 
         if (demo && !await db.DiscountCodes.AnyAsync(ct))
         {
-            // کدهای تخفیف دمو (روی قیمت پس از جشنواره اعمال می‌شوند)
+            // Demo-Rabattcodes (gelten auf den Preis nach der Aktion)
             db.DiscountCodes.AddRange(
                 new DiscountCode { Code = "START10", Percent = 10, MaxUses = 500 },
                 new DiscountCode { Code = "WELCOME5", Percent = 5 },
-                // فروشگاه: فقط برای اعضای دارای عضویت فعال
+                // Shop: nur für Mitglieder mit aktiver Mitgliedschaft
                 new DiscountCode { Code = "MEMBER15", Percent = 15, Scope = DiscountScope.Shop, MembersOnly = true });
             await db.SaveChangesAsync(ct);
         }
@@ -119,7 +119,7 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
                     {
                         Sku = $"{s.Slug}-{++vi}".ToUpperInvariant(), Size = v.Size, Color = v.Color, ColorHex = v.ColorHex, Flavor = v.Flavor, PriceToman = v.PriceToman,
                     };
-                    // موجودی نمونه و قابل‌تکرار: بیشتر شعبه‌ها چند عدد، بعضی صفر (برای نمایش «ناموجود در این شعبه»)
+                    // Wiederholbarer Beispielbestand: die meisten Filialen einige Stück, manche 0 (für „in dieser Filiale nicht vorrätig“)
                     foreach (var b in branchIds)
                     {
                         var q = (n * 7 + b * 5 + vi * 3) % 13;
@@ -154,12 +154,12 @@ public class DbSeeder(GymDbContext db, ILogger<DbSeeder> logger)
 
         if (demo && !await db.Campaigns.AnyAsync(ct))
         {
-            // جشنوارهٔ فعال دمو: از امروز تا ۲۱ روز بعد، تا شمارش معکوس همیشه زنده باشد.
+            // Aktive Demo-Aktion: ab heute für 21 Tage, damit der Countdown immer läuft.
             var now = DateTime.UtcNow;
             db.Campaigns.Add(new Campaign
             {
-                Title = "جشنوارهٔ پاییزی",
-                Description = "۲۰٪ تخفیف پکیج‌های سه، شش و دوازده‌ماهه — فقط تا پایان جشنواره",
+                Title = "Herbstaktion",
+                Description = "20 % Rabatt auf 3-, 6- und 12-Monats-Pakete — nur bis Aktionsende",
                 StartsAtUtc = now.Date,
                 EndsAtUtc = now.Date.AddDays(21),
                 DiscountPercent = 20,

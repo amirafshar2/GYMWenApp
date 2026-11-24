@@ -12,9 +12,9 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace GymPlatform.Api.Controllers;
 
 /// <summary>
-/// دسترسی پنل کارکنان. نقش‌ها و شعبه‌ها هر بار از پایگاه داده خوانده می‌شوند (نه از توکن)،
-/// تا وقتی مدیر کل دسترسی کسی را برمی‌دارد، همان لحظه اعمال شود. مدیر کل همه‌جا دسترسی دارد.
-/// چند ویژگی روی کلاس و متد با هم «و» می‌شوند.
+/// Zugriff aufs Mitarbeiterpanel. Rollen und Filialen werden jedes Mal aus der Datenbank gelesen (nicht aus dem Token),
+/// damit entzogene Rechte sofort gelten. Der Gesamtadmin hat überall Zugriff.
+/// Mehrere Attribute an Klasse und Methode werden mit „und“ verknüpft.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class PanelAccessAttribute(params string[] roles) : Attribute, IAsyncActionFilter
@@ -32,7 +32,7 @@ public sealed class PanelAccessAttribute(params string[] roles) : Attribute, IAs
         }
         if (!scope.IsSuperAdmin && !roles.Any(scope.Roles.Contains))
         {
-            context.Result = new ObjectResult(new ProblemDetails { Status = 403, Title = "به این بخش دسترسی ندارید." }) { StatusCode = 403 };
+            context.Result = new ObjectResult(new ProblemDetails { Status = 403, Title = "Kein Zugriff auf diesen Bereich." }) { StatusCode = 403 };
             return;
         }
         await next();
@@ -50,7 +50,7 @@ file static class R
         Canteen = Roles.CanteenStaff, Shop = Roles.ShopStaff;
 }
 
-/// <summary>پنل: کارمند فعلی + داشبورد مدیر + خروجی اکسل</summary>
+/// <summary>Panel: aktueller Mitarbeiter + Admin-Dashboard + Excel-Export</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/panel")]
@@ -75,7 +75,7 @@ public sealed class PanelController(IStaffScopeService scopes, IDashboardService
             .ToActionResult(this, f => File(f.Content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", f.FileName));
 }
 
-/// <summary>پذیرش: جست‌وجوی عضو، پرونده، ثبت ورود دستی/اسکنر، ورودهای امروز</summary>
+/// <summary>Empfang: Mitgliedersuche, Akte, manueller/Scanner-Check-in, heutige Check-ins</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/panel/reception")]
@@ -102,7 +102,7 @@ public sealed class ReceptionController(IReceptionService reception) : Controlle
         (await reception.TodayAsync(this.Scope(), branch, ct)).ToActionResult(this);
 }
 
-/// <summary>مربی: شاگردها، برنامهٔ تمرین و تغذیه، ثبت وزن</summary>
+/// <summary>Trainer: Schüler, Trainings- und Ernährungsplan, Gewicht erfassen</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/panel/coach")]
@@ -133,7 +133,7 @@ public sealed class CoachPanelController(ICoachService coach) : ControllerBase
         (await coach.AddMetricAsync(User.UserId(), memberId, request, ct)).ToActionResult(this, m => StatusCode(201, m));
 }
 
-/// <summary>مدیریت محتوا: پکیج، جشنواره، کد تخفیف، قرارداد، فروشگاه، بوفه، کارکنان، پیامک</summary>
+/// <summary>Inhaltsverwaltung: Paket, Aktion, Rabattcode, Vertrag, Shop, Bistro, Mitarbeiter, SMS</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/panel/admin")]
@@ -142,14 +142,14 @@ public sealed class CoachPanelController(ICoachService coach) : ControllerBase
 public sealed class AdminController(IAdminService admin, ISmsService sms, PublicImageStore images, IWebHostEnvironment env,
     Microsoft.AspNetCore.OutputCaching.IOutputCacheStore cache) : ControllerBase
 {
-    /// <summary>صفحه‌های عمومی (پکیج‌ها، جشنواره) ۶۰ ثانیه کش می‌شوند؛ بعد از تغییر، کش همان لحظه پاک می‌شود</summary>
+    /// <summary>Öffentliche Seiten (Pakete, Aktion) werden 60 Sekunden gecacht; nach einer Änderung wird der Cache sofort geleert</summary>
     private async Task<IActionResult> Fresh(IActionResult r, CancellationToken ct)
     {
         if (r is ObjectResult { StatusCode: null or < 300 } or NoContentResult or StatusCodeResult { StatusCode: < 300 }) await cache.EvictByTagAsync("public", ct);
         return r;
     }
 
-    // ---- تنظیمات سایت (هویت، رنگ، متن و عکس صفحه‌ها، ماژول‌ها) و دستیار راه‌اندازی
+    // ---- Website-Einstellungen (Identität, Farben, Texte und Bilder, Module) und Einrichtungsassistent
     [HttpGet("site"), PanelAccess(R.Super)]
     public async Task<IActionResult> SiteSettings([FromServices] ISiteService site, CancellationToken ct) => Ok(await site.GetAsync(ct));
 
@@ -165,7 +165,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     public async Task<IActionResult> UpdateSetup([FromBody] SetupUpdateRequest r, [FromServices] ISiteService site, CancellationToken ct) =>
         await Fresh((await site.UpdateSetupAsync(r, User.UserId(), ct)).ToActionResult(this), ct);
 
-    /// <summary>بستهٔ محتوا (zip): شعبه‌ها، پکیج‌ها، مربیان، سؤالات، قرارداد، کالاها، منو، تنظیمات سایت و عکس‌های آپلودی — بدون هیچ اطلاعات عضو</summary>
+    /// <summary>Inhaltspaket (zip): Filialen, Pakete, Trainer, FAQ, Vertrag, Produkte, Karte, Seiteneinstellungen und hochgeladene Bilder — ohne Mitgliederdaten</summary>
     [HttpGet("content/export"), PanelAccess(R.Super)]
     [EnableRateLimiting("payment")]
     public async Task<IActionResult> ExportContent([FromServices] SiteInstaller installer, CancellationToken ct)
@@ -174,7 +174,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return File(zip, "application/zip", $"site-content-{DateTime.UtcNow:yyyyMMdd}.zip");
     }
 
-    // ---- ویدیو: آپلود مستقیم روی دیسک، بهینه‌سازی در صف پس‌زمینه
+    // ---- Video: direkter Upload auf die Festplatte, Optimierung in einer Hintergrund-Warteschlange
     [HttpPost("videos"), PanelAccess(R.Super)]
     [RequestSizeLimit(GymPlatform.Api.Video.VideoStore.MaxBytes + 1024 * 1024)]
     [GymPlatform.Api.Video.DisableFormValueModelBinding]
@@ -195,7 +195,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return Ok(new { ready = s.Ready, poster = s.Poster, failed = s.Failed });
     }
 
-    // ---- شعبه‌ها و سؤالات پرتکرار
+    // ---- Filialen und FAQ
     [HttpGet("branches"), PanelAccess(R.Super)]
     public async Task<IActionResult> Branches(CancellationToken ct) => Ok(await admin.BranchesAsync(ct));
 
@@ -230,7 +230,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     public async Task<IActionResult> DeleteFaq(int id, CancellationToken ct) =>
         await Fresh((await admin.DeleteFaqAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent()), ct);
 
-    // ---- عکس‌ها: کتابخانهٔ عکس‌های سایت + آپلود (فقط مدیر کل)
+    // ---- Bilder: Mediathek der Seite + Upload (nur Gesamtadmin)
     [HttpGet("images"), PanelAccess(R.Super)]
     public IActionResult ImageLibrary()
     {
@@ -241,7 +241,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
             List(Path.Combine(web, "media", "shop"), "/media/shop", "*.svg")
                 .Concat(List(Path.Combine(web, "media", "coaches"), "/media/coaches", "*.*")).ToList(),
             Directory.GetFiles(images.Root).OrderByDescending(System.IO.File.GetCreationTimeUtc).Take(60).Select(f => $"{PublicImageStore.RequestPath}/{Path.GetFileName(f)}").ToList(),
-            // عکس‌های خود قالب (هیرو، سالن، گالری، پوستر ویدیو، لوگوی نمونه) برای تنظیمات سایت
+            // Bilder der Vorlage (Hero, Studio, Galerie, Videoposter, Beispiellogo) für die Website-Einstellungen
             new[] { "hero", "gym", "gallery", "video" }.SelectMany(d => List(Path.Combine(web, "media", d), $"/media/{d}", "*.webp"))
                 .Concat(List(Path.Combine(web, "brand"), "/brand", "*.svg")).ToList()));
     }
@@ -255,7 +255,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return path is null ? Problem(statusCode: 400, title: error) : StatusCode(201, new { path });
     }
 
-    // ---- ساخت/ویرایش/حذف (فقط مدیر کل)
+    // ---- Anlegen/Bearbeiten/Löschen (nur Gesamtadmin)
     [HttpPost("packages"), PanelAccess(R.Super)]
     public async Task<IActionResult> CreatePackage([FromBody] SavePackageRequest r, CancellationToken ct) =>
         await Fresh((await admin.SavePackageAsync(null, r, User.UserId(), ct)).ToActionResult(this, p => StatusCode(201, p)), ct);
@@ -276,7 +276,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     public async Task<IActionResult> EditProduct(int id, [FromBody] SaveProductRequest r, CancellationToken ct) =>
         (await admin.SaveProductAsync(id, r, this.Scope(), ct)).ToActionResult(this);
 
-    // ---- مربیان (پروفایل سایت + حساب پنل مربی)
+    // ---- Trainer (Seitenprofil + Trainerpanel-Konto)
     [HttpGet("coaches"), PanelAccess(R.Super)]
     public async Task<IActionResult> Coaches(CancellationToken ct) => Ok(await admin.CoachesAsync(ct));
 
@@ -304,7 +304,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     public async Task<IActionResult> DeleteCanteenItem(int id, CancellationToken ct) =>
         (await admin.DeleteCanteenItemAsync(id, User.UserId(), ct)).ToActionResult(this, _ => NoContent());
 
-    // ---- فقط مدیر کل
+    // ---- Nur Gesamtadmin
     [HttpGet("packages"), PanelAccess(R.Super)]
     public async Task<IActionResult> Packages(CancellationToken ct) => Ok(await admin.PackagesAsync(ct));
 
@@ -358,7 +358,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     [HttpGet("sms"), PanelAccess(R.Super)]
     public async Task<IActionResult> Sms([FromQuery] string? kind, CancellationToken ct) => Ok(await sms.StatsAsync(kind, ct));
 
-    /// <summary>اجرای فوری زمان‌بند پیامک (همان کاری که سرویس پس‌زمینه هر ۱۵ دقیقه می‌کند)</summary>
+    /// <summary>SMS-Planer sofort ausführen (dasselbe, was der Hintergrunddienst alle 15 Minuten tut)</summary>
     [HttpPost("sms/run"), PanelAccess(R.Super)]
     public async Task<IActionResult> RunSms(CancellationToken ct)
     {
@@ -367,7 +367,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         return Ok(new { scheduled, sent });
     }
 
-    // ---- فروشگاه (موجودی و سفارش‌ها محدود به شعبه‌های کارمند)
+    // ---- Shop (Bestand und Bestellungen auf die Filialen des Mitarbeiters beschränkt)
     [HttpGet("products"), PanelAccess(R.Manager, R.Shop)]
     public async Task<IActionResult> Products(CancellationToken ct) => Ok(await admin.ProductsAsync(this.Scope(), ct));
 
@@ -386,7 +386,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
     public async Task<IActionResult> ShopOrderStatus(int id, [FromBody] ShopOrderStatusRequest r, CancellationToken ct) =>
         (await admin.SetShopOrderStatusAsync(this.Scope(), id, r.Status, ct)).ToActionResult(this);
 
-    // ---- بوفه
+    // ---- Bistro
     [HttpGet("canteen-items"), PanelAccess(R.Manager, R.Canteen)]
     public async Task<IActionResult> CanteenItems(CancellationToken ct) => Ok(await admin.CanteenItemsAsync(ct));
 
@@ -395,7 +395,7 @@ public sealed class AdminController(IAdminService admin, ISmsService sms, Public
         (await admin.UpdateCanteenItemAsync(id, r, this.Scope(), ct)).ToActionResult(this);
 }
 
-/// <summary>سمت عضو: برنامهٔ مربی، وزن‌ها، تنظیمات پیامک و تاریخ تولد</summary>
+/// <summary>Mitgliederseite: Trainerplan, Gewichte, SMS-Einstellungen und Geburtsdatum</summary>
 [ApiController]
 [Authorize]
 [Route("api/v1/me")]

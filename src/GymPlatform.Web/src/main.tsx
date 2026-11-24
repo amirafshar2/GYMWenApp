@@ -6,7 +6,7 @@ import './index.css'
 import App from './App'
 import { loadSite } from './lib/site'
 
-// نام، لوگو، رنگ و متن‌های سایت از تنظیمات پنل (نسخهٔ ذخیره‌شده فوراً، نسخهٔ تازه در پس‌زمینه)
+// Name, Logo, Farbe und Texte der Seite aus den Panel-Einstellungen (gespeicherte Version sofort, neue im Hintergrund)
 loadSite().finally(() =>
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

@@ -15,47 +15,47 @@ namespace GymPlatform.Business.Services.Panel;
 public sealed class SmsOptions
 {
     public const string Section = "Sms";
-    /// <summary>نام الگوها در پنل سامانهٔ پیامک (کاوه‌نگار: Verify Lookup). هر الگو ۳ توکن می‌گیرد.</summary>
+    /// <summary>Namen der Vorlagen im SMS-Anbieter (Kavenegar: Verify Lookup). Jede Vorlage nimmt 3 Tokens.</summary>
     public string WelcomeTemplate { get; set; } = "gym-welcome";
     public string RenewTemplate { get; set; } = "gym-renew";
     public string BirthdayTemplate { get; set; } = "gym-birthday";
     public string CampaignTemplate { get; set; } = "gym-campaign";
-    /// <summary>پیامک‌های یادآوری/تبلیغی فقط در این بازه (ساعت تهران) ارسال می‌شوند.</summary>
+    /// <summary>Erinnerungs-/Werbe-SMS werden nur in diesem Zeitfenster (Berliner Zeit) gesendet.</summary>
     public int QuietBeforeHour { get; set; } = 9;
     public int QuietAfterHour { get; set; } = 21;
     public int MaxAttempts { get; set; } = 3;
     public int BirthdayDiscountPercent { get; set; } = 20;
 }
 
-/// <summary>متن پیامک‌ها. سامانهٔ واقعی فقط نام الگو و توکن‌ها را می‌گیرد؛ Preview برای گزارش پنل است.</summary>
+/// <summary>SMS-Texte. Der echte Anbieter bekommt nur Vorlagenname und Tokens; Preview ist für den Bericht im Panel.</summary>
 public static class SmsTexts
 {
-    /// <summary>آدرس سایت در پیامک‌ها (از تنظیم Sms:SiteUrl، مثلاً example.ir/join). تا دامنه تعیین نشده، متن عمومی.</summary>
-    public static string Site { get; set; } = "سایت باشگاه";
-    /// <summary>نام کوتاه باشگاه (از تنظیمات سایت، با هر ذخیره به‌روز می‌شود)</summary>
-    public static string Brand { get; set; } = "باشگاه";
+    /// <summary>Adresse der Seite in SMS (aus Sms:SiteUrl, z. B. example.de/join). Solange keine Domain festgelegt ist, ein allgemeiner Text.</summary>
+    public static string Site { get; set; } = "die Website des Studios";
+    /// <summary>Kurzname des Studios (aus den Website-Einstellungen, wird bei jedem Speichern aktualisiert)</summary>
+    public static string Brand { get; set; } = "Studio";
 
-    public static string Token(string? s) => string.IsNullOrWhiteSpace(s) ? "عضو" : s.Trim().Replace(' ', '‌');
+    public static string Token(string? s) => string.IsNullOrWhiteSpace(s) ? "Mitglied" : s.Trim().Replace(' ', '\u00A0');
 
     public static string Welcome(string name, string branch, string until, bool renewal) => renewal
-        ? $"{name} عزیز، عضویتت در {Brand} {branch} تمدید شد و تا {until} اعتبار دارد. ممنون که همراه ما هستی."
-        : $"{name} عزیز، به {Brand} {branch} خوش آمدی! عضویتت تا {until} فعال است. کارت ورود در پروفایلت است.";
+        ? $"Hallo {name}, deine Mitgliedschaft bei {Brand} {branch} wurde verlängert und gilt bis {until}. Danke, dass du dabei bist."
+        : $"Hallo {name}, willkommen bei {Brand} {branch}! Deine Mitgliedschaft ist aktiv bis {until}. Deine Zutrittskarte findest du im Profil.";
     public static string Renew(string name, int days, string date) => days <= 1
-        ? $"{name} عزیز، عضویتت در {Brand} فردا ({date}) تمام می‌شود. برای تمدید: {Site}"
-        : $"{name} عزیز، {PersianText.FaDigits(days.ToString())} روز دیگر ({date}) عضویتت در {Brand} تمام می‌شود. تمدید آنلاین: {Site}";
+        ? $"Hallo {name}, deine Mitgliedschaft bei {Brand} endet morgen ({date}). Zum Verlängern: {Site}"
+        : $"Hallo {name}, deine Mitgliedschaft bei {Brand} endet in {days} Tagen ({date}). Online verlängern: {Site}";
     public static string Birthday(string name, string code, int percent) =>
-        $"{name} عزیز، تولدت مبارک! هدیهٔ {Brand}: کد {code} با {PersianText.FaDigits(percent.ToString())}٪ تخفیف شاپ تا یک هفته.";
+        $"Hallo {name}, alles Gute zum Geburtstag! Ein Geschenk von {Brand}: Code {code} mit {percent} % Rabatt im Shop, eine Woche gültig.";
     public static string Campaign(string name, string title, string offer, string until) =>
-        $"{name} عزیز، دلمان برایت تنگ شده! {title}: {offer} تا {until}. {Site} لغو11";
+        $"Hallo {name}, wir vermissen dich! {title}: {offer} bis {until}. {Site} Abmelden: STOP";
 }
 
 public interface ISmsService
 {
-    /// <summary>اضافه به صف (بدون SaveChanges)؛ تکراری بودن با DedupeKey کنترل می‌شود.</summary>
+    /// <summary>Zur Warteschlange hinzufügen (ohne SaveChanges); Duplikate werden über DedupeKey verhindert.</summary>
     Task<bool> EnqueueAsync(int? userId, string phone, SmsKind kind, string template, IReadOnlyList<string> tokens, string preview, string dedupeKey, int? campaignId, CancellationToken ct);
-    /// <summary>یادآوری‌های ۷ و ۱ روز مانده و تبریک تولد امروز را در صف می‌گذارد.</summary>
+    /// <summary>Stellt Erinnerungen für 7 und 1 Resttag sowie heutige Geburtstagsgrüße in die Warteschlange.</summary>
     Task<int> ScheduleDueAsync(CancellationToken ct);
-    /// <summary>ارسال صف. پیامک‌های غیرفوری خارج از ساعت مجاز می‌مانند.</summary>
+    /// <summary>Warteschlange senden. Nicht dringende SMS bleiben außerhalb der erlaubten Zeit liegen.</summary>
     Task<int> DispatchAsync(int batch, CancellationToken ct);
     Task<Result<CampaignAudienceDto>> CampaignAudienceAsync(StaffScope scope, int campaignId, CancellationToken ct);
     Task<Result<CampaignAudienceDto>> SendCampaignAsync(StaffScope scope, int campaignId, CancellationToken ct);
@@ -64,11 +64,11 @@ public interface ISmsService
 
 public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock, IOptions<SmsOptions> options, ILogger<SmsService> logger) : ISmsService
 {
-    private static readonly PersianCalendar Pc = new();
+    private static readonly GregorianCalendar Pc = new();
     private static readonly MembershipStatus[] Paid = [MembershipStatus.Active, MembershipStatus.Expired];
     private SmsOptions O => options.Value;
 
-    /// <summary>نسخهٔ ایستا برای استفاده درون تراکنش‌های دیگر (مثل فعال شدن عضویت).</summary>
+    /// <summary>Statische Variante zur Nutzung innerhalb anderer Transaktionen (z. B. Aktivierung einer Mitgliedschaft).</summary>
     public static void Add(GymDbContext db, int? userId, string phone, SmsKind kind, string template, IReadOnlyList<string> tokens, string preview, string dedupeKey, int? campaignId = null) =>
         db.SmsMessages.Add(new SmsMessage
         {
@@ -89,7 +89,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
         var today = Jalali.TehranDayStartUtc(now);
         var added = 0;
 
-        // ---- یادآوری پایان عضویت: آخرین عضویت هر نفر که ۷ یا ۱ روز دیگر تمام می‌شود
+        // ---- Ablauf-Erinnerung: letzte Mitgliedschaft jeder Person, die in 7 oder 1 Tag endet
         foreach (var days in new[] { 7, 1 })
         {
             var from = today.AddDays(days); var to = from.AddDays(1);
@@ -104,7 +104,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
             }
         }
 
-        // ---- تولد (بر اساس روز و ماه شمسی، چون ایرانی‌ها تولد شمسی جشن می‌گیرند)
+        // ---- Geburtstag (nach Tag und Monat)
         var t = Jalali.ToTehran(now);
         var (jm, jd, jy) = (Pc.GetMonth(t), Pc.GetDayOfMonth(t), Pc.GetYear(t));
         var withBirth = await db.Users.AsNoTracking().Where(u => u.BirthDate != null && u.PhoneNumber != null)
@@ -115,7 +115,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
             if (Pc.GetMonth(b) != jm || Pc.GetDayOfMonth(b) != jd) continue;
             var key = $"bd:{u.Id}:{jy}";
             if (await db.SmsMessages.AnyAsync(s => s.DedupeKey == key, ct)) continue;
-            // هدیه: کد یک‌بارمصرف شخصی شاپ
+            // Geschenk: persönlicher Einmal-Code für den Shop
             var code = "BD" + RandomNumberGenerator.GetString("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 6);
             db.DiscountCodes.Add(new DiscountCode { Code = code, Percent = O.BirthdayDiscountPercent, MaxUses = 1, ExpiresAtUtc = today.AddDays(8), IsActive = true, Scope = DiscountScope.Shop, MembersOnly = true });
             var name = SmsTexts.Token(FirstName(u.FullName));
@@ -132,7 +132,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
         var hour = Jalali.ToTehran(clock.UtcNow).Hour;
         var quiet = hour < O.QuietBeforeHour || hour >= O.QuietAfterHour;
         var q = db.SmsMessages.Where(s => s.Status == SmsStatus.Queued && s.Attempts < O.MaxAttempts);
-        if (quiet) q = q.Where(s => s.Kind == SmsKind.Welcome); // خوش‌آمد بلافاصله؛ بقیه صبح
+        if (quiet) q = q.Where(s => s.Kind == SmsKind.Welcome); // Willkommen sofort; der Rest morgens
         var list = await q.OrderBy(s => s.Id).Take(batch).ToListAsync(ct);
         var sent = 0;
         foreach (var s in list)
@@ -155,7 +155,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
         return sent;
     }
 
-    // ---------------- پیامک جشنواره: فقط اعضای منقضی‌شده‌ای که پیامک تبلیغاتی را قبول کرده‌اند
+    // ---------------- Aktions-SMS: nur abgelaufene Mitglieder, die Werbe-SMS zugestimmt haben
     private async Task<(Campaign? C, List<(int UserId, string Phone, string? Name)> To, int Expired, int OptedOut)> AudienceAsync(StaffScope scope, int campaignId, CancellationToken ct)
     {
         var c = await db.Campaigns.AsNoTracking().FirstOrDefaultAsync(x => x.Id == campaignId, ct);
@@ -178,21 +178,21 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
     }
 
     private static string Offer(Campaign c) => c.DiscountAmountToman is { } a
-        ? PersianText.FaDigits((a / 1000).ToString("N0", CultureInfo.InvariantCulture).Replace(",", "٬")) + " هزار تومان تخفیف"
-        : PersianText.FaDigits(c.DiscountPercent.ToString()) + "٪ تخفیف";
+        ? PersianText.Euro(a) + " Rabatt"
+        : c.DiscountPercent + " % Rabatt";
 
     public async Task<Result<CampaignAudienceDto>> CampaignAudienceAsync(StaffScope scope, int campaignId, CancellationToken ct)
     {
         var (c, to, expired, optedOut) = await AudienceAsync(scope, campaignId, ct);
-        if (c is null) return Result<CampaignAudienceDto>.Fail("id", "جشنواره پیدا نشد.", ErrorType.NotFound);
-        return Result<CampaignAudienceDto>.Ok(new CampaignAudienceDto(to.Count, expired, optedOut, SmsTexts.Campaign("[نام]", c.Title, Offer(c), Jalali.Date(c.EndsAtUtc))));
+        if (c is null) return Result<CampaignAudienceDto>.Fail("id", "Aktion nicht gefunden.", ErrorType.NotFound);
+        return Result<CampaignAudienceDto>.Ok(new CampaignAudienceDto(to.Count, expired, optedOut, SmsTexts.Campaign("[Name]", c.Title, Offer(c), Jalali.Date(c.EndsAtUtc))));
     }
 
     public async Task<Result<CampaignAudienceDto>> SendCampaignAsync(StaffScope scope, int campaignId, CancellationToken ct)
     {
         var (c, to, expired, optedOut) = await AudienceAsync(scope, campaignId, ct);
-        if (c is null) return Result<CampaignAudienceDto>.Fail("id", "جشنواره پیدا نشد.", ErrorType.NotFound);
-        if (!c.IsActive || c.EndsAtUtc <= clock.UtcNow) return Result<CampaignAudienceDto>.Fail("id", "جشنوارهٔ تمام‌شده یا غیرفعال را نمی‌شود اطلاع‌رسانی کرد.", ErrorType.Conflict);
+        if (c is null) return Result<CampaignAudienceDto>.Fail("id", "Aktion nicht gefunden.", ErrorType.NotFound);
+        if (!c.IsActive || c.EndsAtUtc <= clock.UtcNow) return Result<CampaignAudienceDto>.Fail("id", "Für eine beendete oder inaktive Aktion kann nicht benachrichtigt werden.", ErrorType.Conflict);
         var existing = (await db.SmsMessages.Where(s => s.CampaignId == c.Id).Select(s => s.DedupeKey).ToListAsync(ct)).ToHashSet();
         var added = 0;
         var until = Jalali.Date(c.EndsAtUtc); var offer = Offer(c);
@@ -206,7 +206,7 @@ public sealed class SmsService(GymDbContext db, ISmsSender sender, IClock clock,
         }
         db.AuditLogs.Add(new AuditLog { Action = "campaign.sms_queued", EntityType = "Campaign", EntityId = c.Id.ToString(), UserId = scope.UserId, Data = $"count={added}" });
         await db.SaveChangesAsync(ct);
-        return Result<CampaignAudienceDto>.Ok(new CampaignAudienceDto(added, expired, optedOut, SmsTexts.Campaign("[نام]", c.Title, offer, until)));
+        return Result<CampaignAudienceDto>.Ok(new CampaignAudienceDto(added, expired, optedOut, SmsTexts.Campaign("[Name]", c.Title, offer, until)));
     }
 
     public async Task<SmsStatsDto> StatsAsync(string? kind, CancellationToken ct)

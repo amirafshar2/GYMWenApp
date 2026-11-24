@@ -1,137 +1,137 @@
 [
  {
   "slug": "whey-2kg",
-  "name": "پروتئین وی ۲ کیلویی",
-  "brandName": "آیرون‌لب",
+  "name": "Whey Protein 2 kg",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "پروتئین",
-  "priceToman": 8900000,
-  "description": "پروتئین وی کنسانتره با ۲۴ گرم پروتئین در هر اسکوپ؛ مناسب بعد از تمرین.",
+  "category": "Protein",
+  "priceToman": 4990,
+  "description": "Whey-Konzentrat mit 24 g Protein pro Portion; ideal nach dem Training.",
   "highlights": [
-   "۲۴ گرم پروتئین در هر وعده",
-   "۶۶ وعده",
-   "هضم سریع"
+   "24 g Protein pro Portion",
+   "66 Portionen",
+   "Schnell verdaulich"
   ],
   "imagePath": "/media/shop/whey-2kg.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    },
    {
-    "flavor": "وانیل"
+    "flavor": "Vanille"
    },
    {
-    "flavor": "توت‌فرنگی"
+    "flavor": "Erdbeere"
    }
   ],
   "sortOrder": 0
  },
  {
   "slug": "whey-iso-2kg",
-  "name": "وی ایزوله ۲ کیلویی",
-  "brandName": "آیرون‌لب",
+  "name": "Whey Isolat 2 kg",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "پروتئین",
-  "priceToman": 12400000,
-  "description": "وی ایزوله با چربی و لاکتوز بسیار کم برای دورهٔ کات.",
+  "category": "Protein",
+  "priceToman": 6990,
+  "description": "Whey-Isolat mit sehr wenig Fett und Laktose für die Diätphase.",
   "highlights": [
-   "۲۷ گرم پروتئین",
-   "کم‌لاکتوز",
-   "زیر ۱ گرم چربی"
+   "27 g Protein",
+   "Laktosearm",
+   "Unter 1 g Fett"
   ],
   "imagePath": "/media/shop/whey-iso-2kg.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    },
    {
-    "flavor": "کافه‌موکا"
+    "flavor": "Café Mocca"
    }
   ],
   "sortOrder": 1
  },
  {
   "slug": "whey-1kg",
-  "name": "پروتئین وی ۱ کیلویی",
-  "brandName": "پاورفیت",
+  "name": "Whey Protein 1 kg",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "پروتئین",
-  "priceToman": 4900000,
-  "description": "بستهٔ کوچک‌تر وی برای شروع.",
+  "category": "Protein",
+  "priceToman": 2790,
+  "description": "Kleinere Whey-Packung zum Einstieg.",
   "highlights": [
-   "۲۳ گرم پروتئین",
-   "۳۳ وعده"
+   "23 g Protein",
+   "33 Portionen"
   ],
   "imagePath": "/media/shop/whey-1kg.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    },
    {
-    "flavor": "وانیل"
+    "flavor": "Vanille"
    }
   ],
   "sortOrder": 2
  },
  {
   "slug": "casein-1kg",
-  "name": "کازئین شبانه ۱ کیلویی",
-  "brandName": "نوتری‌مکس",
+  "name": "Casein Night 1 kg",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "پروتئین",
-  "priceToman": 5600000,
-  "description": "پروتئین آهسته‌جذب برای قبل از خواب.",
+  "category": "Protein",
+  "priceToman": 3290,
+  "description": "Langsam verdauliches Protein für vor dem Schlafengehen.",
   "highlights": [
-   "آزادسازی تا ۷ ساعت",
-   "۲۴ گرم پروتئین"
+   "Freisetzung bis zu 7 Stunden",
+   "24 g Protein"
   ],
   "imagePath": "/media/shop/casein-1kg.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    }
   ],
   "sortOrder": 3
  },
  {
   "slug": "mass-gainer-3kg",
-  "name": "گینر ۳ کیلویی",
-  "brandName": "بادی‌پرو",
+  "name": "Weight Gainer 3 kg",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "گینر",
-  "priceToman": 6800000,
-  "description": "کربوهیدرات و پروتئین برای افزایش وزن.",
+  "category": "Gainer",
+  "priceToman": 3990,
+  "description": "Kohlenhydrate und Protein zum Zunehmen.",
   "highlights": [
-   "۶۵۰ کالری در هر وعده",
-   "۳۰ گرم پروتئین"
+   "650 kcal pro Portion",
+   "30 g Protein"
   ],
   "imagePath": "/media/shop/mass-gainer-3kg.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    },
    {
-    "flavor": "موز"
+    "flavor": "Banane"
    }
   ],
   "sortOrder": 4
  },
  {
   "slug": "creatine-300",
-  "name": "کراتین مونوهیدرات ۳۰۰ گرم",
-  "brandName": "آیرون‌لب",
+  "name": "Kreatin Monohydrat 300 g",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "کراتین",
-  "priceToman": 2400000,
-  "description": "کراتین خالص میکرونایز برای قدرت و حجم.",
+  "category": "Kreatin",
+  "priceToman": 1990,
+  "description": "Reines mikronisiertes Kreatin für Kraft und Muskelaufbau.",
   "highlights": [
-   "۵ گرم در روز",
-   "بدون طعم"
+   "5 g pro Tag",
+   "Geschmacksneutral"
   ],
   "imagePath": "/media/shop/creatine-300.svg",
   "isHouseBrand": false,
@@ -144,15 +144,15 @@
  },
  {
   "slug": "creatine-500",
-  "name": "کراتین مونوهیدرات ۵۰۰ گرم",
-  "brandName": "پاورفیت",
+  "name": "Kreatin Monohydrat 500 g",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "کراتین",
-  "priceToman": 3600000,
-  "description": "بستهٔ اقتصادی کراتین خالص.",
+  "category": "Kreatin",
+  "priceToman": 2990,
+  "description": "Sparpackung reines Kreatin.",
   "highlights": [
-   "۱۰۰ وعده",
-   "بدون طعم"
+   "100 Portionen",
+   "Geschmacksneutral"
   ],
   "imagePath": "/media/shop/creatine-500.svg",
   "isHouseBrand": false,
@@ -165,58 +165,58 @@
  },
  {
   "slug": "bcaa-400",
-  "name": "آمینو BCAA ۴۰۰ گرم",
-  "brandName": "نوتری‌مکس",
+  "name": "Amino BCAA 400 g",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "آمینو",
-  "priceToman": 2900000,
-  "description": "نسبت ۲:۱:۱ لوسین، ایزولوسین و والین.",
+  "category": "Aminosäuren",
+  "priceToman": 2490,
+  "description": "Verhältnis 2:1:1 Leucin, Isoleucin und Valin.",
   "highlights": [
-   "حین تمرین",
-   "بدون قند"
+   "Während des Trainings",
+   "Ohne Zucker"
   ],
   "imagePath": "/media/shop/bcaa-400.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "هندوانه"
+    "flavor": "Wassermelone"
    },
    {
-    "flavor": "لیمو"
+    "flavor": "Zitrone"
    }
   ],
   "sortOrder": 7
  },
  {
   "slug": "eaa-350",
-  "name": "آمینو EAA ۳۵۰ گرم",
-  "brandName": "بادی‌پرو",
+  "name": "Amino EAA 350 g",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "آمینو",
-  "priceToman": 3300000,
-  "description": "همهٔ آمینواسیدهای ضروری.",
+  "category": "Aminosäuren",
+  "priceToman": 2790,
+  "description": "Alle essenziellen Aminosäuren.",
   "highlights": [
-   "۹ آمینواسید ضروری"
+   "9 essenzielle Aminosäuren"
   ],
   "imagePath": "/media/shop/eaa-350.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "انبه"
+    "flavor": "Mango"
    }
   ],
   "sortOrder": 8
  },
  {
   "slug": "glutamine-300",
-  "name": "گلوتامین ۳۰۰ گرم",
-  "brandName": "آیرون‌لب",
+  "name": "Glutamin 300 g",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "آمینو",
-  "priceToman": 2200000,
-  "description": "برای ریکاوری.",
+  "category": "Aminosäuren",
+  "priceToman": 1990,
+  "description": "Für die Regeneration.",
   "highlights": [
-   "بدون طعم"
+   "Geschmacksneutral"
   ],
   "imagePath": "/media/shop/glutamine-300.svg",
   "isHouseBrand": false,
@@ -229,38 +229,38 @@
  },
  {
   "slug": "preworkout-300",
-  "name": "پری‌ورک‌اوت ۳۰۰ گرم",
-  "brandName": "پاورفیت",
+  "name": "Pre-Workout 300 g",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "انرژی‌زا",
-  "priceToman": 3100000,
-  "description": "انرژی و تمرکز قبل از تمرین.",
+  "category": "Booster",
+  "priceToman": 2990,
+  "description": "Energie und Fokus vor dem Training.",
   "highlights": [
-   "کافئین ۲۰۰ میلی‌گرم",
-   "بتاآلانین"
+   "200 mg Koffein",
+   "Beta-Alanin"
   ],
   "imagePath": "/media/shop/preworkout-300.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "میوه‌ای"
+    "flavor": "Fruchtmix"
    },
    {
-    "flavor": "سیب سبز"
+    "flavor": "Grüner Apfel"
    }
   ],
   "sortOrder": 10
  },
  {
   "slug": "citrulline-200",
-  "name": "سیترولین مالات ۲۰۰ گرم",
-  "brandName": "نوتری‌مکس",
+  "name": "Citrullin Malat 200 g",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "انرژی‌زا",
-  "priceToman": 2500000,
-  "description": "پمپ و استقامت عضلانی.",
+  "category": "Booster",
+  "priceToman": 2290,
+  "description": "Pump und Muskelausdauer.",
   "highlights": [
-   "۶ گرم در وعده"
+   "6 g pro Portion"
   ],
   "imagePath": "/media/shop/citrulline-200.svg",
   "isHouseBrand": false,
@@ -273,14 +273,14 @@
  },
  {
   "slug": "beta-alanine-250",
-  "name": "بتاآلانین ۲۵۰ گرم",
-  "brandName": "بادی‌پرو",
+  "name": "Beta-Alanin 250 g",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "انرژی‌زا",
-  "priceToman": 1900000,
-  "description": "افزایش استقامت در ست‌های سنگین.",
+  "category": "Booster",
+  "priceToman": 1790,
+  "description": "Mehr Ausdauer bei schweren Sätzen.",
   "highlights": [
-   "۳٫۲ گرم در وعده"
+   "3,2 g pro Portion"
   ],
   "imagePath": "/media/shop/beta-alanine-250.svg",
   "isHouseBrand": false,
@@ -293,34 +293,34 @@
  },
  {
   "slug": "l-carnitine",
-  "name": "ال‌کارنیتین مایع ۵۰۰ میلی",
-  "brandName": "پاورفیت",
+  "name": "L-Carnitin flüssig 500 ml",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "کاهش وزن",
-  "priceToman": 1700000,
-  "description": "ال‌کارنیتین مایع برای قبل از هوازی.",
+  "category": "Abnehmen",
+  "priceToman": 1690,
+  "description": "Flüssiges L-Carnitin vor dem Ausdauertraining.",
   "highlights": [
-   "۲۰۰۰ میلی‌گرم در وعده"
+   "2000 mg pro Portion"
   ],
   "imagePath": "/media/shop/l-carnitine.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "پرتقال"
+    "flavor": "Orange"
    }
   ],
   "sortOrder": 13
  },
  {
   "slug": "fat-burner",
-  "name": "چربی‌سوز ۹۰ کپسول",
-  "brandName": "بادی‌پرو",
+  "name": "Fatburner 90 Kapseln",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "کاهش وزن",
-  "priceToman": 2600000,
-  "description": "ترکیب چای سبز و کافئین. با پزشک مشورت کنید.",
+  "category": "Abnehmen",
+  "priceToman": 2490,
+  "description": "Mischung aus Grüntee und Koffein. Bitte ärztlich beraten lassen.",
   "highlights": [
-   "۹۰ کپسول"
+   "90 Kapseln"
   ],
   "imagePath": "/media/shop/fat-burner.svg",
   "isHouseBrand": false,
@@ -333,14 +333,14 @@
  },
  {
   "slug": "omega3",
-  "name": "امگا ۳ — ۶۰ سافت‌ژل",
-  "brandName": "نوتری‌مکس",
+  "name": "Omega-3 — 60 Softgels",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 1450000,
-  "description": "روغن ماهی خالص‌شده.",
+  "category": "Vitamine",
+  "priceToman": 1490,
+  "description": "Gereinigtes Fischöl.",
   "highlights": [
-   "۱۰۰۰ میلی‌گرم"
+   "1000 mg"
   ],
   "imagePath": "/media/shop/omega3.svg",
   "isHouseBrand": false,
@@ -353,14 +353,14 @@
  },
  {
   "slug": "multivitamin",
-  "name": "مولتی‌ویتامین ورزشی ۶۰ قرص",
-  "brandName": "آیرون‌لب",
+  "name": "Sport-Multivitamin 60 Tabletten",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 1350000,
-  "description": "ویتامین‌ها و مواد معدنی برای ورزشکاران.",
+  "category": "Vitamine",
+  "priceToman": 1290,
+  "description": "Vitamine und Mineralstoffe für Sportler.",
   "highlights": [
-   "روزی یک قرص"
+   "Eine Tablette täglich"
   ],
   "imagePath": "/media/shop/multivitamin.svg",
   "isHouseBrand": false,
@@ -373,14 +373,14 @@
  },
  {
   "slug": "vitamin-d3",
-  "name": "ویتامین D3 هزار واحد",
-  "brandName": "نوتری‌مکس",
+  "name": "Vitamin D3 1000 IE",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 690000,
-  "description": "۱۰۰ قرص.",
+  "category": "Vitamine",
+  "priceToman": 790,
+  "description": "100 Tabletten.",
   "highlights": [
-   "۱۰۰۰ واحد"
+   "1000 IE"
   ],
   "imagePath": "/media/shop/vitamin-d3.svg",
   "isHouseBrand": false,
@@ -393,14 +393,14 @@
  },
  {
   "slug": "zma",
-  "name": "ZMA — ۹۰ کپسول",
-  "brandName": "پاورفیت",
+  "name": "ZMA — 90 Kapseln",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 1250000,
-  "description": "زینک، منیزیم و B6 برای خواب و ریکاوری.",
+  "category": "Vitamine",
+  "priceToman": 1290,
+  "description": "Zink, Magnesium und B6 für Schlaf und Regeneration.",
   "highlights": [
-   "شب قبل از خواب"
+   "Abends vor dem Schlafen"
   ],
   "imagePath": "/media/shop/zma.svg",
   "isHouseBrand": false,
@@ -413,14 +413,14 @@
  },
  {
   "slug": "magnesium",
-  "name": "منیزیم ۱۲۰ قرص",
-  "brandName": "نوتری‌مکس",
+  "name": "Magnesium 120 Tabletten",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 780000,
-  "description": "منیزیم سیترات.",
+  "category": "Vitamine",
+  "priceToman": 890,
+  "description": "Magnesiumcitrat.",
   "highlights": [
-   "۱۲۰ قرص"
+   "120 Tabletten"
   ],
   "imagePath": "/media/shop/magnesium.svg",
   "isHouseBrand": false,
@@ -433,106 +433,106 @@
  },
  {
   "slug": "collagen",
-  "name": "کلاژن ۲۰۰ گرم",
-  "brandName": "بادی‌پرو",
+  "name": "Kollagen 200 g",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "ویتامین",
-  "priceToman": 2100000,
-  "description": "پپتید کلاژن برای مفاصل و پوست.",
+  "category": "Vitamine",
+  "priceToman": 1990,
+  "description": "Kollagenpeptide für Gelenke und Haut.",
   "highlights": [
-   "۱۰ گرم در وعده"
+   "10 g pro Portion"
   ],
   "imagePath": "/media/shop/collagen.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "بدون طعم"
+    "flavor": "Geschmacksneutral"
    },
    {
-    "flavor": "لیمو"
+    "flavor": "Zitrone"
    }
   ],
   "sortOrder": 20
  },
  {
   "slug": "protein-bar-box",
-  "name": "پروتئین بار — جعبهٔ ۱۲تایی",
-  "brandName": "آیرون‌لب",
+  "name": "Proteinriegel — Box mit 12 Stück",
+  "brandName": "IronLab",
   "kind": "Supplement",
-  "category": "میان‌وعده",
-  "priceToman": 2280000,
-  "description": "هر بار ۲۰ گرم پروتئین.",
+  "category": "Snacks",
+  "priceToman": 2490,
+  "description": "Je Riegel 20 g Protein.",
   "highlights": [
-   "۱۲ عدد ۶۰ گرمی"
+   "12 Stück à 60 g"
   ],
   "imagePath": "/media/shop/protein-bar-box.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "شکلات"
+    "flavor": "Schokolade"
    },
    {
-    "flavor": "کارامل"
+    "flavor": "Karamell"
    }
   ],
   "sortOrder": 21
  },
  {
   "slug": "electrolyte",
-  "name": "الکترولیت ۳۰۰ گرم",
-  "brandName": "پاورفیت",
+  "name": "Elektrolyte 300 g",
+  "brandName": "PowerFit",
   "kind": "Supplement",
-  "category": "میان‌وعده",
-  "priceToman": 980000,
-  "description": "جبران املاح در تمرین‌های طولانی.",
+  "category": "Snacks",
+  "priceToman": 990,
+  "description": "Mineralstoffausgleich bei langen Einheiten.",
   "highlights": [
-   "بدون قند"
+   "Ohne Zucker"
   ],
   "imagePath": "/media/shop/electrolyte.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "لیمو"
+    "flavor": "Zitrone"
    },
    {
-    "flavor": "هندوانه"
+    "flavor": "Wassermelone"
    }
   ],
   "sortOrder": 22
  },
  {
   "slug": "oats-powder",
-  "name": "پودر جو دوسر ۱ کیلویی",
-  "brandName": "نوتری‌مکس",
+  "name": "Hafermehl 1 kg",
+  "brandName": "NutriMax",
   "kind": "Supplement",
-  "category": "میان‌وعده",
-  "priceToman": 650000,
-  "description": "کربوهیدرات کامل برای صبحانه و گینر خانگی.",
+  "category": "Snacks",
+  "priceToman": 690,
+  "description": "Vollwertige Kohlenhydrate für Frühstück und selbstgemachten Gainer.",
   "highlights": [
-   "۱ کیلوگرم"
+   "1 kg"
   ],
   "imagePath": "/media/shop/oats-powder.svg",
   "isHouseBrand": false,
   "variants": [
    {
-    "flavor": "ساده"
+    "flavor": "Natur"
    },
    {
-    "flavor": "شکلاتی"
+    "flavor": "Schoko"
    }
   ],
   "sortOrder": 23
  },
  {
   "slug": "peanut-butter",
-  "name": "کرهٔ بادام‌زمینی پروتئینی",
-  "brandName": "بادی‌پرو",
+  "name": "Protein-Erdnussbutter",
+  "brandName": "BodyPro",
   "kind": "Supplement",
-  "category": "میان‌وعده",
-  "priceToman": 590000,
-  "description": "بدون شکر افزوده.",
+  "category": "Snacks",
+  "priceToman": 590,
+  "description": "Ohne Zuckerzusatz.",
   "highlights": [
-   "۵۰۰ گرم"
+   "500 g"
   ],
   "imagePath": "/media/shop/peanut-butter.svg",
   "isHouseBrand": false,
@@ -545,91 +545,91 @@
  },
  {
   "slug": "tshirt-dry",
-  "name": "تیشرت دری‌فیت آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Dri-Fit-T-Shirt",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "تیشرت",
-  "priceToman": 950000,
-  "description": "پارچهٔ سبک و خنک با لوگوی آهن‌کوه.",
+  "category": "T-Shirt",
+  "priceToman": 2490,
+  "description": "Leichter, kühler Stoff mit Eisenwerk-Logo.",
   "highlights": [
-   "پارچهٔ دری‌فیت",
-   "دوخت تخت"
+   "Dri-Fit-Stoff",
+   "Flache Nähte"
   ],
   "imagePath": "/media/shop/tshirt-dry.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "S"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XXL"
    },
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": "S"
    },
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": "M"
    },
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": "L"
    },
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": "XL"
    },
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": "XXL"
    },
    {
-    "color": "سفید",
+    "color": "Weiß",
     "colorHex": "#F4F4F4",
     "size": "S"
    },
    {
-    "color": "سفید",
+    "color": "Weiß",
     "colorHex": "#F4F4F4",
     "size": "M"
    },
    {
-    "color": "سفید",
+    "color": "Weiß",
     "colorHex": "#F4F4F4",
     "size": "L"
    },
    {
-    "color": "سفید",
+    "color": "Weiß",
     "colorHex": "#F4F4F4",
     "size": "XL"
    },
    {
-    "color": "سفید",
+    "color": "Weiß",
     "colorHex": "#F4F4F4",
     "size": "XXL"
    }
@@ -638,45 +638,45 @@
  },
  {
   "slug": "tank-top",
-  "name": "رکابی تمرینی آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Trainings-Tanktop",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "تیشرت",
-  "priceToman": 720000,
-  "description": "برای تمرین‌های گرم.",
+  "category": "T-Shirt",
+  "priceToman": 1990,
+  "description": "Für schweißtreibende Einheiten.",
   "highlights": [
-   "خنک و سبک"
+   "Kühl und leicht"
   ],
   "imagePath": "/media/shop/tank-top.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "M"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "L"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "XL"
    }
@@ -685,56 +685,56 @@
  },
  {
   "slug": "hoodie",
-  "name": "هودی آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Hoodie",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "هودی",
-  "priceToman": 2450000,
-  "description": "هودی کلاه‌دار گرم برای قبل و بعد از تمرین.",
+  "category": "Hoodie",
+  "priceToman": 4990,
+  "description": "Warmer Kapuzenpullover für vor und nach dem Training.",
   "highlights": [
-   "دورس داخل‌کرک",
-   "جیب کانگورویی"
+   "Innen angeraut",
+   "Kängurutasche"
   ],
   "imagePath": "/media/shop/hoodie.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "M"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "L"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "XL"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "XXL"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XXL"
    }
@@ -743,45 +743,45 @@
  },
  {
   "slug": "joggers",
-  "name": "شلوار اسلش آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Jogginghose",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "شلوار",
-  "priceToman": 1650000,
-  "description": "شلوار راحتی کمرکش با جیب زیپ‌دار.",
+  "category": "Hose",
+  "priceToman": 3990,
+  "description": "Bequeme Hose mit Gummibund und Reißverschlusstaschen.",
   "highlights": [
-   "جیب زیپ‌دار"
+   "Reißverschlusstasche"
   ],
   "imagePath": "/media/shop/joggers.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "M"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "L"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "XL"
    }
@@ -790,76 +790,76 @@
  },
  {
   "slug": "women-long-tee",
-  "name": "تیشرت بلند بانوان آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Longshirt Damen",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "بانوان",
-  "priceToman": 1150000,
-  "description": "تیشرت آستین‌بلند و پوشیده، مناسب سالن بانوان.",
+  "category": "Damen",
+  "priceToman": 2990,
+  "description": "Langärmeliges, bedeckendes Shirt, ideal für den Damenbereich.",
   "highlights": [
-   "آستین‌بلند",
-   "قد بلند"
+   "Langarm",
+   "Lange Passform"
   ],
   "imagePath": "/media/shop/women-long-tee.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "S"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "M"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "L"
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": "XL"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "S"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    },
    {
-    "color": "صورتی دودی",
+    "color": "Altrosa",
     "colorHex": "#B88A92",
     "size": "S"
    },
    {
-    "color": "صورتی دودی",
+    "color": "Altrosa",
     "colorHex": "#B88A92",
     "size": "M"
    },
    {
-    "color": "صورتی دودی",
+    "color": "Altrosa",
     "colorHex": "#B88A92",
     "size": "L"
    },
    {
-    "color": "صورتی دودی",
+    "color": "Altrosa",
     "colorHex": "#B88A92",
     "size": "XL"
    }
@@ -868,56 +868,56 @@
  },
  {
   "slug": "women-leggings",
-  "name": "لگ ورزشی بانوان آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Sportleggings Damen",
+  "brandName": "Eisenwerk",
   "kind": "Apparel",
-  "category": "بانوان",
-  "priceToman": 1250000,
-  "description": "کشسان با کمر بلند.",
+  "category": "Damen",
+  "priceToman": 3490,
+  "description": "Elastisch mit hohem Bund.",
   "highlights": [
-   "کمر بلند",
-   "ضدتعریق"
+   "Hoher Bund",
+   "Schweißableitend"
   ],
   "imagePath": "/media/shop/women-leggings.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "S"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "M"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "L"
    },
    {
-    "color": "سرمه‌ای",
+    "color": "Marineblau",
     "colorHex": "#0B2F57",
     "size": "XL"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "S"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    }
@@ -926,26 +926,26 @@
  },
  {
   "slug": "shaker-700",
-  "name": "شیکر ۷۰۰ میلی آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Shaker 700 ml",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "شیکر و بطری",
-  "priceToman": 380000,
-  "description": "شیکر با فنر هم‌زن و درب ضدنشت.",
+  "category": "Shaker und Flaschen",
+  "priceToman": 990,
+  "description": "Shaker mit Mixfeder und auslaufsicherem Deckel.",
   "highlights": [
-   "۷۰۰ میلی‌لیتر",
-   "بدون BPA"
+   "700 Milliliter",
+   "BPA-frei"
   ],
   "imagePath": "/media/shop/shaker-700.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": null
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": null
    }
@@ -954,20 +954,20 @@
  },
  {
   "slug": "bottle-1l",
-  "name": "بطری آب یک‌لیتری آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Trinkflasche 1 Liter",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "شیکر و بطری",
-  "priceToman": 520000,
-  "description": "بطری مقاوم با درب ورزشی.",
+  "category": "Shaker und Flaschen",
+  "priceToman": 1290,
+  "description": "Robuste Flasche mit Sportverschluss.",
   "highlights": [
-   "۱ لیتر"
+   "1 Liter"
   ],
   "imagePath": "/media/shop/bottle-1l.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": null
    }
@@ -976,25 +976,25 @@
  },
  {
   "slug": "towel",
-  "name": "حولهٔ ورزشی میکروفایبر",
-  "brandName": "آهن‌کوه",
+  "name": "Mikrofaser-Sporthandtuch",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "لوازم",
-  "priceToman": 450000,
-  "description": "حولهٔ سبک و زودخشک، لازم برای ورود به سالن.",
+  "category": "Zubehör",
+  "priceToman": 1190,
+  "description": "Leicht und schnell trocknend, Pflicht im Trainingsbereich.",
   "highlights": [
-   "۴۰×۹۰ سانتی‌متر"
+   "40×90 Zentimeter"
   ],
   "imagePath": "/media/shop/towel.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "آبی آهن‌کوه",
+    "color": "Eisenwerk-Blau",
     "colorHex": "#0B5FB0",
     "size": null
    },
    {
-    "color": "طوسی",
+    "color": "Grau",
     "colorHex": "#6B6F76",
     "size": null
    }
@@ -1003,35 +1003,35 @@
  },
  {
   "slug": "gloves",
-  "name": "دستکش بدنسازی آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Trainingshandschuhe",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "لوازم",
-  "priceToman": 690000,
-  "description": "کف چرمی ضدلغزش.",
+  "category": "Zubehör",
+  "priceToman": 1790,
+  "description": "Rutschfeste Lederhandfläche.",
   "highlights": [
-   "مچ‌بند دار"
+   "Mit Handgelenkbandage"
   ],
   "imagePath": "/media/shop/gloves.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "S"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    }
@@ -1040,30 +1040,30 @@
  },
  {
   "slug": "lifting-belt",
-  "name": "کمربند بدنسازی چرمی",
-  "brandName": "آهن‌کوه",
+  "name": "Leder-Gewichthebergürtel",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "لوازم",
-  "priceToman": 1850000,
-  "description": "برای اسکوات و ددلیفت سنگین.",
+  "category": "Zubehör",
+  "priceToman": 4490,
+  "description": "Für schwere Kniebeugen und Kreuzheben.",
   "highlights": [
-   "چرم ۱۰ میلی‌متری"
+   "10 mm Leder"
   ],
   "imagePath": "/media/shop/lifting-belt.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "M"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "L"
    },
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": "XL"
    }
@@ -1072,20 +1072,20 @@
  },
  {
   "slug": "gym-bag",
-  "name": "ساک ورزشی آهن‌کوه",
-  "brandName": "آهن‌کوه",
+  "name": "Eisenwerk Sporttasche",
+  "brandName": "Eisenwerk",
   "kind": "Gear",
-  "category": "لوازم",
-  "priceToman": 1950000,
-  "description": "جای کفش جدا و جیب ضدآب.",
+  "category": "Zubehör",
+  "priceToman": 3990,
+  "description": "Separates Schuhfach und wasserdichte Tasche.",
   "highlights": [
-   "۳۵ لیتر"
+   "35 Liter"
   ],
   "imagePath": "/media/shop/gym-bag.svg",
   "isHouseBrand": true,
   "variants": [
    {
-    "color": "مشکی",
+    "color": "Schwarz",
     "colorHex": "#1E1E1E",
     "size": null
    }

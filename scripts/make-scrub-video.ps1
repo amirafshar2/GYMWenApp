@@ -1,6 +1,6 @@
-# نسخه‌های ویدیوی پیش‌فرض قالب، با همان تنظیمات بهینه‌سازی خودکار آپلودهای پنل (Video/VideoOptimizer.cs) — نیاز به ffmpeg در PATH
-# خروجی: gym-scrub.mp4 (1080 اسکرولی)، gym-scrub-720.mp4، gym-scrub-540.mp4، gym.mp4 (پخش تکراری)، gym.jpg، gym-960.jpg
-# -Crop: نوارهای سیاه کناری را می‌بُرد (پیش‌فرض برای ویدیوی فعلی). خالی = بدون برش
+# Versionen des Standardvideos der Vorlage, mit denselben Optimierungseinstellungen wie Panel-Uploads (Video/VideoOptimizer.cs) — benötigt ffmpeg in PATH
+# Ausgabe: gym-scrub.mp4 (1080 Scroll), gym-scrub-720.mp4, gym-scrub-540.mp4, gym.mp4 (Schleife), gym.jpg, gym-960.jpg
+# -Crop: schneidet schwarze Seitenbalken ab (Standard für das aktuelle Video). Leer = kein Zuschnitt
 param(
   [string]$Video = (Join-Path $PSScriptRoot '..\src\GymPlatform.Web\public\media\video\gym-source.mp4'),
   [string]$Crop = ''
@@ -21,4 +21,4 @@ Enc 'gym-scrub-540.mp4' 960 25 'main' -Scrub
 Enc 'gym.mp4' 1920 21 'high'
 ffmpeg -v error -y -threads 1 -i $Video -frames:v 1 -vf "${pre}scale='min(1920,iw)':-2:flags=lanczos" -q:v 3 (Join-Path $dir 'gym.jpg')
 ffmpeg -v error -y -threads 1 -i $Video -frames:v 1 -vf "${pre}scale='min(960,iw)':-2:flags=lanczos" -q:v 4 (Join-Path $dir 'gym-960.jpg')
-Write-Host "✓ نسخه‌ها ساخته شد. در SiteVideo.tsx مقدار ?v= نسخهٔ پیش‌فرض را عوض کنید تا کش قدیمی دور زده شود."
+Write-Host "✓ Versionen erzeugt. In SiteVideo.tsx den ?v=-Wert der Standardversion ändern, damit alte Caches umgangen werden."

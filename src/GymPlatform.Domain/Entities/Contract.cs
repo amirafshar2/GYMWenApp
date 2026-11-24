@@ -1,15 +1,15 @@
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>متن قرارداد نسخه‌دار؛ مدیر نسخهٔ تازه منتشر می‌کند و نسخه‌های قبلی برای قراردادهای امضاشده می‌مانند.</summary>
+/// <summary>Versionierter Vertragstext; der Admin veröffentlicht neue Versionen, frühere bleiben für unterschriebene Verträge erhalten.</summary>
 public class ContractTemplate : BaseEntity
 {
     public int Version { get; set; }
     public required string Title { get; set; }
 
-    /// <summary>بندهای قرارداد، هر بند یک پاراگراف.</summary>
+    /// <summary>Vertragsklauseln, jede Klausel ein Absatz.</summary>
     public List<string> Clauses { get; set; } = [];
 
-    /// <summary>پرسش‌های فرم سلامت پیش از ورزش (PAR-Q) — پاسخ بله/خیر.</summary>
+    /// <summary>Fragen des Gesundheitsfragebogens vor dem Training (PAR-Q) — Antwort Ja/Nein.</summary>
     public List<string> HealthQuestions { get; set; } = [];
     public bool IsActive { get; set; }
     public DateTime? PublishedAtUtc { get; set; }
@@ -28,13 +28,13 @@ public class SignedContract : BaseEntity
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
 
-    /// <summary>پاسخ‌های فرم سلامت به ترتیب پرسش‌ها.</summary>
+    /// <summary>Antworten des Gesundheitsfragebogens in der Reihenfolge der Fragen.</summary>
     public List<bool> HealthAnswers { get; set; } = [];
     public string? HealthNotes { get; set; }
 
-    /// <summary>SHA-256 متن دقیق امضاشده (بندها + پاسخ‌ها) برای اثبات عدم تغییر.</summary>
+    /// <summary>SHA-256 des exakt unterschriebenen Textes (Klauseln + Antworten) als Nachweis der Unverändertheit.</summary>
     public required string ContentHash { get; set; }
 
-    /// <summary>مسیر نسبی PDF بیرون از wwwroot.</summary>
+    /// <summary>Relativer Pfad des PDFs außerhalb von wwwroot.</summary>
     public string? PdfPath { get; set; }
 }

@@ -12,13 +12,13 @@ public interface ISiteService
 {
     Task<SiteConfig> GetAsync(CancellationToken ct);
     Task<Result<SiteConfig>> SaveAsync(SiteConfig input, int staffId, CancellationToken ct);
-    /// <summary>فقط برای نصب اولیه و ورود بستهٔ محتوا (بدون اعتبارسنجی فرم پنل)</summary>
+    /// <summary>Nur für Erstinstallation und Import eines Inhaltspakets (ohne Formularvalidierung des Panels)</summary>
     Task SaveRawAsync(SiteConfig config, int? staffId, CancellationToken ct);
     Task<SetupStatusDto> GetSetupStatusAsync(CancellationToken ct);
     Task<Result<SetupStatusDto>> UpdateSetupAsync(SetupUpdateRequest r, int staffId, CancellationToken ct);
 }
 
-/// <summary>نسخهٔ خوانده‌شده در حافظه نگه داشته می‌شود؛ هر ذخیره آن را عوض می‌کند (یک نصب = یک سرور)</summary>
+/// <summary>Die gelesene Version bleibt im Speicher; jedes Speichern ersetzt sie (eine Installation = ein Server)</summary>
 public sealed class SiteConfigCache
 {
     private SiteConfig? _value;
@@ -27,7 +27,7 @@ public sealed class SiteConfigCache
 
 public sealed record SetupStepDto(string Key, string Title, string Hint, string Link, bool Done, bool Optional);
 public sealed record SetupStatusDto(string Mode, bool Published, bool GuideHidden, IReadOnlyList<SetupStepDto> Steps, int DoneCount, int RequiredCount);
-/// <param name="Step">مرحله‌ای که دستی «انجام شد» یا «برگرداندن» می‌شود</param>
+/// <param name="Step">Schritt, der manuell „erledigt“ oder „zurückgesetzt“ wird</param>
 public sealed record SetupUpdateRequest(string? Step, bool? StepDone, bool? Publish, bool? GuideHidden);
 
 public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, IClock clock, IVideoLibrary? videos = null) : ISiteService
@@ -49,11 +49,11 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         return cfg;
     }
 
-    /// <summary>نسخهٔ کش مشترک است؛ هر تغییر روی یک کپی انجام می‌شود</summary>
+    /// <summary>Die Cache-Version ist geteilt; jede Änderung erfolgt an einer Kopie</summary>
     public static SiteConfig Clone(SiteConfig c) => Parse(JsonSerializer.Serialize(c, Json));
 
-    /// <summary>نام نمایشی در PDF، گزارش و پیامک (نصب خامِ بی‌نام: «باشگاه»)</summary>
-    public static string DisplayName(SiteConfig c) => c.Brand.Name is { Length: > 0 } n ? n : c.Brand.ShortName is { Length: > 0 } s ? s : "باشگاه";
+    /// <summary>Anzeigename in PDF, Bericht und SMS (leere Installation ohne Namen: „Studio“)</summary>
+    public static string DisplayName(SiteConfig c) => c.Brand.Name is { Length: > 0 } n ? n : c.Brand.ShortName is { Length: > 0 } s ? s : "Studio";
     public static string ShortDisplayName(SiteConfig c) => c.Brand.ShortName is { Length: > 0 } s ? s : DisplayName(c);
 
     public static SiteConfig Parse(string json)
@@ -62,7 +62,7 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         catch (JsonException) { return new SiteConfig(); }
     }
 
-    /// <summary>بخش‌های تازه‌ای که در نسخه‌های بعدی قالب اضافه می‌شوند به فهرست ذخیره‌شده اضافه می‌شوند</summary>
+    /// <summary>Neue Bereiche aus späteren Vorlagenversionen werden an die gespeicherte Liste angehängt</summary>
     private static SiteConfig Normalize(SiteConfig c)
     {
         c.Home.Sections = c.Home.Sections.Where(s => SiteDefaults.SectionKeys.Contains(s.Key)).DistinctBy(s => s.Key).ToList();
@@ -83,7 +83,7 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         Panel.SmsTexts.Brand = ShortDisplayName(cache.Value);
     }
 
-    // ================================================================ ذخیره از پنل
+    // ================================================================ Speichern aus dem Panel
     public async Task<Result<SiteConfig>> SaveAsync(SiteConfig r, int staffId, CancellationToken ct)
     {
         var current = await GetAsync(ct);
@@ -93,22 +93,22 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         string T(string? v, int max, string key, string label, bool required = false)
         {
             var s = PersianText.CleanText(v) ?? "";
-            if (required && s.Length == 0) e[key] = [$"{label} را بنویسید."];
-            else if (s.Length > max) e[key] = [$"{label} حداکثر {max} حرف."];
+            if (required && s.Length == 0) e[key] = [$"{label} angeben."];
+            else if (s.Length > max) e[key] = [$"{label} Höchstens {max} Zeichen."];
             return s.Length > max ? s[..max] : s;
         }
         string? O(string? v, int max, string key, string label) { var s = T(v, max, key, label); return s.Length == 0 ? null : s; }
         string? Img(string? v, string key, bool required = false)
         {
             var s = v?.Trim();
-            if (string.IsNullOrEmpty(s)) { if (required) e[key] = ["یک عکس انتخاب کنید."]; return null; }
-            if (!ValidImagePath(s)) { e[key] = ["عکس فقط از کتابخانهٔ سایت یا آپلود."]; return null; }
+            if (string.IsNullOrEmpty(s)) { if (required) e[key] = ["Bitte ein Bild wählen."]; return null; }
+            if (!ValidImagePath(s)) { e[key] = ["Bild nur aus der Mediathek der Seite oder per Upload."]; return null; }
             return s;
         }
         string Color(string? v, string key, string fallback)
         {
             var s = v?.Trim() ?? "";
-            if (!HexColor().IsMatch(s)) { e[key] = ["رنگ را به شکل ‎#0B5FB0 وارد کنید."]; return fallback; }
+            if (!HexColor().IsMatch(s)) { e[key] = ["Farbe im Format #0B5FB0 eingeben."]; return fallback; }
             return s.ToUpperInvariant();
         }
         string? Link(string? v, string key, params string[] hosts)
@@ -117,7 +117,7 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
             if (string.IsNullOrEmpty(s)) return null;
             if (!Uri.TryCreate(s, UriKind.Absolute, out var u) || u.Scheme != Uri.UriSchemeHttps || s.Length > 200 ||
                 !hosts.Any(h => u.Host.Equals(h, StringComparison.OrdinalIgnoreCase) || u.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase)))
-            { e[key] = [$"آدرس باید با https://{hosts[0]} شروع شود."]; return null; }
+            { e[key] = [$"Die Adresse muss mit https://{hosts[0]} beginnen."]; return null; }
             return s;
         }
         List<CardItem> Cards(List<CardItem>? list, string key, int max, bool image, bool text)
@@ -125,12 +125,12 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
             var o = new List<CardItem>();
             foreach (var (it, i) in (list ?? []).Take(max).Select((x, i) => (x, i)))
             {
-                var title = T(it.Title, 60, $"{key}[{i}].title", "عنوان");
+                var title = T(it.Title, 60, $"{key}[{i}].title", "Titel");
                 if (title.Length == 0) continue;
                 o.Add(new CardItem
                 {
                     Title = title,
-                    Text = text ? O(it.Text, 200, $"{key}[{i}].text", "توضیح") : null,
+                    Text = text ? O(it.Text, 200, $"{key}[{i}].text", "Beschreibung") : null,
                     ImageUrl = image ? Img(it.ImageUrl, $"{key}[{i}].imageUrl") : null,
                     Icon = it.Icon is { } ic && Icons.Contains(ic) ? ic : null,
                     Href = it.Href is { } h && AllowedHref().IsMatch(h) ? h : null,
@@ -140,48 +140,48 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
         }
         SimpleSection S(SimpleSection? s, string key) => new()
         {
-            Eyebrow = T(s?.Eyebrow, 60, $"{key}.eyebrow", "برچسب"),
-            Title = T(s?.Title, 120, $"{key}.title", "تیتر"),
-            Text = T(s?.Text, 400, $"{key}.text", "متن"),
+            Eyebrow = T(s?.Eyebrow, 60, $"{key}.eyebrow", "Label"),
+            Title = T(s?.Title, 120, $"{key}.title", "Überschrift"),
+            Text = T(s?.Text, 400, $"{key}.text", "Text"),
         };
 
-        // ---- هویت
+        // ---- Identität
         var b = r.Brand ?? new();
         c.Brand = new BrandSettings
         {
-            Name = T(b.Name, 80, "brand.name", "نام کامل", required: true),
-            ShortName = T(b.ShortName, 24, "brand.shortName", "نام کوتاه", required: true),
-            LatinName = T(b.LatinName, 40, "brand.latinName", "نام لاتین"),
-            Slogan = T(b.Slogan, 80, "brand.slogan", "شعار"),
-            NearSlogan = T(b.NearSlogan, 80, "brand.nearSlogan", "شعار شعبه‌ها"),
-            WhySlogan = T(b.WhySlogan, 40, "brand.whySlogan", "تیتر «چرا ما»"),
-            City = T(b.City, 40, "brand.city", "شهر"),
-            Description = T(b.Description, 200, "brand.description", "توضیح کوتاه"),
+            Name = T(b.Name, 80, "brand.name", "Vollständiger Name", required: true),
+            ShortName = T(b.ShortName, 24, "brand.shortName", "Kurzname", required: true),
+            LatinName = T(b.LatinName, 40, "brand.latinName", "Lateinischer Name"),
+            Slogan = T(b.Slogan, 80, "brand.slogan", "Slogan"),
+            NearSlogan = T(b.NearSlogan, 80, "brand.nearSlogan", "Filial-Slogan"),
+            WhySlogan = T(b.WhySlogan, 40, "brand.whySlogan", "Überschrift „Warum wir“"),
+            City = T(b.City, 40, "brand.city", "Stadt"),
+            Description = T(b.Description, 200, "brand.description", "Kurzbeschreibung"),
             LogoUrl = Img(b.LogoUrl, "brand.logoUrl"),
             LogoFullUrl = Img(b.LogoFullUrl, "brand.logoFullUrl"),
         };
-        if (c.Brand.LatinName.Length > 0 && !LatinName().IsMatch(c.Brand.LatinName)) e["brand.latinName"] = ["فقط حروف انگلیسی، عدد و فاصله."];
+        if (c.Brand.LatinName.Length > 0 && !LatinName().IsMatch(c.Brand.LatinName)) e["brand.latinName"] = ["Nur englische Buchstaben, Ziffern und Leerzeichen."];
 
-        // ---- تماس
+        // ---- Kontakt
         var ct2 = r.Contact ?? new();
         var phone = PersianText.ToLatinDigits(ct2.Phone).Replace(" ", "").Replace("-", "");
-        if (phone.Length > 0 && !PhoneRx().IsMatch(phone)) e["contact.phone"] = ["شمارهٔ تلفن را فقط با رقم بنویسید، مثل ۰۹۱۲۱۲۳۴۵۶۷ یا ۰۲۱۱۲۳۴۵۶۷۸."];
+        if (phone.Length > 0 && !PhoneRx().IsMatch(phone)) e["contact.phone"] = ["Telefonnummer bitte nur mit Ziffern, z. B. 015123456789 oder 07111234567."];
         var email = ct2.Email?.Trim();
-        if (!string.IsNullOrEmpty(email) && (!EmailRx().IsMatch(email) || email.Length > 120)) e["contact.email"] = ["ایمیل معتبر نیست."];
+        if (!string.IsNullOrEmpty(email) && (!EmailRx().IsMatch(email) || email.Length > 120)) e["contact.email"] = ["Ungültige E-Mail."];
         c.Contact = new ContactSettings
         {
             Phone = phone,
             Email = string.IsNullOrEmpty(email) ? null : email,
-            Address = O(ct2.Address, 300, "contact.address", "آدرس"),
+            Address = O(ct2.Address, 300, "contact.address", "Adresse"),
             Instagram = Link(ct2.Instagram, "contact.instagram", "instagram.com"),
             Telegram = Link(ct2.Telegram, "contact.telegram", "t.me", "telegram.me"),
             WhatsApp = Link(ct2.WhatsApp, "contact.whatsApp", "wa.me", "whatsapp.com"),
-            ResponseTime = O(ct2.ResponseTime, 40, "contact.responseTime", "زمان پاسخ"),
+            ResponseTime = O(ct2.ResponseTime, 40, "contact.responseTime", "Antwortzeit"),
             EnamadId = ct2.EnamadId is { Length: > 0 } eid && Digits().IsMatch(eid) && eid.Length <= 12 ? eid : null,
             EnamadCode = ct2.EnamadCode is { Length: > 0 } ec && AlphaNum().IsMatch(ec) && ec.Length <= 40 ? ec : null,
         };
 
-        // ---- رنگ
+        // ---- Farbe
         var th = r.Theme ?? new();
         c.Theme = new ThemeSettings
         {
@@ -190,7 +190,7 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
             Dark = Color(th.Dark, "theme.dark", "#181818"),
         };
 
-        // ---- صفحهٔ اصلی
+        // ---- Startseite
         var h = r.Home ?? new();
         c.Home = new HomeSettings
         {
@@ -198,41 +198,41 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
                 .Select(s => new SectionToggle { Key = s.Key, Enabled = s.Enabled }).ToList(),
             Hero = new HeroSettings
             {
-                Eyebrow = T(h.Hero?.Eyebrow, 60, "home.hero.eyebrow", "برچسب هیرو"),
-                Body = T(h.Hero?.Body, 300, "home.hero.body", "متن هیرو"),
-                PrimaryCta = T(h.Hero?.PrimaryCta, 30, "home.hero.primaryCta", "دکمهٔ اول", required: true),
-                SecondaryCta = T(h.Hero?.SecondaryCta, 30, "home.hero.secondaryCta", "دکمهٔ دوم", required: true),
+                Eyebrow = T(h.Hero?.Eyebrow, 60, "home.hero.eyebrow", "Hero-Label"),
+                Body = T(h.Hero?.Body, 300, "home.hero.body", "Hero-Text"),
+                PrimaryCta = T(h.Hero?.PrimaryCta, 30, "home.hero.primaryCta", "Erster Button", required: true),
+                SecondaryCta = T(h.Hero?.SecondaryCta, 30, "home.hero.secondaryCta", "Zweiter Button", required: true),
                 ImageUrl = Img(h.Hero?.ImageUrl, "home.hero.imageUrl", required: true) ?? new HeroSettings().ImageUrl,
                 MobileImageUrl = Img(h.Hero?.MobileImageUrl, "home.hero.mobileImageUrl") ?? Img(h.Hero?.ImageUrl, "home.hero.imageUrl") ?? new HeroSettings().MobileImageUrl,
             },
             Intro = new IntroSettings
             {
-                Eyebrow = T(h.Intro?.Eyebrow, 60, "home.intro.eyebrow", "برچسب"),
-                Title = T(h.Intro?.Title, 160, "home.intro.title", "تیتر"),
+                Eyebrow = T(h.Intro?.Eyebrow, 60, "home.intro.eyebrow", "Label"),
+                Title = T(h.Intro?.Title, 160, "home.intro.title", "Überschrift"),
                 Cards = Cards(h.Intro?.Cards, "home.intro.cards", 8, image: true, text: false),
             },
             Why = new WhySettings
             {
-                Title = T(h.Why?.Title, 120, "home.why.title", "تیتر"),
-                Text = T(h.Why?.Text, 400, "home.why.text", "متن"),
+                Title = T(h.Why?.Title, 120, "home.why.title", "Überschrift"),
+                Text = T(h.Why?.Text, 400, "home.why.text", "Text"),
                 ImageUrl = Img(h.Why?.ImageUrl, "home.why.imageUrl") ?? "",
-                ImageCta = T(h.Why?.ImageCta, 60, "home.why.imageCta", "متن روی عکس"),
+                ImageCta = T(h.Why?.ImageCta, 60, "home.why.imageCta", "Text auf dem Bild"),
                 Points = Cards(h.Why?.Points, "home.why.points", 6, image: false, text: true),
                 FoundedYear = h.Why?.FoundedYear is >= 1300 and <= 1500 ? h.Why.FoundedYear : null,
                 Members = h.Why?.Members is > 0 and < 10_000_000 ? h.Why.Members : null,
             },
             Video = new VideoSettings
             {
-                Title = T(h.Video?.Title, 80, "home.video.title", "شعار ویدیو"),
-                VideoUrl = h.Video?.VideoUrl is { Length: > 0 } v ? (ValidVideo(v) ? v : Err(e, "home.video.videoUrl", "ویدیو فقط از پوشهٔ ویدیوی سایت یا آپلود.")) : null,
+                Title = T(h.Video?.Title, 80, "home.video.title", "Video-Slogan"),
+                VideoUrl = h.Video?.VideoUrl is { Length: > 0 } v ? (ValidVideo(v) ? v : Err(e, "home.video.videoUrl", "Video nur aus dem Videoordner der Seite oder per Upload.")) : null,
                 PosterUrl = Img(h.Video?.PosterUrl, "home.video.posterUrl") ?? "",
                 MobilePosterUrl = Img(h.Video?.MobilePosterUrl, "home.video.mobilePosterUrl"),
                 Mode = h.Video?.Mode == "loop" ? "loop" : "scrub",
             },
             Offer = new OfferSettings
             {
-                Eyebrow = T(h.Offer?.Eyebrow, 60, "home.offer.eyebrow", "برچسب"),
-                Title = T(h.Offer?.Title, 120, "home.offer.title", "تیتر"),
+                Eyebrow = T(h.Offer?.Eyebrow, 60, "home.offer.eyebrow", "Label"),
+                Title = T(h.Offer?.Title, 120, "home.offer.title", "Überschrift"),
                 Items = Cards(h.Offer?.Items, "home.offer.items", 12, image: false, text: true),
             },
             Branches = S(h.Branches, "home.branches"),
@@ -240,38 +240,38 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
             Shop = S(h.Shop, "home.shop"),
             Events = new EventsSettings
             {
-                Eyebrow = T(h.Events?.Eyebrow, 60, "home.events.eyebrow", "برچسب"),
-                Title = T(h.Events?.Title, 120, "home.events.title", "تیتر"),
-                Text = T(h.Events?.Text, 400, "home.events.text", "متن"),
+                Eyebrow = T(h.Events?.Eyebrow, 60, "home.events.eyebrow", "Label"),
+                Title = T(h.Events?.Title, 120, "home.events.title", "Überschrift"),
+                Text = T(h.Events?.Text, 400, "home.events.text", "Text"),
                 ImageUrl = Img(h.Events?.ImageUrl, "home.events.imageUrl") ?? "",
                 SecondImageUrl = Img(h.Events?.SecondImageUrl, "home.events.secondImageUrl") ?? "",
             },
             Gallery = new GallerySettings
             {
-                Title = T(h.Gallery?.Title, 120, "home.gallery.title", "تیتر"),
+                Title = T(h.Gallery?.Title, 120, "home.gallery.title", "Überschrift"),
                 Images = Cards(h.Gallery?.Images, "home.gallery.images", 24, image: true, text: false).Where(x => x.ImageUrl is not null).ToList(),
             },
             Coaches = S(h.Coaches, "home.coaches"),
             Faq = S(h.Faq, "home.faq"),
             Contact = S(h.Contact, "home.contact"),
-            FooterNote = T(h.FooterNote, 120, "home.footerNote", "متن فوتر"),
+            FooterNote = T(h.FooterNote, 120, "home.footerNote", "Footer-Text"),
         };
 
-        // ---- صفحه‌های قانونی
+        // ---- Rechtsseiten
         var l = r.Legal ?? new();
         c.Legal = new LegalSettings
         {
-            About = T(l.About, 6000, "legal.about", "درباره ما"),
-            Terms = T(l.Terms, 12000, "legal.terms", "قوانین"),
-            Privacy = T(l.Privacy, 12000, "legal.privacy", "حریم خصوصی"),
-            Refund = T(l.Refund, 6000, "legal.refund", "بازگشت وجه"),
+            About = T(l.About, 6000, "legal.about", "Über uns"),
+            Terms = T(l.Terms, 12000, "legal.terms", "AGB"),
+            Privacy = T(l.Privacy, 12000, "legal.privacy", "Datenschutz"),
+            Refund = T(l.Refund, 6000, "legal.refund", "Erstattung"),
         };
 
-        // ---- ماژول‌ها
+        // ---- Module
         c.Modules = r.Modules ?? new();
 
         if (e.Count > 0) return Result<SiteConfig>.Fail(e);
-        // بهینه بودن ویدیو را سرور از روی فایل {id}.ready تعیین می‌کند، نه فرم
+        // Ob ein Video optimiert ist, bestimmt der Server anhand der Datei {id}.ready, nicht das Formular
         c.Home.Video.Optimized = c.Home.Video.VideoUrl is { } vu && (videos?.IsOptimized(vu) ?? VideoPath().IsMatch(vu));
         await SaveRawAsync(c, staffId, ct);
         db.AuditLogs.Add(new AuditLog { Action = "site.updated", EntityType = "Site", EntityId = "1", UserId = staffId });
@@ -285,7 +285,7 @@ public sealed partial class SiteService(GymDbContext db, SiteConfigCache cache, 
 
     public static readonly string[] Icons = ["dumbbell", "scale", "salad", "calendar", "user", "users", "mountain", "bag", "heart", "trophy", "clock", "shield", "flame", "bike", "waves"];
 
-    /// <summary>عکس فقط از پوشه‌های خود سایت یا آپلودهای بررسی‌شده</summary>
+    /// <summary>Bilder nur aus den Ordnern der Seite oder geprüften Uploads</summary>
     public static bool ValidImagePath(string s) => s.Length < 200 && !s.Contains("..") && ImagePath().IsMatch(s);
 
     [GeneratedRegex(@"^/(media/[a-z]+|brand)/[A-Za-z0-9._-]+\.(webp|png|jpe?g|svg)$")] private static partial Regex ImagePath();

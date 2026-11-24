@@ -1,11 +1,11 @@
 "use client";
 /**
- * Pricing Section (21st.dev — نسخهٔ «Plans that works best…» با کارت‌های گرادیانی و سوییچ متحرک)
- * تغییرات نسبت به اصل:
- *  - پلن‌ها، متن‌ها و برچسب‌های سوییچ از props می‌آیند (فارسی، RTL)
- *  - آبی اصلی با رنگ‌های تم سایت (قرمز --color-plate و زغالی --color-chalk) جایگزین شده
- *  - TimelineContent (وابستگی جدا) با یک Reveal سادهٔ motion با همان انیمیشن blur/fade جایگزین شده
- *  - قیمت به‌صورت متن فارسی (NumberFlow ارقام فارسی ندارد) با انیمیشن عوض‌شدن
+ * Pricing Section (21st.dev — Variante „Plans that works best…“ mit Verlaufskarten und animiertem Schalter)
+ * Änderungen gegenüber dem Original:
+ *  - Pläne, Texte und Schalterlabels kommen aus props
+ *  - das Originalblau wurde durch Theme-Farben ersetzt (Rot --color-plate und Anthrazit --color-chalk)
+ *  - TimelineContent (separate Abhängigkeit) durch ein einfaches motion-Reveal mit gleicher blur/fade-Animation ersetzt
+ *  - Preis als formatierter Text mit Wechselanimation
  */
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CheckCheck } from "lucide-react";
@@ -18,16 +18,16 @@ export interface PricingPlan {
   description: string;
   price: string;
   priceUnit: string;
-  /** قیمت قبل از تخفیف (خط‌خورده) */
+  /** Preis vor Rabatt (durchgestrichen) */
   oldPrice?: string;
-  /** برچسب کوچک کنار قیمت، مثلاً «۲۰٪ تخفیف جشنواره» */
+  /** Kleines Label neben dem Preis, z. B. „20 % Aktionsrabatt“ */
   badge?: string;
-  /** یک خط زیر قیمت، مثلاً «ماهانه ۲ میلیون» */
+  /** Eine Zeile unter dem Preis, z. B. „monatlich 39 €“ */
   note?: string;
   buttonText: string;
   popular?: boolean;
   features: { text: string; icon: ReactNode }[];
-  includes: string[]; // [عنوان، ...موارد]
+  includes: string[]; // [Titel, ...Punkte]
 }
 
 export interface PricingGroup {
@@ -42,7 +42,7 @@ const revealVariants = {
   hidden: { filter: "blur(10px)", y: -20, opacity: 0 },
 };
 
-/** جایگزین TimelineContent: با ورود بخش به دید، به ترتیب شماره ظاهر می‌شود */
+/** Ersatz für TimelineContent: erscheint nacheinander, sobald der Bereich sichtbar wird */
 function TimelineContent({ as = "div", animationNum, className, children }: {
   as?: ElementType; animationNum: number; timelineRef: RefObject<HTMLElement | null>; className?: string; children: ReactNode;
 }) {
@@ -78,7 +78,7 @@ const PricingSwitch = ({ groups, value, onSwitch }: { groups: PricingGroup[]; va
   </div>
 );
 
-export default function PricingSection({ id, title, accent, subtitle, groups, onSelect, popularLabel = "محبوب‌ترین" }: {
+export default function PricingSection({ id, title, accent, subtitle, groups, onSelect, popularLabel = "Am beliebtesten" }: {
   id?: string;
   title: ReactNode;
   accent: ReactNode;

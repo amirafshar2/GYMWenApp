@@ -31,13 +31,13 @@ export interface TokyoSkylineHeroProps {
   /** Total input distance (px) needed to scrub the full video. Tune to taste. */
   scrubDistance?: number
   /**
-   * تغییر برای پروژه: وقتی true است، بخش وسط صفحه قرار می‌گیرد؛ قفل اسکرول فقط وقتی بخش به بالای
-   * صفحه می‌رسد فعال می‌شود و در انتهای ویدیو (یا ابتدای آن هنگام برگشت) آزاد می‌شود.
+   * Änderung fürs Projekt: bei true steht der Bereich mitten auf der Seite; die Scroll-Sperre greift erst, wenn der Bereich oben ankommt,
+   * und wird am Videoende (bzw. am Anfang beim Zurückscrollen) wieder gelöst.
    */
   midPage?: boolean
-  /** object-position ویدیو (مثلاً «50% 20%» تا سر سوژه بریده نشود) */
+  /** object-position des Videos (z. B. „50% 20%“, damit der Kopf nicht abgeschnitten wird) */
   videoPosition?: string
-  /** نمایش منوی شیشه‌ای داخل بخش */
+  /** Glasmenü innerhalb des Bereichs anzeigen */
   showNav?: boolean
   fontFamily?: string
   className?: string
@@ -155,7 +155,7 @@ export default function TokyoSkylineHero({
       b.left = "0"
       b.right = "0"
       b.width = "100%"
-      // سایت می‌تواند هدر و نوارها را هنگام پخش ویدیو کنار بزند
+      // Die Seite kann Header und Leisten beim Abspielen des Videos ausblenden
       if (midPage) document.documentElement.dataset.videoLock = "1"
     }
 
@@ -182,13 +182,13 @@ export default function TokyoSkylineHero({
       return true
     }
 
-    // وسط صفحه: قفل وقتی بخش به بالای صفحه رسید؛ آزادسازی در دو سر ویدیو
+    // Mitte der Seite: Sperre, wenn der Bereich oben ankommt; Freigabe an beiden Videoenden
     function snapAndLock() {
       const top = section!.getBoundingClientRect().top + window.scrollY
       window.scrollTo({ top, behavior: "instant" as ScrollBehavior })
       engageLock()
     }
-    /** true یعنی رویداد را این بخش مصرف کرد (اسکرول صفحه متوقف شود) */
+    /** true = dieser Bereich hat das Ereignis verbraucht (Seitenscroll stoppen) */
     function routeDelta(deltaY: number): boolean {
       if (reduceMotion) return false
       if (!midPage) { addDelta(deltaY); return true }
@@ -230,7 +230,7 @@ export default function TokyoSkylineHero({
     window.addEventListener("touchstart", onTouchStart, { passive: true })
     window.addEventListener("touchmove", onTouchMove, { passive: false })
 
-    // اسکرول با کیبورد از روی بخش رد نشود؛ ولی پرش لینک‌های منو (اسکرول برنامه‌ای) آزاد است
+    // Scrollen per Tastatur überspringt den Bereich nicht; Sprünge über Menülinks (programmatisches Scrollen) bleiben frei
     let lastKey = 0
     const SCROLL_KEYS = new Set(["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Spacebar", "Home", "End"])
     const onKey = (e: KeyboardEvent) => {
@@ -239,7 +239,7 @@ export default function TokyoSkylineHero({
       if (SCROLL_KEYS.has(e.key)) lastKey = Date.now()
     }
     if (midPage) window.addEventListener("keydown", onKey)
-    // کلیک روی لینک‌های منو وقتی ویدیو قفل است: قفل آزاد شود تا پرش انجام شود
+    // Klick auf Menülinks bei gesperrtem Video: Sperre lösen, damit der Sprung klappt
     const onLinkClick = (e: MouseEvent) => {
       if (!locked) return
       const a = (e.target as HTMLElement | null)?.closest?.("a[href]")

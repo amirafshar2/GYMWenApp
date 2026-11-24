@@ -11,7 +11,7 @@ import { Btn, inputCls, Notice, PageShell, Panel, Spinner, toLatinDigits } from 
 
 const D = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' } as const
 
-/** کیف پول: شارژ با درگاه، خرج در بوفه و فروشگاه */
+/** Guthaben: Aufladen per Gateway, Ausgeben im Bistro und Shop */
 export default function WalletPage() {
   const { ready, user } = useRequireAuth()
   const nav = useNavigate()
@@ -24,7 +24,7 @@ export default function WalletPage() {
   const [back, setBack] = useState<PaymentResult | null>(null)
   const key = useRef(newKey())
 
-  useEffect(() => { document.title = `کیف پول | ${brand.name}` }, [])
+  useEffect(() => { document.title = `Guthaben | ${brand.name}` }, [])
   useEffect(() => {
     if (!ready || !user) return
     walletApi.get().then((x) => { setW(x); setAmount((a) => a ?? x.topUpPresets[1] ?? x.topUpPresets[0]) }).catch((e: Error) => setErr(e.message))
@@ -32,35 +32,35 @@ export default function WalletPage() {
     if (pid) memberApi.payment(pid).then(setBack).catch(() => null)
   }, [ready, user, params])
 
-  const value = custom ? Number(toLatinDigits(custom).replace(/[^\d]/g, '')) : amount ?? 0
+  const value = custom ? Number(toLatinDigits(custom).replace(/[^\d]/g, '')) * 100 : amount ?? 0
   const top = async (e: FormEvent) => {
     e.preventDefault()
     if (!w) return
-    if (value < w.minTopUpToman || value > w.maxTopUpToman) return setErr(`مبلغ باید بین ${toman(w.minTopUpToman)} و ${toman(w.maxTopUpToman)} باشد.`)
+    if (value < w.minTopUpToman || value > w.maxTopUpToman) return setErr(`Der Betrag muss zwischen ${toman(w.minTopUpToman)} und ${toman(w.maxTopUpToman)} liegen.`)
     setBusy(true); setErr(null)
-    try { continuePurchase(await walletApi.topUp(Math.round(value / 1000) * 1000, key.current), nav) }
+    try { continuePurchase(await walletApi.topUp(Math.round(value / 100) * 100, key.current), nav) }
     catch (x) { setErr((x as Error).message); setBusy(false); key.current = newKey() }
   }
 
-  if (!w) return err ? <PageShell title="کیف پول"><Notice tone="err">{err}</Notice></PageShell> : <Spinner />
+  if (!w) return err ? <PageShell title="Guthaben"><Notice tone="err">{err}</Notice></PageShell> : <Spinner />
 
   return (
-    <PageShell eyebrow="حساب کاربری" title="کیف پول">
+    <PageShell eyebrow="Benutzerkonto" title="Guthaben">
       {params.get('payment') && back && (
         <Notice tone={back.status === 'succeeded' ? 'ok' : 'err'} className="mb-6">
-          {back.status === 'succeeded' ? `${toman(back.amountToman)} به کیف پول اضافه شد.` : 'شارژ انجام نشد. اگر مبلغی کم شده، بانک تا ۷۲ ساعت برمی‌گرداند.'}
+          {back.status === 'succeeded' ? `${toman(back.amountToman)} Dem Guthaben gutgeschrieben.` : 'Aufladung fehlgeschlagen. Falls ein Betrag abgebucht wurde, erstattet die Bank ihn.'}
         </Notice>
       )}
       <div className="grid items-start gap-6 lg:grid-cols-[400px_1fr] [&>*]:min-w-0">
         <div className="grid gap-6">
-          <section aria-label="موجودی" className="relative overflow-hidden rounded-[14px] bg-[linear-gradient(135deg,#0b2f57,#0b5fb0)] p-7 text-white shadow-[0_20px_50px_rgb(11_95_176/0.3)]">
-            <WalletIcon className="absolute -bottom-6 -left-6 size-40 text-white/10" aria-hidden />
-            <p className="text-[14px] text-white/70">موجودی</p>
+          <section aria-label="Guthaben" className="relative overflow-hidden rounded-[14px] bg-[linear-gradient(135deg,#0b2f57,#0b5fb0)] p-7 text-white shadow-[0_20px_50px_rgb(11_95_176/0.3)]">
+            <WalletIcon className="absolute -bottom-6 -right-6 size-40 text-white/10" aria-hidden />
+            <p className="text-[14px] text-white/70">Guthaben</p>
             <p className="mt-1 text-[36px] font-black tabular-nums">{toman(w.balanceToman)}</p>
-            <p className="mt-4 text-[13px] text-white/70">برای خرید از بوفه و فروشگاه همهٔ شعبه‌ها</p>
+            <p className="mt-4 text-[13px] text-white/70">Für Einkäufe im Bistro und Shop aller Filialen</p>
           </section>
           <Panel>
-            <h2 className="mb-4 text-[18px] font-black text-chalk">شارژ کیف پول</h2>
+            <h2 className="mb-4 text-[18px] font-black text-chalk">Guthaben aufladen</h2>
             <form onSubmit={top} className="grid gap-3">
               <div className="grid grid-cols-2 gap-2">
                 {w.topUpPresets.map((p) => (
@@ -70,16 +70,16 @@ export default function WalletPage() {
                   </button>
                 ))}
               </div>
-              <label className="grid gap-2"><span className="text-[13px] text-rubber">یا مبلغ دلخواه (تومان)</span>
-                <input value={custom} onChange={(e) => setCustom(e.target.value)} inputMode="numeric" placeholder="مثلاً ۷۵۰۰۰۰" className={inputCls} /></label>
+              <label className="grid gap-2"><span className="text-[13px] text-rubber">oder Wunschbetrag (€)</span>
+                <input value={custom} onChange={(e) => setCustom(e.target.value)} inputMode="numeric" placeholder="z. B. 50" className={inputCls} /></label>
               {err && <p role="alert" className="text-[14px] text-danger">{err}</p>}
-              <Btn type="submit" busy={busy} className="mt-2"><CreditCard className="size-5" aria-hidden />پرداخت {value ? toman(value) : ''}</Btn>
+              <Btn type="submit" busy={busy} className="mt-2"><CreditCard className="size-5" aria-hidden />Zahlung {value ? toman(value) : ''}</Btn>
             </form>
           </Panel>
         </div>
         <Panel aria-labelledby="w-h">
-          <h2 id="w-h" className="mb-4 text-[18px] font-black text-chalk">گردش حساب</h2>
-          {w.transactions.length === 0 ? <p className="text-[14px] text-rubber">هنوز تراکنشی ندارید.</p> : (
+          <h2 id="w-h" className="mb-4 text-[18px] font-black text-chalk">Kontobewegungen</h2>
+          {w.transactions.length === 0 ? <p className="text-[14px] text-rubber">Noch keine Transaktionen.</p> : (
             <ul className="divide-y divide-steel-2">
               {w.transactions.map((t) => (
                 <li key={t.id} className="flex items-center gap-3 py-3">
@@ -87,8 +87,8 @@ export default function WalletPage() {
                     {t.amountToman > 0 ? <ArrowDownLeft className="size-5" /> : <ArrowUpRight className="size-5" />}
                   </span>
                   <div className="min-w-0 flex-1"><p className="truncate font-bold text-chalk">{t.description}</p><p className="text-[12px] text-rubber">{jalali(t.createdAtUtc, D)}</p></div>
-                  <div className="text-left"><p className={cn('font-black tabular-nums', t.amountToman > 0 ? 'text-[#1f7a46]' : 'text-chalk')}>{t.amountToman > 0 ? '+' : '−'}{faNum(Math.abs(t.amountToman))}</p>
-                    <p className="text-[12px] text-rubber">مانده {faNum(t.balanceAfterToman)}</p></div>
+                  <div className="text-right"><p className={cn('font-black tabular-nums', t.amountToman > 0 ? 'text-[#1f7a46]' : 'text-chalk')}>{t.amountToman > 0 ? '+' : '−'}{toman(Math.abs(t.amountToman))}</p>
+                    <p className="text-[12px] text-rubber">Saldo {toman(t.balanceAfterToman)}</p></div>
                 </li>
               ))}
             </ul>

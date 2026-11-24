@@ -1,7 +1,7 @@
 namespace GymPlatform.Business.Dtos;
 
-// ---- دسترسی کارمند ----
-/// <summary>کارمند فعلی و شعبه‌هایی که می‌تواند ببیند. مدیر کل همهٔ شعبه‌ها را دارد.</summary>
+// ---- Mitarbeiterzugang ----
+/// <summary>Aktueller Mitarbeiter und die Filialen, die er sehen darf. Der Gesamtadmin sieht alle Filialen.</summary>
 public sealed record StaffScope(int UserId, IReadOnlyList<string> Roles, bool IsSuperAdmin, IReadOnlyList<int> BranchIds)
 {
     public bool Can(int branchId) => IsSuperAdmin || BranchIds.Contains(branchId);
@@ -10,7 +10,7 @@ public sealed record StaffScope(int UserId, IReadOnlyList<string> Roles, bool Is
 public sealed record PanelMeDto(int UserId, string? FullName, IReadOnlyList<string> Roles, IReadOnlyList<BranchRefDto> Branches, int? CoachId);
 public sealed record BranchRefDto(int Id, string Slug, string Name);
 
-// ---- داشبورد ----
+// ---- Dashboard ----
 public sealed record RevenueSplitDto(long Membership, long Shop, long Canteen)
 {
     public long Total => Membership + Shop + Canteen;
@@ -25,7 +25,7 @@ public sealed record DashboardDto(
     IReadOnlyList<DailyRevenueDto> Daily, IReadOnlyList<BranchStatDto> Branches, IReadOnlyList<ExpiringMemberDto> Expiring,
     IReadOnlyList<CampaignEffectDto> Campaigns, IReadOnlyList<int> CheckInsByHour);
 
-// ---- پذیرش ----
+// ---- Empfang ----
 public sealed record MemberSearchRowDto(int UserId, string? FullName, string Phone, string? ActivePackage, string? ActiveBranch, int? DaysLeft);
 public sealed record MemberSummaryDto(
     int UserId, string? FullName, string Phone, string? Gender, MembershipDto? Active, IReadOnlyList<MembershipDto> Memberships,
@@ -33,7 +33,7 @@ public sealed record MemberSummaryDto(
 public sealed record CheckInRowDto(int Id, DateTime OccurredAtUtc, string BranchName, string? MemberName, int? UserId, bool Allowed, string Reason, string Method);
 public sealed record ReceptionCheckInRequest(string BranchSlug, string? Credential, int? UserId = null);
 
-// ---- مربی ----
+// ---- Trainer ----
 public sealed record PlanDayDto(string Day, string Focus, IReadOnlyList<string> Items);
 public sealed record TrainingPlanDto(int Id, string Title, IReadOnlyList<PlanDayDto> Days, string? Nutrition, string CoachName, DateTime UpdatedAtUtc);
 public sealed record SavePlanRequest(string Title, IReadOnlyList<PlanDayDto> Days, string? Nutrition);
@@ -45,9 +45,9 @@ public sealed record AddTraineeRequest(string Phone);
 public sealed record PreferencesRequest(DateOnly? BirthDate, bool MarketingSmsOptIn);
 public sealed record PreferencesDto(DateOnly? BirthDate, bool MarketingSmsOptIn);
 
-// ---- مدیریت محتوا ----
+// ---- Inhaltsverwaltung ----
 public sealed record AdminPackageDto(int Id, string Slug, string Name, string? Tagline, string Category, int DurationMonths, int? Sessions, long PriceToman, bool IsActive, bool IsFeatured, int SortOrder, IReadOnlyList<string> Features, int Memberships);
-/// <summary>ساخت/ویرایش کامل پکیج (فقط مدیر کل)</summary>
+/// <summary>Paket vollständig anlegen/bearbeiten (nur Gesamtadmin)</summary>
 public sealed record SavePackageRequest(string Name, string? Tagline, string Category, int DurationMonths, int? Sessions, long PriceToman, IReadOnlyList<string>? Features, bool IsActive, bool IsFeatured);
 public sealed record UpdatePackageRequest(long PriceToman, bool IsActive, bool IsFeatured, string? Tagline);
 public sealed record AdminCampaignDto(int Id, string Title, string? Description, DateTime StartsAtUtc, DateTime EndsAtUtc, int DiscountPercent, long? DiscountAmountToman,
@@ -64,7 +64,7 @@ public sealed record AdminVariantDto(int Id, string Sku, string Label, long? Pri
 public sealed record AdminProductDto(int Id, string Slug, string Name, string Kind, string Category, string ImagePath, long PriceToman, bool IsActive, IReadOnlyList<AdminVariantDto> Variants,
     string BrandName = "", string? Description = null, IReadOnlyList<string>? Highlights = null, IReadOnlyList<SaveVariantDto>? VariantDetails = null);
 public sealed record SaveVariantDto(int? Id, string? Size, string? Color, string? ColorHex, string? Flavor, long? PriceToman);
-/// <summary>ساخت/ویرایش کامل کالا (فقط مدیر کل). مدل‌ها اضافه/ویرایش می‌شوند ولی حذف نمی‌شوند (سفارش‌های قبلی به آن‌ها اشاره دارند)؛ برای برداشتن کالا «نمایش در سایت» را خاموش کنید.</summary>
+/// <summary>Produkt vollständig anlegen/bearbeiten (nur Gesamtadmin). Varianten werden ergänzt/bearbeitet, aber nicht gelöscht (alte Bestellungen verweisen darauf); zum Entfernen „Auf der Seite zeigen“ ausschalten.</summary>
 public sealed record SaveProductRequest(string Name, string BrandName, string Kind, string Category, string? Description, long PriceToman, string ImagePath, bool IsActive,
     IReadOnlyList<string>? Highlights, IReadOnlyList<SaveVariantDto>? Variants);
 public sealed record UpdateProductRequest(long PriceToman, bool IsActive);
@@ -73,23 +73,23 @@ public sealed record AdminShopOrderDto(int Id, string? Number, string Status, st
     string? Address, long TotalToman, DateTime CreatedAtUtc, IReadOnlyList<ShopOrderItemDto> Items);
 public sealed record ShopOrderStatusRequest(string Status);
 public sealed record AdminCanteenItemDto(int Id, string Name, string Category, long PriceToman, bool IsAvailable, string ImagePath, string? Description = null, int? Kcal = null, int? ProteinG = null);
-/// <summary>ساخت/ویرایش کامل آیتم منو (فقط مدیر کل؛ منو برای همهٔ شعبه‌ها یکی است)</summary>
+/// <summary>Speisekartenposten vollständig anlegen/bearbeiten (nur Gesamtadmin; die Karte gilt für alle Filialen)</summary>
 public sealed record SaveCanteenItemRequest(string Name, string? Description, string Category, long PriceToman, int? Kcal, int? ProteinG, string ImagePath, bool IsAvailable);
 public sealed record ImageLibraryDto(IReadOnlyList<string> Canteen, IReadOnlyList<string> Shop, IReadOnlyList<string> Uploads, IReadOnlyList<string> Site);
 public sealed record UpdateCanteenItemRequest(long PriceToman, bool IsAvailable);
 
-// ---- کارکنان ----
+// ---- Mitarbeiter ----
 public sealed record StaffRowDto(int UserId, string? FullName, string Phone, IReadOnlyList<string> Roles, IReadOnlyList<BranchRefDto> Branches, DateTime? LastLoginAtUtc);
 public sealed record SaveStaffRequest(string Phone, string? FullName, IReadOnlyList<string> Roles, IReadOnlyList<string> BranchSlugs);
 
-// ---- پیامک ----
+// ---- SMS ----
 public sealed record SmsRowDto(int Id, string Phone, string Kind, string Preview, string Status, DateTime CreatedAtUtc, DateTime? SentAtUtc, string? Error);
 public sealed record SmsStatsDto(int Queued, int SentToday, int Failed, IReadOnlyList<SmsRowDto> Recent);
 
-// ---- مربیان (مدیر کل) ----
+// ---- Trainer (Gesamtadmin) ----
 public sealed record AdminCoachDto(int Id, string Slug, string FullName, string Specialty, string? Bio, int YearsOfExperience, string Section,
     string BranchSlug, string BranchName, string? PhotoUrl, IReadOnlyList<string> Achievements, bool IsActive, string? LinkedPhone, string? LinkedName, int Trainees);
-/// <summary>LinkedPhone: موبایل حساب ورود مربی به پنل مربی (خالی = هنوز حساب ندارد)</summary>
+/// <summary>LinkedPhone: Handynummer des Trainer-Logins für das Trainerpanel (leer = noch kein Konto)</summary>
 public sealed record SaveCoachRequest(string FullName, string Specialty, string? Bio, int YearsOfExperience, string Section, string BranchSlug,
     string? PhotoUrl, IReadOnlyList<string>? Achievements, bool IsActive, string? LinkedPhone);
 

@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace GymPlatform.Api.Filters;
 
 /// <summary>
-/// بررسی توکن CSRF (کوکی + هدر X-XSRF-TOKEN) برای درخواست‌های بی‌نام (فرم‌ها، ورود).
-/// درخواست‌هایی که با توکن Bearer (JWT در هدر Authorization) احراز شده‌اند در معرض CSRF نیستند،
-/// چون مرورگر این هدر را خودکار نمی‌فرستد؛ برای آن‌ها بررسی لازم نیست.
-/// توکن از GET /api/v1/security/csrf گرفته می‌شود.
+/// Prüfung des CSRF-Tokens (Cookie + Header X-XSRF-TOKEN) für anonyme Anfragen (Formulare, Login).
+/// Anfragen mit Bearer-Token (JWT im Authorization-Header) sind nicht CSRF-gefährdet,
+/// weil der Browser diesen Header nicht automatisch sendet; dort ist keine Prüfung nötig.
+/// Das Token kommt von GET /api/v1/security/csrf.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class ValidateCsrfAttribute : Attribute, IAsyncAuthorizationFilter
@@ -26,14 +26,14 @@ public sealed class ValidateCsrfAttribute : Attribute, IAsyncAuthorizationFilter
             context.Result = new BadRequestObjectResult(new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
-                Title = "توکن امنیتی نامعتبر است. صفحه را دوباره بارگذاری کنید."
+                Title = "Ungültiges Sicherheitstoken. Bitte die Seite neu laden."
             });
     }
 }
 
 /// <summary>
-/// برای endpointهایی که با کوکی کار می‌کنند (refresh/logout): فقط درخواست هم‌مبدأ با هدر سفارشی پذیرفته می‌شود.
-/// کوکی SameSite=Strict است؛ این بررسی لایهٔ دوم دفاع در برابر CSRF است.
+/// Für Endpoints mit Cookie (refresh/logout): nur Same-Origin-Anfragen mit eigenem Header werden akzeptiert.
+/// Das Cookie ist SameSite=Strict; diese Prüfung ist die zweite Verteidigungslinie gegen CSRF.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class SameOriginOnlyAttribute : Attribute, IAuthorizationFilter
@@ -48,6 +48,6 @@ public sealed class SameOriginOnlyAttribute : Attribute, IAuthorizationFilter
         var sameOrigin = site is "" or "same-origin" or "none" &&
                          (origin.Length == 0 || Uri.TryCreate(origin, UriKind.Absolute, out var o) && o.Authority == req.Host.Value);
         if (!sameOrigin || req.Headers[Header].ToString() != "web")
-            context.Result = new ObjectResult(new ProblemDetails { Status = 403, Title = "درخواست از مبدأ نامعتبر." }) { StatusCode = 403 };
+            context.Result = new ObjectResult(new ProblemDetails { Status = 403, Title = "Anfrage von ungültigem Ursprung." }) { StatusCode = 403 };
     }
 }

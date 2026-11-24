@@ -1411,7 +1411,7 @@ export default function SculptureHero(props: SculptureHeroProps) {
     () => (imageBackground ? hexToRgb(imageBackground, [0.918, 0.914, 0.906]) : null),
     [imageBackground]
   )
-  // از همان اول درست حدس زده شود تا گوشی تصویر بزرگ دسکتاپ را بی‌دلیل دانلود نکند
+  // Von Anfang an richtig raten, damit das Handy nicht unnötig das große Desktopbild lädt
   const [isMobile, setIsMobile] = React.useState(() => typeof window !== "undefined" && window.innerWidth < 640)
   const loadedImageRef = React.useRef<HTMLImageElement | null>(null)
   const mobileRef = React.useRef(typeof window !== "undefined" && window.innerWidth < 640)
@@ -1481,7 +1481,7 @@ export default function SculptureHero(props: SculptureHeroProps) {
       img.style.top = rect.y + "px"
       img.style.width = rect.w + "px"
       img.style.height = rect.h + "px"
-      // تا تناسب واقعی تصویر معلوم و جایش محاسبه نشده پنهان است (وگرنه لحظه‌ای جابه‌جا می‌شود)
+      // Unsichtbar, bis Seitenverhältnis und Position berechnet sind (sonst springt es kurz)
       if (loadedImageRef.current) img.style.visibility = "visible"
     }
     const hintEl = hintRef.current
@@ -1510,9 +1510,9 @@ export default function SculptureHero(props: SculptureHeroProps) {
     const fail = () => {
       root.dataset.gl = "off"
     }
-    // سرعت: موتور ذرات فقط با اولین حرکت ماوس/لمس روی هیرو ساخته می‌شود.
-    // در حالت سکون همان تصویر ثابت دیده می‌شود (intro خاموش است)، پس ظاهر عوض نمی‌شود
-    // ولی ساخت ~۱۰۰ هزار ذره دیگر بارگذاری اول صفحه را کند نمی‌کند.
+    // Performance: die Partikel-Engine startet erst bei der ersten Maus-/Touchbewegung im Hero.
+    // Im Ruhezustand ist dasselbe Standbild zu sehen (Intro aus), das Aussehen ändert sich also nicht,
+    // aber ~100.000 Partikel bremsen den ersten Seitenaufbau nicht mehr.
     let visible = true
     const start = () => {
       if (engine || root.dataset.gl === "off") return

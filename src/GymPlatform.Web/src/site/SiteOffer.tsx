@@ -1,11 +1,11 @@
 import { useRef } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react'
 import { iconOf } from '@/lib/icons'
 import { fill, site } from '@/lib/site'
 import { Eyebrow, useFadeUp, wrap } from './ui/SectionHead'
 
-/** «آنچه ارائه می‌دهیم»: کاروسل آیکون‌ها با پس‌زمینهٔ حبابی، مثل صفحهٔ مرجع */
+/** „Was wir bieten“: Icon-Karussell mit Blasenhintergrund, wie auf der Referenzseite */
 export default function SiteOffer() {
   const track = useRef<HTMLUListElement>(null)
   const reduced = useReducedMotion()
@@ -15,8 +15,8 @@ export default function SiteOffer() {
     const el = track.current
     if (!el) return
     const card = el.querySelector('li')
-    // در RTL حرکت به «بعدی» یعنی اسکرول به سمت چپ (منفی)
-    el.scrollBy({ left: -dir * ((card?.clientWidth ?? 300) + 30), behavior: reduced ? 'auto' : 'smooth' })
+    // „Weiter“ bedeutet Scrollen nach rechts (positiv)
+    el.scrollBy({ left: dir * ((card?.clientWidth ?? 300) + 30), behavior: reduced ? 'auto' : 'smooth' })
   }
 
   return (
@@ -28,8 +28,8 @@ export default function SiteOffer() {
             <h2 id="offer-title" className="mt-3 text-[clamp(1.9rem,3.4vw,3rem)] font-bold leading-[1.3] text-chalk">{fill(o.title)}</h2>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => slide(-1)} aria-label="قبلی" className="grid size-12 cursor-pointer place-items-center border-2 border-steel-2 text-chalk transition-colors hover:border-chalk hover:bg-chalk hover:text-white"><ChevronRight className="size-5" aria-hidden /></button>
-            <button type="button" onClick={() => slide(1)} aria-label="بعدی" className="grid size-12 cursor-pointer place-items-center border-2 border-steel-2 text-chalk transition-colors hover:border-chalk hover:bg-chalk hover:text-white"><ChevronLeft className="size-5" aria-hidden /></button>
+            <button type="button" onClick={() => slide(-1)} aria-label="Zurück" className="grid size-12 cursor-pointer place-items-center border-2 border-steel-2 text-chalk transition-colors hover:border-chalk hover:bg-chalk hover:text-white"><ChevronLeft className="size-5" aria-hidden /></button>
+            <button type="button" onClick={() => slide(1)} aria-label="Weiter" className="grid size-12 cursor-pointer place-items-center border-2 border-steel-2 text-chalk transition-colors hover:border-chalk hover:bg-chalk hover:text-white"><ChevronRight className="size-5" aria-hidden /></button>
           </div>
         </motion.div>
 
@@ -43,7 +43,7 @@ export default function SiteOffer() {
                 </span>
                 <span className="mt-7 text-[21px] font-bold text-chalk">{fill(it.title)}</span>
                 <span className="mt-3 text-[15px] leading-7 text-rubber">{fill(it.text)}</span>
-                <ArrowLeft className="mt-5 size-5 text-chalk transition-all group-hover:-translate-x-1 group-hover:text-plate" aria-hidden />
+                <ArrowRight className="mt-5 size-5 text-chalk transition-all group-hover:translate-x-1 group-hover:text-plate" aria-hidden />
               </a>
             </motion.li>
           ) })}

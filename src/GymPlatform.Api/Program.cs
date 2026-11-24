@@ -35,7 +35,7 @@ builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ProblemDetai
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi(o => o.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
-// ---- رمزها: فقط از User Secrets / متغیر محیطی. در توسعه اگر نبود، کلید موقت ساخته می‌شود ----
+// ---- Geheimnisse: nur aus User Secrets / Umgebungsvariablen. In der Entwicklung wird sonst ein temporärer Schlüssel erzeugt ----
 ProductionGuard.Enforce(builder.Configuration, builder.Environment);
 EnsureSecret(builder, "Jwt:SigningKey");
 EnsureSecret(builder, "Otp:Pepper");
@@ -43,7 +43,7 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptio
 builder.Services.Configure<OtpOptions>(builder.Configuration.GetSection(OtpOptions.Section));
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.Section));
 
-// ---- اتصال به سیستم گیت/دستبند و سیستم‌های بیرونی ----
+// ---- Anbindung an Gate-/Armbandsystem und externe Systeme ----
 builder.Services.Configure<GymPlatform.Business.Services.Access.AccessOptions>(builder.Configuration.GetSection(GymPlatform.Business.Services.Access.AccessOptions.Section));
 builder.Services.Configure<GymPlatform.Api.Integrations.WebhookOptions>(builder.Configuration.GetSection(GymPlatform.Api.Integrations.WebhookOptions.Section));
 builder.Services.AddScoped<GymPlatform.Api.Controllers.DeviceKeyFilter>();
@@ -56,13 +56,13 @@ if (builder.Configuration.GetValue("Integrations:DispatcherEnabled", true))
     builder.Services.AddHostedService<GymPlatform.Api.Integrations.MaintenanceWorker>();
 }
 
-// ---- فاز ۳: فروشگاه، بوفه (لحظه‌ای با SignalR)، کیف پول ----
+// ---- Phase 3: Shop, Bistro (live mit SignalR), Guthaben ----
 builder.Services.Configure<CommerceOptions>(builder.Configuration.GetSection(CommerceOptions.Section));
 builder.Services.AddScoped<PaymentGateway>();
 builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 4 * 1024; o.EnableDetailedErrors = builder.Environment.IsDevelopment(); });
 builder.Services.AddScoped<ICanteenNotifier, GymPlatform.Api.Hubs.SignalRCanteenNotifier>();
 
-// ---- Identity (فقط هسته؛ ورود با OTP، نقش‌ها برای فاز ۴) + JWT ----
+// ---- Identity (nur Kern; Login per OTP, Rollen für Phase 4) + JWT ----
 builder.Services.AddIdentityCore<AppUser>(o =>
     {
         o.User.RequireUniqueEmail = false;
@@ -90,7 +90,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             NameClaimType = "sub",
             RoleClaimType = ClaimTypes.Role,
         };
-        // WebSocket هدر Authorization ندارد؛ فقط برای مسیر Hub توکن از کوئری خوانده می‌شود (لاگ درخواست‌ها کوئری را ثبت نمی‌کند)
+        // WebSocket hat keinen Authorization-Header; nur für den Hub-Pfad wird das Token aus der Query gelesen (das Request-Log speichert die Query nicht)
         o.Events = new JwtBearerEvents
         {
             OnMessageReceived = ctx =>
@@ -110,7 +110,7 @@ builder.Services.AddSingleton<GymPlatform.Business.Services.Site.IVideoLibrary>(
 builder.Services.AddSingleton<GymPlatform.Api.Video.VideoOptimizer>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GymPlatform.Api.Video.VideoOptimizer>());
 
-// ---- پیامک: Log (دمو) یا Kavenegar ----
+// ---- SMS: Log (Demo) oder Kavenegar ----
 builder.Services.Configure<GymPlatform.Business.Services.Panel.SmsOptions>(builder.Configuration.GetSection(GymPlatform.Business.Services.Panel.SmsOptions.Section));
 builder.Services.AddScoped<GymPlatform.Business.Services.Panel.DemoSeeder>();
 if (builder.Configuration["Sms:SiteUrl"] is { Length: > 3 } smsSite) GymPlatform.Business.Services.Panel.SmsTexts.Site = smsSite;
@@ -121,12 +121,12 @@ if (builder.Configuration["Sms:Provider"]?.Equals("Kavenegar", StringComparison.
 }
 else builder.Services.AddSingleton<ISmsSender, LogSmsSender>();
 
-// ---- درگاه پرداخت: Parbad — آزمایشی (فقط دمو) یا زرین‌پال ----
+// ---- Zahlungs-Gateway: Parbad — Test (nur Demo) oder Zahlungsanbieter ----
 builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection(PaymentOptions.Section));
 var paymentCfg = builder.Configuration.GetSection(PaymentOptions.Section).Get<PaymentOptions>() ?? new PaymentOptions();
 var sqlServer = !string.Equals(builder.Configuration["Database:Provider"], "Sqlite", StringComparison.OrdinalIgnoreCase);
 if (sqlServer)
-    // وضعیت درگاه (Parbad) در SQL Server تا با ری‌استارت سرور پرداخت در جریان گم نشود؛ جدول ParbadCache در مایگریشن ساخته می‌شود
+    // Gateway-Status (Parbad) in SQL Server, damit laufende Zahlungen einen Serverneustart überstehen; die Tabelle ParbadCache entsteht per Migration
     builder.Services.AddDistributedSqlServerCache(o =>
     {
         o.ConnectionString = builder.Configuration.GetConnectionString("Default");
@@ -146,7 +146,7 @@ builder.Services.AddParbad()
     .ConfigureHttpContext(h => h.UseDefaultAspNetCore())
     .ConfigureStorage(s => { if (sqlServer) s.UseDistributedCache(); else s.UseMemoryCache(); });
 
-// ---- سلامت سرویس برای مانیتورینگ: /health/live (برنامه بالاست) و /health/ready (دیتابیس هم جواب می‌دهد)
+// ---- Health-Checks fürs Monitoring: /health/live (App läuft) und /health/ready (Datenbank antwortet auch)
 builder.Services.AddHealthChecks().AddDbContextCheck<GymDbContext>("database", tags: ["ready"]);
 
 builder.Services.AddAntiforgery(o =>
@@ -154,7 +154,7 @@ builder.Services.AddAntiforgery(o =>
     o.HeaderName = "X-XSRF-TOKEN";
     o.Cookie.HttpOnly = true;
     o.Cookie.SameSite = SameSiteMode.Strict;
-    // در توسعه (http) کوکی بدون Secure؛ در production فقط HTTPS با پیشوند __Host-
+    // In der Entwicklung (http) Cookie ohne Secure; in Production nur HTTPS mit Präfix __Host-
     if (builder.Environment.IsDevelopment())
     {
         o.Cookie.Name = "kg-af";
@@ -167,8 +167,8 @@ builder.Services.AddAntiforgery(o =>
     }
 });
 
-// Rate limiting: فرم‌ها (و بعداً OTP/پرداخت) بر اساس IP محدود می‌شوند.
-// ضریب سقف‌ها فقط برای تست‌های یکپارچه (همهٔ درخواست‌های تست از یک IP می‌آیند)؛ در production همیشه ۱
+// Rate Limiting: Formulare (und später OTP/Zahlung) werden pro IP begrenzt.
+// Faktor der Limits nur für Integrationstests (alle Testanfragen kommen von einer IP); in Production immer 1
 var rl = (builder.Environment.IsEnvironment("Testing") || builder.Environment.IsDevelopment()) ? builder.Configuration.GetValue("RateLimiting:PermitMultiplier", 1) : 1;
 builder.Services.AddRateLimiter(o =>
 {
@@ -176,7 +176,7 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("forms", ctx => RateLimitPartition.GetFixedWindowLimiter(
         ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
-    // OTP: هر IP حداکثر ۵ درخواست در دقیقه (محدودیت هر شماره هم در سرویس اعمال می‌شود)
+    // OTP: höchstens 5 Anfragen pro Minute und IP (das Limit pro Nummer greift zusätzlich im Service)
     o.AddPolicy("otp", ctx => RateLimitPartition.GetFixedWindowLimiter(
         "otp:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 5 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
@@ -186,7 +186,7 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("payment", ctx => RateLimitPartition.GetFixedWindowLimiter(
         "pay:" + (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
-    // هر گیت با کلید خودش: تا ۶۰۰ درخواست در دقیقه (ساعت شلوغ)
+    // Jedes Gate mit eigenem Schlüssel: bis zu 600 Anfragen pro Minute (Stoßzeit)
     o.AddPolicy("device", ctx => RateLimitPartition.GetFixedWindowLimiter(
         "dev:" + (ctx.Request.Headers["X-Device-Key"].ToString() is { Length: > 0 } k ? k.GetHashCode().ToString() : ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown"),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 600 * rl, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
@@ -214,19 +214,19 @@ builder.Services.AddResponseCompression(o =>
 builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
 builder.Services.AddHsts(o => { o.MaxAge = TimeSpan.FromDays(365); o.IncludeSubDomains = true; });
 
-// کلیدهای Data Protection (توکن ضد CSRF) در volume پایدار تا با ری‌استارت کانتینر باطل نشوند
+// Data-Protection-Schlüssel (Anti-CSRF-Token) im persistenten Volume, damit sie einen Container-Neustart überstehen
 if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } keysPath)
     builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath)).SetApplicationName("GymPlatform");
 
-// پشت reverse proxy (Caddy/Nginx در Docker): IP واقعی کاربر برای rate limit و HTTPS برای کوکی‌های Secure
+// Hinter einem Reverse Proxy (Caddy/Nginx in Docker): echte Client-IP für Rate Limit und HTTPS für Secure-Cookies
 if (builder.Configuration.GetValue("ReverseProxy:Enabled", false))
     builder.Services.Configure<ForwardedHeadersOptions>(o =>
     {
         o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         o.ForwardLimit = 1;
-        // فقط هدرهای پراکسی‌های شناخته‌شده پذیرفته می‌شود (ReverseProxy:KnownNetworks، مثل 172.16.0.0/12).
-        // اگر خالی باشد هر فرستنده‌ای قبول می‌شود؛ آن‌وقت پورت اپ حتماً باید فقط روی 127.0.0.1 یا شبکهٔ داخلی Docker باز باشد
-        // (در docker-compose همین‌طور است)، وگرنه با X-Forwarded-For جعلی محدودیت تعداد درخواست دور زده می‌شود.
+        // Nur Header bekannter Proxys werden akzeptiert (ReverseProxy:KnownNetworks, z. B. 172.16.0.0/12).
+        // Ist die Liste leer, wird jeder Absender akzeptiert; dann darf der App-Port nur auf 127.0.0.1 oder im internen Docker-Netz offen sein
+        // (so ist es in docker-compose), sonst umgeht ein gefälschtes X-Forwarded-For das Anfragelimit.
         o.KnownIPNetworks.Clear();
         o.KnownProxies.Clear();
         foreach (var cidr in builder.Configuration.GetSection("ReverseProxy:KnownNetworks").Get<string[]>() ?? [])
@@ -236,17 +236,17 @@ if (builder.Configuration.GetValue("ReverseProxy:Enabled", false))
 var app = builder.Build();
 if (app.Configuration.GetValue("ReverseProxy:Enabled", false)) app.UseForwardedHeaders();
 
-// ساخت/به‌روزرسانی دیتابیس و دادهٔ نمونهٔ دمو
+// Datenbank anlegen/aktualisieren und Demodaten
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-    // Database:AutoMigrate=false یعنی مایگریشن با اسکریپت بازبینی‌شده (docs/database/migrate.sql) اجرا می‌شود
+    // Database:AutoMigrate=false = Migration per geprüftem Skript (docs/database/migrate.sql)
     if (db.Database.IsSqlServer()) { if (app.Configuration.GetValue("Database:AutoMigrate", true)) await db.Database.MigrateAsync(); }
     else
     {
-        // Sqlite فقط برای دموست: اگر فایل دیتابیس از نسخهٔ قبلی (بدون جداول فاز ۲) باشد، از نو ساخته می‌شود
+        // Sqlite nur für Demos: stammt die Datei aus einer älteren Version (ohne Phase-2-Tabellen), wird sie neu angelegt
         await db.Database.EnsureCreatedAsync();
-        try { _ = await db.SiteContents.AnyAsync(); } // جدیدترین جدول؛ نبودش یعنی فایل دمو قدیمی است
+        try { _ = await db.SiteContents.AnyAsync(); } // Neueste Tabelle; fehlt sie, ist die Demodatei veraltet
         catch (Microsoft.Data.Sqlite.SqliteException)
         {
             await db.Database.EnsureDeletedAsync();
@@ -254,24 +254,24 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // نصب اولیه (فقط بار اول): Setup:Mode = Blank (خالی، برای مشتری تازه) | Demo (برند و دادهٔ نمایشی) | Content (بستهٔ محتوای خروجی‌گرفته از پنل)
+    // Erstinstallation (nur beim ersten Mal): Setup:Mode = Blank (leer, für neue Kunden) | Demo (Marke und Demodaten) | Content (aus dem Panel exportiertes Inhaltspaket)
     var setupMode = app.Configuration["Setup:Mode"] is { Length: > 0 } m ? m
         : !app.Configuration.GetValue("Database:SeedDemoData", true) || app.Environment.IsProduction() ? "Blank" : "Demo";
     var installed = await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().InstallAsync(
         setupMode, Path.Combine(AppContext.BaseDirectory, "Seed"), app.Configuration["Setup:ContentFile"],
         app.Services.GetRequiredService<PublicImageStore>().Root, app.Configuration["Setup:OwnerPhone"], CancellationToken.None,
         demoData: !app.Environment.IsProduction() && app.Configuration.GetValue("Setup:DemoData", false));
-    // مالک را می‌شود بعداً هم با Setup:OwnerPhone اضافه کرد (مثلاً اگر بار اول جا افتاده)
+    // Der Inhaber kann auch später mit Setup:OwnerPhone hinzugefügt werden (z. B. falls er beim ersten Mal fehlte)
     if (installed is null && app.Configuration["Setup:OwnerPhone"] is { Length: > 0 } owner)
         await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.SiteInstaller>().EnsureOwnerAsync(owner, CancellationToken.None);
-    // تنظیمات سایت از همین ابتدا در حافظه (نام باشگاه در پیامک‌های زمان‌بندی‌شده هم لازم است)
+    // Seiteneinstellungen von Anfang an im Speicher (der Studioname wird auch in geplanten SMS gebraucht)
     await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Site.ISiteService>().GetAsync(CancellationToken.None);
 
-    // گیت نمایشی برای تست اتصال (هرگز در production)
+    // Demo-Gate zum Testen der Anbindung (niemals in Production)
     if (!app.Environment.IsProduction() && app.Configuration["Access:DemoDeviceKey"] is { Length: >= 16 } demoKey)
         await scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Access.IAccessControlService>().EnsureDemoDeviceAsync(demoKey, CancellationToken.None);
 
-    // کارمندان نمایشی و ۲۰۰ عضو ساختگی با ۶ ماه سابقه برای پرزنت؛ هرگز در production
+    // Demo-Mitarbeiter und 200 fiktive Mitglieder mit 6 Monaten Verlauf für Präsentationen; niemals in Production
     if (!app.Environment.IsProduction() && app.Configuration["Demo:StaffPhone"] is { Length: 11 } staffPhone)
     {
         var demo = scope.ServiceProvider.GetRequiredService<GymPlatform.Business.Services.Panel.DemoSeeder>();
@@ -290,21 +290,21 @@ app.UseResponseCompression();
 app.UseSerilogRequestLogging();
 
 app.UseMiddleware<PrecompressedStaticFilesMiddleware>();
-// عکس‌های آپلودی مدیر (بیرون از wwwroot)
+// Vom Admin hochgeladene Bilder (außerhalb von wwwroot)
 var uploads = app.Services.GetRequiredService<PublicImageStore>();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = uploads.FileProvider,
     RequestPath = PublicImageStore.RequestPath,
-    OnPrepareResponse = ctx => ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable", // نام فایل تصادفی و تغییرناپذیر
+    OnPrepareResponse = ctx => ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable", // zufälliger, unveränderlicher Dateiname
 });
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        // فایل‌های هش‌دار Vite یک سال کش می‌شوند؛ index.html و رسانه‌ها (ویدیو، عکس، لوگو) هر بار با ETag
-        // اعتبارسنجی می‌شوند تا با عوض شدن فایل، مرورگر نسخهٔ قدیمی را نشان ندهد.
+        // Vite-Dateien mit Hash werden ein Jahr gecacht; index.html und Medien (Video, Bild, Logo) werden jedes Mal per ETag
+        // validiert, damit der Browser nach einer Dateiänderung keine alte Version zeigt.
         var path = ctx.File.Name;
         var req = ctx.Context.Request.Path;
         ctx.Context.Response.Headers.CacheControl =
@@ -319,7 +319,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRateLimiter();
 app.UseOutputCache();
 
-// صفحهٔ درگاه آزمایشی Parbad (فقط وقتی Payment:UseVirtualGateway روشن است)
+// Seite des Parbad-Test-Gateways (nur wenn Payment:UseVirtualGateway an ist)
 if (paymentCfg.UseVirtualGateway) app.UseParbadVirtualGateway();
 
 app.UseAuthentication();
@@ -328,7 +328,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 app.MapControllers();
-// ویدیوهای آپلودی و نسخه‌های بهینه‌شده‌شان: فقط نام‌های مجاز، با Range (جلو/عقب رفتن) و کش یک‌ساعته
+// Hochgeladene Videos und ihre optimierten Versionen: nur erlaubte Namen, mit Range (Vor-/Zurückspulen) und einstündigem Cache
 app.MapMethods(GymPlatform.Api.Video.VideoStore.RequestPath + "/{name}", ["GET", "HEAD"], (string name, GymPlatform.Api.Video.VideoStore videos, HttpContext http) =>
 {
     if (!GymPlatform.Api.Video.VideoStore.PublicName().IsMatch(name)) return Results.NotFound();
@@ -342,12 +342,12 @@ app.MapFallbackToFile("index.html");
 
 app.Run();
 
-// در توسعه، نبودِ رمز با کلید تصادفی موقت جبران می‌شود؛ در production خطا می‌دهد.
+// In der Entwicklung wird ein fehlendes Geheimnis durch einen temporären Zufallsschlüssel ersetzt; in Production gibt es einen Fehler.
 static void EnsureSecret(WebApplicationBuilder b, string key)
 {
     if (!string.IsNullOrWhiteSpace(b.Configuration[key])) return;
     if (!b.Environment.IsDevelopment() && !b.Environment.IsEnvironment("Testing"))
-        throw new InvalidOperationException($"{key} تنظیم نشده است (User Secrets یا متغیر محیطی {key.Replace(":", "__")}).");
+        throw new InvalidOperationException($"{key} ist nicht gesetzt (User Secrets oder Umgebungsvariable {key.Replace(":", "__")}).");
     b.Configuration[key] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
     Console.WriteLine($"[warn] {key} not configured; using an ephemeral development key.");
 }

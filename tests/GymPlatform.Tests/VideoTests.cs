@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>آپلود ویدیو: ذخیرهٔ مستقیم روی دیسک، بهینه‌سازی پس‌زمینه با ffmpeg، وضعیت و سرو با Range.</summary>
+/// <summary>Video-Upload: direkt auf die Platte, Hintergrundoptimierung mit ffmpeg, Status und Auslieferung mit Range.</summary>
 public sealed class VideoTests
 {
     private static bool HasFfmpeg => GymPlatform.Api.Video.VideoOptimizer.Which("ffmpeg") is not null;
@@ -86,14 +86,14 @@ public sealed class VideoTests
             var part = await http.SendAsync(range);
             Assert.Equal(HttpStatusCode.PartialContent, part.StatusCode);
             Assert.Equal(HttpStatusCode.OK, (await http.SendAsync(new HttpRequestMessage(HttpMethod.Head, $"/media/videos/{id}.jpg"))).StatusCode);
-            // نام‌های غیرمجاز سرو نمی‌شوند (نسخهٔ اصلی و فایل وضعیت)
+            // Unerlaubte Namen werden nicht ausgeliefert (Original und Statusdatei)
             Assert.Equal(HttpStatusCode.NotFound, (await admin.SendAsync(HttpMethod.Get, $"/media/videos/{id}.orig.mp4")).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await admin.SendAsync(HttpMethod.Get, $"/media/videos/{id}.ready")).StatusCode);
 
-            // ذخیره در تنظیمات: سرور خودش «بهینه‌شده» را تعیین می‌کند
+            // In den Einstellungen speichern: der Server bestimmt „optimiert“ selbst
             var cfg = await admin.JsonAsync<Dictionary<string, JsonElement>>(await admin.SendAsync(HttpMethod.Get, "/api/v1/panel/admin/site"));
             var home = JsonSerializer.Deserialize<Dictionary<string, object?>>(cfg["home"].GetRawText())!;
-            home["video"] = new { title = "تست", videoUrl = $"/media/videos/{id}.mp4", posterUrl = poster, mode = "scrub", optimized = false };
+            home["video"] = new { title = "Test", videoUrl = $"/media/videos/{id}.mp4", posterUrl = poster, mode = "scrub", optimized = false };
             var body = cfg.ToDictionary(k => k.Key, k => (object?)k.Value);
             body["home"] = home;
             var saved = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Put, "/api/v1/panel/admin/site", body));
@@ -103,7 +103,7 @@ public sealed class VideoTests
     }
 
     [Theory]
-    [InlineData("testsrc=size=64x36:rate=1:duration=61", "۶۰ ثانیه")]
+    [InlineData("testsrc=size=64x36:rate=1:duration=61", "60 Sekunden")]
     [InlineData("testsrc=size=4000x2250:rate=1:duration=1", "4K")]
     public async Task Too_long_or_above_4k_fails_with_reason(string source, string reason)
     {

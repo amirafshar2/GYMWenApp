@@ -13,21 +13,21 @@ import { ImagePicker } from './CatalogForms'
 
 type Errors = Record<string, string[]>
 const TABS = [
-  ['brand', 'نام و لوگو'], ['theme', 'رنگ‌ها'], ['contact', 'تماس'], ['home', 'صفحهٔ اصلی'], ['legal', 'صفحه‌های قانونی'], ['modules', 'بخش‌های سایت'], ['package', 'بستهٔ محتوا'],
+  ['brand', 'Name und Logo'], ['theme', 'Farben'], ['contact', 'Kontakt'], ['home', 'Startseite'], ['legal', 'Rechtsseiten'], ['modules', 'Bereiche der Seite'], ['package', 'Inhaltspaket'],
 ] as const
 type Tab = (typeof TABS)[number][0]
 
 const SECTION_LABEL: Record<SectionKey, string> = {
-  intro: 'چه می‌کنیم (رشته‌ها)', why: 'چرا ما', video: 'ویدیو', offer: 'آنچه ارائه می‌دهیم', branches: 'شعبه‌ها', pricing: 'پکیج‌ها',
-  shop: 'فروشگاه', events: 'جشنواره', gallery: 'گالری', coaches: 'مربیان', faq: 'سؤالات پرتکرار', contact: 'مشاورهٔ رایگان',
+  intro: 'Was wir tun (Angebote)', why: 'Warum wir', video: 'Video', offer: 'Was wir bieten', branches: 'Filialen', pricing: 'Pakete',
+  shop: 'Shop', events: 'Aktion', gallery: 'Galerie', coaches: 'Trainer', faq: 'Häufige Fragen', contact: 'Kostenlose Beratung',
 }
 const PALETTES: [string, string, string, string][] = [
-  ['آبی', '#0B5FB0', '#FFB400', '#181818'], ['قرمز', '#C62832', '#FFB400', '#1A1414'], ['سبز', '#13804B', '#F2C230', '#121A16'],
-  ['نارنجی', '#D9541E', '#2B2B2B', '#1C1612'], ['بنفش', '#6D3FB5', '#F5B83D', '#17131F'], ['مشکی', '#222222', '#E8B73A', '#0E0E0E'],
+  ['Blau', '#0B5FB0', '#FFB400', '#181818'], ['Rot', '#C62832', '#FFB400', '#1A1414'], ['Grün', '#13804B', '#F2C230', '#121A16'],
+  ['Orange', '#D9541E', '#2B2B2B', '#1C1612'], ['Lila', '#6D3FB5', '#F5B83D', '#17131F'], ['Schwarz', '#222222', '#E8B73A', '#0E0E0E'],
 ]
-const HREFS: [string, string][] = [['#branches', 'شعبه‌ها'], ['#packages', 'پکیج‌ها'], ['#coaches', 'مربیان'], ['#consult', 'مشاوره'], ['#gallery', 'گالری'], ['/shop', 'فروشگاه']]
+const HREFS: [string, string][] = [['#branches', 'Filialen'], ['#packages', 'Pakete'], ['#coaches', 'Trainer'], ['#consult', 'Beratung'], ['#gallery', 'Galerie'], ['/shop', 'Shop']]
 
-/** تنظیمات سایت: همهٔ متن‌ها، عکس‌ها، رنگ‌ها و بخش‌ها — هر چه این‌جا عوض شود، همان لحظه روی سایت است */
+/** Website-Einstellungen: alle Texte, Bilder, Farben und Bereiche — jede Änderung hier ist sofort auf der Seite */
 export default function SiteSettingsPage() {
   const [params, setParams] = useSearchParams()
   const tab = (TABS.find(([k]) => k === params.get('tab'))?.[0] ?? 'brand') as Tab
@@ -56,11 +56,11 @@ export default function SiteSettingsPage() {
       const r = await panelApi.saveSite(cfg)
       setCfg(r); setSaved(JSON.stringify(r))
       await reloadSite()
-      setMsg({ tone: 'ok', text: 'ذخیره شد و روی سایت اعمال شد.' })
+      setMsg({ tone: 'ok', text: 'Gespeichert und auf der Seite übernommen.' })
     } catch (e) {
       const x = e as Error & { errors?: Errors }
       setErrors(x.errors ?? {})
-      setMsg({ tone: 'err', text: x.errors ? `${Object.keys(x.errors).length} مورد را اصلاح کنید (با رنگ قرمز مشخص شده).` : x.message })
+      setMsg({ tone: 'err', text: x.errors ? `${Object.keys(x.errors).length} Punkt(e) korrigieren (rot markiert).` : x.message })
     } finally { setBusy(false) }
   }
   const err = (k: string) => errors[Object.keys(errors).find((x) => x.toLowerCase() === k.toLowerCase()) ?? '']?.[0]
@@ -68,11 +68,11 @@ export default function SiteSettingsPage() {
 
   return (
     <>
-      <PanelTitle title="تنظیمات سایت" sub="نام، لوگو، رنگ، متن‌ها، عکس‌ها و بخش‌های سایت. بعد از «ذخیره» همان لحظه روی سایت دیده می‌شود.">
-        <a href="/" target="_blank" rel="noopener" className="inline-flex h-11 items-center gap-2 rounded-[3px] border-2 border-steel-2 bg-white px-4 text-[14px] font-bold text-chalk hover:border-chalk"><Eye className="size-4" aria-hidden />دیدن سایت</a>
+      <PanelTitle title="Website-Einstellungen" sub="Name, Logo, Farben, Texte, Bilder und Bereiche der Seite. Nach „Speichern“ sofort auf der Seite sichtbar.">
+        <a href="/" target="_blank" rel="noopener" className="inline-flex h-11 items-center gap-2 rounded-[3px] border-2 border-steel-2 bg-white px-4 text-[14px] font-bold text-chalk hover:border-chalk"><Eye className="size-4" aria-hidden />Website ansehen</a>
       </PanelTitle>
 
-      <div role="tablist" aria-label="بخش‌های تنظیمات" className="-mx-1 mb-5 flex gap-1 overflow-x-auto px-1 pb-1">
+      <div role="tablist" aria-label="Bereiche der Einstellungen" className="-mx-1 mb-5 flex gap-1 overflow-x-auto px-1 pb-1">
         {TABS.map(([k, label]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setParams({ tab: k }, { replace: true })}
             className={cn('h-10 shrink-0 cursor-pointer rounded-full px-4 text-[14px] font-bold transition-colors',
@@ -95,11 +95,11 @@ export default function SiteSettingsPage() {
       </div>
 
       {tab !== 'package' && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-steel-2 bg-white/95 backdrop-blur lg:right-[260px]">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-steel-2 bg-white/95 backdrop-blur lg:left-[260px]">
           <div className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-8">
-            <Btn onClick={save} busy={busy} disabled={!dirty}><Check className="size-4" aria-hidden />ذخیره و اعمال روی سایت</Btn>
-            {dirty ? <span className="text-[13px] font-bold text-[#7a5600]">تغییرات ذخیره نشده</span> : <span className="text-[13px] text-rubber">همه‌چیز ذخیره است</span>}
-            {dirty && <button type="button" onClick={() => { setCfg(JSON.parse(saved)); setErrors({}) }} className="cursor-pointer text-[13px] font-bold text-rubber hover:text-chalk">برگرداندن تغییرات</button>}
+            <Btn onClick={save} busy={busy} disabled={!dirty}><Check className="size-4" aria-hidden />Speichern und übernehmen</Btn>
+            {dirty ? <span className="text-[13px] font-bold text-[#7a5600]">Ungespeicherte Änderungen</span> : <span className="text-[13px] text-rubber">Alles gespeichert</span>}
+            {dirty && <button type="button" onClick={() => { setCfg(JSON.parse(saved)); setErrors({}) }} className="cursor-pointer text-[13px] font-bold text-rubber hover:text-chalk">Änderungen verwerfen</button>}
           </div>
         </div>
       )}
@@ -107,7 +107,7 @@ export default function SiteSettingsPage() {
   )
 }
 
-// ================================================================ اجزای فرم
+// ================================================================ Formularbausteine
 type Err = (k: string) => string | undefined
 type SetFn = <K extends keyof SiteConfig>(k: K, v: Partial<SiteConfig[K]>) => void
 
@@ -121,7 +121,7 @@ function F({ label, hint, error, children, className }: { label: string; hint?: 
 }
 const Text = ({ value, onChange, error, dir, max, placeholder }: { value: string | null | undefined; onChange: (v: string) => void; error?: string; dir?: 'ltr'; max?: number; placeholder?: string }) => (
   <input value={value ?? ''} onChange={(e) => onChange(e.target.value)} dir={dir} maxLength={max} placeholder={placeholder} aria-invalid={!!error}
-    className={cn(inputCls, 'h-11', dir === 'ltr' && 'text-left')} />
+    className={cn(inputCls, 'h-11', dir === 'ltr' && 'text-right')} />
 )
 const Area = ({ value, onChange, error, rows = 3, max }: { value: string | null | undefined; onChange: (v: string) => void; error?: string; rows?: number; max?: number }) => (
   <textarea value={value ?? ''} onChange={(e) => onChange(e.target.value)} rows={rows} maxLength={max} aria-invalid={!!error} className={cn(inputCls, 'py-2.5 leading-7')} />
@@ -137,34 +137,34 @@ function Card({ title, sub, children, aside }: { title: string; sub?: string; ch
     </Panel>
   )
 }
-const PH = <span>می‌توانید از <b dir="ltr">{'{name} {short} {city} {branches} {phone}'}</b> استفاده کنید.</span>
+const PH = <span>Sie können <b dir="ltr">{'{name} {short} {city} {branches} {phone}'}</b> verwenden.</span>
 
-// ================================================================ نام و لوگو
+// ================================================================ Name und Logo
 function BrandTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   const b = c.brand, s = (v: Partial<SiteConfig['brand']>) => set('brand', v)
   return (
     <>
-      <Card title="نام باشگاه" sub="در هدر، فوتر، عنوان صفحه، پیامک‌ها، فاکتور و قرارداد استفاده می‌شود.">
-        <F label="نام کامل" hint="مثل «مجموعه باشگاه‌های …»" error={err('brand.name')}><Text value={b.name} onChange={(v) => s({ name: v })} max={80} /></F>
-        <F label="نام کوتاه (کنار لوگو)" hint="یک یا دو کلمه" error={err('brand.shortName')}><Text value={b.shortName} onChange={(v) => s({ shortName: v })} max={24} /></F>
-        <F label="نام لاتین" hint="کلمهٔ اولش با حروف بزرگ پشت تصویر اصلی می‌آید." error={err('brand.latinName')}><Text dir="ltr" value={b.latinName} onChange={(v) => s({ latinName: v })} max={40} placeholder="IRON GYM" /></F>
-        <F label="شهر" error={err('brand.city')}><Text value={b.city} onChange={(v) => s({ city: v })} max={40} /></F>
-        <F label="توضیح کوتاه (برای گوگل)" className="sm:col-span-2" error={err('brand.description')}><Area value={b.description} onChange={(v) => s({ description: v })} rows={2} max={200} /></F>
+      <Card title="Name des Studios" sub="Erscheint in Header, Footer, Seitentitel, SMS, Rechnung und Vertrag.">
+        <F label="Vollständiger Name" hint="z. B. „Fitnessstudios …“" error={err('brand.name')}><Text value={b.name} onChange={(v) => s({ name: v })} max={80} /></F>
+        <F label="Kurzname (neben dem Logo)" hint="Ein oder zwei Wörter" error={err('brand.shortName')}><Text value={b.shortName} onChange={(v) => s({ shortName: v })} max={24} /></F>
+        <F label="Lateinischer Name" hint="Das erste Wort erscheint in Großbuchstaben hinter dem Hauptbild." error={err('brand.latinName')}><Text dir="ltr" value={b.latinName} onChange={(v) => s({ latinName: v })} max={40} placeholder="IRON GYM" /></F>
+        <F label="Stadt" error={err('brand.city')}><Text value={b.city} onChange={(v) => s({ city: v })} max={40} /></F>
+        <F label="Kurzbeschreibung (für Google)" className="sm:col-span-2" error={err('brand.description')}><Area value={b.description} onChange={(v) => s({ description: v })} rows={2} max={200} /></F>
       </Card>
-      <Card title="شعارها" sub="با «؛» شعار دو تکه می‌شود و تکهٔ دوم رنگی نمایش داده می‌شود.">
-        <F label="شعار اصلی (روی تصویر اول)" error={err('brand.slogan')}><Text value={b.slogan} onChange={(v) => s({ slogan: v })} max={80} /></F>
-        <F label="شعار بخش شعبه‌ها" error={err('brand.nearSlogan')}><Text value={b.nearSlogan} onChange={(v) => s({ nearSlogan: v })} max={80} /></F>
-        <F label="برچسب بخش «چرا ما»" error={err('brand.whySlogan')}><Text value={b.whySlogan} onChange={(v) => s({ whySlogan: v })} max={40} /></F>
+      <Card title="Slogans" sub="Mit „;“ wird der Slogan zweigeteilt, der zweite Teil erscheint farbig.">
+        <F label="Hauptslogan (auf dem ersten Bild)" error={err('brand.slogan')}><Text value={b.slogan} onChange={(v) => s({ slogan: v })} max={80} /></F>
+        <F label="Slogan im Filialbereich" error={err('brand.nearSlogan')}><Text value={b.nearSlogan} onChange={(v) => s({ nearSlogan: v })} max={80} /></F>
+        <F label="Label des Bereichs „Warum wir“" error={err('brand.whySlogan')}><Text value={b.whySlogan} onChange={(v) => s({ whySlogan: v })} max={40} /></F>
       </Card>
-      <Card title="لوگو" sub="لوگوی گرد یا مربعی با پس‌زمینهٔ شفاف (PNG یا WebP) بهترین نتیجه را دارد.">
-        <F label="لوگوی کوچک (هدر و آیکن مرورگر)" error={err('brand.logoUrl')}><ImagePicker prefer="site" value={b.logoUrl ?? ''} onChange={(v) => s({ logoUrl: v })} hint="مربعی، دست‌کم ۲۵۶×۲۵۶ پیکسل." /></F>
-        <F label="لوگوی کامل (فوتر، اختیاری)" error={err('brand.logoFullUrl')}><ImagePicker prefer="site" wide value={b.logoFullUrl ?? ''} onChange={(v) => s({ logoFullUrl: v })} hint="اگر خالی باشد همان لوگوی کوچک استفاده می‌شود." /></F>
+      <Card title="Logo" sub="Ein rundes oder quadratisches Logo mit transparentem Hintergrund (PNG oder WebP) wirkt am besten.">
+        <F label="Kleines Logo (Header und Browser-Icon)" error={err('brand.logoUrl')}><ImagePicker prefer="site" value={b.logoUrl ?? ''} onChange={(v) => s({ logoUrl: v })} hint="Quadratisch, mindestens 256×256 Pixel." /></F>
+        <F label="Vollständiges Logo (Footer, optional)" error={err('brand.logoFullUrl')}><ImagePicker prefer="site" wide value={b.logoFullUrl ?? ''} onChange={(v) => s({ logoFullUrl: v })} hint="Leer = das kleine Logo wird verwendet." /></F>
       </Card>
     </>
   )
 }
 
-// ================================================================ رنگ‌ها
+// ================================================================ Farben
 function ThemeTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   const t = c.theme, s = (v: Partial<SiteConfig['theme']>) => set('theme', v)
   const Color = ({ k, label, hint }: { k: keyof SiteConfig['theme']; label: string; hint: string }) => (
@@ -178,13 +178,13 @@ function ThemeTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   )
   return (
     <>
-      <Card title="رنگ‌های سایت" sub="رنگ روشن‌تر و تیره‌تر (برای hover و متن روی زمینهٔ تیره) خودکار ساخته می‌شود.">
-        <Color k="primary" label="رنگ اصلی" hint="دکمه‌ها، لینک‌ها و تأکیدها — بهتر است رنگ لوگو باشد." />
-        <Color k="accent" label="رنگ دوم" hint="دکمهٔ «شروع کن» و نشانه‌ها." />
-        <Color k="dark" label="رنگ تیره" hint="فوتر و بخش مشاوره." />
+      <Card title="Farben der Seite" sub="Hellere und dunklere Varianten (für Hover und Text auf dunklem Grund) werden automatisch erzeugt.">
+        <Color k="primary" label="Hauptfarbe" hint="Buttons, Links und Akzente — idealerweise die Logofarbe." />
+        <Color k="accent" label="Zweitfarbe" hint="„Los geht’s“-Button und Markierungen." />
+        <Color k="dark" label="Dunkle Farbe" hint="Footer und Beratungsbereich." />
       </Card>
       <Panel className="p-5">
-        <h2 className="mb-3 text-[15px] font-black text-chalk">ترکیب‌های آماده</h2>
+        <h2 className="mb-3 text-[15px] font-black text-chalk">Fertige Kombinationen</h2>
         <div className="flex flex-wrap gap-2">
           {PALETTES.map(([name, p, a, d]) => (
             <button key={name} type="button" onClick={() => s({ primary: p, accent: a, dark: d })}
@@ -193,38 +193,38 @@ function ThemeTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
             </button>
           ))}
         </div>
-        <div className="mt-5 overflow-hidden rounded-[6px] border border-steel-2" aria-label="پیش‌نمایش">
+        <div className="mt-5 overflow-hidden rounded-[6px] border border-steel-2" aria-label="Vorschau">
           <div className="flex flex-wrap items-center gap-3 bg-white p-4">
-            <span className="rounded-[3px] px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: t.primary }}>ثبت‌نام آنلاین</span>
-            <span className="rounded-[3px] px-5 py-2.5 text-[14px] font-bold text-chalk" style={{ background: t.accent }}>شروع کن</span>
-            <span className="text-[14px] font-bold" style={{ color: t.primary }}>لینک نمونه</span>
+            <span className="rounded-[3px] px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: t.primary }}>Online anmelden</span>
+            <span className="rounded-[3px] px-5 py-2.5 text-[14px] font-bold text-chalk" style={{ background: t.accent }}>Los geht’s</span>
+            <span className="text-[14px] font-bold" style={{ color: t.primary }}>Beispiellink</span>
           </div>
-          <div className="p-4 text-[14px] text-white/80" style={{ background: t.dark }}>فوتر سایت</div>
+          <div className="p-4 text-[14px] text-white/80" style={{ background: t.dark }}>Footer der Seite</div>
         </div>
       </Panel>
     </>
   )
 }
 
-// ================================================================ تماس
+// ================================================================ Kontakt
 function ContactTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   const x = c.contact, s = (v: Partial<SiteConfig['contact']>) => set('contact', v)
   return (
-    <Card title="اطلاعات تماس" sub="در هدر، فوتر، بخش مشاوره و صفحه‌های قانونی نمایش داده می‌شود.">
-      <F label="تلفن پشتیبانی" hint="موبایل یا ثابت با پیش‌شماره" error={err('contact.phone')}><Text dir="ltr" value={x.phone} onChange={(v) => s({ phone: toLatinDigits(v) })} max={14} placeholder="09121234567" /></F>
-      <F label="ایمیل" error={err('contact.email')}><Text dir="ltr" value={x.email} onChange={(v) => s({ email: v })} max={120} /></F>
-      <F label="آدرس دفتر مرکزی" className="sm:col-span-2" error={err('contact.address')}><Text value={x.address} onChange={(v) => s({ address: v })} max={300} /></F>
-      <F label="اینستاگرام" error={err('contact.instagram')}><Text dir="ltr" value={x.instagram} onChange={(v) => s({ instagram: v })} placeholder="https://instagram.com/…" /></F>
-      <F label="تلگرام" error={err('contact.telegram')}><Text dir="ltr" value={x.telegram} onChange={(v) => s({ telegram: v })} placeholder="https://t.me/…" /></F>
-      <F label="واتساپ" error={err('contact.whatsApp')}><Text dir="ltr" value={x.whatsApp} onChange={(v) => s({ whatsApp: v })} placeholder="https://wa.me/98…" /></F>
-      <F label="زمان پاسخ‌گویی به مشاوره" error={err('contact.responseTime')}><Text value={x.responseTime} onChange={(v) => s({ responseTime: v })} max={40} /></F>
-      <F label="اینماد — id" hint="بعد از صدور نماد از enamad.ir" error={err('contact.enamadId')}><Text dir="ltr" value={x.enamadId} onChange={(v) => s({ enamadId: toLatinDigits(v) })} max={12} /></F>
-      <F label="اینماد — Code" error={err('contact.enamadCode')}><Text dir="ltr" value={x.enamadCode} onChange={(v) => s({ enamadCode: v })} max={40} /></F>
+    <Card title="Kontaktdaten" sub="Erscheint in Header, Footer, Beratungsbereich und Rechtsseiten.">
+      <F label="Service-Telefon" hint="Handy oder Festnetz mit Vorwahl" error={err('contact.phone')}><Text dir="ltr" value={x.phone} onChange={(v) => s({ phone: toLatinDigits(v) })} max={14} placeholder="01571234567" /></F>
+      <F label="E-Mail" error={err('contact.email')}><Text dir="ltr" value={x.email} onChange={(v) => s({ email: v })} max={120} /></F>
+      <F label="Adresse der Zentrale" className="sm:col-span-2" error={err('contact.address')}><Text value={x.address} onChange={(v) => s({ address: v })} max={300} /></F>
+      <F label="Instagram" error={err('contact.instagram')}><Text dir="ltr" value={x.instagram} onChange={(v) => s({ instagram: v })} placeholder="https://instagram.com/…" /></F>
+      <F label="Telegram" error={err('contact.telegram')}><Text dir="ltr" value={x.telegram} onChange={(v) => s({ telegram: v })} placeholder="https://t.me/…" /></F>
+      <F label="WhatsApp" error={err('contact.whatsApp')}><Text dir="ltr" value={x.whatsApp} onChange={(v) => s({ whatsApp: v })} placeholder="https://wa.me/98…" /></F>
+      <F label="Antwortzeit bei Beratung" error={err('contact.responseTime')}><Text value={x.responseTime} onChange={(v) => s({ responseTime: v })} max={40} /></F>
+      <F label="Vertrauenssiegel — id" hint="nach Ausstellung des Siegels" error={err('contact.enamadId')}><Text dir="ltr" value={x.enamadId} onChange={(v) => s({ enamadId: toLatinDigits(v) })} max={12} /></F>
+      <F label="Vertrauenssiegel — Code" error={err('contact.enamadCode')}><Text dir="ltr" value={x.enamadCode} onChange={(v) => s({ enamadCode: v })} max={40} /></F>
     </Card>
   )
 }
 
-// ================================================================ صفحهٔ اصلی
+// ================================================================ Startseite
 function HomeTab({ c, setHome, err, errKeys }: { c: SiteConfig; setHome: (v: Partial<SiteConfig['home']>) => void; err: Err; errKeys: string[] }) {
   const h = c.home
   const [open, setOpen] = useState<string>('hero')
@@ -238,66 +238,66 @@ function HomeTab({ c, setHome, err, errKeys }: { c: SiteConfig; setHome: (v: Par
 
   const editors: Record<string, ReactNode> = {
     hero: <>
-      <F label="برچسب بالای شعار" hint={PH} error={err('home.hero.eyebrow')}><Text value={h.hero.eyebrow} onChange={(v) => sec('hero')({ eyebrow: v })} /></F>
-      <F label="متن زیر شعار" error={err('home.hero.body')} className="sm:col-span-2"><Area value={h.hero.body} onChange={(v) => sec('hero')({ body: v })} max={300} /></F>
-      <F label="دکمهٔ اول" error={err('home.hero.primaryCta')}><Text value={h.hero.primaryCta} onChange={(v) => sec('hero')({ primaryCta: v })} max={30} /></F>
-      <F label="دکمهٔ دوم" error={err('home.hero.secondaryCta')}><Text value={h.hero.secondaryCta} onChange={(v) => sec('hero')({ secondaryCta: v })} max={30} /></F>
-      <F label="تصویر اصلی" error={err('home.hero.imageUrl')} hint="با جلوهٔ ذرات نمایش داده می‌شود؛ سوژه روی زمینهٔ روشن و ساده بهتر است."><ImagePicker prefer="site" wide value={h.hero.imageUrl} onChange={(v) => sec('hero')({ imageUrl: v })} /></F>
-      <F label="تصویر اصلی در موبایل" error={err('home.hero.mobileImageUrl')}><ImagePicker prefer="site" value={h.hero.mobileImageUrl} onChange={(v) => sec('hero')({ mobileImageUrl: v })} hint="عمودی؛ خالی = همان تصویر اصلی" /></F>
+      <F label="Label über dem Slogan" hint={PH} error={err('home.hero.eyebrow')}><Text value={h.hero.eyebrow} onChange={(v) => sec('hero')({ eyebrow: v })} /></F>
+      <F label="Text unter dem Slogan" error={err('home.hero.body')} className="sm:col-span-2"><Area value={h.hero.body} onChange={(v) => sec('hero')({ body: v })} max={300} /></F>
+      <F label="Erster Button" error={err('home.hero.primaryCta')}><Text value={h.hero.primaryCta} onChange={(v) => sec('hero')({ primaryCta: v })} max={30} /></F>
+      <F label="Zweiter Button" error={err('home.hero.secondaryCta')}><Text value={h.hero.secondaryCta} onChange={(v) => sec('hero')({ secondaryCta: v })} max={30} /></F>
+      <F label="Hauptbild" error={err('home.hero.imageUrl')} hint="Wird mit Partikeleffekt gezeigt; ein Motiv vor hellem, schlichtem Hintergrund wirkt am besten."><ImagePicker prefer="site" wide value={h.hero.imageUrl} onChange={(v) => sec('hero')({ imageUrl: v })} /></F>
+      <F label="Hauptbild auf dem Handy" error={err('home.hero.mobileImageUrl')}><ImagePicker prefer="site" value={h.hero.mobileImageUrl} onChange={(v) => sec('hero')({ mobileImageUrl: v })} hint="Hochformat; leer = gleiches Hauptbild" /></F>
     </>,
     intro: <>
-      <F label="برچسب" error={err('home.intro.eyebrow')}><Text value={h.intro.eyebrow} onChange={(v) => sec('intro')({ eyebrow: v })} /></F>
-      <F label="تیتر" hint={PH} error={err('home.intro.title')}><Text value={h.intro.title} onChange={(v) => sec('intro')({ title: v })} max={160} /></F>
-      <Cards className="sm:col-span-2" label="کارت‌های رشته (عکس عمودی)" items={h.intro.cards} max={8} image onChange={(cards) => sec('intro')({ cards })} errPrefix="home.intro.cards" err={err} />
+      <F label="Label" error={err('home.intro.eyebrow')}><Text value={h.intro.eyebrow} onChange={(v) => sec('intro')({ eyebrow: v })} /></F>
+      <F label="Überschrift" hint={PH} error={err('home.intro.title')}><Text value={h.intro.title} onChange={(v) => sec('intro')({ title: v })} max={160} /></F>
+      <Cards className="sm:col-span-2" label="Angebotskarten (Hochformatbilder)" items={h.intro.cards} max={8} image onChange={(cards) => sec('intro')({ cards })} errPrefix="home.intro.cards" err={err} />
     </>,
     why: <>
-      <F label="تیتر" error={err('home.why.title')}><Text value={h.why.title} onChange={(v) => sec('why')({ title: v })} max={120} /></F>
-      <F label="متن روی عکس (لینک به پکیج‌ها)" error={err('home.why.imageCta')}><Text value={h.why.imageCta} onChange={(v) => sec('why')({ imageCta: v })} max={60} /></F>
-      <F label="متن" hint={PH} className="sm:col-span-2" error={err('home.why.text')}><Area value={h.why.text} onChange={(v) => sec('why')({ text: v })} max={400} /></F>
-      <F label="عکس" error={err('home.why.imageUrl')}><ImagePicker prefer="site" value={h.why.imageUrl} onChange={(v) => sec('why')({ imageUrl: v })} /></F>
+      <F label="Überschrift" error={err('home.why.title')}><Text value={h.why.title} onChange={(v) => sec('why')({ title: v })} max={120} /></F>
+      <F label="Text auf dem Bild (Link zu den Paketen)" error={err('home.why.imageCta')}><Text value={h.why.imageCta} onChange={(v) => sec('why')({ imageCta: v })} max={60} /></F>
+      <F label="Text" hint={PH} className="sm:col-span-2" error={err('home.why.text')}><Area value={h.why.text} onChange={(v) => sec('why')({ text: v })} max={400} /></F>
+      <F label="Bild" error={err('home.why.imageUrl')}><ImagePicker prefer="site" value={h.why.imageUrl} onChange={(v) => sec('why')({ imageUrl: v })} /></F>
       <div className="grid content-start gap-4">
-        <F label="سال تأسیس (شمسی)" hint="برای عدد «سال سابقه»؛ خالی = نمایش داده نشود"><Text dir="ltr" value={h.why.foundedYear?.toString() ?? ''} onChange={(v) => sec('why')({ foundedYear: v.trim() ? Number(toLatinDigits(v)) || null : null })} max={4} placeholder="1395" /></F>
-        <F label="تعداد شاگرد فعال" hint="خالی = نمایش داده نشود"><Text dir="ltr" value={h.why.members?.toString() ?? ''} onChange={(v) => sec('why')({ members: v.trim() ? Number(toLatinDigits(v).replace(/[,٬]/g, '')) || null : null })} max={8} /></F>
+        <F label="Gründungsjahr" hint="Für die Zahl „Jahre Erfahrung“; leer = nicht anzeigen"><Text dir="ltr" value={h.why.foundedYear?.toString() ?? ''} onChange={(v) => sec('why')({ foundedYear: v.trim() ? Number(toLatinDigits(v)) || null : null })} max={4} placeholder="1395" /></F>
+        <F label="Anzahl aktiver Mitglieder" hint="Leer = nicht anzeigen"><Text dir="ltr" value={h.why.members?.toString() ?? ''} onChange={(v) => sec('why')({ members: v.trim() ? Number(toLatinDigits(v).replace(/[,٬]/g, '')) || null : null })} max={8} /></F>
       </div>
-      <Cards className="sm:col-span-2" label="بندها" items={h.why.points} max={6} text onChange={(points) => sec('why')({ points })} errPrefix="home.why.points" err={err} />
+      <Cards className="sm:col-span-2" label="Punkte" items={h.why.points} max={6} text onChange={(points) => sec('why')({ points })} errPrefix="home.why.points" err={err} />
     </>,
     video: <>
-      <F label="شعار روی ویدیو" error={err('home.video.title')}><Text value={h.video.title} onChange={(v) => sec('video')({ title: v })} max={80} /></F>
+      <F label="Slogan auf dem Video" error={err('home.video.title')}><Text value={h.video.title} onChange={(v) => sec('video')({ title: v })} max={80} /></F>
       <VideoField className="sm:col-span-2" value={h.video} onChange={(v) => sec('video')(v)} err={err('home.video.videoUrl')} />
-      <F label="عکس (برای حالت کم‌مصرف و اینترنت کند)" error={err('home.video.posterUrl')}><ImagePicker prefer="site" wide value={h.video.posterUrl} onChange={(v) => sec('video')({ posterUrl: v })} /></F>
-      <F label="عکس در موبایل" error={err('home.video.mobilePosterUrl')}><ImagePicker prefer="site" value={h.video.mobilePosterUrl ?? ''} onChange={(v) => sec('video')({ mobilePosterUrl: v })} hint="عمودی؛ خالی = همان عکس" /></F>
+      <F label="Bild (für Sparmodus und langsames Internet)" error={err('home.video.posterUrl')}><ImagePicker prefer="site" wide value={h.video.posterUrl} onChange={(v) => sec('video')({ posterUrl: v })} /></F>
+      <F label="Bild auf dem Handy" error={err('home.video.mobilePosterUrl')}><ImagePicker prefer="site" value={h.video.mobilePosterUrl ?? ''} onChange={(v) => sec('video')({ mobilePosterUrl: v })} hint="Hochformat; leer = gleiches Bild" /></F>
     </>,
     offer: <>
-      <F label="برچسب" error={err('home.offer.eyebrow')}><Text value={h.offer.eyebrow} onChange={(v) => sec('offer')({ eyebrow: v })} /></F>
-      <F label="تیتر" error={err('home.offer.title')}><Text value={h.offer.title} onChange={(v) => sec('offer')({ title: v })} max={120} /></F>
-      <Cards className="sm:col-span-2" label="خدمات" items={h.offer.items} max={12} text icon href onChange={(items) => sec('offer')({ items })} errPrefix="home.offer.items" err={err} />
+      <F label="Label" error={err('home.offer.eyebrow')}><Text value={h.offer.eyebrow} onChange={(v) => sec('offer')({ eyebrow: v })} /></F>
+      <F label="Überschrift" error={err('home.offer.title')}><Text value={h.offer.title} onChange={(v) => sec('offer')({ title: v })} max={120} /></F>
+      <Cards className="sm:col-span-2" label="Leistungen" items={h.offer.items} max={12} text icon href onChange={(items) => sec('offer')({ items })} errPrefix="home.offer.items" err={err} />
     </>,
     events: <>
-      <F label="برچسب" error={err('home.events.eyebrow')}><Text value={h.events.eyebrow} onChange={(v) => sec('events')({ eyebrow: v })} /></F>
-      <F label="تیتر" error={err('home.events.title')}><Text value={h.events.title} onChange={(v) => sec('events')({ title: v })} max={120} /></F>
-      <F label="متن (وقتی جشنوارهٔ فعالی نیست)" className="sm:col-span-2" error={err('home.events.text')}><Area value={h.events.text} onChange={(v) => sec('events')({ text: v })} max={400} /></F>
-      <F label="عکس اول"><ImagePicker prefer="site" value={h.events.imageUrl} onChange={(v) => sec('events')({ imageUrl: v })} /></F>
-      <F label="عکس دوم"><ImagePicker prefer="site" value={h.events.secondImageUrl} onChange={(v) => sec('events')({ secondImageUrl: v })} /></F>
+      <F label="Label" error={err('home.events.eyebrow')}><Text value={h.events.eyebrow} onChange={(v) => sec('events')({ eyebrow: v })} /></F>
+      <F label="Überschrift" error={err('home.events.title')}><Text value={h.events.title} onChange={(v) => sec('events')({ title: v })} max={120} /></F>
+      <F label="Text (wenn keine Aktion läuft)" className="sm:col-span-2" error={err('home.events.text')}><Area value={h.events.text} onChange={(v) => sec('events')({ text: v })} max={400} /></F>
+      <F label="Erstes Bild"><ImagePicker prefer="site" value={h.events.imageUrl} onChange={(v) => sec('events')({ imageUrl: v })} /></F>
+      <F label="Zweites Bild"><ImagePicker prefer="site" value={h.events.secondImageUrl} onChange={(v) => sec('events')({ secondImageUrl: v })} /></F>
     </>,
     gallery: <>
-      <F label="تیتر" hint={PH} error={err('home.gallery.title')} className="sm:col-span-2"><Text value={h.gallery.title} onChange={(v) => sec('gallery')({ title: v })} max={120} /></F>
-      <Cards className="sm:col-span-2" label="عکس‌ها (عنوان = توضیح عکس برای نابینایان)" items={h.gallery.images} max={24} image onChange={(images) => sec('gallery')({ images })} errPrefix="home.gallery.images" err={err} />
+      <F label="Überschrift" hint={PH} error={err('home.gallery.title')} className="sm:col-span-2"><Text value={h.gallery.title} onChange={(v) => sec('gallery')({ title: v })} max={120} /></F>
+      <Cards className="sm:col-span-2" label="Bilder (Titel = Bildbeschreibung für Screenreader)" items={h.gallery.images} max={24} image onChange={(images) => sec('gallery')({ images })} errPrefix="home.gallery.images" err={err} />
     </>,
   }
   const simple = (k: 'branches' | 'pricing' | 'shop' | 'coaches' | 'faq' | 'contact') => {
     const v = h[k] as SimpleSection
     return <>
-      <F label="برچسب" hint={PH} error={err(`home.${k}.eyebrow`)}><Text value={v.eyebrow} onChange={(x) => sec(k)({ eyebrow: x })} max={60} /></F>
-      <F label="تیتر" hint="با «؛» قسمت دوم تیتر رنگی می‌شود." error={err(`home.${k}.title`)}><Text value={v.title} onChange={(x) => sec(k)({ title: x })} max={120} /></F>
-      <F label="متن" className="sm:col-span-2" error={err(`home.${k}.text`)}><Area value={v.text} onChange={(x) => sec(k)({ text: x })} max={400} rows={2} /></F>
+      <F label="Label" hint={PH} error={err(`home.${k}.eyebrow`)}><Text value={v.eyebrow} onChange={(x) => sec(k)({ eyebrow: x })} max={60} /></F>
+      <F label="Überschrift" hint="Mit „;“ wird der zweite Teil der Überschrift farbig." error={err(`home.${k}.title`)}><Text value={v.title} onChange={(x) => sec(k)({ title: x })} max={120} /></F>
+      <F label="Text" className="sm:col-span-2" error={err(`home.${k}.text`)}><Area value={v.text} onChange={(x) => sec(k)({ text: x })} max={400} rows={2} /></F>
     </>
   }
 
-  const blocks: { key: string; label: string; idx?: number }[] = [{ key: 'hero', label: 'تصویر و شعار اول صفحه (همیشه اول)' },
+  const blocks: { key: string; label: string; idx?: number }[] = [{ key: 'hero', label: 'Bild und Slogan oben auf der Seite (immer zuerst)' },
     ...h.sections.map((s, idx) => ({ key: s.key, label: SECTION_LABEL[s.key], idx }))]
   return (
     <>
-      <Panel className="p-4 text-[13px] leading-6 text-rubber">ترتیب بخش‌ها را با فلش‌ها عوض کنید و با چشم روشن/خاموش کنید. روی هر بخش بزنید تا متن و عکس‌هایش باز شود.</Panel>
+      <Panel className="p-4 text-[13px] leading-6 text-rubber">Reihenfolge mit den Pfeilen ändern und mit dem Auge ein-/ausblenden. Auf einen Bereich tippen, um Texte und Bilder zu öffnen.</Panel>
       {blocks.map((b) => {
         const s = b.idx !== undefined ? h.sections[b.idx] : null
         const body = editors[b.key] ?? (['branches', 'pricing', 'shop', 'coaches', 'faq', 'contact'].includes(b.key) ? simple(b.key as 'faq') : null)
@@ -307,26 +307,26 @@ function HomeTab({ c, setHome, err, errKeys }: { c: SiteConfig; setHome: (v: Par
           <Panel key={b.key} className={cn('overflow-hidden', s && !s.enabled && 'opacity-60', hasErr && 'ring-2 ring-danger')}>
             <div className="flex items-center gap-2 p-3 ps-4">
               <button type="button" onClick={() => setOpen(isOpen ? '' : b.key)} aria-expanded={isOpen} className="min-w-0 flex-1 cursor-pointer text-start text-[15px] font-black text-chalk">
-                {b.label}{s && !s.enabled && <span className="ms-2 text-[12px] font-bold text-rubber">(خاموش)</span>}
+                {b.label}{s && !s.enabled && <span className="ms-2 text-[12px] font-bold text-rubber">(aus)</span>}
               </button>
               {s && <>
-                <IconBtn label="بالاتر" onClick={() => move(b.idx!, -1)} disabled={b.idx === 0}><ArrowUp className="size-4" /></IconBtn>
-                <IconBtn label="پایین‌تر" onClick={() => move(b.idx!, 1)} disabled={b.idx === h.sections.length - 1}><ArrowDown className="size-4" /></IconBtn>
-                <IconBtn label={s.enabled ? 'خاموش کردن' : 'روشن کردن'} onClick={() => toggle(b.idx!)}>{s.enabled ? <Eye className="size-4" /> : <EyeOff className="size-4" />}</IconBtn>
+                <IconBtn label="Nach oben" onClick={() => move(b.idx!, -1)} disabled={b.idx === 0}><ArrowUp className="size-4" /></IconBtn>
+                <IconBtn label="Nach unten" onClick={() => move(b.idx!, 1)} disabled={b.idx === h.sections.length - 1}><ArrowDown className="size-4" /></IconBtn>
+                <IconBtn label={s.enabled ? 'Ausblenden' : 'Einblenden'} onClick={() => toggle(b.idx!)}>{s.enabled ? <Eye className="size-4" /> : <EyeOff className="size-4" />}</IconBtn>
               </>}
             </div>
             {isOpen && body && <div className="grid gap-4 border-t border-steel-2 p-4 sm:grid-cols-2">{body}</div>}
           </Panel>
         )
       })}
-      <Card title="فوتر و خلاصه">
-        <F label="یک خط معرفی کوتاه" hint="کنار تعداد شعبه‌ها، مثل «سالن‌های جدای آقایان و بانوان»" error={err('home.footerNote')}><Text value={h.footerNote} onChange={(v) => setHome({ footerNote: v })} max={120} /></F>
+      <Card title="Footer und Kurzinfo">
+        <F label="Eine kurze Vorstellungszeile" hint="Neben der Filialanzahl, z. B. „getrennte Herren- und Damenbereiche“" error={err('home.footerNote')}><Text value={h.footerNote} onChange={(v) => setHome({ footerNote: v })} max={120} /></F>
       </Card>
     </>
   )
 }
 
-/** ویدیو: قالب / آپلود خود مالک / بدون ویدیو؛ بعد از آپلود هر ۴ ثانیه وضعیت بهینه‌سازی پرسیده می‌شود */
+/** Video: Vorlage / eigener Upload / kein Video; nach dem Upload wird alle 4 Sekunden der Optimierungsstatus abgefragt */
 function VideoField({ value, onChange, err, className }: { value: SiteConfig['home']['video']; onChange: (v: Partial<SiteConfig['home']['video']>) => void; err?: string; className?: string }) {
   const input = useRef<HTMLInputElement>(null)
   const [pct, setPct] = useState<number | null>(null)
@@ -335,7 +335,7 @@ function VideoField({ value, onChange, err, className }: { value: SiteConfig['ho
   const kind = !value.videoUrl ? 'none' : value.videoUrl.startsWith('/media/videos/') ? 'upload' : 'builtin'
   const pending = /^\/media\/videos\/([a-f0-9]{32})\.mp4$/.exec(value.videoUrl ?? '')?.[1]
 
-  // ویدیوی آپلودی که هنوز بهینه نشده (مثلاً صفحه دوباره باز شده): پیگیری ادامه پیدا کند
+  // Hochgeladenes, noch nicht optimiertes Video (z. B. Seite neu geöffnet): Abfrage fortsetzen
   useEffect(() => { if (pending && value.optimized === false && !job) setJob({ id: pending, state: 'optimizing' }) }, [pending]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (job?.state !== 'optimizing') return
@@ -368,31 +368,31 @@ function VideoField({ value, onChange, err, className }: { value: SiteConfig['ho
   return (
     <div className={cn('grid gap-3 rounded-[6px] border border-steel-2 bg-steel/50 p-4', className)}>
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-[13px] font-bold text-chalk">ویدیو</span>
-        <select value={kind} aria-label="ویدیو" onChange={(e) => onChange(e.target.value === 'none' ? { videoUrl: null } : e.target.value === 'builtin' ? { videoUrl: '/media/video/gym.mp4', optimized: true } : {})}
+        <span className="text-[13px] font-bold text-chalk">Video</span>
+        <select value={kind} aria-label="Video" onChange={(e) => onChange(e.target.value === 'none' ? { videoUrl: null } : e.target.value === 'builtin' ? { videoUrl: '/media/video/gym.mp4', optimized: true } : {})}
           className={cn(inputCls, 'h-10 w-auto cursor-pointer')}>
-          <option value="builtin">ویدیوی قالب</option>
-          {kind === 'upload' && <option value="upload">ویدیوی آپلودشده</option>}
-          <option value="none">بدون ویدیو (فقط عکس)</option>
+          <option value="builtin">Video der Vorlage</option>
+          {kind === 'upload' && <option value="upload">Hochgeladenes Video</option>}
+          <option value="none">Kein Video (nur Bild)</option>
         </select>
-        <Btn type="button" variant="dark" className="h-10" busy={pct !== null} onClick={() => input.current?.click()}>آپلود ویدیوی خودتان</Btn>
-        <input ref={input} type="file" accept="video/mp4,video/quicktime" className="sr-only" aria-label="فایل ویدیو"
+        <Btn type="button" variant="dark" className="h-10" busy={pct !== null} onClick={() => input.current?.click()}>Eigenes Video hochladen</Btn>
+        <input ref={input} type="file" accept="video/mp4,video/quicktime" className="sr-only" aria-label="Videodatei"
           onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
       </div>
-      <p className="text-[12px] leading-5 text-rubber">MP4 یا MOV، حداکثر ۸۰ مگابایت، ۶۰ ثانیه و 4K. سرور خودش نسخه‌های سبک برای گوشی، تبلت و کامپیوتر می‌سازد؛ صدا حذف می‌شود.</p>
+      <p className="text-[12px] leading-5 text-rubber">MP4 oder MOV, höchstens 80 MB, 60 Sekunden und 4K. Der Server erzeugt leichte Versionen für Handy, Tablet und Computer; der Ton wird entfernt.</p>
       {pct !== null && (
         <div className="grid gap-1" role="status">
           <div className="h-2 overflow-hidden rounded-full bg-steel-2"><div className="h-full bg-plate transition-[width]" style={{ width: `${pct}%` }} /></div>
-          <span className="text-[12px] text-rubber">در حال آپلود… {pct}٪</span>
+          <span className="text-[12px] text-rubber">Wird hochgeladen… {pct}%</span>
         </div>
       )}
-      {job?.state === 'optimizing' && <Notice tone="info">در حال بهینه‌سازی… (چند دقیقه؛ می‌توانید ذخیره کنید و صفحه را ببندید)</Notice>}
-      {job?.state === 'ready' && <Notice tone="ok">ویدیو آماده است. برای اعمال روی سایت «ذخیره» را بزنید.</Notice>}
+      {job?.state === 'optimizing' && <Notice tone="info">Wird optimiert… (einige Minuten; Sie können speichern und die Seite schließen)</Notice>}
+      {job?.state === 'ready' && <Notice tone="ok">Das Video ist bereit. Zum Übernehmen „Speichern“ drücken.</Notice>}
       {job?.state === 'failed' && <Notice tone="err">{job.msg}</Notice>}
       {(upErr || err) && <Notice tone="err">{upErr ?? err}</Notice>}
       {value.videoUrl && (
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="نحوهٔ پخش">
-          {([['scrub', 'با اسکرول جلو و عقب برود'], ['loop', 'خودکار و تکراری پخش شود']] as const).map(([k, l]) => (
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Wiedergabe">
+          {([['scrub', 'Beim Scrollen vor- und zurücklaufen'], ['loop', 'Automatisch in Schleife abspielen']] as const).map(([k, l]) => (
             <button key={k} type="button" role="radio" aria-checked={(value.mode ?? 'scrub') === k} onClick={() => onChange({ mode: k })}
               className={cn('h-10 cursor-pointer rounded-full border-2 px-4 text-[13px] font-bold', (value.mode ?? 'scrub') === k ? 'border-plate bg-plate text-white' : 'border-steel-2 bg-white text-chalk')}>{l}</button>
           ))}
@@ -407,7 +407,7 @@ function IconBtn({ label, onClick, disabled, children }: { label: string; onClic
     className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full text-chalk hover:bg-steel disabled:cursor-default disabled:opacity-30">{children}</button>
 }
 
-/** فهرست کارت‌ها: عنوان + (متن، عکس، آیکن، لینک بسته به بخش) */
+/** Kartenliste: Titel + (Text, Bild, Icon, Link je nach Bereich) */
 function Cards({ label, items, onChange, max, image, text, icon, href, className, errPrefix, err }: {
   label: string; items: CardItem[]; onChange: (v: CardItem[]) => void; max: number; image?: boolean; text?: boolean; icon?: boolean; href?: boolean
   className?: string; errPrefix: string; err: Err
@@ -420,45 +420,45 @@ function Cards({ label, items, onChange, max, image, text, icon, href, className
       {items.map((it, i) => (
         <div key={i} className="grid gap-3 rounded-[6px] border border-steel-2 bg-steel/50 p-3 sm:grid-cols-[1fr_auto]">
           <div className="grid gap-3 sm:grid-cols-2">
-            <F label="عنوان" error={err(`${errPrefix}[${i}].title`)}><Text value={it.title} onChange={(v) => up(i, { title: v })} max={60} /></F>
+            <F label="Titel" error={err(`${errPrefix}[${i}].title`)}><Text value={it.title} onChange={(v) => up(i, { title: v })} max={60} /></F>
             {icon && (
-              <F label="آیکن">
+              <F label="Icon">
                 <select value={it.icon ?? 'dumbbell'} onChange={(e) => up(i, { icon: e.target.value })} className={cn(inputCls, 'h-11 cursor-pointer')}>
                   {Object.entries(ICONS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
               </F>
             )}
-            {text && <F label="توضیح" className={icon ? '' : 'sm:col-span-1'} error={err(`${errPrefix}[${i}].text`)}><Text value={it.text} onChange={(v) => up(i, { text: v })} max={200} /></F>}
+            {text && <F label="Beschreibung" className={icon ? '' : 'sm:col-span-1'} error={err(`${errPrefix}[${i}].text`)}><Text value={it.text} onChange={(v) => up(i, { text: v })} max={200} /></F>}
             {href && (
-              <F label="لینک">
+              <F label="Link">
                 <select value={it.href ?? '#packages'} onChange={(e) => up(i, { href: e.target.value })} className={cn(inputCls, 'h-11 cursor-pointer')}>
                   {HREFS.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </F>
             )}
-            {image && <F label="عکس" error={err(`${errPrefix}[${i}].imageUrl`)}><ImagePicker prefer="site" value={it.imageUrl ?? ''} onChange={(v) => up(i, { imageUrl: v })} /></F>}
+            {image && <F label="Bild" error={err(`${errPrefix}[${i}].imageUrl`)}><ImagePicker prefer="site" value={it.imageUrl ?? ''} onChange={(v) => up(i, { imageUrl: v })} /></F>}
           </div>
           <div className="flex gap-1 sm:flex-col">
-            <IconBtn label="بالاتر" onClick={() => move(i, -1)} disabled={i === 0}><ArrowUp className="size-4" /></IconBtn>
-            <IconBtn label="پایین‌تر" onClick={() => move(i, 1)} disabled={i === items.length - 1}><ArrowDown className="size-4" /></IconBtn>
-            <IconBtn label="حذف" onClick={() => onChange(items.filter((_, k) => k !== i))}><Trash2 className="size-4 text-danger" /></IconBtn>
+            <IconBtn label="Nach oben" onClick={() => move(i, -1)} disabled={i === 0}><ArrowUp className="size-4" /></IconBtn>
+            <IconBtn label="Nach unten" onClick={() => move(i, 1)} disabled={i === items.length - 1}><ArrowDown className="size-4" /></IconBtn>
+            <IconBtn label="Löschen" onClick={() => onChange(items.filter((_, k) => k !== i))}><Trash2 className="size-4 text-danger" /></IconBtn>
           </div>
         </div>
       ))}
       {items.length < max && (
         <button type="button" onClick={() => onChange([...items, { title: '', icon: icon ? 'dumbbell' : null, href: href ? '#packages' : null }])}
           className="inline-flex h-10 w-fit cursor-pointer items-center gap-1.5 rounded-[3px] border-2 border-dashed border-steel-2 px-4 text-[13px] font-bold text-chalk hover:border-chalk">
-          <Plus className="size-4" aria-hidden />افزودن
+          <Plus className="size-4" aria-hidden />Hinzufügen
         </button>
       )}
     </div>
   )
 }
 
-// ================================================================ صفحه‌های قانونی
+// ================================================================ Rechtsseiten
 function LegalTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   const [doc, setDoc] = useState<keyof SiteConfig['legal']>('about')
-  const DOCS: [keyof SiteConfig['legal'], string][] = [['about', 'درباره ما'], ['terms', 'قوانین و مقررات'], ['privacy', 'حریم خصوصی'], ['refund', 'لغو و بازگشت وجه']]
+  const DOCS: [keyof SiteConfig['legal'], string][] = [['about', 'Über uns'], ['terms', 'AGB'], ['privacy', 'Datenschutz'], ['refund', 'Kündigung und Erstattung']]
   const todo = useMemo(() => (c.legal[doc].match(/\[\[[^\]]*\]\]/g) ?? []).length, [c.legal, doc])
   return (
     <Panel className="p-5">
@@ -471,12 +471,12 @@ function LegalTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
         })}
       </div>
       <p className="mb-3 text-[13px] leading-6 text-rubber">
-        خطی که با <b dir="ltr">##</b> شروع شود تیتر است و با <b dir="ltr">-</b> بند فهرست. هر چه بین <b dir="ltr">[[ ]]</b> باشد زرد نشان داده می‌شود تا تکمیلش کنید{todo > 0 && <> — <b className="text-[#7a5600]">{todo} جای خالی مانده</b></>}.
-        متن نهایی را مشاور حقوقی تأیید کند.
+        Eine Zeile, die mit <b dir="ltr">##</b> beginnt, ist eine Überschrift, mit <b dir="ltr">-</b> ein Listenpunkt. Alles zwischen <b dir="ltr">[[ ]]</b> wird gelb markiert, damit Sie es ergänzen{todo > 0 && <> — <b className="text-[#7a5600]">{todo} Lücken offen</b></>}.
+        Den finalen Text sollte eine Rechtsberatung prüfen.
       </p>
       <div className="grid gap-4 lg:grid-cols-2">
-        <F label="متن" error={err(`legal.${doc}`)}><Area value={c.legal[doc]} onChange={(v) => set('legal', { [doc]: v })} rows={22} max={12000} /></F>
-        <div className="grid content-start gap-1 text-[13px] font-bold text-chalk">پیش‌نمایش
+        <F label="Text" error={err(`legal.${doc}`)}><Area value={c.legal[doc]} onChange={(v) => set('legal', { [doc]: v })} rows={22} max={12000} /></F>
+        <div className="grid content-start gap-1 text-[13px] font-bold text-chalk">Vorschau
           <article className="max-h-[560px] overflow-y-auto rounded-[6px] border border-steel-2 bg-white p-4 text-[14px] font-normal leading-7 [&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:text-[16px] [&_h2]:font-black [&_li]:mb-1 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5">
             <LiteDoc text={c.legal[doc]} />
           </article>
@@ -486,17 +486,17 @@ function LegalTab({ c, set, err }: { c: SiteConfig; set: SetFn; err: Err }) {
   )
 }
 
-// ================================================================ بخش‌های سایت (ماژول‌ها)
+// ================================================================ Bereiche der Seite (Module)
 function ModulesTab({ c, set }: { c: SiteConfig; set: SetFn }) {
   const m = c.modules
   const rows: [keyof SiteConfig['modules'], string, string][] = [
-    ['shop', 'فروشگاه آنلاین', 'صفحهٔ فروشگاه، سبد خرید و بخش فروشگاه در صفحهٔ اصلی'],
-    ['canteen', 'منوی بوفه با QR', 'سفارش از روی میز با اسکن QR هر شعبه'],
-    ['wallet', 'کیف پول', 'شارژ و پرداخت با کیف پول'],
-    ['festival', 'جشنواره و شمارش معکوس', 'نوار بالای سایت و صفحهٔ جشنواره'],
-    ['coaches', 'معرفی مربیان', 'بخش مربیان در صفحهٔ اصلی'],
-    ['consultation', 'فرم مشاورهٔ رایگان', 'فرم ثبت شماره برای تماس مشاور'],
-    ['cityMap', 'نقشهٔ شماتیک شعبه‌ها', 'با سه شعبه یا بیشتر، شعبه‌ها روی نقشهٔ شهر؛ خاموش = فهرست ساده'],
+    ['shop', 'Online-Shop', 'Shopseite, Warenkorb und Shopbereich auf der Startseite'],
+    ['canteen', 'Bistro-Karte mit QR', 'Bestellung am Tisch per QR-Scan in jeder Filiale'],
+    ['wallet', 'Guthaben', 'Aufladen und Bezahlen mit Guthaben'],
+    ['festival', 'Aktion und Countdown', 'Leiste oben auf der Seite und Aktionsseite'],
+    ['coaches', 'Trainervorstellung', 'Trainerbereich auf der Startseite'],
+    ['consultation', 'Formular für kostenlose Beratung', 'Formular zum Hinterlassen der Nummer für einen Rückruf'],
+    ['cityMap', 'Schematische Filialkarte', 'Ab drei Filialen erscheinen die Filialen auf einer Stadtkarte; aus = einfache Liste'],
   ]
   return (
     <Panel className="divide-y divide-steel-2">
@@ -510,23 +510,23 @@ function ModulesTab({ c, set }: { c: SiteConfig; set: SetFn }) {
   )
 }
 
-// ================================================================ بستهٔ محتوا
+// ================================================================ Inhaltspaket
 function PackageTab() {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   return (
     <Panel className="p-5">
-      <h2 className="text-[17px] font-black text-chalk">خروجی کامل محتوای سایت</h2>
+      <h2 className="text-[17px] font-black text-chalk">Kompletter Export der Seiteninhalte</h2>
       <p className="mt-2 max-w-2xl text-[14px] leading-7 text-rubber">
-        یک فایل zip با شعبه‌ها، پکیج‌ها، مربیان، سؤالات، قرارداد، کالاها، منوی بوفه، همهٔ تنظیمات این صفحه و عکس‌های آپلودشده.
-        هیچ اطلاعاتی از اعضا، پرداخت‌ها یا کارکنان در آن نیست. با این فایل یک نصب تازه دقیقاً با همین محتوا بالا می‌آید
-        (<b dir="ltr">Setup__Mode=Content</b> و <b dir="ltr">Setup__ContentFile</b>)؛ برای پشتیبان‌گیری از محتوا هم مناسب است.
+        Eine zip-Datei mit Filialen, Paketen, Trainern, FAQ, Vertrag, Produkten, Bistro-Karte, allen Einstellungen dieser Seite und hochgeladenen Bildern.
+        Keine Daten von Mitgliedern, Zahlungen oder Mitarbeitern enthalten. Mit dieser Datei startet eine neue Installation mit genau diesem Inhalt
+        (<b dir="ltr">Setup__Mode=Content</b> und <b dir="ltr">Setup__ContentFile</b>); auch als Inhaltssicherung geeignet.
       </p>
       {err && <Notice tone="err" className="mt-3">{err}</Notice>}
       <Btn className="mt-4" busy={busy} onClick={async () => {
         setBusy(true); setErr(null)
         try { await downloadBlob(() => panelApi.exportContent(), `site-content-${new Date().toISOString().slice(0, 10)}.zip`) } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
-      }}><Download className="size-4" aria-hidden />دانلود بستهٔ محتوا</Btn>
+      }}><Download className="size-4" aria-hidden />Inhaltspaket herunterladen</Btn>
     </Panel>
   )
 }

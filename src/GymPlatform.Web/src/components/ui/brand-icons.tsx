@@ -1,4 +1,4 @@
-// آیکون‌های برند (نسخهٔ جدید lucide-react آیکون برندها را حذف کرده است) — طرح خطی هم‌سبک lucide
+// Markenicons (das neue lucide-react hat sie entfernt) — Linienstil wie lucide
 import type { SVGProps } from 'react'
 
 type P = SVGProps<SVGSVGElement> & { size?: number }

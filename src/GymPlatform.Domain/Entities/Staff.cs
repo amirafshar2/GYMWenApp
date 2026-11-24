@@ -2,7 +2,7 @@ using GymPlatform.Domain.Enums;
 
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>شعبه‌هایی که یک کارمند (مدیر شعبه، پذیرش، بوفه، فروشگاه) به آن‌ها دسترسی دارد. مدیر کل به همه دسترسی دارد.</summary>
+/// <summary>Filialen, auf die ein Mitarbeiter (Filialleitung, Empfang, Bistro, Shop) Zugriff hat. Der Gesamtadmin hat Zugriff auf alle.</summary>
 public class StaffBranch
 {
     public int UserId { get; set; }
@@ -11,7 +11,7 @@ public class StaffBranch
     public Branch? Branch { get; set; }
 }
 
-/// <summary>شاگردِ یک مربی</summary>
+/// <summary>Schüler eines Trainers</summary>
 public class CoachAssignment : BaseEntity
 {
     public int CoachId { get; set; }
@@ -21,21 +21,21 @@ public class CoachAssignment : BaseEntity
     public bool IsActive { get; set; } = true;
 }
 
-/// <summary>برنامهٔ تمرینی و غذایی که مربی برای شاگرد می‌نویسد (فقط آخرین برنامهٔ فعال نمایش داده می‌شود).</summary>
+/// <summary>Trainings- und Ernährungsplan, den der Trainer für den Schüler schreibt (nur der letzte aktive Plan wird angezeigt).</summary>
 public class TrainingPlan : BaseEntity
 {
     public int MemberUserId { get; set; }
     public int CoachId { get; set; }
     public Coach? Coach { get; set; }
     public required string Title { get; set; }
-    /// <summary>روزها به‌صورت JSON: [{ "day": "شنبه", "focus": "...", "items": ["..."] }]</summary>
+    /// <summary>Tage als JSON: [{ "day": "Montag", "focus": "...", "items": ["..."] }]</summary>
     public required string DaysJson { get; set; }
     public string? Nutrition { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
-/// <summary>وزن و اندازه‌ها (عضو یا مربی ثبت می‌کند)</summary>
+/// <summary>Gewicht und Maße (vom Mitglied oder Trainer erfasst)</summary>
 public class BodyMetric : BaseEntity
 {
     public int UserId { get; set; }
@@ -46,16 +46,16 @@ public class BodyMetric : BaseEntity
     public int? RecordedByUserId { get; set; }
 }
 
-/// <summary>صف و گزارش پیامک‌ها. DedupeKey یکتا جلوی ارسال دوبارهٔ یک یادآوری را می‌گیرد.</summary>
+/// <summary>Warteschlange und Protokoll der SMS. Ein eindeutiger DedupeKey verhindert doppelte Erinnerungen.</summary>
 public class SmsMessage : BaseEntity
 {
     public int? UserId { get; set; }
     public required string Phone { get; set; }
     public SmsKind Kind { get; set; }
     public required string Template { get; set; }
-    /// <summary>مقادیر الگو (JSON آرایه)</summary>
+    /// <summary>Vorlagenwerte (JSON-Array)</summary>
     public required string TokensJson { get; set; }
-    /// <summary>متن کامل برای نمایش در گزارش</summary>
+    /// <summary>Volltext zur Anzeige im Bericht</summary>
     public required string Preview { get; set; }
     public SmsStatus Status { get; set; } = SmsStatus.Queued;
     public int Attempts { get; set; }

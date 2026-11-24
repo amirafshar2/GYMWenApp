@@ -1,6 +1,6 @@
 namespace GymPlatform.Api.Auth;
 
-/// <summary>کوکی توکن تازه‌سازی: HttpOnly، SameSite=Strict، Secure در production، محدود به مسیر auth.</summary>
+/// <summary>Cookie des Refresh-Tokens: HttpOnly, SameSite=Strict, Secure in Production, auf den Auth-Pfad beschränkt.</summary>
 public static class RefreshCookie
 {
     public const string Path = "/api/v1/auth";

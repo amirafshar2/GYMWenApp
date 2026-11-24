@@ -1,42 +1,42 @@
 import { test, expect } from '@playwright/test'
 
-test('هیرو شعار برند را نشان می‌دهد و صفحه RTL است', async ({ page }) => {
+test('Hero zeigt den Markenslogan und die Seite ist LTR', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
-  await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('تمرین کن')
+  await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('Trainiere')
 })
 
-test('نزدیک‌ترین شعبه با موقعیت کاربر پیدا می‌شود', async ({ page, context }) => {
+test('Nächstes Studio wird über den Standort gefunden', async ({ page, context }) => {
   await context.grantPermissions(['geolocation'])
-  await context.setGeolocation({ latitude: 35.9236, longitude: 50.9113 }) // کنار شعبهٔ شهرک سرو (دادهٔ نمایشی)
+  await context.setGeolocation({ latitude: 48.7725, longitude: 9.1535 }) // neben der Filiale West (Demodaten)
   await page.goto('/branches')
-  await page.getByRole('button', { name: 'نزدیک‌ترین شعبه به من' }).click()
-  await expect(page.getByText('نزدیک‌ترین،').first()).toBeVisible()
-  await expect(page.locator('#branch-sarv-women')).toContainText('نزدیک‌ترین')
+  await page.getByRole('button', { name: 'Nächstes Studio finden' }).click()
+  await expect(page.getByText('Am nächsten,').first()).toBeVisible()
+  await expect(page.locator('#branch-sarv-women')).toContainText('Am nächsten')
 })
 
-test('فیلتر بانوان فقط شعبه‌های دارای سالن بانوان را نشان می‌دهد', async ({ page }) => {
+test('Damenfilter zeigt nur Filialen mit Damenbereich', async ({ page }) => {
   await page.goto('/branches')
-  await page.getByRole('radio', { name: 'بانوان' }).click()
+  await page.getByRole('radio', { name: 'Damen' }).click()
   await expect(page.locator('#branch-bahar-men')).toHaveCount(0)
   await expect(page.locator('#branch-bahar-women')).toBeVisible()
 })
 
-test('پکیج‌ها با تخفیف جشنواره نمایش داده می‌شوند', async ({ page }) => {
+test('Pakete werden mit Aktionsrabatt angezeigt', async ({ page }) => {
   await page.goto('/packages')
-  await expect(page.getByRole('heading', { name: /دوازده‌ماهه/ })).toBeVisible()
-  await expect(page.getByText('٪ تخفیف جشنواره').first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: /12 Monate/ })).toBeVisible()
+  await expect(page.getByText('% Aktionsrabatt').first()).toBeVisible()
 })
 
-test('فرم مشاوره خطای شمارهٔ نامعتبر را نشان می‌دهد', async ({ page }) => {
+test('Beratungsformular zeigt Fehler bei ungültiger Nummer', async ({ page }) => {
   await page.goto('/#consult')
-  await page.locator('#consult').getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
-  await page.locator('#consult').getByLabel('شمارهٔ موبایل').fill('12345')
-  await page.getByRole('button', { name: 'ثبت درخواست مشاوره' }).click()
-  await expect(page.getByRole('alert').filter({ hasText: 'شمارهٔ موبایل را مثل' })).toBeVisible()
+  await page.locator('#consult').getByLabel('Vor- und Nachname').fill('Sarah Becker')
+  await page.locator('#consult').getByLabel('Handynummer').fill('12345')
+  await page.getByRole('button', { name: 'Beratung anfragen' }).click()
+  await expect(page.getByRole('alert').filter({ hasText: 'Bitte die Handynummer im Format' })).toBeVisible()
 })
 
-test('هدرهای امنیتی روی پاسخ‌ها هست', async ({ request }) => {
+test('Sicherheitsheader sind in den Antworten vorhanden', async ({ request }) => {
   const res = await request.get('/api/v1/branches')
   expect(res.headers()['content-security-policy']).toContain("default-src 'self'")
   expect(res.headers()['x-content-type-options']).toBe('nosniff')

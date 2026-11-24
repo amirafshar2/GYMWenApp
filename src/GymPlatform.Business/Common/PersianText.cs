@@ -4,7 +4,7 @@ namespace GymPlatform.Business.Common;
 
 public static class PersianText
 {
-    /// <summary>ارقام فارسی و عربی را به لاتین تبدیل می‌کند و فاصله/خط تیره را حذف می‌کند.</summary>
+    /// <summary>Wandelt persische und arabische Ziffern in lateinische um und entfernt Leerzeichen/Bindestriche.</summary>
     public static string NormalizeDigits(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return string.Empty;
@@ -19,18 +19,18 @@ public static class PersianText
         return sb.ToString();
     }
 
-    /// <summary>شمارهٔ موبایل ایران را به قالب 09xxxxxxxxx تبدیل می‌کند (پشتیبانی از +98 و 0098).</summary>
+    /// <summary>Wandelt eine deutsche Handynummer ins Format 01xxxxxxxxx um (unterstützt +49, 0049 und 49).</summary>
     public static string NormalizeMobile(string? input)
     {
-        var s = NormalizeDigits(input);
-        if (s.StartsWith("+98")) s = "0" + s[3..];
-        else if (s.StartsWith("0098")) s = "0" + s[4..];
-        else if (s.StartsWith("98") && s.Length == 12) s = "0" + s[2..];
-        else if (s.StartsWith('9') && s.Length == 10) s = "0" + s;
+        var s = NormalizeDigits(input).Replace("/", "").Replace("(", "").Replace(")", "");
+        if (s.StartsWith("+49")) s = "0" + s[3..];
+        else if (s.StartsWith("0049")) s = "0" + s[4..];
+        else if (s.StartsWith("49") && s.Length >= 12) s = "0" + s[2..];
+        else if (s.StartsWith('1') && s.Length is 10 or 11) s = "0" + s;
         return s;
     }
 
-    /// <summary>متن کاربر را مرتب می‌کند: ی/ک عربی → فارسی، حذف کاراکترهای کنترلی.</summary>
+    /// <summary>Bereinigt Benutzertext: arabisches Ya/Kaf → persisch, entfernt Steuerzeichen.</summary>
     public static string? CleanText(string? input)
     {
         if (input is null) return null;
@@ -41,10 +41,18 @@ public static class PersianText
 
     public static string ToLatinDigits(string? input) => NormalizeDigits(input);
 
+    /// <summary>Deutsche Handynummer: 015x/016x/017x, insgesamt 11 oder 12 Ziffern.</summary>
     public static bool IsValidMobile(string normalized) =>
-        normalized.Length == 11 && normalized.StartsWith("09") && normalized.All(char.IsAsciiDigit);
+        normalized.Length is 11 or 12 && normalized.StartsWith("01") && normalized[2] is >= '5' and <= '7' && normalized.All(char.IsAsciiDigit);
 
-    /// <summary>ارقام لاتین را فارسی می‌کند (برای پیام‌های کاربر).</summary>
-    public static string FaDigits(string input) =>
-        new(input.Select(c => c is >= '0' and <= '9' ? (char)('۰' + (c - '0')) : c).ToArray());
+    /// <summary>Lateinische Ziffern bleiben unverändert (früher: Umwandlung in persische Ziffern).</summary>
+    public static string FaDigits(string input) => input;
+
+    private static readonly System.Globalization.CultureInfo De = System.Globalization.CultureInfo.GetCultureInfo("de-DE");
+
+    /// <summary>Betrag in Cent → „1.234,50 €“.</summary>
+    public static string Euro(long cents) => (cents / 100m).ToString("N2", De) + " €";
+
+    /// <summary>Ganze Zahl mit deutschem Tausendertrennzeichen.</summary>
+    public static string Num(long n) => n.ToString("N0", De);
 }

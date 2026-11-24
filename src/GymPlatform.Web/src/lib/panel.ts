@@ -1,7 +1,7 @@
 import type { SiteConfig } from './site'
 import { currentAccessToken, refreshSession, request, type Membership } from './api'
 
-// ---------------- انواع (هم‌نام با DTOهای سرور)
+// ---------------- Typen (gleichnamig mit den Server-DTOs)
 export interface BranchRef { id: number; slug: string; name: string }
 export interface PanelMe { userId: number; fullName: string | null; roles: string[]; branches: BranchRef[]; coachId: number | null }
 export interface Split { membership: number; shop: number; canteen: number; total: number }
@@ -89,22 +89,22 @@ export const panelApi = {
   me: () => get<PanelMe>(`${P}/me`),
   dashboard: (branch?: string, days = 30) => get<Dashboard>(`${P}/dashboard${q({ branch, days })}`),
   exportDashboard: (branch?: string, days = 30) => request<Blob>('GET', `${P}/dashboard/export${q({ branch, days })}`, { auth: true, raw: true }),
-  // پذیرش
+  // Empfang
   search: (text: string) => get<MemberRow[]>(`${P}/reception/members${q({ q: text })}`),
   member: (id: number) => get<MemberSummary>(`${P}/reception/members/${id}`),
   checkIn: (branchSlug: string, credential: string) => send<AccessResult>('POST', `${P}/reception/checkins`, { branchSlug, credential }),
-  /** ورود دستی از پروندهٔ عضو؛ توکن کارت فقط سمت سرور خوانده می‌شود */
+  /** Manueller Check-in aus der Mitgliederakte; das Karten-Token wird nur serverseitig gelesen */
   checkInMember: (branchSlug: string, userId: number) => send<AccessResult>('POST', `${P}/reception/checkins`, { branchSlug, userId }),
   today: (branch: string) => get<CheckInRow[]>(`${P}/reception/checkins${q({ branch })}`),
   assignCredential: (userId: number, body: { type: string; value: string; label?: string }) => send<Credential>('POST', `/staff/members/${userId}/credentials`, body),
   revokeCredential: (userId: number, id: number) => send<null>('DELETE', `/staff/members/${userId}/credentials/${id}`),
-  // مربی
+  // Trainer
   trainees: () => get<TraineeRow[]>(`${P}/coach/trainees`),
   addTrainee: (phone: string) => send<TraineeRow>('POST', `${P}/coach/trainees`, { phone }),
   trainee: (id: number) => get<TraineeDetail>(`${P}/coach/trainees/${id}`),
   savePlan: (id: number, body: { title: string; days: PlanDay[]; nutrition: string | null }) => send<TrainingPlan>('PUT', `${P}/coach/trainees/${id}/plan`, body),
   addMetric: (id: number, body: { weightKg: number; bodyFatPercent?: number | null; waistCm?: number | null }) => send<BodyMetric>('POST', `${P}/coach/trainees/${id}/metrics`, body),
-  // مدیریت
+  // Verwaltung
   packages: () => get<AdminPackage[]>(`${A}/packages`),
   updatePackage: (id: number, body: { priceToman: number; isActive: boolean; isFeatured: boolean; tagline: string | null }) => send<AdminPackage>('PUT', `${A}/packages/${id}`, body),
   campaigns: () => get<AdminCampaign[]>(`${A}/campaigns`),
@@ -134,7 +134,7 @@ export const panelApi = {
   saveCoach: (id: number | null, body: SaveCoach) => send<AdminCoach>(id ? 'PUT' : 'POST', id ? `${A}/coaches/${id}` : `${A}/coaches`, body),
   deleteCoach: (id: number) => send<null>('DELETE', `${A}/coaches/${id}`),
   images: () => get<ImageLibrary>(`${A}/images`),
-  // تنظیمات سایت و دستیار راه‌اندازی
+  // Website-Einstellungen und Einrichtungsassistent
   site: () => get<SiteConfig & { setup: unknown }>(`${A}/site`),
   saveSite: (body: SiteConfig) => send<SiteConfig>('PUT', `${A}/site`, body),
   setup: () => get<SetupStatus>(`${A}/setup`),
@@ -147,7 +147,7 @@ export const panelApi = {
   faq: () => get<AdminFaq[]>(`${A}/faq`),
   saveFaq: (id: number | null, body: { question: string; answer: string; sortOrder?: number }) => send<AdminFaq>(id ? 'PUT' : 'POST', id ? `${A}/faq/${id}` : `${A}/faq`, body),
   deleteFaq: (id: number) => send<null>('DELETE', `${A}/faq/${id}`),
-  /** آپلود عکس (JPG/PNG/WebP تا ۲ مگابایت)؛ مسیر عکس را برمی‌گرداند */
+  /** Bild-Upload (JPG/PNG/WebP bis 2 MB); gibt den Bildpfad zurück */
   uploadImage: async (file: File): Promise<string> => {
     const send = () => {
       const fd = new FormData(); fd.append('file', file)
@@ -157,10 +157,10 @@ export const panelApi = {
     let res = await send()
     if (res.status === 401 && await refreshSession()) res = await send()
     const body = await res.json().catch(() => ({})) as { path?: string; title?: string }
-    if (!res.ok || !body.path) throw new Error(body.title ?? 'آپلود عکس انجام نشد.')
+    if (!res.ok || !body.path) throw new Error(body.title ?? 'Bild-Upload fehlgeschlagen.')
     return body.path
   },
-  /** آپلود ویدیو (MP4/MOV تا ۸۰ مگابایت) با درصد پیشرفت؛ بهینه‌سازی بعدش در سرور انجام می‌شود */
+  /** Video-Upload (MP4/MOV bis 80 MB) mit Fortschritt; die Optimierung läuft danach auf dem Server */
   uploadVideo: async (file: File, onProgress: (pct: number) => void): Promise<{ url: string; video: string; optimizing: boolean }> => {
     const once = () => new Promise<{ status: number; body: { url?: string; video?: string; optimizing?: boolean; title?: string } }>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
@@ -170,12 +170,12 @@ export const panelApi = {
       if (t) xhr.setRequestHeader('Authorization', `Bearer ${t}`)
       xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100)) }
       xhr.onload = () => { let body = {}; try { body = JSON.parse(xhr.responseText) } catch { /* */ } resolve({ status: xhr.status, body }) }
-      xhr.onerror = () => reject(new Error('ارتباط قطع شد؛ دوباره امتحان کنید.'))
+      xhr.onerror = () => reject(new Error('Verbindung unterbrochen; bitte erneut versuchen.'))
       const fd = new FormData(); fd.append('file', file); xhr.send(fd)
     })
     let r = await once()
     if (r.status === 401 && await refreshSession()) r = await once()
-    if (r.status !== 201 || !r.body.url) throw new Error(r.body.title ?? (r.status === 413 ? 'حجم ویدیو حداکثر ۸۰ مگابایت باشد.' : 'آپلود ویدیو انجام نشد.'))
+    if (r.status !== 201 || !r.body.url) throw new Error(r.body.title ?? (r.status === 413 ? 'Das Video darf höchstens 80 MB groß sein.' : 'Video-Upload fehlgeschlagen.'))
     return r.body as { url: string; video: string; optimizing: boolean }
   },
   videoStatus: (id: string) => get<{ ready: boolean; poster: string | null; failed: string | null }>(`${A}/uploads/${id}/status`),
@@ -195,7 +195,7 @@ export const myCoachingApi = {
 }
 
 export const ROLE_LABEL: Record<string, string> = {
-  SuperAdmin: 'مدیر کل', BranchManager: 'مدیر شعبه', Reception: 'پذیرش', Coach: 'مربی', CanteenStaff: 'بوفه', ShopStaff: 'فروشگاه',
+  SuperAdmin: 'Gesamtadmin', BranchManager: 'Filialleitung', Reception: 'Empfang', Coach: 'Trainer', CanteenStaff: 'Bistro', ShopStaff: 'Shop',
 }
 export const STAFF_ROLES = Object.keys(ROLE_LABEL)
 export const can = (me: PanelMe | null | undefined, ...roles: string[]) => !!me && (me.roles.includes('SuperAdmin') || roles.some((r) => me.roles.includes(r)))

@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 /**
- * ویدیوی اسکرولی روی دستگاه‌های مختلف، با CPU کندشده:
- * فاصلهٔ زمان هدف (از موقعیت اسکرول) تا currentTime ویدیو باید کمتر از ۰٫۳ ثانیه بماند.
- * Chromium تست H.264 ندارد؛ فایل‌های mp4 با route به VP9 (همان GOP=4) جایگزین می‌شوند.
+ * Scroll-Video auf verschiedenen Geräten, mit gedrosselter CPU:
+ * Der Abstand der Zielzeit (aus der Scrollposition) zu currentTime des Videos muss unter 0,3 Sekunden bleiben.
+ * Chromium im Test hat kein H.264; mp4-Dateien werden per route durch VP9 (gleiche GOP=4) ersetzt.
  */
 const SRC = join(process.cwd(), 'public/media/video')
 const TMP = join(tmpdir(), 'kg-vp9')
@@ -23,11 +23,11 @@ const vp9 = (name: string) => {
 
 type Profile = { name: string; width: number; height: number; cores: number; memory: number; touch: boolean; cpu: number; expect: string }
 const PROFILES: Profile[] = [
-  { name: 'کامپیوتر ضعیف', width: 1366, height: 768, cores: 2, memory: 2, touch: false, cpu: 6, expect: 'gym-scrub-540' },
-  { name: 'کامپیوتر معمولی', width: 1440, height: 900, cores: 4, memory: 8, touch: false, cpu: 4, expect: 'gym-scrub-720' },
-  { name: 'کامپیوتر قوی', width: 1920, height: 1080, cores: 8, memory: 8, touch: false, cpu: 4, expect: 'gym-scrub.mp4' },
-  { name: 'تبلت', width: 820, height: 1180, cores: 8, memory: 4, touch: true, cpu: 4, expect: 'gym-scrub-720' },
-  { name: 'گوشی', width: 390, height: 844, cores: 8, memory: 4, touch: true, cpu: 6, expect: 'gym-scrub-720' },
+  { name: 'Schwacher Computer', width: 1366, height: 768, cores: 2, memory: 2, touch: false, cpu: 6, expect: 'gym-scrub-540' },
+  { name: 'Normaler Computer', width: 1440, height: 900, cores: 4, memory: 8, touch: false, cpu: 4, expect: 'gym-scrub-720' },
+  { name: 'Starker Computer', width: 1920, height: 1080, cores: 8, memory: 8, touch: false, cpu: 4, expect: 'gym-scrub.mp4' },
+  { name: 'Tablet', width: 820, height: 1180, cores: 8, memory: 4, touch: true, cpu: 4, expect: 'gym-scrub-720' },
+  { name: 'Handy', width: 390, height: 844, cores: 8, memory: 4, touch: true, cpu: 6, expect: 'gym-scrub-720' },
 ]
 
 async function measure(browser: Browser, p: Profile) {
@@ -45,9 +45,9 @@ async function measure(browser: Browser, p: Profile) {
   const page = await ctx.newPage()
   const cdp = await ctx.newCDPSession(page)
   await page.goto('/')
-  const section = page.locator('section[aria-label^="ویدیوی تمرین"]')
+  const section = page.locator('section[aria-label^="Trainingsvideo"]')
   await section.scrollIntoViewIfNeeded()
-  await expect(section.locator('img').first()).toBeVisible() // عکس فریم اول همیشه هست
+  await expect(section.locator('img').first()).toBeVisible() // das Bild des ersten Frames ist immer da
   const top = await section.evaluate((el) => el.getBoundingClientRect().top + scrollY)
   await page.evaluate((y) => scrollTo(0, y), top)
   await page.waitForFunction(() => { const v = document.querySelector('video'); return !!v && v.readyState >= 2 && v.duration > 0 }, null, { timeout: 20_000 })
@@ -67,7 +67,7 @@ async function measure(browser: Browser, p: Profile) {
     const lag = await page.evaluate(() => { const v = document.querySelector('video')!; return Math.abs(Number(v.dataset.target ?? 0) - v.currentTime) })
     lags.push(lag)
   }
-  // و برگشت به عقب
+  // und zurück
   for (let i = 0; i < 12; i++) { await page.evaluate(() => scrollBy(0, -80)); await page.waitForTimeout(120) }
   const back = await page.evaluate(() => { const v = document.querySelector('video')!; return Math.abs(Number(v.dataset.target ?? 0) - v.currentTime) })
   const frames = await page.evaluate(() => (document.querySelector('video') as HTMLVideoElement & { __frames?: number }).__frames ?? 0)
@@ -78,8 +78,8 @@ async function measure(browser: Browser, p: Profile) {
 }
 
 for (const p of PROFILES) {
-  test(`ویدیوی اسکرولی روان: ${p.name}`, async ({ browser }, info) => {
-    test.skip(info.project.name !== 'desktop', 'هر پروفایل context خودش را می‌سازد')
+  test(`Flüssiges Scroll-Video: ${p.name}`, async ({ browser }, info) => {
+    test.skip(info.project.name !== 'desktop', 'Jedes Profil baut seinen eigenen Context')
     test.setTimeout(120_000)
     const r = await measure(browser, p)
     console.log(`[scrub] ${p.name} cpu×${p.cpu}: ${r.requested.join(',')} median=${r.median.toFixed(3)}s p90=${r.p90.toFixed(3)}s back=${r.back.toFixed(3)}s frames=${r.frames}`)

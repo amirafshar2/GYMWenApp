@@ -1,14 +1,14 @@
 /**
- * سرعت: نسخهٔ فشردهٔ Brotli (حداکثر کیفیت) و gzip از فایل‌های بیلد، یک بار هنگام بیلد.
- * سرور (PrecompressedStaticFilesMiddleware) اگر مرورگر پشتیبانی کند همین فایل‌ها را می‌فرستد
- * به‌جای فشرده‌سازی سریع و ضعیف‌تر هنگام هر درخواست.
+ * Performance: Brotli- (maximale Qualität) und gzip-Versionen der Build-Dateien, einmal beim Build.
+ * Der Server (PrecompressedStaticFilesMiddleware) liefert diese Dateien, wenn der Browser es unterstützt,
+ * statt bei jeder Anfrage schnell und schwächer zu komprimieren.
  */
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const dir = fileURLToPath(new URL('../../GymPlatform.Api/wwwroot/assets/', import.meta.url)) // روی ویندوز هم درست
+const dir = fileURLToPath(new URL('../../GymPlatform.Api/wwwroot/assets/', import.meta.url)) // funktioniert auch unter Windows
 let saved = 0, n = 0
 for (const f of readdirSync(dir)) {
   if (!/\.(js|css|svg|json)$/.test(f)) continue

@@ -13,13 +13,13 @@ public class Coach : BaseEntity
     public string? PhotoUrl { get; set; }
     public List<string> Achievements { get; set; } = [];
     public int SortOrder { get; set; }
-    /// <summary>false یعنی در سایت نمایش داده نمی‌شود (مربی رفته یا موقتاً نیست)؛ سابقهٔ شاگردها می‌ماند.</summary>
+    /// <summary>false = nicht auf der Seite angezeigt (Trainer ist gegangen oder vorübergehend weg); die Schülerhistorie bleibt.</summary>
     public bool IsActive { get; set; } = true;
 
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
 
-    /// <summary>حساب ورود مربی (برای پنل مربی)</summary>
+    /// <summary>Login-Konto des Trainers (für das Trainerpanel)</summary>
     public int? UserId { get; set; }
     public AppUser? User { get; set; }
 }

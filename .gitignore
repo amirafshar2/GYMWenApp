@@ -7,30 +7,30 @@ obj/
 *.db-shm
 *.db-wal
 
-# فرانت
+# Frontend
 node_modules/
 src/GymPlatform.Api/wwwroot/
 src/GymPlatform.Web/test-results/
 src/GymPlatform.Web/playwright-report/
 src/GymPlatform.Web/dist/
 
-# اسرار
+# Geheimnisse
 .env
 .env.*
 !.env.example
 appsettings.*.local.json
 
-# آرشیو پرتفولیوی شخصی (مال پرتفولیو، نه کد مشتری)
+# Persönliches Portfolio-Archiv (gehört zum Portfolio, nicht zum Kundencode)
 portfolio-export/
 
-# فریم‌های ویدیوی هیرو (حجیم؛ با scripts/make-hero-frames ساخته می‌شوند)
+# Frames des Hero-Videos (groß; werden mit scripts/make-hero-frames erzeugt)
 src/GymPlatform.Web/public/media/hero/frames/desktop/
 src/GymPlatform.Web/public/media/hero/frames/mobile/
 
-# تصویر خام مجسمه (۱۱ مگابایت)؛ نسخه‌های وب dumbbell.webp و dumbbell-mobile.webp در گیت هستند
+# Rohbild der Skulptur (11 MB); die Web-Versionen dumbbell.webp und dumbbell-mobile.webp sind in Git
 src/GymPlatform.Web/public/media/hero/dumbbell.png
 
-# ویدیوی خام باشگاه (نسخهٔ بهینه‌اش gym.mp4 است که سایت پخش می‌کند)
+# Rohvideo des Studios (die optimierte Fassung gym.mp4 spielt die Seite ab)
 src/GymPlatform.Web/public/media/video/gym-source.mp4
 src/GymPlatform.Api/App_Data/
 
@@ -39,5 +39,5 @@ src/GymPlatform.Api/App_Data/
 .sync*/
 *.bundle
 
-# محتوای واقعی یک باشگاه (بستهٔ محتوا برای Setup:Mode=Content) — هرگز در گیت
+# Echter Inhalt eines Studios (Inhaltspaket für Setup:Mode=Content) — niemals in Git
 private/

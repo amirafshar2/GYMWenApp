@@ -1,10 +1,10 @@
 namespace GymPlatform.Business.Services.Site;
 
-/// <summary>ویدیوهای سایت (پیش‌فرض قالب یا آپلود مدیر): آیا نسخه‌های بهینهٔ اسکرول برایش ساخته شده است؟</summary>
+/// <summary>Videos der Seite (Vorlagen-Standard oder Admin-Upload): Wurden die optimierten Scroll-Versionen erzeugt?</summary>
 public interface IVideoLibrary
 {
-    /// <summary>آدرس مجاز ویدیو (پوشهٔ ویدیوی قالب یا آپلود)</summary>
+    /// <summary>Erlaubte Videoadresse (Videoordner der Vorlage oder Upload)</summary>
     bool IsValidUrl(string url);
-    /// <summary>نسخه‌های ‎-scrub/-720/-540 و عکس‌ها کامل ساخته شده‌اند</summary>
+    /// <summary>Die Versionen -scrub/-720/-540 und die Bilder sind vollständig erzeugt</summary>
     bool IsOptimized(string url);
 }

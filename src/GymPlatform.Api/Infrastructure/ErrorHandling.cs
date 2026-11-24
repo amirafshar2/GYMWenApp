@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymPlatform.Api.Infrastructure;
 
-/// <summary>هر خطای پیش‌بینی‌نشده → ProblemDetails (RFC 7807) با traceId، بدون افشای جزئیات داخلی.</summary>
+/// <summary>Jeder unerwartete Fehler → ProblemDetails (RFC 7807) mit traceId, ohne interne Details preiszugeben.</summary>
 public sealed class GlobalExceptionHandler(IProblemDetailsService problems, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct)
@@ -20,8 +20,8 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problems, ILog
             ProblemDetails = new ProblemDetails
             {
                 Status = 500,
-                Title = "خطای غیرمنتظره در سرور",
-                Detail = "مشکلی پیش آمد. دوباره امتحان کنید؛ اگر تکرار شد با پشتیبانی تماس بگیرید.",
+                Title = "Unerwarteter Serverfehler",
+                Detail = "Etwas ist schiefgelaufen. Bitte erneut versuchen; falls es wieder passiert, den Support kontaktieren.",
             }
         });
     }
@@ -29,14 +29,14 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problems, ILog
 
 public static class ProblemDetailsSetup
 {
-    /// <summary>به همهٔ ProblemDetailsها traceId اضافه می‌شود تا خطا در لاگ پیدا شود.</summary>
+    /// <summary>Jedes ProblemDetails erhält eine traceId, damit der Fehler im Log auffindbar ist.</summary>
     public static void Customize(ProblemDetailsContext ctx) =>
         ctx.ProblemDetails.Extensions["traceId"] = Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier;
 }
 
 public static class ResultHttpExtensions
 {
-    /// <summary>Result کسب‌وکار → پاسخ HTTP با کد مناسب و ValidationProblemDetails.</summary>
+    /// <summary>Geschäfts-Result → HTTP-Antwort mit passendem Code und ValidationProblemDetails.</summary>
     public static IActionResult ToActionResult<T>(this Result<T> r, ControllerBase c, Func<T, IActionResult>? ok = null)
     {
         if (r.Succeeded) return ok?.Invoke(r.Value!) ?? c.Ok(r.Value);
@@ -52,7 +52,7 @@ public static class ResultHttpExtensions
         var pd = new ValidationProblemDetails(r.Errors.ToDictionary(k => k.Key, v => v.Value))
         {
             Status = status,
-            Title = r.FirstError ?? "درخواست نامعتبر است.",
+            Title = r.FirstError ?? "Ungültige Anfrage.",
             Instance = c.Request.Path,
         };
         pd.Extensions["traceId"] = Activity.Current?.Id ?? c.HttpContext.TraceIdentifier;

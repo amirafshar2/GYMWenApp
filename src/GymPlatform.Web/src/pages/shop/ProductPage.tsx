@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronRight, MapPin, Minus, Plus, ShoppingBag } from 'lucide-react'
+import { Check, ChevronLeft, MapPin, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { shopApi, type ProductDetail, type Variant } from '@/lib/commerce'
 import { cart, useCart } from '@/lib/cart'
 import { brand } from '@/lib/brand'
@@ -22,7 +22,7 @@ export default function ProductPage() {
 
   useEffect(() => {
     shopApi.product(slug).then((d) => {
-      setP(d); document.title = `${d.name} | شاپ ${brand.shortName}`
+      setP(d); document.title = `${d.name} | Shop ${brand.shortName}`
       const first = d.variants.find((v) => v.totalStock > 0) ?? d.variants[0]
       setFlavor(first?.flavor ?? null); setColor(first?.color ?? null); setSize(first?.size ?? null)
     }).catch((e: Error) => setErr(e.message))
@@ -48,12 +48,12 @@ export default function ProductPage() {
     <div className="bg-steel">
       <div className="mx-auto w-full max-w-[1290px] px-5 py-8 sm:px-8 sm:py-12">
         <Link to={p.kind === 'supplement' ? '/shop' : '/shop?kind=merch'} className="mb-6 inline-flex items-center gap-1 text-[14px] font-bold text-rubber hover:text-chalk">
-          <ChevronRight className="size-4" aria-hidden />بازگشت به فروشگاه
+          <ChevronLeft className="size-4" aria-hidden />Zurück zum Shop
         </Link>
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="relative overflow-hidden rounded-[10px] bg-white">
             <img src={p.imagePath} alt={p.name} className="aspect-square w-full object-contain" />
-            {p.isHouseBrand && <span className="absolute right-4 top-4 rounded-full bg-plate px-3 py-1 text-[12px] font-bold text-white">برند {brand.shortName}</span>}
+            {p.isHouseBrand && <span className="absolute left-4 top-4 rounded-full bg-plate px-3 py-1 text-[12px] font-bold text-white">Marke {brand.shortName}</span>}
           </div>
 
           <div>
@@ -67,10 +67,10 @@ export default function ProductPage() {
 
             <div className="mt-8 grid gap-6">
               {flavors.length > 0 && (
-                <Picker label="طعم">{flavors.map((f) => <Opt key={f} active={flavor === f} onClick={() => setFlavor(f)}>{f}</Opt>)}</Picker>
+                <Picker label="Geschmack">{flavors.map((f) => <Opt key={f} active={flavor === f} onClick={() => setFlavor(f)}>{f}</Opt>)}</Picker>
               )}
               {colors.length > 0 && (
-                <Picker label={`رنگ${color ? `: ${color}` : ''}`}>
+                <Picker label={`Farbe${color ? `: ${color}` : ''}`}>
                   {colors.map(([c, hex]) => (
                     <button key={c} type="button" aria-label={c} aria-pressed={color === c} onClick={() => setColor(c)}
                       className={cn('grid size-11 cursor-pointer place-items-center rounded-full border-2 transition-shadow', color === c ? 'border-plate shadow-[0_0_0_3px_rgb(11_95_176/0.2)]' : 'border-steel-2')}>
@@ -80,18 +80,18 @@ export default function ProductPage() {
                 </Picker>
               )}
               {sizes.length > 0 && (
-                <Picker label="سایز">{sizes.map((s) => <Opt key={s} active={size === s} disabled={!sizeAvail(s)} onClick={() => setSize(s)}>{s}</Opt>)}</Picker>
+                <Picker label="Größe">{sizes.map((s) => <Opt key={s} active={size === s} disabled={!sizeAvail(s)} onClick={() => setSize(s)}>{s}</Opt>)}</Picker>
               )}
             </div>
 
             <div className="mt-8 rounded-[8px] border border-steel-2 bg-white p-4">
-              <p className="mb-3 flex items-center gap-2 text-[14px] font-bold text-chalk"><MapPin className="size-4 text-plate" aria-hidden />موجودی در شعبه‌ها</p>
-              {!variant ? <p className="text-[14px] text-rubber">این ترکیب موجود نیست.</p> : (
+              <p className="mb-3 flex items-center gap-2 text-[14px] font-bold text-chalk"><MapPin className="size-4 text-plate" aria-hidden />Bestand in den Filialen</p>
+              {!variant ? <p className="text-[14px] text-rubber">Diese Kombination ist nicht verfügbar.</p> : (
                 <ul className="grid max-h-48 gap-1 overflow-y-auto text-[14px] sm:grid-cols-2">
                   {variant.stock.map((s) => (
                     <li key={s.branchSlug} className={cn('flex justify-between gap-2 rounded-[3px] px-2 py-1.5', s.branchSlug === branch && 'bg-plate/10 font-bold')}>
-                      <button type="button" onClick={() => cart.setBranch(s.branchSlug)} className="cursor-pointer truncate text-right hover:text-plate">{s.branchName}</button>
-                      <span className={s.quantity === 0 ? 'text-rubber' : 'text-[#1f7a46]'}>{s.quantity === 0 ? 'ناموجود' : `${faNum(s.quantity)} عدد`}</span>
+                      <button type="button" onClick={() => cart.setBranch(s.branchSlug)} className="cursor-pointer truncate text-left hover:text-plate">{s.branchName}</button>
+                      <span className={s.quantity === 0 ? 'text-rubber' : 'text-[#1f7a46]'}>{s.quantity === 0 ? 'Nicht vorrätig' : `${faNum(s.quantity)} Stück`}</span>
                     </li>
                   ))}
                 </ul>
@@ -100,16 +100,16 @@ export default function ProductPage() {
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <div className="flex h-[52px] items-center rounded-[3px] border border-steel-2 bg-white">
-                <button type="button" aria-label="کم کردن" onClick={() => setQty((q) => Math.max(1, q - 1))} className="grid size-[50px] cursor-pointer place-items-center hover:text-plate"><Minus className="size-4" /></button>
+                <button type="button" aria-label="Verringern" onClick={() => setQty((q) => Math.max(1, q - 1))} className="grid size-[50px] cursor-pointer place-items-center hover:text-plate"><Minus className="size-4" /></button>
                 <span className="w-10 text-center text-[16px] font-bold" aria-live="polite">{faNum(qty)}</span>
-                <button type="button" aria-label="زیاد کردن" onClick={() => setQty((q) => Math.min(10, q + 1))} className="grid size-[50px] cursor-pointer place-items-center hover:text-plate"><Plus className="size-4" /></button>
+                <button type="button" aria-label="Erhöhen" onClick={() => setQty((q) => Math.min(10, q + 1))} className="grid size-[50px] cursor-pointer place-items-center hover:text-plate"><Plus className="size-4" /></button>
               </div>
               <Btn onClick={add} disabled={!variant || inBranch < 1} className="min-w-[220px] flex-1">
-                <ShoppingBag className="size-5" aria-hidden />{!variant || inBranch < 1 ? (branch ? 'در این شعبه ناموجود' : 'ناموجود') : 'افزودن به سبد'}
+                <ShoppingBag className="size-5" aria-hidden />{!variant || inBranch < 1 ? (branch ? 'In dieser Filiale nicht vorrätig' : 'Nicht vorrätig') : 'In den Warenkorb'}
               </Btn>
             </div>
             {added && (
-              <Notice tone="ok" className="mt-4">به سبد اضافه شد. <button type="button" onClick={() => nav('/cart')} className="cursor-pointer font-bold underline">مشاهدهٔ سبد خرید</button></Notice>
+              <Notice tone="ok" className="mt-4">Zum Warenkorb hinzugefügt. <button type="button" onClick={() => nav('/cart')} className="cursor-pointer font-bold underline">Warenkorb ansehen</button></Notice>
             )}
           </div>
         </div>

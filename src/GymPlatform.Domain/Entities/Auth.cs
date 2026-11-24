@@ -2,7 +2,7 @@ using GymPlatform.Domain.Enums;
 
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>کد یکبارمصرف پیامکی. خود کد ذخیره نمی‌شود؛ فقط HMAC آن.</summary>
+/// <summary>SMS-Einmalcode. Der Code selbst wird nicht gespeichert; nur sein HMAC.</summary>
 public class OtpCode : BaseEntity
 {
     public required string PhoneNumber { get; set; }
@@ -14,7 +14,7 @@ public class OtpCode : BaseEntity
     public string? RequestIp { get; set; }
 }
 
-/// <summary>توکن تازه‌سازی (در کوکی HttpOnly). فقط هش SHA-256 آن ذخیره می‌شود؛ با هر استفاده چرخانده می‌شود.</summary>
+/// <summary>Refresh-Token (im HttpOnly-Cookie). Nur der SHA-256-Hash wird gespeichert; bei jeder Nutzung rotiert.</summary>
 public class RefreshToken : BaseEntity
 {
     public int UserId { get; set; }
@@ -28,7 +28,7 @@ public class RefreshToken : BaseEntity
     public bool IsActive(DateTime utcNow) => RevokedAtUtc is null && utcNow < ExpiresAtUtc;
 }
 
-/// <summary>لاگ ممیزی (قرارداد، پرداخت، قیمت، نقش‌ها…).</summary>
+/// <summary>Audit-Log (Vertrag, Zahlung, Preis, Rollen…).</summary>
 public class AuditLog : BaseEntity
 {
     public required string Action { get; set; }

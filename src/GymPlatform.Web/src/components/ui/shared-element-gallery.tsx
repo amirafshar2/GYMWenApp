@@ -1,7 +1,7 @@
 /**
- * Shared Element Gallery (21st.dev) — کپی بدون تغییر منطق.
- * تغییرات: z-index مودال بالای هدر چسبان سایت، برچسب دکمهٔ بستن فارسی،
- * کپشن زیر عکس باز شده، و type برای spring (تنظیم TypeScript پروژه).
+ * Shared Element Gallery (21st.dev) — Kopie ohne Logikänderung.
+ * Änderungen: z-index des Modals über dem fixierten Header, deutsches Label für den Schließen-Button,
+ * Bildunterschrift unter dem geöffneten Bild und Typ für spring (TypeScript-Einstellung des Projekts).
  */
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -157,7 +157,7 @@ function GalleryModal() {
   return (
     <AnimatePresence>
       {selectedImage && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={selectedImage.alt || "عکس گالری"}>
+        <div className="fixed inset-0 z-[90] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={selectedImage.alt || "Galeriebild"}>
           {/* Frosted glass backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -210,7 +210,7 @@ function GalleryModal() {
             transition={{ delay: 0.1, duration: 0.2 }}
             className="absolute top-6 right-6 z-50 p-2.5 bg-white/10 text-white rounded-full backdrop-blur-md hover:bg-white/20 transition-colors"
             onClick={() => setSelectedImage(null)}
-            aria-label="بستن عکس"
+            aria-label="Bild schließen"
           >
             <X className="w-5 h-5" />
           </motion.button>

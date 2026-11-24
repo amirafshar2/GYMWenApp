@@ -2,7 +2,7 @@ using GymPlatform.Business.Services.Commerce;
 
 namespace GymPlatform.Api.Integrations;
 
-/// <summary>هر دقیقه سفارش‌های پرداخت‌نشدهٔ قدیمی را لغو و موجودی کنارگذاشته‌شده را آزاد می‌کند.</summary>
+/// <summary>Storniert jede Minute alte unbezahlte Bestellungen und gibt reservierten Bestand frei.</summary>
 public sealed class PendingOrderSweeper(IServiceScopeFactory scopes, ILogger<PendingOrderSweeper> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stop)

@@ -27,7 +27,7 @@ public interface IAdminService
     Task<IReadOnlyList<AdminCanteenItemDto>> CanteenItemsAsync(CancellationToken ct);
     Task<Result<AdminCanteenItemDto>> UpdateCanteenItemAsync(int id, UpdateCanteenItemRequest r, StaffScope scope, CancellationToken ct);
     Task<IReadOnlyList<StaffRowDto>> StaffAsync(CancellationToken ct);
-    // ساخت و ویرایش کامل (فقط مدیر کل)
+    // Vollständig anlegen und bearbeiten (nur Gesamtadmin)
     Task<Result<AdminPackageDto>> SavePackageAsync(int? id, SavePackageRequest r, int staffId, CancellationToken ct);
     Task<Result<bool>> DeletePackageAsync(int id, int staffId, CancellationToken ct);
     Task<Result<AdminProductDto>> SaveProductAsync(int? id, SaveProductRequest r, StaffScope scope, CancellationToken ct);
@@ -46,13 +46,13 @@ public interface IAdminService
     Task<Result<StaffRowDto>> SaveStaffAsync(SaveStaffRequest r, int byUserId, CancellationToken ct);
 }
 
-/// <summary>مدیریت محتوا و کارکنان. هر تغییر قیمت/نقش در لاگ ممیزی ثبت می‌شود.</summary>
+/// <summary>Verwaltung von Inhalten und Mitarbeitern. Jede Preis-/Rollenänderung landet im Audit-Log.</summary>
 public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> users, IClock clock) : IAdminService
 {
     private void Audit(string action, string entity, object id, int by, string? data = null) =>
         db.AuditLogs.Add(new AuditLog { Action = action, EntityType = entity, EntityId = id.ToString(), UserId = by, Data = data });
 
-    // ---------------- پکیج‌ها
+    // ---------------- Pakete
     public async Task<IReadOnlyList<AdminPackageDto>> PackagesAsync(CancellationToken ct)
     {
         var counts = await db.Memberships.GroupBy(m => m.PackageId).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N, ct);
@@ -65,8 +65,8 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<AdminPackageDto>> UpdatePackageAsync(int id, UpdatePackageRequest r, int staffId, CancellationToken ct)
     {
         var p = await db.Packages.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (p is null) return Result<AdminPackageDto>.Fail("id", "پکیج پیدا نشد.", ErrorType.NotFound);
-        if (r.PriceToman is < 10_000 or > 2_000_000_000 || r.PriceToman % 1000 != 0) return Result<AdminPackageDto>.Fail("priceToman", "قیمت باید مضرب هزار تومان و معقول باشد.");
+        if (p is null) return Result<AdminPackageDto>.Fail("id", "Paket nicht gefunden.", ErrorType.NotFound);
+        if (r.PriceToman is < 100 or > 1_000_000 || r.PriceToman % 10 != 0) return Result<AdminPackageDto>.Fail("priceToman", "Der Preis muss ein Vielfaches von 10 Cent und realistisch sein.");
         Audit("package.updated", "Package", p.Id, staffId, $"price {p.PriceToman}->{r.PriceToman};active={r.IsActive}");
         p.PriceToman = r.PriceToman; p.IsActive = r.IsActive; p.IsFeatured = r.IsFeatured;
         var tagline = PersianText.CleanText(r.Tagline);
@@ -75,7 +75,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         return Result<AdminPackageDto>.Ok(ToDto(p));
     }
 
-    // ---------------- جشنواره
+    // ---------------- Aktionen
     public async Task<IReadOnlyList<AdminCampaignDto>> CampaignsAsync(CancellationToken ct) =>
         (await db.Campaigns.AsNoTracking().OrderByDescending(c => c.StartsAtUtc).ToListAsync(ct)).Select(ToDto).ToList();
 
@@ -86,22 +86,22 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     {
         var errors = new Dictionary<string, string[]>();
         var title = PersianText.CleanText(r.Title);
-        if (title is null || title.Length > 150) errors["title"] = ["عنوان جشنواره را بنویسید."];
-        if (r.EndsAtUtc <= r.StartsAtUtc) errors["endsAtUtc"] = ["تاریخ پایان باید بعد از شروع باشد."];
-        if (r.DiscountAmountToman is null && r.DiscountPercent is < 1 or > 90) errors["discountPercent"] = ["درصد تخفیف بین ۱ تا ۹۰."];
-        if (r.DiscountAmountToman is < 1000) errors["discountAmountToman"] = ["مبلغ تخفیف نامعتبر است."];
-        if (r.MaxRedemptions is < 1) errors["maxRedemptions"] = ["سقف باید حداقل ۱ باشد."];
+        if (title is null || title.Length > 150) errors["title"] = ["Bitte einen Titel für die Aktion angeben."];
+        if (r.EndsAtUtc <= r.StartsAtUtc) errors["endsAtUtc"] = ["Das Enddatum muss nach dem Start liegen."];
+        if (r.DiscountAmountToman is null && r.DiscountPercent is < 1 or > 90) errors["discountPercent"] = ["Rabatt zwischen 1 und 90 Prozent."];
+        if (r.DiscountAmountToman is < 100) errors["discountAmountToman"] = ["Ungültiger Rabattbetrag."];
+        if (r.MaxRedemptions is < 1) errors["maxRedemptions"] = ["Die Obergrenze muss mindestens 1 sein."];
         var pkgs = (r.EligiblePackageSlugs ?? []).Distinct().ToList();
         var brs = (r.EligibleBranchSlugs ?? []).Distinct().ToList();
-        if (pkgs.Count > 0 && await db.Packages.CountAsync(p => pkgs.Contains(p.Slug), ct) != pkgs.Count) errors["eligiblePackageSlugs"] = ["پکیج نامعتبر."];
-        if (brs.Count > 0 && await db.Branches.CountAsync(b => brs.Contains(b.Slug), ct) != brs.Count) errors["eligibleBranchSlugs"] = ["شعبهٔ نامعتبر."];
+        if (pkgs.Count > 0 && await db.Packages.CountAsync(p => pkgs.Contains(p.Slug), ct) != pkgs.Count) errors["eligiblePackageSlugs"] = ["Ungültiges Paket."];
+        if (brs.Count > 0 && await db.Branches.CountAsync(b => brs.Contains(b.Slug), ct) != brs.Count) errors["eligibleBranchSlugs"] = ["Ungültige Filiale."];
         if (errors.Count > 0) return Result<AdminCampaignDto>.Fail(errors);
 
         Campaign? c;
         if (id is { } cid)
         {
             c = await db.Campaigns.FirstOrDefaultAsync(x => x.Id == cid, ct);
-            if (c is null) return Result<AdminCampaignDto>.Fail("id", "جشنواره پیدا نشد.", ErrorType.NotFound);
+            if (c is null) return Result<AdminCampaignDto>.Fail("id", "Aktion nicht gefunden.", ErrorType.NotFound);
         }
         else { c = new Campaign { Title = title! }; db.Campaigns.Add(c); }
         c.Title = title!; c.Description = PersianText.CleanText(r.Description);
@@ -114,7 +114,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         return Result<AdminCampaignDto>.Ok(ToDto(c));
     }
 
-    // ---------------- کد تخفیف
+    // ---------------- Rabattcode
     private static AdminDiscountCodeDto ToDto(DiscountCode d) => new(d.Id, d.Code, d.Percent, d.MaxUses, d.UsedCount, d.ExpiresAtUtc, d.IsActive, d.Scope.ToString().ToLowerInvariant(), d.MembersOnly);
 
     public async Task<IReadOnlyList<AdminDiscountCodeDto>> CodesAsync(CancellationToken ct) =>
@@ -123,13 +123,13 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<AdminDiscountCodeDto>> SaveCodeAsync(int? id, SaveDiscountCodeRequest r, int staffId, CancellationToken ct)
     {
         var code = (r.Code ?? "").Trim().ToUpperInvariant();
-        if (code.Length is < 3 or > 30 || !code.All(char.IsAsciiLetterOrDigit)) return Result<AdminDiscountCodeDto>.Fail("code", "کد ۳ تا ۳۰ حرف/رقم لاتین.");
-        if (r.Percent is < 1 or > 90) return Result<AdminDiscountCodeDto>.Fail("percent", "درصد بین ۱ تا ۹۰.");
+        if (code.Length is < 3 or > 30 || !code.All(char.IsAsciiLetterOrDigit)) return Result<AdminDiscountCodeDto>.Fail("code", "Code: 3 bis 30 lateinische Buchstaben/Ziffern.");
+        if (r.Percent is < 1 or > 90) return Result<AdminDiscountCodeDto>.Fail("percent", "Prozent zwischen 1 und 90.");
         DiscountScope? scope = r.Scope?.ToLowerInvariant() switch { "membership" => DiscountScope.Membership, "shop" => DiscountScope.Shop, "any" => DiscountScope.Any, _ => null };
-        if (scope is null) return Result<AdminDiscountCodeDto>.Fail("scope", "محدوده: membership، shop یا any.");
-        if (await db.DiscountCodes.AnyAsync(d => d.Code == code && d.Id != (id ?? 0), ct)) return Result<AdminDiscountCodeDto>.Fail("code", "این کد قبلاً ساخته شده.", ErrorType.Conflict);
+        if (scope is null) return Result<AdminDiscountCodeDto>.Fail("scope", "Geltungsbereich: membership, shop oder any.");
+        if (await db.DiscountCodes.AnyAsync(d => d.Code == code && d.Id != (id ?? 0), ct)) return Result<AdminDiscountCodeDto>.Fail("code", "Dieser Code existiert bereits.", ErrorType.Conflict);
         DiscountCode? d;
-        if (id is { } did) { d = await db.DiscountCodes.FirstOrDefaultAsync(x => x.Id == did, ct); if (d is null) return Result<AdminDiscountCodeDto>.Fail("id", "کد پیدا نشد.", ErrorType.NotFound); }
+        if (id is { } did) { d = await db.DiscountCodes.FirstOrDefaultAsync(x => x.Id == did, ct); if (d is null) return Result<AdminDiscountCodeDto>.Fail("id", "Code nicht gefunden.", ErrorType.NotFound); }
         else { d = new DiscountCode { Code = code }; db.DiscountCodes.Add(d); }
         d.Code = code; d.Percent = r.Percent; d.MaxUses = r.MaxUses; d.ExpiresAtUtc = r.ExpiresAtUtc is { } e ? DateTime.SpecifyKind(e, DateTimeKind.Utc) : null;
         d.IsActive = r.IsActive; d.Scope = scope.Value; d.MembersOnly = r.MembersOnly;
@@ -139,7 +139,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         return Result<AdminDiscountCodeDto>.Ok(ToDto(d));
     }
 
-    // ---------------- قرارداد (نسخه‌دار؛ ویرایش = نسخهٔ جدید، امضاهای قبلی دست‌نخورده می‌مانند)
+    // ---------------- Vertrag (versioniert; Bearbeiten = neue Version, frühere Unterschriften bleiben unberührt)
     public async Task<IReadOnlyList<AdminContractDto>> ContractsAsync(CancellationToken ct)
     {
         var counts = await db.SignedContracts.GroupBy(s => s.Version).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N, ct);
@@ -152,9 +152,9 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         var title = PersianText.CleanText(r.Title);
         var clauses = (r.Clauses ?? []).Select(PersianText.CleanText).Where(x => x is not null).Cast<string>().ToList();
         var questions = (r.HealthQuestions ?? []).Select(PersianText.CleanText).Where(x => x is not null).Cast<string>().ToList();
-        if (title is null) return Result<AdminContractDto>.Fail("title", "عنوان قرارداد را بنویسید.");
-        if (clauses.Count is < 1 or > 40 || clauses.Any(c => c.Length > 2000)) return Result<AdminContractDto>.Fail("clauses", "۱ تا ۴۰ بند، هر بند حداکثر ۲۰۰۰ حرف.");
-        if (questions.Count > 20 || questions.Any(q => q.Length > 300)) return Result<AdminContractDto>.Fail("healthQuestions", "حداکثر ۲۰ پرسش.");
+        if (title is null) return Result<AdminContractDto>.Fail("title", "Bitte einen Vertragstitel angeben.");
+        if (clauses.Count is < 1 or > 40 || clauses.Any(c => c.Length > 2000)) return Result<AdminContractDto>.Fail("clauses", "1 bis 40 Klauseln, jede höchstens 2000 Zeichen.");
+        if (questions.Count > 20 || questions.Any(q => q.Length > 300)) return Result<AdminContractDto>.Fail("healthQuestions", "Höchstens 20 Fragen.");
         var version = (await db.ContractTemplates.MaxAsync(t => (int?)t.Version, ct) ?? 0) + 1;
         await db.ContractTemplates.Where(t => t.IsActive).ExecuteUpdateAsync(s => s.SetProperty(t => t.IsActive, false), ct);
         var t = new ContractTemplate { Version = version, Title = title, Clauses = clauses, HealthQuestions = questions, IsActive = true, PublishedAtUtc = clock.UtcNow };
@@ -164,7 +164,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         return Result<AdminContractDto>.Ok(new AdminContractDto(t.Id, t.Version, t.Title, t.Clauses, t.HealthQuestions, true, t.PublishedAtUtc, 0));
     }
 
-    // ---------------- فروشگاه
+    // ---------------- Shop
     public async Task<IReadOnlyList<AdminProductDto>> ProductsAsync(StaffScope scope, CancellationToken ct)
     {
         var list = await db.Products.AsNoTracking().Include(p => p.Variants).ThenInclude(v => v.Stocks).ThenInclude(s => s.Branch)
@@ -175,8 +175,8 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<AdminProductDto>> UpdateProductAsync(int id, UpdateProductRequest r, int staffId, CancellationToken ct)
     {
         var p = await db.Products.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (p is null) return Result<AdminProductDto>.Fail("id", "کالا پیدا نشد.", ErrorType.NotFound);
-        if (r.PriceToman is < 1000 or > 1_000_000_000 || r.PriceToman % 1000 != 0) return Result<AdminProductDto>.Fail("priceToman", "قیمت باید مضرب هزار تومان باشد.");
+        if (p is null) return Result<AdminProductDto>.Fail("id", "Produkt nicht gefunden.", ErrorType.NotFound);
+        if (r.PriceToman is < 10 or > 1_000_000 || r.PriceToman % 10 != 0) return Result<AdminProductDto>.Fail("priceToman", "Der Preis muss ein Vielfaches von 10 Cent sein.");
         Audit("product.updated", "Product", p.Id, staffId, $"price {p.PriceToman}->{r.PriceToman};active={r.IsActive}");
         p.PriceToman = r.PriceToman; p.IsActive = r.IsActive;
         await db.SaveChangesAsync(ct);
@@ -185,11 +185,11 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
 
     public async Task<Result<int>> SetStockAsync(StaffScope scope, int variantId, SetStockRequest r, CancellationToken ct)
     {
-        if (r.Quantity is < 0 or > 100_000) return Result<int>.Fail("quantity", "موجودی بین ۰ تا ۱۰۰٬۰۰۰.");
+        if (r.Quantity is < 0 or > 100_000) return Result<int>.Fail("quantity", "Bestand zwischen 0 und 100.000.");
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == r.BranchSlug, ct);
-        if (branch is null) return Result<int>.Fail("branchSlug", "شعبه پیدا نشد.", ErrorType.NotFound);
-        if (!scope.Can(branch.Id)) return Result<int>.Fail("branchSlug", "به انبار این شعبه دسترسی ندارید.", ErrorType.Forbidden);
-        if (!await db.ProductVariants.AnyAsync(v => v.Id == variantId, ct)) return Result<int>.Fail("variant", "مدل کالا پیدا نشد.", ErrorType.NotFound);
+        if (branch is null) return Result<int>.Fail("branchSlug", "Filiale nicht gefunden.", ErrorType.NotFound);
+        if (!scope.Can(branch.Id)) return Result<int>.Fail("branchSlug", "Kein Zugriff auf das Lager dieser Filiale.", ErrorType.Forbidden);
+        if (!await db.ProductVariants.AnyAsync(v => v.Id == variantId, ct)) return Result<int>.Fail("variant", "Produktvariante nicht gefunden.", ErrorType.NotFound);
         var s = await db.BranchStocks.FirstOrDefaultAsync(x => x.VariantId == variantId && x.BranchId == branch.Id, ct);
         var before = s?.Quantity ?? 0;
         if (s is null) db.BranchStocks.Add(new BranchStock { VariantId = variantId, BranchId = branch.Id, Quantity = r.Quantity });
@@ -219,7 +219,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<AdminShopOrderDto>> SetShopOrderStatusAsync(StaffScope scope, int id, string status, CancellationToken ct)
     {
         var o = await db.ShopOrders.Include(x => x.Items).Include(x => x.Branch).Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (o is null || !scope.Can(o.BranchId)) return Result<AdminShopOrderDto>.Fail("id", "سفارش پیدا نشد.", ErrorType.NotFound);
+        if (o is null || !scope.Can(o.BranchId)) return Result<AdminShopOrderDto>.Fail("id", "Bestellung nicht gefunden.", ErrorType.NotFound);
         OrderStatus? target = status switch { "shipped" => OrderStatus.Shipped, "completed" => OrderStatus.Completed, "ready" => OrderStatus.ReadyForPickup, _ => null };
         var ok = (o.Status, target) switch
         {
@@ -228,14 +228,14 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
             (OrderStatus.ReadyForPickup or OrderStatus.Shipped, OrderStatus.Completed) => true,
             _ => false,
         };
-        if (!ok) return Result<AdminShopOrderDto>.Fail("status", "این تغییر وضعیت ممکن نیست.", ErrorType.Conflict);
+        if (!ok) return Result<AdminShopOrderDto>.Fail("status", "Dieser Statuswechsel ist nicht möglich.", ErrorType.Conflict);
         o.Status = target!.Value;
         Audit($"shop.{status}", "ShopOrder", o.Id, scope.UserId);
         await db.SaveChangesAsync(ct);
         return Result<AdminShopOrderDto>.Ok(ToDto(o));
     }
 
-    // ---------------- بوفه
+    // ---------------- Bistro
     public async Task<IReadOnlyList<AdminCanteenItemDto>> CanteenItemsAsync(CancellationToken ct) =>
         (await db.CanteenItems.AsNoTracking().OrderBy(i => i.SortOrder).ToListAsync(ct))
             .Select(ToDto).ToList();
@@ -243,18 +243,18 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<AdminCanteenItemDto>> UpdateCanteenItemAsync(int id, UpdateCanteenItemRequest r, StaffScope scope, CancellationToken ct)
     {
         var i = await db.CanteenItems.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (i is null) return Result<AdminCanteenItemDto>.Fail("id", "آیتم پیدا نشد.", ErrorType.NotFound);
-        // منو برای همهٔ شعبه‌ها یکی است: قیمت را فقط مدیر کل عوض می‌کند؛ بقیه فقط «تمام شد / موجود شد»
-        if (!scope.IsSuperAdmin && r.PriceToman != i.PriceToman) return Result<AdminCanteenItemDto>.Fail("priceToman", "تغییر قیمت منو فقط با مدیر کل است.", ErrorType.Forbidden);
+        if (i is null) return Result<AdminCanteenItemDto>.Fail("id", "Posten nicht gefunden.", ErrorType.NotFound);
+        // Die Karte gilt für alle Filialen: den Preis ändert nur der Gesamtadmin; alle anderen nur „Ausverkauft / Wieder da“
+        if (!scope.IsSuperAdmin && r.PriceToman != i.PriceToman) return Result<AdminCanteenItemDto>.Fail("priceToman", "Preise der Karte ändert nur der Gesamtadmin.", ErrorType.Forbidden);
         var staffId = scope.UserId;
-        if (r.PriceToman is < 1000 or > 50_000_000 || r.PriceToman % 1000 != 0) return Result<AdminCanteenItemDto>.Fail("priceToman", "قیمت باید مضرب هزار تومان باشد.");
+        if (r.PriceToman is < 10 or > 100_000 || r.PriceToman % 10 != 0) return Result<AdminCanteenItemDto>.Fail("priceToman", "Der Preis muss ein Vielfaches von 10 Cent sein.");
         i.PriceToman = r.PriceToman; i.IsAvailable = r.IsAvailable;
         Audit("canteen.item_updated", "CanteenItem", i.Id, staffId);
         await db.SaveChangesAsync(ct);
         return Result<AdminCanteenItemDto>.Ok(ToDto(i));
     }
 
-    // ---------------- کارکنان
+    // ---------------- Mitarbeiter
     private static readonly string[] StaffRoles = [Roles.SuperAdmin, Roles.BranchManager, Roles.Reception, Roles.Coach, Roles.CanteenStaff, Roles.ShopStaff];
 
     public async Task<IReadOnlyList<StaffRowDto>> StaffAsync(CancellationToken ct)
@@ -270,11 +270,11 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
     public async Task<Result<StaffRowDto>> SaveStaffAsync(SaveStaffRequest r, int byUserId, CancellationToken ct)
     {
         var phone = PersianText.NormalizeMobile(r.Phone);
-        if (!PersianText.IsValidMobile(phone)) return Result<StaffRowDto>.Fail("phone", "شمارهٔ موبایل معتبر نیست.");
+        if (!PersianText.IsValidMobile(phone)) return Result<StaffRowDto>.Fail("phone", "Ungültige Handynummer.");
         var roles = (r.Roles ?? []).Distinct().ToList();
-        if (roles.Any(x => !StaffRoles.Contains(x))) return Result<StaffRowDto>.Fail("roles", "نقش نامعتبر.");
+        if (roles.Any(x => !StaffRoles.Contains(x))) return Result<StaffRowDto>.Fail("roles", "Ungültige Rolle.");
         var branchIds = await db.Branches.Where(b => (r.BranchSlugs ?? new List<string>()).Contains(b.Slug)).Select(b => b.Id).ToListAsync(ct);
-        if (roles.Count > 0 && !roles.Contains(Roles.SuperAdmin) && branchIds.Count == 0) return Result<StaffRowDto>.Fail("branchSlugs", "حداقل یک شعبه انتخاب کنید.");
+        if (roles.Count > 0 && !roles.Contains(Roles.SuperAdmin) && branchIds.Count == 0) return Result<StaffRowDto>.Fail("branchSlugs", "Bitte mindestens eine Filiale wählen.");
 
         var user = await users.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phone, ct);
         if (user is null)
@@ -284,7 +284,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
             await users.AddToRoleAsync(user, Roles.Member);
         }
         else if (PersianText.CleanText(r.FullName) is { } n) { user.FullName = n; await users.UpdateAsync(user); }
-        if (user.Id == byUserId && !roles.Contains(Roles.SuperAdmin)) return Result<StaffRowDto>.Fail("roles", "نمی‌توانید دسترسی مدیر کل خودتان را بردارید.");
+        if (user.Id == byUserId && !roles.Contains(Roles.SuperAdmin)) return Result<StaffRowDto>.Fail("roles", "Sie können sich die Gesamtadmin-Rechte nicht selbst entziehen.");
 
         var current = (await users.GetRolesAsync(user)).Where(x => x != Roles.Member).ToList();
         await users.RemoveFromRolesAsync(user, current.Except(roles));
@@ -293,7 +293,7 @@ public sealed partial class AdminService(GymDbContext db, UserManager<AppUser> u
         foreach (var b in branchIds) db.StaffBranches.Add(new StaffBranch { UserId = user.Id, BranchId = b });
         Audit("staff.saved", "User", user.Id, byUserId, $"roles={string.Join(',', roles)};branches={branchIds.Count}");
         await db.SaveChangesAsync(ct);
-        // نقش تازه با توکن بعدی (حداکثر چند دقیقه) اعمال می‌شود
+        // Die neue Rolle gilt ab dem nächsten Token (spätestens nach wenigen Minuten)
         return Result<StaffRowDto>.Ok((await StaffAsync(ct)).FirstOrDefault(x => x.UserId == user.Id)
             ?? new StaffRowDto(user.Id, user.FullName, phone, [], [], user.LastLoginAtUtc));
     }

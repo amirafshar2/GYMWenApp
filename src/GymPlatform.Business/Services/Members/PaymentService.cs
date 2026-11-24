@@ -13,7 +13,7 @@ namespace GymPlatform.Business.Services.Members;
 public interface IPaymentService
 {
     Task<Payment?> FindByTrackingAsync(long trackingNumber, CancellationToken ct);
-    /// <summary>نتیجهٔ تأییدشدهٔ درگاه (Verify سمت سرور) را ثبت می‌کند. تکراری بودن بی‌اثر است.</summary>
+    /// <summary>Speichert das bestätigte Gateway-Ergebnis (serverseitiges Verify). Wiederholungen bleiben wirkungslos.</summary>
     Task<Result<int>> CompleteAsync(long trackingNumber, bool succeeded, string? transactionCode, string? message, RequestContext rc, CancellationToken ct);
     Task<PaymentResultDto?> GetForUserAsync(int userId, int paymentId, CancellationToken ct);
 }
@@ -24,7 +24,7 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         db.Payments.AsNoTracking().FirstOrDefaultAsync(p => p.TrackingNumber == trackingNumber, ct);
 
     public Task<Result<int>> CompleteAsync(long trackingNumber, bool succeeded, string? transactionCode, string? message, RequestContext rc, CancellationToken ct) =>
-        // تراکنش داخل execution strategy (سازگار با EnableRetryOnFailure در SQL Server)
+        // Transaktion innerhalb der Execution Strategy (kompatibel mit EnableRetryOnFailure in SQL Server)
         db.Database.CreateExecutionStrategy().ExecuteAsync(() => CompleteCoreAsync(trackingNumber, succeeded, transactionCode, message, rc, ct));
 
     private async Task<Result<int>> CompleteCoreAsync(long trackingNumber, bool succeeded, string? transactionCode, string? message, RequestContext rc, CancellationToken ct)
@@ -33,14 +33,14 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         var payment = await db.Payments.FirstOrDefaultAsync(p => p.TrackingNumber == trackingNumber, ct);
         if (payment is null)
-            return Result<int>.Fail("payment", "پرداخت پیدا نشد.", ErrorType.NotFound);
+            return Result<int>.Fail("payment", "Zahlung nicht gefunden.", ErrorType.NotFound);
 
-        // idempotency: پرداختی که قبلاً نهایی شده دوباره پردازش نمی‌شود
+        // Idempotenz: eine bereits abgeschlossene Zahlung wird nicht erneut verarbeitet
         if (payment.Status != PaymentStatus.Pending)
             return Result<int>.Ok(payment.Id);
 
-        // «برداشتن» اتمی پرداخت: اگر دو callback هم‌زمان برسند، فقط یکی Pending را نهایی می‌کند و دومی همین‌جا برمی‌گردد
-        // (قفل ردیف تا پایان تراکنش می‌ماند؛ بدون این، کیف پول یا بازگشت وجه دو بار شارژ می‌شد)
+        // Atomares „Übernehmen“ der Zahlung: kommen zwei Callbacks gleichzeitig, schließt nur einer Pending ab, der zweite kehrt hier zurück
+        // (Zeilensperre bis Transaktionsende; ohne sie würde Guthaben oder Erstattung doppelt gebucht)
         var finalStatus = succeeded ? PaymentStatus.Succeeded : PaymentStatus.Failed;
         var payId = payment.Id;
         if (await db.Payments.Where(p => p.Id == payId && p.Status == PaymentStatus.Pending)
@@ -71,7 +71,7 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
                 break;
             case PaymentPurpose.WalletTopUp:
                 if (succeeded)
-                    await WalletLedger.CreditAsync(db, payment.UserId, payment.AmountToman, WalletTxType.TopUp, "شارژ کیف پول", $"payment:{payment.Id}", now, ct);
+                    await WalletLedger.CreditAsync(db, payment.UserId, payment.AmountToman, WalletTxType.TopUp, "Guthaben aufladen", $"payment:{payment.Id}", now, ct);
                 break;
         }
 
@@ -98,7 +98,7 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
             return;
         }
 
-        // تمدید: اگر عضویت فعالی دارد، عضویت تازه از پایان آن شروع می‌شود
+        // Verlängerung: Bei aktiver Mitgliedschaft beginnt die neue am Ende der alten
         var lastEnd = await db.Memberships.AsNoTracking()
             .Where(x => x.UserId == payment.UserId && x.Id != m.Id && x.Status == MembershipStatus.Active && x.EndsAtUtc > now)
             .MaxAsync(x => (DateTime?)x.EndsAtUtc, ct);
@@ -107,14 +107,14 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         m.StartsAtUtc = start;
         m.EndsAtUtc = start.AddMonths(m.Package!.DurationMonths);
 
-        // برای نرم‌افزار گیت/حسابداری: عضویت فعال شد (از صف خروجی ارسال می‌شود)
+        // Für Gate-/Buchhaltungssoftware: Mitgliedschaft aktiviert (über die Ausgangswarteschlange gesendet)
         IntegrationEvents.Add(db, "membership.activated", new
         {
             memberId = payment.UserId, membershipId = m.Id, branchId = m.BranchId, section = m.Section.ToString().ToLowerInvariant(),
             startsAtUtc = m.StartsAtUtc, endsAtUtc = m.EndsAtUtc, sessionsTotal = m.SessionsTotal, qr = AccessControlService.QrPrefix + m.CardToken,
         });
 
-        // پیامک خوش‌آمد / تأیید تمدید (از صف پیامک ارسال می‌شود)
+        // Willkommens-/Verlängerungs-SMS (über die SMS-Warteschlange)
         var who = await db.Users.AsNoTracking().Where(u => u.Id == payment.UserId).Select(u => new { u.FullName, u.PhoneNumber }).FirstAsync(ct);
         var branchName = await db.Branches.AsNoTracking().Where(b => b.Id == m.BranchId).Select(b => b.Name).FirstAsync(ct);
         if (who.PhoneNumber is not null)
@@ -128,7 +128,7 @@ public sealed class PaymentService(GymDbContext db, IClock clock, ICanteenServic
         if (payment.DiscountCode is not null)
             await db.DiscountCodes.Where(d => d.Code == payment.DiscountCode)
                 .ExecuteUpdateAsync(s => s.SetProperty(d => d.UsedCount, d => d.UsedCount + 1), ct);
-        // سقف ثبت‌نام جشنواره
+        // Teilnehmerlimit der Aktion
         if (payment.CampaignId is { } campaignId)
             await db.Campaigns.Where(c => c.Id == campaignId)
                 .ExecuteUpdateAsync(s => s.SetProperty(c => c.RedemptionCount, c => c.RedemptionCount + 1), ct);

@@ -1,6 +1,6 @@
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>«جشنواره» — کمپین تخفیف.</summary>
+/// <summary>„Aktion“ — Rabattkampagne.</summary>
 public class Campaign : BaseEntity
 {
     public required string Title { get; set; }
@@ -8,19 +8,19 @@ public class Campaign : BaseEntity
     public DateTime StartsAtUtc { get; set; }
     public DateTime EndsAtUtc { get; set; }
 
-    /// <summary>درصد تخفیف (۱ تا ۹۰).</summary>
+    /// <summary>Rabatt in Prozent (1 bis 90).</summary>
     public int DiscountPercent { get; set; }
 
-    /// <summary>به‌جای درصد: مبلغ ثابت تخفیف (تومان). اگر پر باشد بر درصد مقدم است.</summary>
+    /// <summary>Statt Prozent: fester Rabattbetrag (Cent). Ist er gesetzt, hat er Vorrang vor dem Prozentsatz.</summary>
     public long? DiscountAmountToman { get; set; }
 
-    /// <summary>خالی یعنی همهٔ پکیج‌ها مشمول هستند.</summary>
+    /// <summary>Leer = alle Pakete sind berechtigt.</summary>
     public List<string> EligiblePackageSlugs { get; set; } = [];
 
-    /// <summary>خالی یعنی همهٔ شعبه‌ها.</summary>
+    /// <summary>Leer = alle Filialen.</summary>
     public List<string> EligibleBranchSlugs { get; set; } = [];
 
-    /// <summary>سقف تعداد ثبت‌نام با این جشنواره (خالی = بی‌سقف)</summary>
+    /// <summary>Maximale Anmeldungen mit dieser Aktion (leer = unbegrenzt)</summary>
     public int? MaxRedemptions { get; set; }
     public int RedemptionCount { get; set; }
 
@@ -35,7 +35,7 @@ public class Campaign : BaseEntity
     public bool AppliesTo(string packageSlug, string branchSlug) =>
         AppliesTo(packageSlug) && (EligibleBranchSlugs.Count == 0 || EligibleBranchSlugs.Contains(branchSlug));
 
-    /// <summary>مبلغ تخفیف روی قیمت پایه (گرد به هزار تومان، بیشتر از قیمت نمی‌شود)</summary>
+    /// <summary>Rabattbetrag auf den Grundpreis (auf volle 10 Cent gerundet, nie höher als der Preis)</summary>
     public long DiscountFor(long baseToman) =>
-        Math.Min(baseToman, DiscountAmountToman is { } a ? a : baseToman * DiscountPercent / 100 / 1000 * 1000);
+        Math.Min(baseToman, DiscountAmountToman is { } a ? a : baseToman * DiscountPercent / 100 / 10 * 10);
 }

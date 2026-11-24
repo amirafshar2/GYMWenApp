@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymPlatform.DataAccess.Repositories;
 
-/// <summary>ریپازیتوری عمومی. همهٔ کوئری‌ها از طریق LINQ/EF پارامتری اجرا می‌شوند (بدون SQL خام).</summary>
+/// <summary>Generisches Repository. Alle Abfragen laufen parametrisiert über LINQ/EF (kein rohes SQL).</summary>
 public class Repository<T>(GymDbContext db) : IRepository<T> where T : BaseEntity
 {
     private readonly DbSet<T> _set = db.Set<T>();

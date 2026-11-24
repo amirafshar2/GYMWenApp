@@ -3,8 +3,8 @@ using GymPlatform.Domain.Enums;
 namespace GymPlatform.Domain.Entities;
 
 /// <summary>
-/// وسیلهٔ ورود عضو: کارت QR دیجیتال (خودکار از عضویت)، دستبند یا کارت RFID که پذیرش تحویل می‌دهد،
-/// یا شناسهٔ عضو در سیستم گیتِ شرکت دیگر. یک عضو می‌تواند چند وسیله داشته باشد.
+/// Zutrittsmittel eines Mitglieds: digitale QR-Karte (automatisch aus der Mitgliedschaft), RFID-Armband oder -Karte vom Empfang,
+/// oder die Mitglieds-ID im Gate-System eines anderen Herstellers. Ein Mitglied kann mehrere Mittel haben.
 /// </summary>
 public class AccessCredential : BaseEntity
 {
@@ -12,11 +12,11 @@ public class AccessCredential : BaseEntity
     public AppUser? User { get; set; }
     public CredentialType Type { get; set; }
 
-    /// <summary>مقدار نرمال‌شده (UID دستبند با حروف بزرگ و بدون فاصله/دونقطه).</summary>
+    /// <summary>Normalisierter Wert (Armband-UID in Großbuchstaben ohne Leerzeichen/Doppelpunkte).</summary>
     public required string Value { get; set; }
     public string? Label { get; set; }
 
-    /// <summary>شناسهٔ همین عضو در نرم‌افزار گیتِ شرکت سازنده (برای همگام‌سازی).</summary>
+    /// <summary>ID dieses Mitglieds in der Gate-Software des Herstellers (zur Synchronisierung).</summary>
     public string? ExternalRef { get; set; }
     public DateTime? RevokedAtUtc { get; set; }
     public int? IssuedByUserId { get; set; }
@@ -24,14 +24,14 @@ public class AccessCredential : BaseEntity
     public bool IsActive => RevokedAtUtc is null;
 }
 
-/// <summary>گیت، ترنستایل یا کارت‌خوان یک شعبه. با کلید API (فقط هش آن ذخیره می‌شود) احراز می‌شود.</summary>
+/// <summary>Gate, Drehkreuz oder Kartenleser einer Filiale. Authentifizierung per API-Schlüssel (nur der Hash wird gespeichert).</summary>
 public class AccessDevice : BaseEntity
 {
     public required string Name { get; set; }
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
 
-    /// <summary>سالنی که این گیت جلویش است؛ Both یعنی ورودی مشترک.</summary>
+    /// <summary>Bereich, vor dem dieses Gate steht; Both = gemeinsamer Eingang.</summary>
     public GenderSection Section { get; set; } = GenderSection.Both;
     public required string KeyHash { get; set; }
     public string? Vendor { get; set; }
@@ -39,7 +39,7 @@ public class AccessDevice : BaseEntity
     public DateTime? LastSeenAtUtc { get; set; }
 }
 
-/// <summary>هر بار که کسی کارت/دستبند می‌زند (مجاز یا غیرمجاز)؛ پایهٔ حضور و غیاب و گزارش‌ها.</summary>
+/// <summary>Jeder Karten-/Armband-Scan (erlaubt oder abgelehnt); Grundlage für Anwesenheit und Berichte.</summary>
 public class CheckIn : BaseEntity
 {
     public int DeviceId { get; set; }
@@ -49,20 +49,20 @@ public class CheckIn : BaseEntity
     public int? MembershipId { get; set; }
     public CredentialType CredentialType { get; set; }
 
-    /// <summary>فقط چهار نویسهٔ آخر وسیله (برای پیگیری، بدون نگه‌داشتن مقدار کامل).</summary>
+    /// <summary>Nur die letzten vier Zeichen des Mittels (zur Nachverfolgung, ohne den vollen Wert zu speichern).</summary>
     public string? CredentialHint { get; set; }
     public AccessDecision Decision { get; set; }
     public AccessDenyReason Reason { get; set; }
     public bool SessionCounted { get; set; }
     public DateTime OccurredAtUtc { get; set; }
 
-    /// <summary>شناسهٔ رویداد از طرف دستگاه؛ ارسال دوباره همان رویداد دوبار ثبت نمی‌شود.</summary>
+    /// <summary>Ereignis-ID vom Gerät; ein erneut gesendetes Ereignis wird nicht doppelt erfasst.</summary>
     public string? ExternalEventId { get; set; }
 }
 
 /// <summary>
-/// صف خروجی (Outbox): رویدادهایی مثل «عضویت فعال شد» داخل همان تراکنش ثبت و بعداً به سیستم‌های بیرونی
-/// (نرم‌افزار گیت، حسابداری، پیامک) فرستاده می‌شوند؛ اگر آن سیستم قطع باشد چیزی گم نمی‌شود.
+/// Ausgangswarteschlange (Outbox): Ereignisse wie „Mitgliedschaft aktiviert“ werden in derselben Transaktion gespeichert und später an externe Systeme
+/// (Gate-Software, Buchhaltung, SMS) gesendet; ist das System nicht erreichbar, geht nichts verloren.
 /// </summary>
 public class IntegrationEvent : BaseEntity
 {

@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace GymPlatform.Api.Controllers;
 
-/// <summary>ورود با موبایل + کد پیامکی؛ توکن دسترسی در بدنه، توکن تازه‌سازی در کوکی HttpOnly.</summary>
+/// <summary>Login mit Handy + SMS-Code; Zugriffstoken im Body, Refresh-Token im HttpOnly-Cookie.</summary>
 [ApiController]
 [Route("api/v1/auth")]
 [Produces("application/json")]
 public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostEnvironment env) : ControllerBase
 {
-    /// <summary>ارسال کد ورود (۲ دقیقه اعتبار).</summary>
+    /// <summary>Login-Code senden (2 Minuten gültig).</summary>
     [HttpPost("otp")]
     [ValidateCsrf]
     [EnableRateLimiting("otp")]
@@ -27,7 +27,7 @@ public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostE
     public async Task<IActionResult> SendOtp([FromBody] OtpRequest request, CancellationToken ct) =>
         (await otp.SendAsync(request.PhoneNumber, OtpPurpose.Login, this.RequestContext(), ct)).ToActionResult(this);
 
-    /// <summary>بررسی کد و ورود (حساب در اولین ورود ساخته می‌شود).</summary>
+    /// <summary>Code prüfen und anmelden (das Konto entsteht beim ersten Login).</summary>
     [HttpPost("verify")]
     [ValidateCsrf]
     [EnableRateLimiting("auth")]
@@ -45,8 +45,8 @@ public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostE
     }
 
     /// <summary>
-    /// ورود یک‌کلیکی نسخهٔ نمایشی. فقط وقتی کار می‌کند که برنامه Production نباشد و کد ورود روی صفحه نمایش داده شود
-    /// (یعنی همین الان هم هر کسی با هر شماره‌ای وارد می‌شود)، و فقط برای حساب‌های دمو؛ در غیر این صورت 404.
+    /// Ein-Klick-Login der Demo-Version. Funktioniert nur, wenn die App nicht in Production läuft und der Login-Code auf der Seite angezeigt wird
+    /// (d. h. ohnehin jeder mit jeder Nummer hineinkommt), und nur für Demo-Konten; sonst 404.
     /// </summary>
     [HttpPost("demo")]
     [ValidateCsrf]
@@ -67,7 +67,7 @@ public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostE
         });
     }
 
-    /// <summary>تمدید توکن دسترسی با کوکی تازه‌سازی (چرخشی).</summary>
+    /// <summary>Zugriffstoken per Refresh-Cookie erneuern (rotierend).</summary>
     [HttpPost("refresh")]
     [SameOriginOnly]
     [EnableRateLimiting("auth")]
@@ -76,7 +76,7 @@ public sealed class AuthController(IOtpService otp, IAuthService auth, IWebHostE
     public async Task<IActionResult> Refresh(CancellationToken ct)
     {
         var raw = RefreshCookie.Read(Request, env);
-        if (string.IsNullOrEmpty(raw)) return Problem(statusCode: 401, title: "وارد نشده‌اید.");
+        if (string.IsNullOrEmpty(raw)) return Problem(statusCode: 401, title: "Nicht angemeldet.");
         var r = await auth.RefreshAsync(raw, this.RequestContext(), ct);
         if (!r.Succeeded) RefreshCookie.Clear(Response, env);
         return r.ToActionResult(this, s =>
@@ -135,7 +135,7 @@ public sealed class MeController(IAuthService auth, IMemberService members, IPay
     public async Task<IActionResult> ContractPdf(int id, CancellationToken ct) =>
         await contracts.GetPdfAsync(User.UserId(), id, ct) is { } f ? File(f.Pdf, "application/pdf", f.FileName) : NotFound();
 
-    /// <summary>QR کارت عضویت فعال (SVG). محتوا فقط توکن تصادفی کارت است.</summary>
+    /// <summary>QR der aktiven Mitgliedskarte (SVG). Inhalt ist nur das zufällige Karten-Token.</summary>
     [HttpGet("card.svg")]
     [Produces("image/svg+xml")]
     public async Task<IActionResult> Card(CancellationToken ct)

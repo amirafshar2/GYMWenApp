@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-/** سبد خرید فروشگاه — فقط روی همین مرورگر (اطلاعات قیمت و موجودی همیشه از سرور دوباره گرفته می‌شود) */
+/** Shop-Warenkorb — nur in diesem Browser (Preise und Bestand kommen immer frisch vom Server) */
 export interface CartItem { variantId: number; quantity: number; slug: string; name: string; label: string | null; imagePath: string; priceToman: number }
 interface CartState { items: CartItem[]; branch: string | null }
 

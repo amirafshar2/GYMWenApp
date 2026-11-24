@@ -1,6 +1,6 @@
 /**
- * Container Scroll Animation (21st.dev / Aceternity) — کپی بدون تغییر منطق.
- * تغییرات: import نوعی MotionValue (تنظیم TypeScript پروژه) و رنگ قاب/داخل قاب با تم تیرهٔ سایت.
+ * Container Scroll Animation (21st.dev / Aceternity) — Kopie ohne Logikänderung.
+ * Änderungen: Typ-Import von MotionValue (TypeScript-Einstellung des Projekts) und Rahmenfarben im dunklen Theme der Seite.
  */
 "use client";
 import React, { useRef } from "react";

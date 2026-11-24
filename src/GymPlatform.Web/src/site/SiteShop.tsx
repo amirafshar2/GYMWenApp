@@ -6,7 +6,7 @@ import { toman } from '@/lib/fa'
 import { fill, site, splitAccent } from '@/lib/site'
 import { SectionHead, useFadeUp, wrap } from './ui/SectionHead'
 
-/** معرفی فروشگاه در صفحهٔ اصلی: شش کالای اول (به ترتیبی که مدیر در پنل چیده) + لینک فروشگاه */
+/** Shop-Vorstellung auf der Startseite: die ersten sechs Produkte (in der Reihenfolge aus dem Panel) + Link zum Shop */
 export default function SiteShop() {
   const { data } = useData('shop-home', () => shopApi.catalog({ kind: 'all' }))
   const fade = useFadeUp(0.1)
@@ -17,9 +17,9 @@ export default function SiteShop() {
   return (
     <section id="shop" aria-labelledby="shop-title" className="bg-steel py-[clamp(80px,9vw,130px)]">
       <div className={wrap}>
-        <SectionHead id="shop-title" eyebrow={fill(sec.eyebrow)} title={accent ? `${title}؛` : title} accent={accent}
+        <SectionHead id="shop-title" eyebrow={fill(sec.eyebrow)} title={accent ? `${title};` : title} accent={accent}
           body={fill(sec.text)}
-          aside={<Link to="/shop" className="inline-flex h-[52px] items-center rounded-[3px] bg-plate px-7 text-[15px] font-bold text-white transition-colors hover:bg-plate-hi">ورود به فروشگاه</Link>} />
+          aside={<Link to="/shop" className="inline-flex h-[52px] items-center rounded-[3px] bg-plate px-7 text-[15px] font-bold text-white transition-colors hover:bg-plate-hi">Zum Shop</Link>} />
         <motion.ul {...fade} className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {items.map((p) => (
             <li key={p.slug}>

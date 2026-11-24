@@ -2,15 +2,15 @@ using GymPlatform.Domain.Enums;
 
 namespace GymPlatform.Domain.Entities;
 
-// ================================================================ فروشگاه
-/// <summary>کالای فروشگاه: مکمل، پوشاک یا لوازم. قیمت پایه روی کالا و در صورت نیاز روی هر مدل (سایز/رنگ/طعم).</summary>
+// ================================================================ Shop
+/// <summary>Shop-Produkt: Supplement, Bekleidung oder Zubehör. Grundpreis am Produkt und bei Bedarf je Variante (Größe/Farbe/Geschmack).</summary>
 public class Product : BaseEntity
 {
     public required string Slug { get; set; }
     public required string Name { get; set; }
     public required string BrandName { get; set; }
     public ProductKind Kind { get; set; }
-    /// <summary>زیرگروه برای فیلتر: پروتئین، کراتین، تیشرت، شیکر…</summary>
+    /// <summary>Untergruppe für den Filter: Protein, Kreatin, T-Shirt, Shaker…</summary>
     public required string Category { get; set; }
     public string? Description { get; set; }
     public required string ImagePath { get; set; }
@@ -22,7 +22,7 @@ public class Product : BaseEntity
     public ICollection<ProductVariant> Variants { get; set; } = [];
 }
 
-/// <summary>یک مدل قابل‌فروش از کالا (مثلاً تیشرت «مشکی، L» یا وی «شکلات»). موجودی روی همین ثبت می‌شود.</summary>
+/// <summary>Eine verkaufbare Variante eines Produkts (z. B. T-Shirt „Schwarz, L“ oder Whey „Schokolade“). Der Bestand hängt an ihr.</summary>
 public class ProductVariant : BaseEntity
 {
     public int ProductId { get; set; }
@@ -32,14 +32,14 @@ public class ProductVariant : BaseEntity
     public string? Color { get; set; }
     public string? ColorHex { get; set; }
     public string? Flavor { get; set; }
-    /// <summary>خالی = قیمت کالا</summary>
+    /// <summary>Leer = Produktpreis</summary>
     public long? PriceToman { get; set; }
     public ICollection<BranchStock> Stocks { get; set; } = [];
 
-    public string Label => string.Join("، ", new[] { Flavor, Color, Size }.Where(x => !string.IsNullOrEmpty(x)));
+    public string Label => string.Join(", ", new[] { Flavor, Color, Size }.Where(x => !string.IsNullOrEmpty(x)));
 }
 
-/// <summary>موجودی یک مدل کالا در یک شعبه. کم شدن فقط با به‌روزرسانی شرطی (Quantity &gt;= n) انجام می‌شود تا منفی نشود.</summary>
+/// <summary>Bestand einer Variante in einer Filiale. Abzug nur per bedingtem Update (Quantity &gt;= n), damit er nicht negativ wird.</summary>
 public class BranchStock : BaseEntity
 {
     public int VariantId { get; set; }
@@ -56,7 +56,7 @@ public class ShopOrder : BaseEntity
     public AppUser? User { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.PendingPayment;
     public Fulfillment Fulfillment { get; set; }
-    /// <summary>شعبه‌ای که کالا از انبارش برداشته می‌شود و (در تحویل حضوری) محل تحویل است.</summary>
+    /// <summary>Filiale, aus deren Lager die Ware kommt und (bei Abholung) Abholort ist.</summary>
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
     public string? RecipientName { get; set; }
@@ -71,7 +71,7 @@ public class ShopOrder : BaseEntity
     public PayMethod PayMethod { get; set; }
     public required string IdempotencyKey { get; set; }
     public DateTime? PaidAtUtc { get; set; }
-    /// <summary>موجودی برای این سفارش کنار گذاشته شده و هنوز برنگشته است.</summary>
+    /// <summary>Bestand für diese Bestellung reserviert und noch nicht zurückgebucht.</summary>
     public bool StockReserved { get; set; }
     public ICollection<ShopOrderItem> Items { get; set; } = [];
 }
@@ -88,7 +88,7 @@ public class ShopOrderItem : BaseEntity
     public int Quantity { get; set; }
 }
 
-// ================================================================ بوفه
+// ================================================================ Bistro
 public class CanteenItem : BaseEntity
 {
     public required string Slug { get; set; }
@@ -109,9 +109,9 @@ public class CanteenOrder : BaseEntity
     public AppUser? User { get; set; }
     public int BranchId { get; set; }
     public Branch? Branch { get; set; }
-    /// <summary>کد میز یا محل (از QR)، مثل «میز ۴» یا «سالن آقایان»</summary>
+    /// <summary>Tisch- oder Ortscode (aus dem QR), z. B. „Tisch 4“ oder „Herrenbereich“</summary>
     public string? TableCode { get; set; }
-    /// <summary>شمارهٔ کوتاه روزانه برای صدا زدن (۱، ۲، ۳…)</summary>
+    /// <summary>Kurze Tagesnummer zum Aufrufen (1, 2, 3…)</summary>
     public int DailyNumber { get; set; }
     public CanteenOrderStatus Status { get; set; } = CanteenOrderStatus.PendingPayment;
     public long TotalToman { get; set; }
@@ -134,8 +134,8 @@ public class CanteenOrderItem : BaseEntity
     public int Quantity { get; set; }
 }
 
-// ================================================================ کیف پول
-/// <summary>موجودی کیف پول هر عضو. تغییر فقط با به‌روزرسانی شرطی و همیشه همراه یک ردیف دفتر (WalletTransaction).</summary>
+// ================================================================ Guthaben
+/// <summary>Guthaben jedes Mitglieds. Änderungen nur per bedingtem Update und immer mit einer Buchungszeile (WalletTransaction).</summary>
 public class Wallet
 {
     public int UserId { get; set; }
@@ -144,15 +144,15 @@ public class Wallet
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
-/// <summary>دفتر کیف پول (فقط اضافه می‌شود، هرگز ویرایش نمی‌شود).</summary>
+/// <summary>Guthabenbuch (nur Anhängen, niemals Bearbeiten).</summary>
 public class WalletTransaction : BaseEntity
 {
     public int UserId { get; set; }
-    /// <summary>مثبت = واریز، منفی = برداشت</summary>
+    /// <summary>Positiv = Gutschrift, negativ = Abbuchung</summary>
     public long AmountToman { get; set; }
     public long BalanceAfterToman { get; set; }
     public WalletTxType Type { get; set; }
     public required string Description { get; set; }
-    /// <summary>مرجع: shop:12، canteen:40، payment:7</summary>
+    /// <summary>Referenz: shop:12, canteen:40, payment:7</summary>
     public string? Reference { get; set; }
 }

@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace GymPlatform.Tests;
 
-/// <summary>سرور آزمایشی با Sqlite موقت، محیط Testing و کد OTP در پاسخ.</summary>
+/// <summary>Testserver mit temporärer Sqlite, Umgebung Testing und OTP-Code in der Antwort.</summary>
 public sealed class GymApiFactory : WebApplicationFactory<Program>
 {
     public const string DeviceKey = "test-gate-key-0000000000000001";
     private readonly string _db = Path.Combine(Path.GetTempPath(), $"kg-test-{Guid.NewGuid():N}.db");
-    /// <summary>تنظیمات اضافه (مثلاً Setup:Mode=Blank برای نصب خام)؛ قبل از اولین درخواست مقدار بگیرد</summary>
+    /// <summary>Zusätzliche Einstellungen (z. B. Setup:Mode=Blank für eine leere Installation); vor der ersten Anfrage setzen</summary>
     public (string Key, string Value)[] Extra { get; init; } = [];
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -40,7 +40,7 @@ public sealed class GymApiFactory : WebApplicationFactory<Program>
     }
 }
 
-/// <summary>کلاینت شبیه مرورگر: کوکی‌ها دستی نگه داشته می‌شوند تا بشود توکن قدیمی را عمداً دوباره فرستاد.</summary>
+/// <summary>Browserähnlicher Client: Cookies werden manuell gehalten, damit man ein altes Token absichtlich erneut senden kann.</summary>
 public sealed class Browser
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
@@ -82,10 +82,10 @@ public sealed class Browser
         Csrf = (await JsonAsync<JsonElement>(res)).GetProperty("token").GetString();
     }
 
-    /// <summary>ورود کامل با OTP؛ شمارهٔ موبایل یکتا برمی‌گرداند.</summary>
+    /// <summary>Vollständiger Login mit OTP; gibt eine eindeutige Handynummer zurück.</summary>
     public async Task<string> LoginAsync(string? phone = null)
     {
-        phone ??= "0912" + Random.Shared.Next(1_000_000, 9_999_999);
+        phone ??= "0157" + Random.Shared.Next(1_000_000, 9_999_999);
         await InitAsync();
         var otp = await JsonAsync<JsonElement>(await SendAsync(HttpMethod.Post, "/api/v1/auth/otp", new { phoneNumber = phone }));
         var code = otp.GetProperty("demoCode").GetString();
@@ -106,7 +106,7 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         // Arrange
         var b = new Browser(factory);
         await b.InitAsync();
-        const string phone = "09120000001";
+        const string phone = "01570000001";
         var otp = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/auth/otp", new { phoneNumber = phone }));
         var right = otp.GetProperty("demoCode").GetString()!;
         var wrong = right == "11111" ? "22222" : "11111";
@@ -116,7 +116,7 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
             Assert.Equal(HttpStatusCode.BadRequest, (await b.SendAsync(HttpMethod.Post, "/api/v1/auth/verify", new { phoneNumber = phone, code = wrong })).StatusCode);
         var afterLock = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/verify", new { phoneNumber = phone, code = right });
 
-        // Assert: بعد از ۵ تلاش اشتباه، حتی کد درست هم پذیرفته نمی‌شود (۴۲۹: کد تازه بگیرید)
+        // Assert: nach 5 falschen Versuchen wird selbst der richtige Code nicht akzeptiert (429: neuen Code anfordern)
         Assert.Equal(HttpStatusCode.TooManyRequests, afterLock.StatusCode);
     }
 
@@ -134,7 +134,7 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     [Fact]
     public async Task Refresh_rotates_token_and_reuse_of_old_chain_revokes_all_sessions()
     {
-        // Arrange: کاربر واقعی دو بار تازه‌سازی کرده است (first → second → third)
+        // Arrange: der echte Benutzer hat zweimal erneuert (first → second → third)
         var b = new Browser(factory);
         await b.LoginAsync();
         b.AccessToken = null;
@@ -144,13 +144,13 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.Equal(HttpStatusCode.OK, (await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh")).StatusCode);
         var third = b.RefreshCookie!;
 
-        // Act: مهاجم توکن قدیمی را می‌فرستد
+        // Act: der Angreifer sendet das alte Token
         UseRefresh(b, first);
         var reuse = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
         UseRefresh(b, third);
         var victim = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
 
-        // Assert: همهٔ نشست‌ها باطل شده‌اند، حتی توکن فعلی کاربر واقعی
+        // Assert: alle Sitzungen sind beendet, auch das aktuelle Token des echten Benutzers
         Assert.NotEqual(first, second);
         Assert.NotEqual(second, third);
         Assert.Equal(HttpStatusCode.Unauthorized, reuse.StatusCode);
@@ -160,7 +160,7 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     [Fact]
     public async Task Refresh_whose_response_was_lost_is_accepted_once_and_keeps_single_chain()
     {
-        // Arrange: پاسخ تازه‌سازی به مرورگر نرسید (رفرش صفحه وسط درخواست)
+        // Arrange: die Refresh-Antwort hat den Browser nicht erreicht (Neuladen während der Anfrage)
         var b = new Browser(factory);
         await b.LoginAsync();
         b.AccessToken = null;
@@ -168,13 +168,13 @@ public class AuthFlowTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
         var lost = b.RefreshCookie!;
 
-        // Act: مرورگر دوباره با توکن قبلی می‌آید
+        // Act: der Browser kommt erneut mit dem vorigen Token
         UseRefresh(b, first);
         var retry = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
         UseRefresh(b, lost);
         var lostUse = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
 
-        // Assert: نشست ادامه دارد و توکنِ گم‌شده دیگر کار نمی‌کند
+        // Assert: die Sitzung läuft weiter und das verlorene Token funktioniert nicht mehr
         Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, lostUse.StatusCode);
     }
@@ -237,7 +237,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
             .Select(t => (n: Regex.Match(t, "name=\"([^\"]+)\""), v: Regex.Match(t, "value=\"([^\"]*)\"")))
             .Where(x => x.n.Success).ToDictionary(x => x.n.Groups[1].Value, x => x.v.Success ? x.v.Groups[1].Value : "");
 
-    /// <summary>کاربر در درگاه آزمایشی «پرداخت» یا «انصراف» را می‌زند و به callback برمی‌گردد.</summary>
+    /// <summary>Der Benutzer drückt im Test-Gateway „Zahlen“ oder „Abbrechen“ und kehrt zum Callback zurück.</summary>
     internal static async Task<HttpResponseMessage> PayInSandboxAsync(Browser b, JsonElement g, bool pay)
     {
         var url = new Uri(g.GetProperty("url").GetString()!).PathAndQuery;
@@ -252,14 +252,14 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
     }
 
     [Fact]
-    public async Task Quote_applies_festival_then_code_and_rounds_to_thousand()
+    public async Task Quote_applies_festival_then_code_and_rounds_to_ten_cents()
     {
         var b = new Browser(factory);
         await b.InitAsync();
         var q = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout/quote",
             new { branchSlug = "markazi", packageSlug = "yearly", section = "men", discountCode = "START10" }));
         var total = q.GetProperty("totalToman").GetInt64();
-        Assert.Equal(0, total % 1000);
+        Assert.Equal(0, total % 10);
         Assert.True(total < q.GetProperty("baseAmountToman").GetInt64());
         Assert.True(q.GetProperty("codeDiscountToman").GetInt64() > 0);
     }
@@ -282,7 +282,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var b = new Browser(factory);
         await b.LoginAsync();
         var noName = await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(Guid.NewGuid().ToString("N")));
-        (await b.SendAsync(HttpMethod.Put, "/api/v1/me", new { fullName = "علی کریمی", gender = "male" })).EnsureSuccessStatusCode();
+        (await b.SendAsync(HttpMethod.Put, "/api/v1/me", new { fullName = "Tim Becker", gender = "male" })).EnsureSuccessStatusCode();
         var noContract = await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(Guid.NewGuid().ToString("N")));
         Assert.Equal(HttpStatusCode.BadRequest, noName.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, noContract.StatusCode);
@@ -293,7 +293,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        await SignContractAsync(b, "سارا رضایی", "female");
+        await SignContractAsync(b, "Sarah Becker", "female");
         var res = await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(Guid.NewGuid().ToString("N"), "men"));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
@@ -304,7 +304,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
         // Arrange
         var b = new Browser(factory);
         await b.LoginAsync();
-        await SignContractAsync(b, "علی کریمی", "male");
+        await SignContractAsync(b, "Tim Becker", "male");
         var key = Guid.NewGuid().ToString("N");
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(key)));
         var id = g.GetProperty("paymentId").GetInt32();
@@ -335,7 +335,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        await SignContractAsync(b, "رضا محمدی", "male");
+        await SignContractAsync(b, "Finn Schmidt", "male");
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(Guid.NewGuid().ToString("N"))));
         var id = g.GetProperty("paymentId").GetInt32();
 
@@ -353,7 +353,7 @@ public class CheckoutFlowTests(GymApiFactory factory) : IClassFixture<GymApiFact
     {
         var owner = new Browser(factory);
         await owner.LoginAsync();
-        await SignContractAsync(owner, "مریم احمدی", "female");
+        await SignContractAsync(owner, "Julia Fischer", "female");
         var g = await owner.JsonAsync<JsonElement>(await owner.SendAsync(HttpMethod.Post, "/api/v1/checkout",
             Order(Guid.NewGuid().ToString("N"), "women")));
         var id = g.GetProperty("paymentId").GetInt32();

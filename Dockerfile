@@ -1,6 +1,6 @@
-# ساخت چندمرحله‌ای: فرانت (Node) ← بک‌اند (.NET SDK) ← اجرای سبک با کاربر غیر root
+# Mehrstufiger Build: Frontend (Node) → Backend (.NET SDK) → schlanke Laufzeit mit Nicht-root-Benutzer
 
-# ---- ۱. فرانت React → wwwroot ----
+# ---- 1. React-Frontend → wwwroot ----
 FROM node:22-alpine AS web
 WORKDIR /src/src/GymPlatform.Web
 COPY src/GymPlatform.Web/package*.json ./
@@ -8,7 +8,7 @@ RUN npm install --no-audit --no-fund
 COPY src/GymPlatform.Web/ ./
 RUN npm run build
 
-# ---- ۲. بک‌اند ----
+# ---- 2. Backend ----
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY GymPlatform.slnx ./
@@ -21,7 +21,7 @@ COPY src/ src/
 COPY --from=web /src/src/GymPlatform.Api/wwwroot src/GymPlatform.Api/wwwroot
 RUN dotnet publish src/GymPlatform.Api/GymPlatform.Api.csproj -c Release -o /app --no-restore /p:UseAppHost=false
 
-# ---- ۳. اجرا ----
+# ---- 3. Laufzeit ----
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080 \
@@ -34,10 +34,10 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     DOTNET_gcServer=0 \
     DOTNET_GCConserveMemory=7 \
     DOTNET_GCHeapHardLimit=0x8000000
-# ffmpeg برای بهینه‌سازی خودکار ویدیوهای آپلودی (بدون آن برنامه کار می‌کند، فقط ویدیو بهینه نمی‌شود)
+# ffmpeg zur automatischen Optimierung hochgeladener Videos (ohne ffmpeg läuft die App, nur ohne Videooptimierung)
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app ./
-# فایل‌های خصوصی (PDF قراردادها) در volume جدا، با مالکیت کاربر غیر root ایمیج (app، UID 1654)
+# Private Dateien (Vertrags-PDFs) in eigenem Volume, Besitzer ist der Nicht-root-Benutzer des Images (app, UID 1654)
 RUN mkdir -p /data/private /data/uploads /data/videos && chown -R $APP_UID /data
 USER $APP_UID
 EXPOSE 8080

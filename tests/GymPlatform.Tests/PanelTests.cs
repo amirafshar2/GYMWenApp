@@ -13,12 +13,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>فاز ۴: پنل مدیر، پذیرش، مربی، مدیریت محتوا و پیامک خودکار — به‌ویژه محدودیت شعبه.</summary>
+/// <summary>Phase 4: Admin-Panel, Empfang, Trainer, Inhaltsverwaltung und automatische SMS — besonders die Filialbeschränkung.</summary>
 public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     private const string Home = "markazi", Other = "azadi";
 
-    /// <summary>کارمند با نقش‌ها و شعبه‌های داده‌شده (نقش‌های پنل هر بار از دیتابیس خوانده می‌شوند؛ توکن تازه لازم نیست)</summary>
+    /// <summary>Mitarbeiter mit gegebenen Rollen und Filialen (Panel-Rollen werden jedes Mal aus der Datenbank gelesen; kein neues Token nötig)</summary>
     private async Task<(Browser b, int userId)> StaffAsync(string[] roles, params string[] branches)
     {
         var b = new Browser(factory);
@@ -38,7 +38,7 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         var phone = await b.LoginAsync();
-        await CheckoutFlowTests.SignContractAsync(b, "سارا کریمی", "male");
+        await CheckoutFlowTests.SignContractAsync(b, "Sarah Klein", "male");
         var order = new { branchSlug = branch, packageSlug = "quarter", section = "men", discountCode = (string?)null, idempotencyKey = Guid.NewGuid().ToString("N") };
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", order));
         await CheckoutFlowTests.PayInSandboxAsync(b, g, pay: true);
@@ -53,7 +53,7 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        foreach (var url in new[] { "/api/v1/panel/me", "/api/v1/panel/dashboard", "/api/v1/panel/reception/members?q=0912", "/api/v1/panel/coach/trainees", "/api/v1/panel/admin/packages", "/api/v1/panel/admin/sms" })
+        foreach (var url in new[] { "/api/v1/panel/me", "/api/v1/panel/dashboard", "/api/v1/panel/reception/members?q=0157", "/api/v1/panel/coach/trainees", "/api/v1/panel/admin/packages", "/api/v1/panel/admin/sms" })
             Assert.Equal(HttpStatusCode.Forbidden, (await b.SendAsync(HttpMethod.Get, url)).StatusCode);
         b.AccessToken = null;
         Assert.Equal(HttpStatusCode.Unauthorized, (await b.SendAsync(HttpMethod.Get, "/api/v1/panel/dashboard")).StatusCode);
@@ -84,7 +84,7 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.Equal(HttpStatusCode.OK, stockHome.StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, boardOther.StatusCode);
         Assert.Equal(HttpStatusCode.OK, boardHome.StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden, packages.StatusCode); // قیمت پکیج فقط با مدیر کل
+        Assert.Equal(HttpStatusCode.Forbidden, packages.StatusCode); // Paketpreise nur durch den Gesamtadmin
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", export.Content.Headers.ContentType?.MediaType);
         Assert.Equal(SmsKind.Welcome, welcome.Kind);
         Assert.Equal(phone, welcome.Phone);
-        Assert.Contains("خوش آمدی", welcome.Preview);
+        Assert.Contains("willkommen", welcome.Preview);
     }
 
     [Fact]
@@ -180,9 +180,9 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         var add = await coach.SendAsync(HttpMethod.Post, "/api/v1/panel/coach/trainees", new { phone });
         var plan = await coach.SendAsync(HttpMethod.Put, $"/api/v1/panel/coach/trainees/{memberId}/plan", new
         {
-            title = "برنامهٔ حجم",
-            days = new[] { new { day = "شنبه", focus = "سینه", items = new[] { "پرس سینه ۴×۸" } } },
-            nutrition = "پروتئین ۱٫۸ گرم به ازای هر کیلو",
+            title = "Aufbauplan",
+            days = new[] { new { day = "Samstag", focus = "Brust", items = new[] { "Bankdrücken 4×8" } } },
+            nutrition = "Protein 1,8 g pro kg Körpergewicht",
         });
         var metric = await coach.SendAsync(HttpMethod.Post, $"/api/v1/panel/coach/trainees/{memberId}/metrics", new { weightKg = 81.4m });
         var stranger = await otherCoach.SendAsync(HttpMethod.Get, $"/api/v1/panel/coach/trainees/{memberId}");
@@ -195,8 +195,8 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.Equal(HttpStatusCode.Created, metric.StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, stranger.StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, strangerPlan.StatusCode);
-        Assert.Equal("برنامهٔ حجم", myPlan.GetProperty("title").GetString());
-        Assert.Equal("پرس سینه ۴×۸", myPlan.GetProperty("days")[0].GetProperty("items")[0].GetString());
+        Assert.Equal("Aufbauplan", myPlan.GetProperty("title").GetString());
+        Assert.Equal("Bankdrücken 4×8", myPlan.GetProperty("days")[0].GetProperty("items")[0].GetString());
         Assert.Equal(81.4m, myMetrics[0].GetProperty("weightKg").GetDecimal());
     }
 
@@ -210,8 +210,8 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             var branch = await db.Branches.FirstAsync(b => b.Slug == Home);
             var pkg = await db.Packages.FirstAsync(p => p.Slug == "quarter");
-            AppUser U(string phone, bool opt) => new() { UserName = phone, PhoneNumber = phone, FullName = "عضو قدیمی", MarketingSmsOptIn = opt };
-            var users = new[] { U("09350000001", true), U("09350000002", false), U("09350000003", true) };
+            AppUser U(string phone, bool opt) => new() { UserName = phone, PhoneNumber = phone, FullName = "Altes Mitglied", MarketingSmsOptIn = opt };
+            var users = new[] { U("01560000001", true), U("01560000002", false), U("01560000003", true) };
             db.Users.AddRange(users);
             await db.SaveChangesAsync();
             Membership M(AppUser u, int startDaysAgo, int endDaysAgo) => new()
@@ -220,8 +220,8 @@ public class PanelTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
                 StartsAtUtc = DateTime.UtcNow.AddDays(-startDaysAgo), EndsAtUtc = DateTime.UtcNow.AddDays(-endDaysAgo),
                 Status = endDaysAgo > 0 ? MembershipStatus.Expired : MembershipStatus.Active,
             };
-            db.Memberships.AddRange(M(users[0], 120, 30), M(users[1], 120, 30), M(users[2], 60, -7)); // سومی هنوز فعال است (۷ روز مانده)
-            var c = new Campaign { Title = "بازگشت به باشگاه", StartsAtUtc = DateTime.UtcNow.AddDays(-1), EndsAtUtc = DateTime.UtcNow.AddDays(10), DiscountPercent = 25, IsActive = true };
+            db.Memberships.AddRange(M(users[0], 120, 30), M(users[1], 120, 30), M(users[2], 60, -7)); // das dritte ist noch aktiv (7 Tage übrig)
+            var c = new Campaign { Title = "Zurück ins Studio", StartsAtUtc = DateTime.UtcNow.AddDays(-1), EndsAtUtc = DateTime.UtcNow.AddDays(10), DiscountPercent = 25, IsActive = true };
             db.Campaigns.Add(c);
             await db.SaveChangesAsync();
             (optIn, optOut, active, campaignId) = (users[0].Id, users[1].Id, users[2].Id, c.Id);

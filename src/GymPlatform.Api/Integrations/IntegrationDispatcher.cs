@@ -9,8 +9,8 @@ using Microsoft.Extensions.Options;
 namespace GymPlatform.Api.Integrations;
 
 /// <summary>
-/// مقصدی که رویدادهای صف خروجی را می‌گیرد. برای هر سیستم بیرونی (نرم‌افزار گیت شرکت X، حسابداری، …)
-/// یک پیاده‌سازی جدا نوشته و ثبت می‌شود؛ بقیهٔ سیستم تغییری نمی‌کند.
+/// Ziel, das die Ereignisse der Ausgangswarteschlange empfängt. Für jedes externe System (Gate-Software von Firma X, Buchhaltung, …)
+/// wird eine eigene Implementierung geschrieben und registriert; der Rest des Systems bleibt unverändert.
 /// </summary>
 public interface IIntegrationSink
 {
@@ -22,15 +22,15 @@ public interface IIntegrationSink
 public sealed class WebhookOptions
 {
     public const string Section = "Integrations:Webhook";
-    /// <summary>آدرس HTTPS گیرنده (مثلاً میان‌افزار نرم‌افزار گیت). خالی = غیرفعال.</summary>
+    /// <summary>HTTPS-Adresse des Empfängers (z. B. Middleware der Gate-Software). Leer = deaktiviert.</summary>
     public string? Url { get; set; }
-    /// <summary>کلید امضای HMAC (در User Secrets / متغیر محیطی)</summary>
+    /// <summary>HMAC-Signaturschlüssel (in User Secrets / Umgebungsvariable)</summary>
     public string? Secret { get; set; }
 }
 
 /// <summary>
-/// وب‌هوک عمومی: هر رویداد با POST و امضای HMAC-SHA256 در هدر <c>X-KG-Signature</c> ارسال می‌شود.
-/// گیرنده با همان کلید، بدنه را امضا و مقایسه می‌کند تا جعلی نباشد.
+/// Allgemeiner Webhook: jedes Ereignis per POST mit HMAC-SHA256-Signatur im Header <c>X-KG-Signature</c> gesendet.
+/// Der Empfänger signiert den Body mit demselben Schlüssel und vergleicht, damit nichts gefälscht ist.
 /// </summary>
 public sealed class WebhookSink(HttpClient http, IOptions<WebhookOptions> options) : IIntegrationSink
 {
@@ -54,8 +54,8 @@ public sealed class WebhookSink(HttpClient http, IOptions<WebhookOptions> option
 }
 
 /// <summary>
-/// هر چند ثانیه رویدادهای ارسال‌نشده را به همهٔ مقصدهای فعال می‌فرستد. شکست = تلاش دوباره با فاصلهٔ افزایشی
-/// (۱۰ ثانیه، ۴۰ ثانیه، … تا یک ساعت)؛ بعد از ۲۰ تلاش رها و در لاگ ثبت می‌شود.
+/// Sendet alle paar Sekunden ungesendete Ereignisse an alle aktiven Ziele. Fehlschlag = erneuter Versuch mit wachsendem Abstand
+/// (10 Sekunden, 40 Sekunden, … bis eine Stunde); nach 20 Versuchen aufgegeben und protokolliert.
 /// </summary>
 public sealed class IntegrationDispatcher(IServiceScopeFactory scopes, ILogger<IntegrationDispatcher> logger) : BackgroundService
 {
@@ -82,7 +82,7 @@ public sealed class IntegrationDispatcher(IServiceScopeFactory scopes, ILogger<I
             .OrderBy(e => e.Id).Take(50).ToListAsync(ct);
         foreach (var e in batch)
         {
-            if (sinks.Count == 0) { e.ProcessedAtUtc = now; e.LastError = "no-sink"; continue; } // مقصدی تعریف نشده: فقط آرشیو
+            if (sinks.Count == 0) { e.ProcessedAtUtc = now; e.LastError = "no-sink"; continue; } // Kein Ziel definiert: nur Archiv
             try
             {
                 foreach (var s in sinks) await s.SendAsync(e, ct);

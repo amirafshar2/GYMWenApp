@@ -2,7 +2,7 @@ using GymPlatform.Business.Common;
 
 namespace GymPlatform.Api.Infrastructure;
 
-/// <summary>فایل‌های خصوصی (PDF قرارداد و…) بیرون از wwwroot؛ فقط از طریق API و پس از احراز مالکیت سرو می‌شوند.</summary>
+/// <summary>Private Dateien (Vertrags-PDF usw.) außerhalb von wwwroot; nur über die API und nach Besitzprüfung ausgeliefert.</summary>
 public sealed class PrivateFileStore : IPrivateFileStore
 {
     private readonly string _root;
@@ -32,7 +32,7 @@ public sealed class PrivateFileStore : IPrivateFileStore
     private string Resolve(string rel)
     {
         var full = Path.GetFullPath(Path.Combine(_root, rel));
-        // جلوگیری از path traversal
+        // Schutz vor Path Traversal
         if (!full.StartsWith(_root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
             throw new UnauthorizedAccessException("Invalid path.");
         return full;

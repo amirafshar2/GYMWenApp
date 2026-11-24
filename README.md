@@ -1,21 +1,21 @@
 # Fitnessstudio-Plattform – ein Ideenprojekt mit Vibe-Coding
 
 > [!IMPORTANT]
-> **Dies ist ein Demo- und Lernprojekt.** Die Marke „Ahankooh“ ist frei erfunden; alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
+> **Dies ist ein Demo- und Lernprojekt.** Die Marke „Eisenwerk Fitness“ ist frei erfunden; alle Mitglieder, Umsätze und Bestellungen sind fiktive Beispieldaten, Zahlungen laufen über ein Test-Gateway und es werden keine echten SMS verschickt.
 >
-> **▶ Live-Demo ansehen: [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
+> **▶ Live-Demo ansehen: [gym.amirrezaafshar.de](https://gym.amirrezaafshar.de/)** · Ins Panel per Ein-Klick-Login auf der Login-Seite
 
-Eine Web-Plattform für eine (fiktive) Fitnessstudio-Kette mit 12 Standorten: öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Leitung. Die Oberfläche ist auf Persisch (Rechts-nach-links) – ein bewusst gewählter Härtetest für Layout und Typografie.
+Eine Web-Plattform für eine (fiktive) Fitnessstudio-Kette mit 12 Standorten: öffentliche Website, Online-Mitgliedschaft mit Bezahlung, Shop, Kantine mit QR-Bestellung und ein Mitarbeiter-Panel für Empfang, Trainer und Leitung. Die Oberfläche ist standardmäßig **Deutsch** (Euro, deutsches Datumsformat, deutsche Handynummern, links-nach-rechts). Die ursprüngliche persische Fassung (Rechts-nach-links, Toman, persischer Kalender) – damals ein bewusst gewählter Härtetest für Layout und Typografie – liegt unverändert im Branch [`persisch`](../../tree/persisch).
 
 ## Live-Demo
 
-**👉 [gymapp-vqzk.onrender.com](https://gymapp-vqzk.onrender.com/)**
+**👉 [gym.amirrezaafshar.de](https://gym.amirrezaafshar.de/)**
 
-- **Ein-Klick-Login:** Auf der Login-Seite gibt es die Schaltflächen „Gesamtleitung“, „Standortleitung“ und „Mitglied“ – ohne Nummer und Code direkt ins Panel bzw. ins Mitgliedskonto.
-- Alternativ mit **09100000000** (alle Rollen) oder **09100000001** (Standortleitung) anmelden – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
+- **Ein-Klick-Login:** Auf der Login-Seite gibt es die Schaltflächen „Gesamtadmin“, „Filialleitung“ und „Studiomitglied“ – ohne Nummer und Code direkt ins Panel bzw. ins Mitgliedskonto.
+- Alternativ mit **01510000000** (alle Rollen) oder **01510000001** (Standortleitung) anmelden – der SMS-Code wird im Demo-Modus direkt auf der Seite angezeigt.
 - Ein oranger Hinweisbalken oben auf jeder Seite kennzeichnet die Demo.
 - Zahlungen laufen über ein Test-Gateway, es wird kein echtes Geld bewegt.
-- Die Demo läuft im kostenlosen Render-Tarif: Nach 15 Minuten ohne Zugriff schläft sie ein, der erste Aufruf dauert dann etwa eine Minute. Demo-Daten werden bei jedem Neustart neu erzeugt.
+- Die Demo läuft auf einem eigenen Server (Docker, Oracle Cloud) und ist sofort erreichbar. Demo-Daten werden bei jedem Neustart neu erzeugt.
 
 ### Screenshots
 
@@ -80,7 +80,7 @@ Ich habe die Ideen, die Anforderungen und jede Phase in natürlicher Sprache bes
 | Echtzeit | SignalR | Live-Bestelltafel der Kantine |
 | Dokumente | QuestPDF, ClosedXML, QRCoder | PDF-Rechnung und -Vertrag, Excel-Export, QR-Mitgliedskarte |
 | Logging | Serilog | strukturierte Logs, Audit-Log in der Datenbank |
-| Frontend | React 19, TypeScript, Vite 8, React Router 7 | Single-Page-App, vollständig RTL/Persisch |
+| Frontend | React 19, TypeScript, Vite 8, React Router 7 | Single-Page-App, Deutsch (persische RTL-Fassung im Branch `persisch`) |
 | Design | Tailwind CSS 4, Motion, Lucide, Komponenten von 21st.dev | Hero mit Partikel-Hantel, Scroll-Animationen, Panels |
 | Tests | xUnit + WebApplicationFactory, Playwright | 77 Server- und 33 Browser-Tests (Desktop und Mobil) |
 | Betrieb | Docker (mehrstufig), docker-compose, Render, GitHub Actions | Image ohne Root, Demo-Hosting, CI mit Sicherheitsprüfung |
@@ -89,7 +89,7 @@ Ich habe die Ideen, die Anforderungen und jede Phase in natürlicher Sprache bes
 
 ```mermaid
 flowchart LR
-    subgraph Client["Browser (React SPA, RTL)"]
+    subgraph Client["Browser (React SPA)"]
         Site["Öffentliche Website"]
         Member["Mitgliedskonto"]
         Panel["Mitarbeiter-Panel"]
@@ -236,8 +236,8 @@ cd src\GymPlatform.Web; npm run dev     # http://localhost:5173, /api wird an ht
 
 | Zugang | Telefonnummer | Rechte |
 |---|---|---|
-| Demo-Mitarbeiter | 09100000000 | alle Rollen inkl. Gesamtleitung |
-| Demo-Standortleitung | 09100000001 | nur ein Standort |
+| Demo-Mitarbeiter | 01510000000 | alle Rollen inkl. Gesamtleitung |
+| Demo-Standortleitung | 01510000001 | nur ein Standort |
 | Demo-Mitglieder | 09391000001 und folgende | Mitgliedskonto mit Karte, Bestellungen, Plan |
 
 - Im Demo-Modus wird keine echte SMS verschickt – der **Code erscheint direkt auf der Seite**.
@@ -252,7 +252,7 @@ cd src\GymPlatform.Web; npm run dev     # http://localhost:5173, /api wird an ht
 - **Shop:** `/shop` – Kategorien, Standort für den Bestand wählen, Farbe und Größe, Warenkorb, Abholung oder Versand.
 - **Wallet:** `/wallet` – Aufladen über das Gateway, Bezahlen in Shop und Kantine.
 - **Kantine (Gast):** `/canteen/<standort>?table=Tisch 4` – dieselbe Adresse, die der QR-Code am Tisch öffnet.
-- **Kantine (Personal):** als 09100000000 anmelden und `/panel/canteen` öffnen und einen Standort wählen; Bestellungen erscheinen live, bei „fertig“ piept das Handy des Gastes. Druckvorlage der Tisch-QR-Codes: `/panel/canteen/qr`.
+- **Kantine (Personal):** als 01510000000 anmelden und `/panel/canteen` öffnen und einen Standort wählen; Bestellungen erscheinen live, bei „fertig“ piept das Handy des Gastes. Druckvorlage der Tisch-QR-Codes: `/panel/canteen/qr`.
 
 ## Rollen und Rechte im Panel
 
@@ -271,7 +271,7 @@ cd src\GymPlatform.Web; npm run dev     # http://localhost:5173, /api wird an ht
 
 ## Automatische SMS
 
-Willkommen/Verlängerungsbestätigung (sofort), Erinnerung 7 und 1 Tag vor Ablauf, Geburtstag (persischer Kalender, mit Einmal-Rabattcode für den Shop) und Aktionen (nur abgelaufene Mitglieder mit Werbe-Einwilligung). Erinnerungen und Werbung nur zwischen 9 und 21 Uhr; jede SMS per eindeutigem Schlüssel nur einmal. Vier Kavenegar-Vorlagen (Willkommen, Verlängerung, Geburtstag, Aktion; je 3 Tokens). Website-Adresse im SMS-Text: `Sms:SiteUrl`.
+Willkommen/Verlängerungsbestätigung (sofort), Erinnerung 7 und 1 Tag vor Ablauf, Geburtstag (mit Einmal-Rabattcode für den Shop) und Aktionen (nur abgelaufene Mitglieder mit Werbe-Einwilligung). Erinnerungen und Werbung nur zwischen 9 und 21 Uhr; jede SMS per eindeutigem Schlüssel nur einmal. Vier Kavenegar-Vorlagen (Willkommen, Verlängerung, Geburtstag, Aktion; je 3 Tokens). Website-Adresse im SMS-Text: `Sms:SiteUrl`.
 
 ## Drehkreuz- und Armband-Anbindung
 
@@ -297,7 +297,7 @@ Das Repository enthält eine fertige **Render-Blueprint-Datei** (`render.yaml`).
 1. In Render **New → Blueprint** wählen.
 2. GitHub verbinden und **nur dieses Repository** freigeben (es ist privat – „Public Git Repository“ findet es nicht).
 3. Repository auswählen, Name bestätigen und **Apply** klicken. Render baut das Docker-Image (Frontend + Backend) und startet den Dienst; der erste Build dauert etwa 10 Minuten.
-4. Die Adresse `https://<name>.onrender.com` öffnen und mit `09100000000` anmelden – der Code erscheint auf der Seite.
+4. Die Adresse `https://<name>.onrender.com` öffnen und mit `01510000000` anmelden – der Code erscheint auf der Seite.
 
 Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check `/health/ready`, automatisches Deployment bei jedem Push auf `master` und diese Umgebungsvariablen:
 
@@ -305,12 +305,12 @@ Was die Blueprint einstellt: Docker, Free-Tarif, Region Frankfurt, Health-Check 
 |---|---|
 | `ASPNETCORE_ENVIRONMENT` | `Staging` |
 | `PORT` | `8080` |
-| `Setup__Mode` | `Demo` (fiktive Marke „Ahankooh“ + Demo-Daten) |
+| `Setup__Mode` | `Demo` (fiktive Marke „Eisenwerk Fitness“ + Demo-Daten) |
 | `Database__Provider` / `ConnectionStrings__Default` | `Sqlite` / `Data Source=/data/private/kg.db` |
 | `Jwt__SigningKey`, `Otp__Pepper` | von Render zufällig erzeugt |
 | `Otp__ExposeCodeInResponse` | `true` (Code auf der Seite) |
 | `Payment__UseVirtualGateway` | `true` (Test-Gateway) |
-| `Demo__StaffPhone` / `Demo__SeedMembers` | `09100000000` / `true` |
+| `Demo__StaffPhone` / `Demo__SeedMembers` | `01510000000` / `true` |
 | `ReverseProxy__Enabled` | `true` (HTTPS hinter dem Render-Proxy) |
 | `DOTNET_gcServer` | `0` (weniger Arbeitsspeicher) |
 
@@ -344,14 +344,14 @@ Beim allerersten Start legt `Setup:Mode` fest, womit die Installation beginnt:
 | Modus | Inhalt | Typischer Einsatz |
 |---|---|---|
 | `Blank` | leere Datenbank, nur Rollen und das Konto des Inhabers (`Setup:OwnerPhone`). Besucher sehen „Website im Aufbau“, bis der Inhaber im Assistenten auf **Veröffentlichen** klickt. | neue Installation, die der Betreiber selbst befüllt |
-| `Demo` | fiktive Marke „Ahankooh“, 12 Beispielstandorte, Pakete, Trainer, Shop, Kantine, Aktion und Rabattcodes | Vorführung, öffentliche Demo |
+| `Demo` | fiktive Marke „Eisenwerk Fitness“, 12 Beispielstandorte, Pakete, Trainer, Shop, Kantine, Aktion und Rabattcodes | Vorführung, öffentliche Demo |
 | `Content` | ein **Inhaltspaket** (`Setup:ContentFile`, ZIP oder Ordner) | Website mit fertigen Inhalten ausliefern, Umzug, Wiederherstellung |
 
 Ohne Angabe gilt: außerhalb von Production `Demo`, in Production `Blank` (`Demo` ist in Production gesperrt).
 
 ```powershell
 # leere Vorlage, Inhaber meldet sich mit seiner Handynummer an
-$env:Setup__Mode = "Blank"; $env:Setup__OwnerPhone = "09121234567"
+$env:Setup__Mode = "Blank"; $env:Setup__OwnerPhone = "01571234567"
 # mit fertigem Inhalt
 $env:Setup__Mode = "Content"; $env:Setup__ContentFile = "C:\inhalte\site-content.zip"
 ```
@@ -384,7 +384,7 @@ Layout und Stil orientieren sich an einer Referenzseite (Vorlage „GYM Store �
 | Galerie | `site/SiteGallery.tsx` | Shared Element Gallery (21st.dev) |
 | Dunkler Footer + Newsletter | `site/SiteFooter.tsx` | Layout der Referenzseite |
 
-Änderungen an den Originalkomponenten: feste englische Texte wurden zu persischen Props, dazu RTL-Anpassungen (kein letter-spacing bei Persisch, Pfeilrichtungen). Jede Datei beschreibt oben ihre Änderungen. Die Lizenz dieser Komponenten ist auf 21st.dev „unknown“ – vor kommerzieller Übergabe prüfen. Originaldemos im Entwicklungsmodus: `npm run dev`, dann `http://localhost:5173/lab`.
+Änderungen an den Originalkomponenten: feste englische Texte wurden zu Props (ursprünglich persisch, jetzt deutsch); die RTL-Anpassungen der persischen Fassung sind im Branch `persisch` erhalten. Jede Datei beschreibt oben ihre Änderungen. Die Lizenz dieser Komponenten ist auf 21st.dev „unknown“ – vor kommerzieller Übergabe prüfen. Originaldemos im Entwicklungsmodus: `npm run dev`, dann `http://localhost:5173/lab`.
 
 ### Scroll-Video
 
@@ -408,7 +408,7 @@ Gemessen (Playwright, CPU 4–6× gedrosselt, Median Abstand Scroll-Ziel ↔ Vid
 - Header: CSP, HSTS (außer Development), X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy.
 - Rate-Limiting pro IP: Formulare 5/min, OTP 5/min, Login 15/min, Zahlung 10/min, global 300.
 - CSRF-Schutz per Cookie + Header `X-XSRF-TOKEN` für Gast-Anfragen.
-- Validierung aller Eingaben in der Business-Schicht, Normalisierung persischer Ziffern und Handynummern.
+- Validierung aller Eingaben in der Business-Schicht, Normalisierung von Ziffern und deutschen Handynummern (+49/0049).
 - EF Core parametrisiert, kein Roh-SQL; Begrenzung der Request-Größe.
 - Der Standort des Nutzers wird nur im Browser verwendet und nicht an den Server gesendet.
 

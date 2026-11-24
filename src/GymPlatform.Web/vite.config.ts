@@ -5,14 +5,14 @@ import path from 'node:path'
 
 const API = process.env.API_URL ?? 'https://localhost:7180'
 
-// در توسعه، /api به بک‌اند ASP.NET پراکسی می‌شود.
-// در بیلد، خروجی مستقیم داخل wwwroot پروژهٔ Api قرار می‌گیرد.
+// In der Entwicklung wird /api an das ASP.NET-Backend weitergeleitet.
+// Beim Build landet die Ausgabe direkt in wwwroot des Api-Projekts.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      // کامپوننت‌های 21st که برای Next.js نوشته شده‌اند
+      // 21st-Komponenten, die für Next.js geschrieben wurden
       'next/link': path.resolve(__dirname, './src/shims/next-link.tsx'),
       'next/image': path.resolve(__dirname, './src/shims/next-image.tsx'),
     },
@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Origin هم به آدرس بک‌اند بازنویسی می‌شود تا بررسی هم‌مبدأ بودن refresh/logout در توسعه رد نشود
+      // Auch Origin wird auf die Backend-Adresse umgeschrieben, damit die Same-Origin-Prüfung von refresh/logout in der Entwicklung nicht scheitert
       '/api': { target: API, changeOrigin: true, secure: false, configure: (p) => p.on('proxyReq', (r) => { if (r.getHeader('origin')) r.setHeader('origin', API) }) },
       '/payment-sandbox': { target: API, changeOrigin: true, secure: false },
       '/hubs': { target: API, changeOrigin: true, secure: false, ws: true },
@@ -29,7 +29,7 @@ export default defineConfig({
   build: {
     outDir: '../GymPlatform.Api/wwwroot',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1100, // chunk نقشه (MapLibre) فقط هنگام دیده شدن نقشه بارگذاری می‌شود
+    chunkSizeWarningLimit: 1100, // der Karten-Chunk (MapLibre) wird erst geladen, wenn die Karte sichtbar wird
     rollupOptions: {
       output: {
         manualChunks(id) {

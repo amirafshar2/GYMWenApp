@@ -10,10 +10,10 @@ public class MembershipPackage : BaseEntity
     public PackageCategory Category { get; set; }
     public int DurationMonths { get; set; }
 
-    /// <summary>null یعنی جلسات نامحدود.</summary>
+    /// <summary>null = unbegrenzte Einheiten.</summary>
     public int? Sessions { get; set; }
 
-    /// <summary>قیمت به تومان.</summary>
+    /// <summary>Preis in Euro-Cent.</summary>
     public long PriceToman { get; set; }
 
     public bool IncludesPersonalCoach { get; set; }

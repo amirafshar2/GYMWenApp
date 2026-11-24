@@ -2,7 +2,7 @@ using GymPlatform.Business.Services;
 
 namespace GymPlatform.Api.Integrations;
 
-/// <summary>روزی یک بار پاک‌سازی داده‌های موقت (کدهای ورود، نشست‌های منقضی، رویدادهای ارسال‌شده).</summary>
+/// <summary>Einmal täglich temporäre Daten aufräumen (Login-Codes, abgelaufene Sitzungen, gesendete Ereignisse).</summary>
 public sealed class MaintenanceWorker(IServiceScopeFactory scopes, ILogger<MaintenanceWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stop)

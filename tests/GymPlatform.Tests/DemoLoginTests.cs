@@ -4,25 +4,25 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace GymPlatform.Tests;
 
-/// <summary>ورود یک‌کلیکی نسخهٔ نمایشی: فقط حساب‌های دمو، و فقط وقتی کد ورود روی صفحه است.</summary>
+/// <summary>Ein-Klick-Login der Demo-Version: nur Demo-Konten und nur, wenn der Login-Code auf der Seite steht.</summary>
 public sealed class DemoLoginTests
 {
     [Fact]
     public async Task Demo_login_works_only_for_demo_accounts()
     {
         using var f = new GymApiFactory();
-        using var demo = f.WithWebHostBuilder(b => b.UseSetting("Demo:StaffPhone", "09100000000"));
+        using var demo = f.WithWebHostBuilder(b => b.UseSetting("Demo:StaffPhone", "01510000000"));
         var http = demo.CreateClient(new() { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
 
         var csrfRes = await Send(http, HttpMethod.Get, "/api/v1/security/csrf", null, null, null);
         var cookie = csrfRes.Headers.GetValues("Set-Cookie").First().Split(';')[0];
         var csrf = JsonDocument.Parse(await csrfRes.Content.ReadAsStringAsync()).RootElement.GetProperty("token").GetString();
 
-        var ok = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "09100000000" }, csrf, cookie);
+        var ok = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "01510000000" }, csrf, cookie);
         Assert.Equal(HttpStatusCode.OK, ok.StatusCode);
         Assert.Contains("accessToken", await ok.Content.ReadAsStringAsync());
 
-        var stranger = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "09121234567" }, csrf, cookie);
+        var stranger = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "01571234567" }, csrf, cookie);
         Assert.Equal(HttpStatusCode.NotFound, stranger.StatusCode);
 
         var site = await Send(http, HttpMethod.Get, "/api/v1/site", null, null, null);
@@ -33,13 +33,13 @@ public sealed class DemoLoginTests
     public async Task Demo_login_is_off_when_code_is_not_shown()
     {
         using var f = new GymApiFactory();
-        using var real = f.WithWebHostBuilder(b => { b.UseSetting("Demo:StaffPhone", "09100000000"); b.UseSetting("Otp:ExposeCodeInResponse", "false"); });
+        using var real = f.WithWebHostBuilder(b => { b.UseSetting("Demo:StaffPhone", "01510000000"); b.UseSetting("Otp:ExposeCodeInResponse", "false"); });
         var http = real.CreateClient(new() { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
         var csrfRes = await Send(http, HttpMethod.Get, "/api/v1/security/csrf", null, null, null);
         var cookie = csrfRes.Headers.GetValues("Set-Cookie").First().Split(';')[0];
         var csrf = JsonDocument.Parse(await csrfRes.Content.ReadAsStringAsync()).RootElement.GetProperty("token").GetString();
 
-        var res = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "09100000000" }, csrf, cookie);
+        var res = await Send(http, HttpMethod.Post, "/api/v1/auth/demo", new { phoneNumber = "01510000000" }, csrf, cookie);
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 

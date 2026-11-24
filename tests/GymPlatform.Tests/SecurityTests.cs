@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>فاز ۵: رگرسیون یافته‌های ممیزی امنیت (هم‌زمانی پرداخت، حدس کد، دسترسی شعبه، سقف کد تخفیف، تنظیمات production).</summary>
+/// <summary>Phase 5: Regressionstests der Sicherheitsaudit-Befunde (gleichzeitige Zahlungen, Code-Raten, Filialzugriff, Rabattcode-Limit, Production-Einstellungen).</summary>
 public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     private const string Home = "markazi", Other = "azadi";
@@ -24,7 +24,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         var phone = await b.LoginAsync();
-        await CheckoutFlowTests.SignContractAsync(b, "رضا امینی", "male");
+        await CheckoutFlowTests.SignContractAsync(b, "Robert Arnold", "male");
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout",
             new { branchSlug = branch, packageSlug = "quarter", section = "men", discountCode = (string?)null, idempotencyKey = Key() }));
         await CheckoutFlowTests.PayInSandboxAsync(b, g, pay: true);
@@ -44,7 +44,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         foreach (var slug in branches)
             db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == slug).Select(x => x.Id).FirstAsync() });
         await db.SaveChangesAsync();
-        // نقش در توکن تازه هم باشد (برای endpointهای مبتنی بر توکن)
+        // Die Rolle muss auch im neuen Token stehen (für tokenbasierte Endpoints)
         b.AccessToken = null;
         b.AccessToken = (await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh"))).GetProperty("accessToken").GetString();
         return b;
@@ -55,7 +55,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        (await b.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 400_000, idempotencyKey = Key() })).EnsureSuccessStatusCode();
+        (await b.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 4_000, idempotencyKey = Key() })).EnsureSuccessStatusCode();
         long tracking; int userId;
         using (var s = factory.Services.CreateScope())
         {
@@ -72,7 +72,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 
         using var check = factory.Services.CreateScope();
         var db = check.ServiceProvider.GetRequiredService<GymDbContext>();
-        Assert.Equal(400_000, await db.Wallets.Where(w => w.UserId == userId).Select(w => w.BalanceToman).FirstAsync());
+        Assert.Equal(4_000, await db.Wallets.Where(w => w.UserId == userId).Select(w => w.BalanceToman).FirstAsync());
         Assert.Equal(1, await db.WalletTransactions.CountAsync(t => t.UserId == userId));
     }
 
@@ -81,7 +81,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         await b.InitAsync();
-        var phone = "0912" + Random.Shared.Next(1_000_000, 9_999_999);
+        var phone = "0157" + Random.Shared.Next(1_000_000, 9_999_999);
         var otp = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/auth/otp", new { phoneNumber = phone }));
         var right = otp.GetProperty("demoCode").GetString()!;
         var wrong = right == "11111" ? "22222" : "11111";
@@ -94,7 +94,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         }));
         var afterwards = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/verify", new { phoneNumber = phone, code = right });
 
-        Assert.True(results.Count(r => r == HttpStatusCode.BadRequest) <= 5); // فقط ۵ حدس واقعاً بررسی شد
+        Assert.True(results.Count(r => r == HttpStatusCode.BadRequest) <= 5); // nur 5 Versuche wurden wirklich geprüft
         Assert.Equal(HttpStatusCode.TooManyRequests, afterwards.StatusCode);
     }
 
@@ -129,7 +129,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         using (var s = factory.Services.CreateScope())
         {
             var db = s.ServiceProvider.GetRequiredService<GymDbContext>();
-            var c = await db.Coaches.FirstAsync(x => x.Slug == "coach-3"); // شعبهٔ کسائی، آقایان
+            var c = await db.Coaches.FirstAsync(x => x.Slug == "coach-3"); // Filiale Bad Cannstatt, Herren
             c.UserId = me.GetProperty("id").GetInt32();
             await db.SaveChangesAsync();
         }
@@ -153,14 +153,14 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         {
             var b = new Browser(factory);
             await b.LoginAsync();
-            await CheckoutFlowTests.SignContractAsync(b, "نیما صادقی", "male");
+            await CheckoutFlowTests.SignContractAsync(b, "Niklas Sander", "male");
             return b;
         }
         object Order(string? dc) => new { branchSlug = Home, packageSlug = "quarter", section = "men", discountCode = dc, idempotencyKey = Key() };
         var a = await Signed();
         var b2 = await Signed();
 
-        var first = await a.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(code));       // در انتظار پرداخت
+        var first = await a.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(code));       // Zahlung ausstehend
         var sameUserAgain = await a.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(code));
         var otherUser = await b2.SendAsync(HttpMethod.Post, "/api/v1/checkout", Order(code));
 
@@ -174,7 +174,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        await CheckoutFlowTests.SignContractAsync(b, "کاوه نیک", "male");
+        await CheckoutFlowTests.SignContractAsync(b, "Kai Neumann", "male");
         var code = "MEMB" + Random.Shared.Next(1000, 9999);
         using (var s = factory.Services.CreateScope())
         {
@@ -191,7 +191,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         var member = new Browser(factory);
         await member.LoginAsync();
-        var top = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 500_000, idempotencyKey = Key() }));
+        var top = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 5_000, idempotencyKey = Key() }));
         await CheckoutFlowTests.PayInSandboxAsync(member, top.GetProperty("gateway"), pay: true);
         var placed = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/canteen/orders",
             new { branchSlug = Home, items = new[] { new { itemId = 1, quantity = 1 } }, payMethod = "wallet", idempotencyKey = Key() }));
@@ -204,7 +204,7 @@ public class SecurityTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         }));
 
         var w = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/me/wallet"));
-        Assert.Equal(500_000, w.GetProperty("balanceToman").GetInt64());
+        Assert.Equal(5_000, w.GetProperty("balanceToman").GetInt64());
     }
 
     [Fact]

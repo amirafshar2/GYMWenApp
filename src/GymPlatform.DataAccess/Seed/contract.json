@@ -1,23 +1,23 @@
 {
-  "title": "قرارداد عضویت در باشگاه‌های آهن‌کوه",
+  "title": "Mitgliedsvertrag bei Eisenwerk Fitness",
   "clauses": [
-    "این قرارداد میان باشگاه‌های آهن‌کوه (از این پس «باشگاه») و عضو که مشخصاتش در این برگه آمده (از این پس «عضو») منعقد می‌شود. متن حاضر نمونه است و پیش از استفادهٔ واقعی باید توسط مدیریت باشگاه و مشاور حقوقی تأیید شود.",
-    "موضوع قرارداد استفاده از سالن و خدمات پکیج انتخاب‌شده، فقط در شعبه و سانس (آقایان یا بانوان) درج‌شده در فاکتور، در مدت اعتبار عضویت است.",
-    "مدت عضویت از تاریخ فعال شدن پس از پرداخت آغاز می‌شود. جلسات استفاده‌نشده پس از پایان مدت قابل انتقال یا بازگشت وجه نیست، مگر در موارد فریز مندرج در پکیج.",
-    "عضو متعهد است مقررات سالن، از جمله پوشش مناسب، رعایت نوبت دستگاه‌ها، بازگرداندن وزنه‌ها و رعایت بهداشت فردی را رعایت کند.",
-    "عضو تأیید می‌کند که اطلاعات فرم سلامت پیوست را صادقانه تکمیل کرده است. در صورت داشتن بیماری یا آسیب، تمرین با مسئولیت عضو و پس از مشورت با پزشک انجام می‌شود.",
-    "باشگاه مسئول نگهداری از وسایل شخصی عضو خارج از کمدهای قفل‌دار نیست.",
-    "کارت عضویت دیجیتال شخصی است و انتقال آن به دیگری مجاز نیست. ورود با کارت دیگری موجب لغو عضویت بدون بازگشت وجه است.",
-    "انصراف تا ۷۲ ساعت پس از پرداخت و پیش از اولین ورود، با کسر ۱۰٪ هزینه امکان‌پذیر است.",
-    "این قرارداد با تأیید عضو از طریق کد یکبارمصرف ارسال‌شده به شمارهٔ موبایل او امضا می‌شود و تاریخ، ساعت، نشانی IP و نسخهٔ قرارداد ثبت می‌گردد."
+    "Dieser Vertrag wird zwischen Eisenwerk Fitness (im Folgenden „Studio“) und dem in diesem Dokument genannten Mitglied (im Folgenden „Mitglied“) geschlossen. Der vorliegende Text ist ein Muster und muss vor dem echten Einsatz von der Studioleitung und einer Rechtsberatung geprüft werden.",
+    "Gegenstand des Vertrags ist die Nutzung des Studios und der Leistungen des gewählten Pakets, nur in der auf der Rechnung genannten Filiale und dem genannten Bereich (Herren oder Damen), während der Laufzeit der Mitgliedschaft.",
+    "Die Laufzeit beginnt mit der Aktivierung nach der Zahlung. Nicht genutzte Einheiten sind nach Ablauf weder übertragbar noch erstattungsfähig, außer bei im Paket vorgesehenen Pausen.",
+    "Das Mitglied verpflichtet sich, die Hausordnung einzuhalten, insbesondere angemessene Kleidung, Rücksicht an den Geräten, Zurücklegen der Gewichte und persönliche Hygiene.",
+    "Das Mitglied bestätigt, den beigefügten Gesundheitsfragebogen wahrheitsgemäß ausgefüllt zu haben. Bei Erkrankungen oder Verletzungen trainiert das Mitglied auf eigene Verantwortung und nach ärztlicher Rücksprache.",
+    "Das Studio haftet nicht für persönliche Gegenstände des Mitglieds außerhalb der abschließbaren Spinde.",
+    "Die digitale Mitgliedskarte ist persönlich und nicht übertragbar. Der Zutritt mit einer fremden Karte führt zur Kündigung ohne Erstattung.",
+    "Ein Rücktritt ist innerhalb von 14 Tagen nach der Zahlung und vor dem ersten Besuch gegen eine Gebühr von 10 % möglich.",
+    "Dieser Vertrag wird durch die Bestätigung des Mitglieds mit dem an seine Handynummer gesendeten Einmalcode unterschrieben; Datum, Uhrzeit, IP-Adresse und Vertragsversion werden gespeichert."
   ],
   "healthQuestions": [
-    "آیا تا به حال پزشک گفته است که بیماری قلبی دارید یا فقط باید فعالیت بدنی تحت نظر پزشک انجام دهید؟",
-    "آیا هنگام فعالیت بدنی درد قفسهٔ سینه احساس می‌کنید؟",
-    "آیا در ماه گذشته بدون فعالیت بدنی درد قفسهٔ سینه داشته‌اید؟",
-    "آیا به خاطر سرگیجه تعادل خود را از دست می‌دهید یا تا به حال از هوش رفته‌اید؟",
-    "آیا مشکل استخوانی یا مفصلی دارید که با تغییر فعالیت بدنی بدتر شود؟",
-    "آیا اکنون برای فشار خون یا بیماری قلبی دارو مصرف می‌کنید؟",
-    "آیا دلیل دیگری می‌شناسید که نباید فعالیت بدنی انجام دهید؟"
+    "Hat Ihnen ein Arzt jemals gesagt, dass Sie eine Herzerkrankung haben oder nur unter ärztlicher Aufsicht Sport treiben sollten?",
+    "Haben Sie bei körperlicher Aktivität Schmerzen in der Brust?",
+    "Hatten Sie im letzten Monat Brustschmerzen ohne körperliche Aktivität?",
+    "Verlieren Sie wegen Schwindel das Gleichgewicht oder waren Sie schon einmal bewusstlos?",
+    "Haben Sie Knochen- oder Gelenkprobleme, die sich durch körperliche Aktivität verschlimmern könnten?",
+    "Nehmen Sie derzeit Medikamente gegen Bluthochdruck oder eine Herzerkrankung?",
+    "Kennen Sie einen anderen Grund, warum Sie keinen Sport treiben sollten?"
   ]
 }

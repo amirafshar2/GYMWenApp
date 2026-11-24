@@ -1,10 +1,10 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
-import { ArrowRight, MessageSquareText } from 'lucide-react'
+import { ArrowLeft, MessageSquareText } from 'lucide-react'
 import { authApi, ApiError, type User } from '@/lib/api'
 import { faDigits, faNum } from '@/lib/fa'
 import { Btn, inputCls, Notice, toLatinDigits } from './ui'
 
-/** شمارش معکوس ثانیه‌ای برای «ارسال دوباره» */
+/** Sekunden-Countdown für „Erneut senden“ */
 export function useCountdown() {
   const [left, setLeft] = useState(0)
   useEffect(() => {
@@ -15,7 +15,7 @@ export function useCountdown() {
   return [left, setLeft] as const
 }
 
-/** فیلد کد پیامکی ۵ رقمی؛ autocomplete=one-time-code تا گوشی کد را خودش پیشنهاد دهد */
+/** Feld für den 5-stelligen SMS-Code; autocomplete=one-time-code, damit das Handy den Code vorschlägt */
 export function CodeField({ value, onChange, id, invalid, describedBy }: { value: string; onChange: (v: string) => void; id: string; invalid?: boolean; describedBy?: string }) {
   return (
     <input id={id} value={value} onChange={(e) => onChange(toLatinDigits(e.target.value).replace(/\D/g, '').slice(0, 5))}
@@ -25,7 +25,7 @@ export function CodeField({ value, onChange, id, invalid, describedBy }: { value
   )
 }
 
-/** ورود دومرحله‌ای: موبایل ← کد پیامکی. در حالت دمو کد روی صفحه نمایش داده می‌شود. */
+/** Zweistufiger Login: Handy → SMS-Code. Im Demo-Modus wird der Code auf der Seite angezeigt. */
 export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => void; compact?: boolean }) {
   const uid = useId()
   const [step, setStep] = useState<'phone' | 'code'>('phone')
@@ -40,7 +40,7 @@ export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => voi
   const normalized = toLatinDigits(phone).replace(/[\s-]/g, '')
   const send = async (e?: FormEvent) => {
     e?.preventDefault()
-    if (!/^(\+98|0098|0)?9\d{9}$/.test(normalized)) return setErr('شمارهٔ موبایل را مثل ۰۹۱۲۳۴۵۶۷۸۹ وارد کنید.')
+    if (!/^(\+98|0098|0)?9\d{9}$/.test(normalized)) return setErr('Bitte die Handynummer im Format 01512 3456789 eingeben.')
     setBusy(true); setErr(null)
     try {
       const r = await authApi.sendOtp(normalized)
@@ -51,49 +51,49 @@ export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => voi
 
   const verify = async (e?: FormEvent) => {
     e?.preventDefault()
-    if (code.length !== 5) return setErr('کد ۵ رقمی پیامک‌شده را وارد کنید.')
+    if (code.length !== 5) return setErr('Bitte den 5-stelligen Code aus der SMS eingeben.')
     setBusy(true); setErr(null)
     try { onDone((await authApi.verify(normalized, code)).user) }
     catch (x) { setErr((x as ApiError).field?.('code') ?? (x as Error).message) }
     finally { setBusy(false) }
   }
 
-  // ورود خودکار وقتی رقم پنجم وارد شد
+  // Automatisch anmelden, sobald die fünfte Ziffer eingegeben ist
   useEffect(() => { if (step === 'code' && code.length === 5 && !busy) void verify() }, [code]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return step === 'phone' ? (
     <form onSubmit={send} noValidate className="grid gap-4">
       <div className="grid gap-2">
-        <label htmlFor={`${uid}-m`} className="text-[14px] font-bold text-chalk">شمارهٔ موبایل</label>
-        <input id={`${uid}-m`} type="tel" inputMode="numeric" autoComplete="tel" dir="ltr" placeholder="۰۹۱۲۳۴۵۶۷۸۹" autoFocus={!compact}
+        <label htmlFor={`${uid}-m`} className="text-[14px] font-bold text-chalk">Handynummer</label>
+        <input id={`${uid}-m`} type="tel" inputMode="numeric" autoComplete="tel" dir="ltr" placeholder="01512 3456789" autoFocus={!compact}
           value={phone} onChange={(e) => setPhone(e.target.value)} aria-invalid={!!err || undefined} aria-describedby={`${uid}-e`}
-          className={`${inputCls} text-right text-[17px]`} />
-        <p className="text-[13px] text-rubber">کد ورود با پیامک فرستاده می‌شود. حساب جدا لازم نیست؛ اولین ورود یعنی ثبت‌نام.</p>
+          className={`${inputCls} text-left text-[17px]`} />
+        <p className="text-[13px] text-rubber">Der Login-Code kommt per SMS. Ein separates Konto ist nicht nötig; der erste Login ist die Anmeldung.</p>
       </div>
       {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-danger">{err}</p>}
-      <Btn type="submit" busy={busy}><MessageSquareText className="size-5" aria-hidden />دریافت کد ورود</Btn>
+      <Btn type="submit" busy={busy}><MessageSquareText className="size-5" aria-hidden />Login-Code anfordern</Btn>
     </form>
   ) : (
     <form onSubmit={verify} noValidate className="grid gap-4">
       <div ref={codeRef} className="grid gap-2">
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor={`${uid}-c`} className="text-[14px] font-bold text-chalk">کد پیامک‌شده به <span dir="ltr">{faDigits(normalized)}</span></label>
+          <label htmlFor={`${uid}-c`} className="text-[14px] font-bold text-chalk">Code gesendet an <span dir="ltr">{faDigits(normalized)}</span></label>
           <button type="button" onClick={() => { setStep('phone'); setErr(null) }} className="inline-flex cursor-pointer items-center gap-1 text-[13px] font-bold text-plate hover:underline">
-            <ArrowRight className="size-4" aria-hidden />تغییر شماره
+            <ArrowLeft className="size-4" aria-hidden />Nummer ändern
           </button>
         </div>
         <CodeField id={`${uid}-c`} value={code} onChange={setCode} invalid={!!err} describedBy={`${uid}-e`} />
       </div>
       {demo && (
         <Notice tone="warn">
-          <b>حالت نمایشی:</b> پیامک واقعی ارسال نمی‌شود. کد شما: <b dir="ltr" className="text-[17px] tracking-widest">{faDigits(demo)}</b>
+          <b>Demo-Modus:</b> Es wird keine echte SMS gesendet. Ihr Code: <b dir="ltr" className="text-[17px] tracking-widest">{faDigits(demo)}</b>
         </Notice>
       )}
       {err && <p id={`${uid}-e`} role="alert" className="text-[14px] text-danger">{err}</p>}
-      <Btn type="submit" busy={busy}>ورود</Btn>
+      <Btn type="submit" busy={busy}>Anmelden</Btn>
       <p className="text-center text-[13px] text-rubber">
-        {left > 0 ? <>ارسال دوباره تا {faNum(left)} ثانیهٔ دیگر</> :
-          <button type="button" onClick={() => void send()} className="cursor-pointer font-bold text-plate hover:underline">ارسال دوبارهٔ کد</button>}
+        {left > 0 ? <>Erneut senden in {faNum(left)} Sekunden</> :
+          <button type="button" onClick={() => void send()} className="cursor-pointer font-bold text-plate hover:underline">Code erneut senden</button>}
       </p>
     </form>
   )

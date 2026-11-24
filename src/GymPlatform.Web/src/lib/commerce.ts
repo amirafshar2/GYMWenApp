@@ -1,6 +1,6 @@
 import { request, submitToGateway, type GatewayRedirect } from './api'
 
-// ---------------- انواع
+// ---------------- Typen
 export interface WalletTx { id: number; amountToman: number; balanceAfterToman: number; type: string; description: string; createdAtUtc: string }
 export interface Wallet { balanceToman: number; transactions: WalletTx[]; topUpPresets: number[]; minTopUpToman: number; maxTopUpToman: number }
 
@@ -74,7 +74,7 @@ export const canteenApi = {
     request<CanteenOrder>('POST', `/canteen/staff/orders/${id}/status`, { body: { status }, auth: true }),
 }
 
-/** نتیجهٔ خرید: کیف پول ← مستقیم به صفحهٔ نتیجه؛ درگاه ← فرم بانک */
+/** Kaufergebnis: Guthaben → direkt zur Ergebnisseite; Gateway → Bankformular */
 export function continuePurchase(r: PurchaseResponse, navigate: (to: string) => void) {
   if (r.completed || !r.gateway) { if (r.redirectPath) navigate(r.redirectPath); return }
   submitToGateway(r.gateway)
@@ -83,13 +83,13 @@ export function continuePurchase(r: PurchaseResponse, navigate: (to: string) => 
 export const newKey = () => crypto.randomUUID().replace(/-/g, '')
 
 export const SHOP_STATUS: Record<ShopOrder['status'], { text: string; tone: 'ok' | 'warn' | 'err' | 'info' }> = {
-  pending: { text: 'در انتظار پرداخت', tone: 'warn' }, paid: { text: 'پرداخت شد — در حال آماده‌سازی ارسال', tone: 'ok' },
-  ready: { text: 'آمادهٔ تحویل در باشگاه', tone: 'ok' }, shipped: { text: 'ارسال شد', tone: 'ok' },
-  completed: { text: 'تحویل شد', tone: 'info' }, cancelled: { text: 'لغو شد', tone: 'err' },
+  pending: { text: 'Zahlung ausstehend', tone: 'warn' }, paid: { text: 'Bezahlt — Versand wird vorbereitet', tone: 'ok' },
+  ready: { text: 'Abholbereit im Studio', tone: 'ok' }, shipped: { text: 'Versendet', tone: 'ok' },
+  completed: { text: 'Zugestellt', tone: 'info' }, cancelled: { text: 'Storniert', tone: 'err' },
 }
 export const CANTEEN_STATUS: Record<CanteenStatus, string> = {
-  pending: 'در انتظار پرداخت', queued: 'در صف', preparing: 'در حال آماده‌سازی', ready: 'آماده است', collected: 'تحویل شد', cancelled: 'لغو شد',
+  pending: 'Zahlung ausstehend', queued: 'In der Warteschlange', preparing: 'In Zubereitung', ready: 'Fertig', collected: 'Zugestellt', cancelled: 'Storniert',
 }
 export const CANTEEN_CATEGORIES: { key: CanteenMenuItem['category']; label: string }[] = [
-  { key: 'shake', label: 'شیک و اسموتی' }, { key: 'coffee', label: 'قهوه' }, { key: 'meal', label: 'غذا' }, { key: 'snack', label: 'میان‌وعده' }, { key: 'drink', label: 'نوشیدنی' },
+  { key: 'shake', label: 'Shakes und Smoothies' }, { key: 'coffee', label: 'Kaffee' }, { key: 'meal', label: 'Essen' }, { key: 'snack', label: 'Snacks' }, { key: 'drink', label: 'Getränke' },
 ]

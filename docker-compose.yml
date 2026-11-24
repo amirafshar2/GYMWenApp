@@ -1,12 +1,12 @@
-# اجرای کامل با SQL Server. رمزها از فایل .env (کپی از .env.example) خوانده می‌شوند و در گیت نیستند.
+# Vollständiger Betrieb mit SQL Server. Passwörter kommen aus .env (Kopie von .env.example) und sind nicht in Git.
 #   docker compose up --build    →  http://localhost:8080
-# در production جلوی این سرویس یک reverse proxy با TLS (Caddy/Nginx) بگذارید؛ کوکی‌های نشست فقط روی HTTPS ارسال می‌شوند.
+# In Production gehört ein Reverse Proxy mit TLS (Caddy/Nginx) davor; Sitzungs-Cookies werden nur über HTTPS gesendet.
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD را در .env بگذارید}
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD in .env setzen}
     volumes:
       - sqldata:/var/opt/mssql
     healthcheck:
@@ -21,18 +21,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # فقط روی همین سرور باز است؛ reverse proxy (Caddy/Nginx) با TLS جلوی آن می‌نشیند.
-    # هرگز "8080:8080" نگذارید: آن‌وقت هر کسی با X-Forwarded-For جعلی محدودیت درخواست‌ها را دور می‌زند.
+    # Nur auf diesem Server offen; ein Reverse Proxy (Caddy/Nginx) mit TLS sitzt davor.
+    # Niemals "8080:8080" setzen: sonst umgeht jeder mit gefälschtem X-Forwarded-For das Rate-Limit.
     ports:
       - "127.0.0.1:8080:8080"
     environment:
-      # Production: اگر تنظیمی دمو یا ناامن باشد، برنامه اجرا نمی‌شود. برای دموی داخلی: APP_ENV=Staging
+      # Production: Bei Demo- oder unsicheren Einstellungen startet die App nicht. Für eine interne Demo: APP_ENV=Staging
       ASPNETCORE_ENVIRONMENT: ${APP_ENV:-Production}
       AllowedHosts: ${SITE_HOSTS:-}
       Database__Provider: SqlServer
       ConnectionStrings__Default: "Server=db;Database=GymPlatform;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
-      Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY را در .env بگذارید}
-      Otp__Pepper: ${OTP_PEPPER:?OTP_PEPPER را در .env بگذارید}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY in .env setzen}
+      Otp__Pepper: ${OTP_PEPPER:?OTP_PEPPER in .env setzen}
       Otp__ExposeCodeInResponse: ${OTP_EXPOSE_CODE:-false}
       Sms__Provider: ${SMS_PROVIDER:-Kavenegar}
       Sms__Kavenegar__ApiKey: ${KAVENEGAR_API_KEY:-}
@@ -44,7 +44,7 @@ services:
       Storage__PublicUploads: /data/uploads
     volumes:
       - private:/data/private
-      # عکس‌هایی که مدیر برای منو، کالا و پکیج آپلود می‌کند
+      # Bilder, die der Admin für Speisekarte, Produkte und Pakete hochlädt
       - uploads:/data/uploads
     read_only: true
     tmpfs:

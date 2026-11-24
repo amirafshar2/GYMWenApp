@@ -41,11 +41,11 @@ const PackagesAdmin = admin('PackagesAdmin'), CampaignsAdmin = admin('CampaignsA
 const CoachesAdmin = admin('CoachesAdmin'), CanteenMenuAdmin = admin('CanteenMenuAdmin'), StaffAdmin = admin('StaffAdmin'), SmsAdmin = admin('SmsAdmin')
 const Lab = import.meta.env.DEV ? lazy(() => import('./lab/Lab')) : () => null
 
-/** صفحه‌هایی که پیش از انتشار سایت هم باز است (ورود مالک و کارکنان) */
+/** Seiten, die auch vor der Veröffentlichung offen sind (Login für Inhaber und Mitarbeiter) */
 const OPEN_BEFORE_PUBLISH = ['/login', '/panel', '/profile']
 
 export default function App() {
-  useSiteVersion() // با ذخیرهٔ تنظیمات در پنل، کل سایت با مقدارهای تازه دوباره رسم می‌شود
+  useSiteVersion() // beim Speichern im Panel wird die ganze Seite mit den neuen Werten neu gezeichnet
   const { pathname, hash } = useLocation()
   const { user } = useAuth()
   const inPanel = pathname.startsWith('/panel')
@@ -54,14 +54,14 @@ export default function App() {
   const m = site.modules
   useEffect(() => {
     if (!hash) { window.scrollTo(0, 0); return }
-    // بخش‌های صفحهٔ اصلی جدا بار می‌شوند؛ تا رسیدن بخش مقصد (حداکثر ۴ ثانیه) صبر کن
+    // Startseiten-Bereiche laden separat; auf den Zielbereich warten (höchstens 4 Sekunden)
     let tries = 0, fix = 0
     const t = setInterval(() => {
       const el = document.getElementById(hash.slice(1))
       if (el || ++tries > 40) {
         clearInterval(t)
         el?.scrollIntoView({ behavior: 'smooth' })
-        // بخش‌های بالاتر ممکن است بعد از رسیدن داده بلندتر شوند؛ یک بار دیگر دقیق تنظیم شود
+        // Bereiche darüber können nach dem Laden höher werden; noch einmal genau ausrichten
         if (el) fix = window.setTimeout(() => {
           const off = el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop || '0')
           if (Math.abs(off) > 30) el.scrollIntoView({ behavior: 'smooth' })
@@ -73,7 +73,7 @@ export default function App() {
 
   return (
     <>
-      <a href="#main" className="sr-only top-0 left-0 focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:left-auto focus:z-[100] rounded-full bg-primary focus:px-4 focus:py-2 text-primary-foreground">پرش به محتوا</a>
+      <a href="#main" className="sr-only top-0 left-0 focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:left-auto focus:z-[100] rounded-full bg-primary focus:px-4 focus:py-2 text-primary-foreground">Zum Inhalt springen</a>
       {!inPanel && !closed && <SiteBanner />}
       <SiteHeader />
       <main id="main" style={{ paddingTop: inPanel ? 78 : 'calc(78px + var(--festival-h, 0px))' }}>

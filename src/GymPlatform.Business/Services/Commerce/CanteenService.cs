@@ -21,8 +21,8 @@ public interface ICanteenService
 }
 
 /// <summary>
-/// منوی آنلاین بوفه: QR میز ← منو ← سفارش ← پرداخت از کیف پول یا درگاه ← نمایش لحظه‌ای روی تابلوی بوفه.
-/// وضعیت‌ها: در صف ← در حال آماده‌سازی ← آماده ← تحویل شد (یا لغو با بازگشت وجه به کیف پول).
+/// Online-Bistrokarte: QR am Tisch → Karte → Bestellung → Zahlung per Guthaben oder Gateway → Live-Anzeige an der Bistrotafel.
+/// Status: in der Warteschlange → in Zubereitung → fertig → abgeholt (oder Storno mit Erstattung aufs Guthaben).
 /// </summary>
 public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifier notifier, IOptions<CommerceOptions> options) : ICanteenService
 {
@@ -54,7 +54,7 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
     public async Task<Result<PurchaseStartedDto>> PlaceAsync(int userId, CanteenOrderRequest r, CancellationToken ct)
     {
         var key = (r.IdempotencyKey ?? "").Trim();
-        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "شناسهٔ درخواست نامعتبر است.");
+        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "Ungültige Anfrage-ID.");
         var existing = await db.CanteenOrders.AsNoTracking().FirstOrDefaultAsync(o => o.UserId == userId && o.IdempotencyKey == key, ct);
         if (existing is not null)
         {
@@ -64,16 +64,16 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
         }
 
         PayMethod? method = r.PayMethod?.ToLowerInvariant() switch { "wallet" => PayMethod.Wallet, "gateway" => PayMethod.Gateway, _ => null };
-        if (method is null) return Result<PurchaseStartedDto>.Fail("payMethod", "روش پرداخت را انتخاب کنید.");
+        if (method is null) return Result<PurchaseStartedDto>.Fail("payMethod", "Bitte eine Zahlungsart wählen.");
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == r.BranchSlug && b.IsActive, ct);
-        if (branch is null) return Result<PurchaseStartedDto>.Fail("branchSlug", "شعبه پیدا نشد. QR را دوباره اسکن کنید.");
+        if (branch is null) return Result<PurchaseStartedDto>.Fail("branchSlug", "Filiale nicht gefunden. Bitte den QR-Code erneut scannen.");
         var lines = (r.Items ?? []).Where(i => i.Quantity > 0).GroupBy(i => i.ItemId).Select(g => (Id: g.Key, Qty: g.Sum(x => x.Quantity))).ToList();
-        if (lines.Count == 0) return Result<PurchaseStartedDto>.Fail("items", "چیزی انتخاب نشده است.");
-        if (lines.Any(l => l.Qty > options.Value.MaxQuantityPerLine)) return Result<PurchaseStartedDto>.Fail("items", "تعداد هر آیتم حداکثر ۱۰ است.");
+        if (lines.Count == 0) return Result<PurchaseStartedDto>.Fail("items", "Nichts ausgewählt.");
+        if (lines.Any(l => l.Qty > options.Value.MaxQuantityPerLine)) return Result<PurchaseStartedDto>.Fail("items", "Höchstens 10 Stück pro Posten.");
         var ids = lines.Select(l => l.Id).ToList();
         var items = await db.CanteenItems.AsNoTracking().Where(i => ids.Contains(i.Id)).ToListAsync(ct);
         var missing = lines.FirstOrDefault(l => items.FirstOrDefault(i => i.Id == l.Id) is not { IsAvailable: true });
-        if (missing != default) return Result<PurchaseStartedDto>.Fail("items", $"«{items.FirstOrDefault(i => i.Id == missing.Id)?.Name ?? "یکی از آیتم‌ها"}» الان موجود نیست.");
+        if (missing != default) return Result<PurchaseStartedDto>.Fail("items", $"«{items.FirstOrDefault(i => i.Id == missing.Id)?.Name ?? "Einer der Posten"}“ ist gerade nicht verfügbar.");
         var note = PersianText.CleanText(r.Note);
         if (note?.Length > 200) note = note[..200];
 
@@ -95,10 +95,10 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
 
             if (method == PayMethod.Wallet)
             {
-                if (!await WalletLedger.TryDebitAsync(db, userId, order.TotalToman, WalletTxType.CanteenPurchase, $"بوفه — سفارش شمارهٔ {order.DailyNumber}", $"canteen:{order.Id}", now, ct))
+                if (!await WalletLedger.TryDebitAsync(db, userId, order.TotalToman, WalletTxType.CanteenPurchase, $"Bistro — Bestellung Nr. {order.DailyNumber}", $"canteen:{order.Id}", now, ct))
                 {
                     await tx.RollbackAsync(ct);
-                    return Result<PurchaseStartedDto>.Fail("payMethod", "موجودی کیف پول کافی نیست.");
+                    return Result<PurchaseStartedDto>.Fail("payMethod", "Guthaben reicht nicht aus.");
                 }
                 order.Status = CanteenOrderStatus.Queued;
                 order.PaidAtUtc = now;
@@ -111,7 +111,7 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
             var payment = new Payment
             {
                 UserId = userId, Purpose = PaymentPurpose.CanteenOrder, CanteenOrderId = order.Id, IdempotencyKey = "cafe-" + key[..Math.Min(58, key.Length)],
-                BaseAmountToman = order.TotalToman, AmountToman = order.TotalToman, Description = $"بوفه — سفارش شمارهٔ {order.DailyNumber}",
+                BaseAmountToman = order.TotalToman, AmountToman = order.TotalToman, Description = $"Bistro — Bestellung Nr. {order.DailyNumber}",
                 TrackingNumber = await TrackingNumbers.NewAsync(db, ct), CreatedAtUtc = now,
             };
             db.Payments.Add(payment);
@@ -121,7 +121,7 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
         });
     }
 
-    /// <summary>پرداخت درگاه سفارش بوفه نهایی شد (داخل تراکنش PaymentService). true یعنی سفارش وارد صف شد و باید اعلان شود.</summary>
+    /// <summary>Gateway-Zahlung der Bistro-Bestellung abgeschlossen (innerhalb der PaymentService-Transaktion). true = Bestellung ist in der Warteschlange und muss gemeldet werden.</summary>
     internal static async Task<bool> OnPaymentCompletedAsync(GymDbContext db, Payment payment, bool succeeded, DateTime now, CancellationToken ct)
     {
         var o = await db.CanteenOrders.FirstAsync(x => x.Id == payment.CanteenOrderId, ct);
@@ -136,8 +136,8 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
             o.PaidAtUtc = now;
             return true;
         }
-        if (o.Status == CanteenOrderStatus.Cancelled) // منقضی شده بود؛ پول به کیف پول برمی‌گردد
-            await WalletLedger.CreditAsync(db, o.UserId, payment.AmountToman, WalletTxType.Refund, $"بازگشت وجه سفارش بوفه {o.DailyNumber}", $"canteen:{o.Id}", now, ct);
+        if (o.Status == CanteenOrderStatus.Cancelled) // war abgelaufen; Geld geht aufs Guthaben
+            await WalletLedger.CreditAsync(db, o.UserId, payment.AmountToman, WalletTxType.Refund, $"Erstattung der Bistro-Bestellung {o.DailyNumber}", $"canteen:{o.Id}", now, ct);
         return false;
     }
 
@@ -173,14 +173,14 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
             "preparing" => CanteenOrderStatus.Preparing, "ready" => CanteenOrderStatus.Ready, "collected" => CanteenOrderStatus.Collected,
             "cancelled" => CanteenOrderStatus.Cancelled, _ => null,
         };
-        if (target is null) return Result<CanteenOrderDto>.Fail("status", "وضعیت نامعتبر است.");
+        if (target is null) return Result<CanteenOrderDto>.Fail("status", "Ungültiger Status.");
 
         var result = await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             db.ChangeTracker.Clear();
             await using var tx = await db.Database.BeginTransactionAsync(ct);
             var o = await db.CanteenOrders.FirstOrDefaultAsync(x => x.Id == orderId, ct);
-            if (o is null) return Result<CanteenOrderDto>.Fail("order", "سفارش پیدا نشد.", ErrorType.NotFound);
+            if (o is null) return Result<CanteenOrderDto>.Fail("order", "Bestellung nicht gefunden.", ErrorType.NotFound);
             var allowed = (o.Status, target.Value) switch
             {
                 (CanteenOrderStatus.Queued, CanteenOrderStatus.Preparing) => true,
@@ -189,19 +189,19 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
                 (CanteenOrderStatus.Queued or CanteenOrderStatus.Preparing, CanteenOrderStatus.Cancelled) => true,
                 _ => false,
             };
-            if (!allowed) return Result<CanteenOrderDto>.Fail("status", "این تغییر وضعیت ممکن نیست.", ErrorType.Conflict);
+            if (!allowed) return Result<CanteenOrderDto>.Fail("status", "Dieser Statuswechsel ist nicht möglich.", ErrorType.Conflict);
 
             var now = clock.UtcNow;
-            // تغییر وضعیت شرطی و اتمی: دو «لغو» هم‌زمان (دوبار کلیک) فقط یک بار وجه برمی‌گرداند
+            // Bedingter, atomarer Statuswechsel: zwei gleichzeitige „Storno“ (Doppelklick) erstatten nur einmal
             var from = o.Status; var to = target.Value;
             if (await db.CanteenOrders.Where(x => x.Id == orderId && x.Status == from)
                     .ExecuteUpdateAsync(x => x.SetProperty(c => c.Status, to), ct) == 0)
-                return Result<CanteenOrderDto>.Fail("status", "وضعیت سفارش همین الان عوض شد؛ صفحه را تازه کنید.", ErrorType.Conflict);
+                return Result<CanteenOrderDto>.Fail("status", "Der Bestellstatus hat sich gerade geändert; bitte die Seite neu laden.", ErrorType.Conflict);
             o.Status = target.Value;
             if (target == CanteenOrderStatus.Ready) o.ReadyAtUtc = now;
             if (target == CanteenOrderStatus.Collected) o.CollectedAtUtc = now;
             if (target == CanteenOrderStatus.Cancelled)
-                await WalletLedger.CreditAsync(db, o.UserId, o.TotalToman, WalletTxType.Refund, $"بازگشت وجه سفارش بوفه {o.DailyNumber} (لغو توسط بوفه)", $"canteen:{o.Id}", now, ct);
+                await WalletLedger.CreditAsync(db, o.UserId, o.TotalToman, WalletTxType.Refund, $"Erstattung der Bistro-Bestellung {o.DailyNumber} (Storno durch das Bistro)", $"canteen:{o.Id}", now, ct);
             db.AuditLogs.Add(new AuditLog { Action = $"canteen.{StatusName(target.Value)}", EntityType = "CanteenOrder", EntityId = o.Id.ToString(), UserId = staffUserId });
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
@@ -228,6 +228,6 @@ public sealed class CanteenService(GymDbContext db, IClock clock, ICanteenNotifi
             .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, CanteenOrderStatus.Cancelled), ct);
     }
 
-    /// <summary>بعد از پرداخت موفق درگاه، از PaymentService صدا زده می‌شود.</summary>
+    /// <summary>Wird nach erfolgreicher Gateway-Zahlung vom PaymentService aufgerufen.</summary>
     public Task NotifyPaidAsync(int orderId, CancellationToken ct) => NotifyAsync(orderId, ct);
 }

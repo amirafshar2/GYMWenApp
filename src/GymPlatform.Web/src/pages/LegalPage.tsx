@@ -6,22 +6,22 @@ import { cn } from '@/lib/utils'
 import LiteDoc from '@/components/LiteDoc'
 
 /**
- * صفحه‌هایی که اینماد و درگاه پرداخت لازم دارند؛ متن از «تنظیمات سایت ← صفحه‌های قانونی».
- * جاهای [[…]] را باشگاه پر می‌کند (تا پر نشده، زرد دیده می‌شود) و متن نهایی را مشاور حقوقی تأیید می‌کند.
+ * Rechtsseiten; Text aus „Website-Einstellungen → Rechtsseiten“.
+ * Die Stellen [[…]] füllt das Studio aus (bis dahin gelb) und den finalen Text prüft eine Rechtsberatung.
  */
 
 const DOCS: Record<string, { title: string; key: 'about' | 'terms' | 'privacy' | 'refund' }> = {
-  about: { title: 'درباره ما', key: 'about' },
-  terms: { title: 'قوانین و مقررات', key: 'terms' },
-  privacy: { title: 'حریم خصوصی', key: 'privacy' },
-  refund: { title: 'لغو و بازگشت وجه', key: 'refund' },
+  about: { title: 'Über uns', key: 'about' },
+  terms: { title: 'AGB', key: 'terms' },
+  privacy: { title: 'Datenschutz', key: 'privacy' },
+  refund: { title: 'Kündigung und Erstattung', key: 'refund' },
 }
 
 export const LEGAL_LINKS = [
-  { to: '/about', text: 'درباره ما' },
-  { to: '/terms', text: 'قوانین و مقررات' },
-  { to: '/privacy', text: 'حریم خصوصی' },
-  { to: '/refund', text: 'لغو و بازگشت وجه' },
+  { to: '/about', text: 'Über uns' },
+  { to: '/terms', text: 'AGB' },
+  { to: '/privacy', text: 'Datenschutz' },
+  { to: '/refund', text: 'Kündigung und Erstattung' },
 ]
 
 export default function LegalPage() {
@@ -31,7 +31,7 @@ export default function LegalPage() {
   return (
     <div className="bg-steel">
       <div className="mx-auto grid w-full max-w-[1100px] gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[220px_1fr]">
-        <nav aria-label="صفحه‌های قوانین" className="lg:sticky lg:top-[100px] lg:self-start">
+        <nav aria-label="Rechtliches" className="lg:sticky lg:top-[100px] lg:self-start">
           <ul className="flex flex-wrap gap-2 lg:grid">
             {LEGAL_LINKS.map((l) => (
               <li key={l.to}>

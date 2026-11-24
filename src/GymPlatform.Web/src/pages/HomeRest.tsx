@@ -18,14 +18,14 @@ const SECTIONS: Record<SectionKey, ComponentType> = {
   shop: SiteShop, events: SiteEvents, gallery: SiteGallery, coaches: SiteCoaches, faq: SiteFaq, contact: SiteContact,
 }
 
-/** بخش‌هایی که به ماژول خاموش وابسته‌اند نمایش داده نمی‌شوند */
+/** Bereiche, die von einem ausgeschalteten Modul abhängen, werden nicht angezeigt */
 const moduleOff = (k: SectionKey) =>
   (k === 'shop' && !site.modules.shop) || (k === 'coaches' && !site.modules.coaches) ||
   (k === 'events' && !site.modules.festival) || (k === 'contact' && !site.modules.consultation)
 
 /**
- * بخش‌های زیر هیرو با ترتیب و روشن/خاموشی که مالک در «تنظیمات سایت» انتخاب کرده؛
- * در یک فایل جدا بار می‌شوند تا هیرو (بزرگ‌ترین المان صفحه) زودتر نمایش داده شود.
+ * Die Bereiche unter dem Hero in der Reihenfolge und Sichtbarkeit, die der Inhaber in den „Website-Einstellungen“ gewählt hat;
+ * werden in einer eigenen Datei geladen, damit der Hero (größtes Element) früher erscheint.
  */
 export default function HomeRest() {
   const list = (site.home?.sections ?? []).filter((s) => s.enabled && SECTIONS[s.key] && !moduleOff(s.key))

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymPlatform.DataAccess;
 
-/// <summary>DbContext اصلی؛ جداول Identity + دامنهٔ باشگاه. پیکربندی هر موجودیت در پوشهٔ Configurations است.</summary>
+/// <summary>Haupt-DbContext; Identity-Tabellen + Studio-Domäne. Die Konfiguration jeder Entität liegt im Ordner Configurations.</summary>
 public class GymDbContext(DbContextOptions<GymDbContext> options)
     : IdentityDbContext<AppUser, AppRole, int>(options)
 {
@@ -49,8 +49,8 @@ public class GymDbContext(DbContextOptions<GymDbContext> options)
     }
 
     /// <summary>
-    /// همهٔ زمان‌ها UTC ذخیره می‌شوند؛ هنگام خواندن هم Kind=Utc می‌گیرند تا در JSON با «Z» بروند
-    /// و مرورگر کاربر ایرانی آن‌ها را به وقت تهران درست نشان دهد (نه به‌عنوان وقت محلی خام).
+    /// Alle Zeiten werden in UTC gespeichert; beim Lesen erhalten sie Kind=Utc, damit sie im JSON mit „Z“ ausgegeben werden
+    /// und der Browser sie korrekt in Ortszeit anzeigt (nicht als rohe Ortszeit).
     /// </summary>
     protected override void ConfigureConventions(ModelConfigurationBuilder c)
     {

@@ -1,22 +1,22 @@
-# اتصال سیستم گیت / دستبند به سایت باشگاه (API نسخهٔ ۱)
+# Anbindung eines Gate-/Armbandsystems an die Studioseite (API Version 1)
 
-این سند برای **شرکت پشتیبان سیستم گیت/ترنستایل باشگاه** است. سایت مستقل از برند گیت طراحی شده و سه روش اتصال دارد؛ شرکت گیت هر کدام را که سیستمش پشتیبانی می‌کند انتخاب کند.
+Dieses Dokument richtet sich an die **Firma, die das Gate-/Drehkreuzsystem des Studios betreut**. Die Seite ist unabhängig von der Gate-Marke und bietet drei Anbindungswege; die Gate-Firma wählt den, den ihr System unterstützt.
 
-| روش | کی مناسب است | مسیر |
+| Weg | Wann geeignet | Pfad |
 |---|---|---|
-| ۱. پرسش آنلاین | گیت هنگام زدن دستبند از سرور می‌پرسد | `POST /api/v1/access/check` |
-| ۲. فهرست سفید | گیت آفلاین تصمیم می‌گیرد و هر چند دقیقه فهرست را می‌گیرد | `GET /api/v1/access/whitelist` |
-| ۳. رویدادهای آفلاین | گیت در قطعی اینترنت ورودها را نگه می‌دارد و بعداً می‌فرستد | `POST /api/v1/access/events` |
-| ۴. وب‌هوک (برعکس) | نرم‌افزار گیت می‌خواهد از تغییر عضویت‌ها باخبر شود | سایت به آدرس شما POST می‌کند |
+| 1. Online-Abfrage | Das Gate fragt beim Scannen des Armbands den Server | `POST /api/v1/access/check` |
+| 2. Whitelist | Das Gate entscheidet offline und holt die Liste alle paar Minuten | `GET /api/v1/access/whitelist` |
+| 3. Offline-Ereignisse | Das Gate speichert Check-ins bei Internetausfall und sendet sie später | `POST /api/v1/access/events` |
+| 4. Webhook (umgekehrt) | Die Gate-Software will über Änderungen an Mitgliedschaften informiert werden | Die Seite sendet POST an Ihre Adresse |
 
-## احراز هویت دستگاه
-هر گیت یک کلید جدا دارد که مدیر سایت می‌سازد (فقط هش آن در سرور ذخیره می‌شود). در همهٔ درخواست‌ها:
+## Authentifizierung des Geräts
+Jedes Gate hat einen eigenen Schlüssel, den der Seitenadmin erzeugt (nur der Hash wird gespeichert). In allen Anfragen:
 ```
-X-Device-Key: <کلید گیت>
+X-Device-Key: <Gate-Schlüssel>
 ```
-کلید اشتباه ← `401`. هر کلید به یک **شعبه** و یک **سالن** (آقایان، بانوان یا مشترک) وصل است. سقف: ۶۰۰ درخواست در دقیقه برای هر گیت. فقط HTTPS.
+Falscher Schlüssel → `401`. Jeder Schlüssel gehört zu einer **Filiale** und einem **Bereich** (Herren, Damen oder gemeinsam). Limit: 600 Anfragen pro Minute und Gate. Nur HTTPS.
 
-## ۱) پرسش آنلاین
+## 1) Online-Abfrage
 ```http
 POST /api/v1/access/check
 Content-Type: application/json
@@ -24,20 +24,20 @@ X-Device-Key: ...
 
 { "credential": "04A1B2C3", "eventId": "gate1-000123", "occurredAtUtc": "2026-10-16T08:30:00Z" }
 ```
-- `credential`: UID دستبند/کارت (با یا بدون `:` و فاصله، حروف کوچک یا بزرگ) **یا** متن QR کارت دیجیتال عضو که با `KG1:` شروع می‌شود.
-- `eventId` (اختیاری ولی توصیه‌شده): شناسهٔ یکتای همین زدن کارت. اگر همان رویداد دوباره ارسال شود، دوبار ثبت و جلسه دوبار کم نمی‌شود.
-- `occurredAtUtc` (اختیاری): برای رویداد آفلاین؛ خالی یعنی همین حالا.
+- `credential`: UID des Armbands/der Karte (mit oder ohne `:` und Leerzeichen, Klein- oder Großbuchstaben) **oder** der QR-Text der digitalen Mitgliedskarte, der mit `KG1:` beginnt.
+- `eventId` (optional, aber empfohlen): eindeutige ID dieses Scans. Wird dasselbe Ereignis erneut gesendet, wird es nicht doppelt erfasst und keine Einheit doppelt abgezogen.
+- `occurredAtUtc` (optional): für Offline-Ereignisse; leer = jetzt.
 
-پاسخ:
+Antwort:
 ```json
-{ "allowed": true, "reason": "ok", "message": "خوش آمدی کاوه", "memberFirstName": "کاوه",
+{ "allowed": true, "reason": "ok", "message": "Willkommen, Kai", "memberFirstName": "Kai",
   "daysLeft": 63, "sessionsLeft": null, "sessionCounted": false }
 ```
-`reason` یکی از: `ok`، `unknown_credential`، `credential_revoked`، `no_active_membership`، `wrong_branch`، `wrong_section`، `no_sessions_left`. متن `message` فارسی و آمادهٔ نمایش روی صفحهٔ گیت است.
+`reason` Einer von: `ok`, `unknown_credential`, `credential_revoked`, `no_active_membership`, `wrong_branch`, `wrong_section`, `no_sessions_left`. Der Text `message` ist auf Deutsch und bereit zur Anzeige am Gate-Display.
 
-قوانین تصمیم: عضویت فعال در **همان شعبه** (قابل تغییر با `Access:AllowAllBranches`) و **همان سالن**. در پکیج‌های جلسه‌ای، اولین ورود هر روز (به وقت تهران) یک جلسه کم می‌کند؛ ورود دوباره در همان روز رایگان است.
+Entscheidungsregeln: aktive Mitgliedschaft in **derselben Filiale** (änderbar mit `Access:AllowAllBranches`) und **demselben Bereich**. Bei Einheitenpaketen zieht der erste Eintritt pro Tag (Berliner Zeit) eine Einheit ab; ein erneuter Eintritt am selben Tag ist frei.
 
-## ۲) فهرست سفید
+## 2) Whitelist
 ```http
 GET /api/v1/access/whitelist
 ```
@@ -46,38 +46,38 @@ GET /api/v1/access/whitelist
   "entries": [ { "credential": "KG1:4D9F...", "type": "qr", "memberId": 15, "validUntilUtc": "...", "sessionsLeft": null },
                { "credential": "04A1B2C3", "type": "wristband", "memberId": 15, "validUntilUtc": "...", "sessionsLeft": null } ] }
 ```
-هر ۵ دقیقه یک‌بار دریافت شود. هرچه در فهرست نیست مجاز نیست.
+Alle 5 Minuten abrufen. Was nicht in der Liste steht, ist nicht erlaubt.
 
-## ۳) رویدادهای آفلاین
-`POST /api/v1/access/events` با آرایه‌ای از همان بدنهٔ `check` (حداکثر ۵۰۰ مورد). همهٔ ورودها در گزارش حضور و غیاب ثبت می‌شوند.
+## 3) Offline-Ereignisse
+`POST /api/v1/access/events` mit einem Array aus demselben Body wie `check` (höchstens 500 Einträge). Alle Check-ins werden im Anwesenheitsbericht erfasst.
 
-## ۴) وب‌هوک (سایت ← نرم‌افزار گیت)
-اگر `Integrations:Webhook:Url` و `Secret` تنظیم شود، سایت این رویدادها را می‌فرستد:
+## 4) Webhook (Seite → Gate-Software)
+Wenn `Integrations:Webhook:Url` und `Secret` gesetzt ist, sendet die Seite diese Ereignisse:
 
-| رویداد | زمان |
+| Ereignis | Zeitpunkt |
 |---|---|
-| `membership.activated` | پرداخت موفق (شامل `memberId`، `branchId`، `section`، `startsAtUtc`، `endsAtUtc`، `qr`) |
-| `credential.assigned` / `credential.revoked` | پذیرش دستبند داد/پس گرفت (شامل `credential` و `externalRef`) |
+| `membership.activated` | Erfolgreiche Zahlung (inkl. `memberId`, `branchId`, `section`, `startsAtUtc`, `endsAtUtc`, `qr`) |
+| `credential.assigned` / `credential.revoked` | Empfang gibt Armband aus/nimmt zurück (inkl. `credential` und `externalRef`) |
 
-هدرها: `X-KG-Event`، `X-KG-Delivery` (شناسهٔ یکتا؛ برای جلوگیری از پردازش دوباره)، `X-KG-Timestamp`، `X-KG-Signature: sha256=<hex>`.
-امضا = `HMAC-SHA256(secret, timestamp + "." + body)`؛ گیرنده باید امضا را بررسی کند و رویدادهای قدیمی‌تر از ۵ دقیقه را رد کند.
-پاسخ غیر 2xx = تلاش دوباره با فاصلهٔ افزایشی (تا ۲۰ بار).
+Header: `X-KG-Event`, `X-KG-Delivery` (eindeutige ID; verhindert doppelte Verarbeitung), `X-KG-Timestamp`, `X-KG-Signature: sha256=<hex>`.
+Signatur = `HMAC-SHA256(secret, timestamp + "." + body)`; der Empfänger muss die Signatur prüfen und Ereignisse älter als 5 Minuten ablehnen.
+Antwort ungleich 2xx = erneuter Versuch mit wachsendem Abstand (bis zu 20 Mal).
 
-## پذیرش: دادن دستبند به عضو
-(نیازمند نقش پذیرش یا مدیر؛ رابط کاربری در پنل پذیرش)
+## Empfang: Armband an ein Mitglied ausgeben
+(Rolle Empfang oder Admin nötig; Oberfläche im Empfangspanel)
 ```
 GET    /api/v1/staff/members/{userId}/credentials
-POST   /api/v1/staff/members/{userId}/credentials   { "type": "wristband|card|external", "value": "04A1B2C3", "label": "...", "externalRef": "شناسهٔ عضو در نرم‌افزار گیت" }
+POST   /api/v1/staff/members/{userId}/credentials   { "type": "wristband|card|external", "value": "04A1B2C3", "label": "...", "externalRef": "ID des Mitglieds in der Gate-Software" }
 DELETE /api/v1/staff/members/{userId}/credentials/{id}
 ```
 
-## تست سریع در نسخهٔ نمایشی
-در حالت Development یک گیت نمایشی برای شعبهٔ اول با کلید `demo-gate-key-0001` ساخته می‌شود:
+## Schnelltest in der Demo-Version
+Im Development-Modus wird für die erste Filiale ein Demo-Gate mit dem Schlüssel `demo-gate-key-0001` angelegt:
 ```bash
 curl -X POST http://localhost:5180/api/v1/access/check \
   -H "X-Device-Key: demo-gate-key-0001" -H "Content-Type: application/json" \
-  -d '{"credential":"KG1:<توکن کارت از پروفایل>"}'
+  -d '{"credential":"KG1:<Karten-Token aus dem Profil>"}'
 ```
 
-## اگر سیستم گیت هیچ‌کدام از این‌ها را پشتیبانی نکند
-یک «آداپتور» کوچک (`IIntegrationSink` در `src/GymPlatform.Api/Integrations`) برای API همان سیستم نوشته می‌شود؛ بقیهٔ سایت تغییری نمی‌کند. برای این کار از شرکت گیت لازم است: مستند API یا SDK، روش احراز هویت، و یک دستگاه یا محیط تست.
+## Falls das Gate-System keinen dieser Wege unterstützt
+Ein kleiner „Adapter“ (`IIntegrationSink` in `src/GymPlatform.Api/Integrations`) wird für die API dieses Systems geschrieben; der Rest der Seite bleibt unverändert. Dafür braucht es von der Gate-Firma: API-Dokumentation oder SDK, Authentifizierungsweg und ein Testgerät oder eine Testumgebung.

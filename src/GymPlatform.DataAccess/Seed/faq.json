@@ -1,7 +1,7 @@
 [
-  { "question": "با عضویت یک شعبه می‌توانم به شعبه‌های دیگر هم بروم؟", "answer": "در پکیج دوازده‌ماهه، ورود به همهٔ شعبه‌های هم‌جنس آزاد است. در بقیهٔ پکیج‌ها با هماهنگی پذیرش امکان‌پذیر است." },
-  { "question": "سانس بانوان و آقایان چطور است؟", "answer": "برخی شعبه‌ها سالن جداگانه دارند و برخی سانس‌بندی می‌شوند. ساعت دقیق هر شعبه روی کارت همان شعبه در نقشه آمده است." },
-  { "question": "قبل از ثبت‌نام می‌توانم مشاوره بگیرم؟", "answer": "بله. فرم مشاورهٔ رایگان را پر کنید؛ همکاران ما برای انتخاب پکیج و برنامه با شما تماس می‌گیرند." },
-  { "question": "امکان فریز عضویت وجود دارد؟", "answer": "در پکیج‌های شش‌ماهه و دوازده‌ماهه، فریز با اطلاع قبلی امکان‌پذیر است." },
-  { "question": "پرداخت آنلاین امن است؟", "answer": "پرداخت فقط از طریق درگاه رسمی بانکی انجام می‌شود و تأیید تراکنش سمت سرور بررسی می‌شود." }
+  { "question": "Kann ich mit der Mitgliedschaft einer Filiale auch in andere Filialen gehen?", "answer": "Im 12-Monats-Paket ist der Zutritt zu allen Filialen deines Bereichs frei. Bei den übrigen Paketen nach Absprache mit dem Empfang." },
+  { "question": "Wie sind die Zeiten für Damen und Herren geregelt?", "answer": "Einige Filialen haben getrennte Bereiche, andere feste Zeitfenster. Die genauen Zeiten jeder Filiale stehen auf ihrer Karte in der Filialübersicht." },
+  { "question": "Kann ich mich vor der Anmeldung beraten lassen?", "answer": "Ja. Fülle das Formular für die kostenlose Beratung aus; unser Team ruft dich an und hilft bei der Wahl von Paket und Plan." },
+  { "question": "Kann ich die Mitgliedschaft pausieren?", "answer": "Bei den 6- und 12-Monats-Paketen ist eine Pause mit Vorankündigung möglich." },
+  { "question": "Ist die Online-Zahlung sicher?", "answer": "Die Zahlung läuft ausschließlich über einen offiziellen Zahlungsdienstleister und wird serverseitig bestätigt." }
 ]

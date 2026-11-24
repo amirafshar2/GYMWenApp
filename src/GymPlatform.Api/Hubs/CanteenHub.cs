@@ -9,15 +9,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymPlatform.Api.Hubs;
 
-/// <summary>پیام‌های سرور به مرورگر (Hub تایپ‌شده)</summary>
+/// <summary>Servernachrichten an den Browser (typisierter Hub)</summary>
 public interface ICanteenClient
 {
     Task OrderChanged(CanteenOrderDto order);
 }
 
 /// <summary>
-/// بوفهٔ لحظه‌ای: کارکنان بوفه به گروه شعبه می‌پیوندند و سفارش‌های تازه را فوراً می‌بینند؛
-/// عضو فقط به گروه سفارش خودش می‌پیوندد تا «آماده است» را بگیرد.
+/// Live-Bistro: Bistro-Mitarbeiter treten der Filialgruppe bei und sehen neue Bestellungen sofort;
+/// das Mitglied tritt nur der Gruppe seiner Bestellung bei, um „Fertig“ zu erhalten.
 /// </summary>
 [Authorize]
 public sealed class CanteenHub(GymDbContext db, GymPlatform.Business.Services.Panel.IStaffScopeService scopes) : Hub<ICanteenClient>
@@ -28,19 +28,19 @@ public sealed class CanteenHub(GymDbContext db, GymPlatform.Business.Services.Pa
 
     public async Task WatchBranch(string branchSlug)
     {
-        // نقش و شعبه از پایگاه داده: کارمند بوفهٔ شعبهٔ «الف» سفارش‌های شعبهٔ «ب» را نمی‌بیند
+        // Rolle und Filiale aus der Datenbank: Bistro-Mitarbeiter von Filiale „A“ sehen keine Bestellungen von Filiale „B“
         var scope = await scopes.ResolveFromDbAsync(Context.User!.UserId(), Context.ConnectionAborted);
-        if (!(scope.Has(Roles.CanteenStaff) || scope.Has(Roles.BranchManager))) throw new HubException("دسترسی ندارید.");
+        if (!(scope.Has(Roles.CanteenStaff) || scope.Has(Roles.BranchManager))) throw new HubException("Kein Zugriff.");
         var id = await scopes.BranchIdAsync(branchSlug, Context.ConnectionAborted);
-        if (id is null) throw new HubException("شعبه پیدا نشد.");
-        if (!scope.Can(id.Value)) throw new HubException("به بوفهٔ این شعبه دسترسی ندارید.");
+        if (id is null) throw new HubException("Filiale nicht gefunden.");
+        if (!scope.Can(id.Value)) throw new HubException("Kein Zugriff auf das Bistro dieser Filiale.");
         await Groups.AddToGroupAsync(Context.ConnectionId, BranchGroup(id.Value));
     }
 
     public async Task WatchOrder(int orderId)
     {
         var userId = Context.User!.UserId();
-        if (!await db.CanteenOrders.AnyAsync(o => o.Id == orderId && o.UserId == userId)) throw new HubException("سفارش پیدا نشد.");
+        if (!await db.CanteenOrders.AnyAsync(o => o.Id == orderId && o.UserId == userId)) throw new HubException("Bestellung nicht gefunden.");
         await Groups.AddToGroupAsync(Context.ConnectionId, OrderGroup(orderId));
     }
 }
@@ -50,7 +50,7 @@ public sealed class SignalRCanteenNotifier(IHubContext<CanteenHub, ICanteenClien
     public async Task OrderChangedAsync(CanteenOrderDto order, CancellationToken ct)
     {
         await hub.Clients.Group(CanteenHub.BranchGroup(order.BranchId)).OrderChanged(order);
-        // به خود عضو نام مشتری نمی‌رود (لازم نیست)
+        // Das Mitglied selbst bekommt keinen Kundennamen (nicht nötig)
         await hub.Clients.Group(CanteenHub.OrderGroup(order.Id)).OrderChanged(order with { CustomerName = null });
     }
 }

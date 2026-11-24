@@ -1,4 +1,4 @@
-// حداقل پیاده‌سازی Field مطابق API کامپوننت field در shadcn (در رجیستری 21st موجود نبود)
+// Minimale Field-Implementierung passend zur API der shadcn-Komponente field (in der 21st-Registry nicht vorhanden)
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 

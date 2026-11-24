@@ -1,6 +1,6 @@
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>درخواست مشاورهٔ رایگان از فرم سایت.</summary>
+/// <summary>Anfrage für kostenlose Beratung aus dem Formular der Seite.</summary>
 public class ConsultationRequest : BaseEntity
 {
     public required string FullName { get; set; }

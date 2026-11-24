@@ -42,7 +42,7 @@ internal sealed class MembershipConfiguration : IEntityTypeConfiguration<Members
 {
     public void Configure(EntityTypeBuilder<Membership> e)
     {
-        // یادآوری پایان عضویت و داشبورد
+        // Erinnerung an Mitgliedschaftsende und Dashboard
         e.HasIndex(x => new { x.BranchId, x.EndsAtUtc });
         e.HasIndex(x => new { x.Status, x.EndsAtUtc });
         e.Property(x => x.CardToken).HasMaxLength(64);
@@ -59,7 +59,7 @@ internal sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 {
     public void Configure(EntityTypeBuilder<Payment> e)
     {
-        // داشبورد (درآمد عضویت) و اثر جشنواره
+        // Dashboard (Mitgliedschaftsumsatz) und Aktionswirkung
         e.HasIndex(x => new { x.Purpose, x.Status, x.PaidAtUtc });
         e.HasIndex(x => x.CampaignId);
         e.HasIndex(x => x.TrackingNumber).IsUnique();
@@ -157,7 +157,7 @@ internal sealed class CheckInConfiguration : IEntityTypeConfiguration<CheckIn>
 {
     public void Configure(EntityTypeBuilder<CheckIn> e)
     {
-        // پروندهٔ عضو در پذیرش و آخرین حضور در پنل مربی
+        // Mitgliederakte am Empfang und letzter Besuch im Trainerpanel
         e.HasIndex(x => new { x.UserId, x.OccurredAtUtc });
         e.Property(x => x.CredentialHint).HasMaxLength(8);
         e.Property(x => x.ExternalEventId).HasMaxLength(64);

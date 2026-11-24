@@ -37,7 +37,7 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
-  /** برای Contact Form از 21st.dev: حالت در حال ارسال */
+  /** Für das Contact Form von 21st.dev: Sendezustand */
   loading?: boolean
 }
 

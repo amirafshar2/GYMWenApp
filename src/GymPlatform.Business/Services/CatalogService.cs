@@ -91,9 +91,9 @@ public sealed class CatalogService(
     {
         var branchCount = (await branches.ListAsync(b => b.IsActive, null, ct)).Count;
         var coachCount = (await coaches.ListAsync(c => c.IsActive, null, ct)).Count;
-        // تعداد شاگرد و سال تأسیس را مالک در «تنظیمات سایت» می‌نویسد؛ خالی یعنی نمایش داده نشود
+        // Mitgliederzahl und Gründungsjahr trägt der Inhaber in den „Website-Einstellungen“ ein; leer = nicht anzeigen
         var why = (await site.GetAsync(ct)).Home.Why;
-        int? years = why.FoundedYear is { } y ? Math.Max(1, new System.Globalization.PersianCalendar().GetYear(Jalali.ToTehran(clock.UtcNow)) - y) : null;
+        int? years = why.FoundedYear is { } y ? Math.Max(1, new System.Globalization.GregorianCalendar().GetYear(Jalali.ToTehran(clock.UtcNow)) - y) : null;
         return new SiteStatsDto(branchCount, why.Members, years, coachCount);
     }
 

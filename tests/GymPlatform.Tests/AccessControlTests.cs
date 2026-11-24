@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>API گیت/دستبند: تصمیم ورود، دستبند، فهرست سفید، رویدادهای تکراری و صف خروجی.</summary>
+/// <summary>Gate-/Armband-API: Zutrittsentscheidung, Armband, Whitelist, doppelte Ereignisse und Ausgangswarteschlange.</summary>
 public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     private HttpClient Gate(string? key = GymApiFactory.DeviceKey)
@@ -27,12 +27,12 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         return await res.Content.ReadFromJsonAsync<JsonElement>();
     }
 
-    /// <summary>عضو با عضویت فعال در شعبهٔ اول (همان شعبهٔ گیت نمایشی)</summary>
+    /// <summary>Mitglied mit aktiver Mitgliedschaft in der ersten Filiale (der Filiale des Demo-Gates)</summary>
     private async Task<(Browser b, int userId, string qr)> PaidMemberAsync(string package = "quarter")
     {
         var b = new Browser(factory);
         await b.LoginAsync();
-        await CheckoutFlowTests.SignContractAsync(b, "کاوه رستمی", "male");
+        await CheckoutFlowTests.SignContractAsync(b, "Kai Roth", "male");
         var order = new { branchSlug = "markazi", packageSlug = package, section = "men", discountCode = (string?)null, idempotencyKey = Guid.NewGuid().ToString("N") };
         var g = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/checkout", order));
         await CheckoutFlowTests.PayInSandboxAsync(b, g, pay: true);
@@ -50,12 +50,12 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
             var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var u = await users.Users.FirstAsync(x => x.PhoneNumber == phone);
             await users.AddToRoleAsync(u, Roles.Reception);
-            // پذیرش فقط اعضای شعبهٔ خودش را می‌بیند
+            // Der Empfang sieht nur Mitglieder seiner eigenen Filiale
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "markazi").Select(x => x.Id).FirstAsync() });
             await db.SaveChangesAsync();
         }
-        // توکن تازه با نقش جدید (refresh نقش‌ها را دوباره می‌خواند)
+        // Neues Token mit der neuen Rolle (refresh liest die Rollen neu)
         b.AccessToken = null;
         var r = await b.SendAsync(HttpMethod.Post, "/api/v1/auth/refresh");
         b.AccessToken = (await b.JsonAsync<JsonElement>(r)).GetProperty("accessToken").GetString();
@@ -80,7 +80,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         var unknown = await Check(gate, "DEADBEEF99");
 
         Assert.True(ok.GetProperty("allowed").GetBoolean());
-        Assert.Contains("کاوه", ok.GetProperty("message").GetString());
+        Assert.Contains("Kai", ok.GetProperty("message").GetString());
         Assert.False(unknown.GetProperty("allowed").GetBoolean());
         Assert.Equal("unknown_credential", unknown.GetProperty("reason").GetString());
     }
@@ -92,10 +92,10 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         var staff = await ReceptionistAsync();
         var uid = "04:A1:B2:" + Random.Shared.Next(0x100000, 0xFFFFFF).ToString("X6");
 
-        var assigned = await staff.SendAsync(HttpMethod.Post, $"/api/v1/staff/members/{userId}/credentials", new { type = "wristband", value = uid, label = "دستبند آبی" });
+        var assigned = await staff.SendAsync(HttpMethod.Post, $"/api/v1/staff/members/{userId}/credentials", new { type = "wristband", value = uid, label = "Blaues Armband" });
         var cred = await staff.JsonAsync<JsonElement>(assigned);
         var gate = Gate();
-        var open = await Check(gate, uid.Replace(":", "").ToLowerInvariant()); // فرمت متفاوت خواننده‌ها
+        var open = await Check(gate, uid.Replace(":", "").ToLowerInvariant()); // unterschiedliches Leserformat
         var dup = await staff.SendAsync(HttpMethod.Post, $"/api/v1/staff/members/{userId}/credentials", new { type = "wristband", value = uid });
         await staff.SendAsync(HttpMethod.Delete, $"/api/v1/staff/members/{userId}/credentials/{cred.GetProperty("id").GetInt32()}");
         var afterRevoke = await Check(gate, uid);
@@ -122,7 +122,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
         var userId = (await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/me"))).GetProperty("id").GetInt32();
         using (var scope = factory.Services.CreateScope())
         {
-            // عضو قبلی همین شعبه که عضویتش تمام شده (پذیرش فقط اعضای شعبهٔ خودش را می‌بیند)
+            // Früheres Mitglied dieser Filiale mit abgelaufener Mitgliedschaft (der Empfang sieht nur Mitglieder der eigenen Filiale)
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             db.Memberships.Add(new Membership
             {
@@ -154,7 +154,7 @@ public class AccessControlTests(GymApiFactory factory) : IClassFixture<GymApiFac
 
         Assert.True(first.GetProperty("sessionCounted").GetBoolean());
         Assert.Equal(7, first.GetProperty("sessionsLeft").GetInt32());
-        Assert.False(second.GetProperty("sessionCounted").GetBoolean()); // همان روز
+        Assert.False(second.GetProperty("sessionCounted").GetBoolean()); // derselbe Tag
         Assert.Equal(7, replay.GetProperty("sessionsLeft").GetInt32());
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();

@@ -20,27 +20,27 @@ export default function ShopOrderPage() {
     if (!ready || !user) return
     shopApi.order(id).then((r) => {
       setO(r)
-      document.title = `سفارش ${r.number ?? ''}`
-      // بعد از بازگشت موفق از بانک، سبد خالی شود
+      document.title = `Bestellung ${r.number ?? ''}`
+      // Nach erfolgreicher Rückkehr von der Bank den Warenkorb leeren
       try { if (r.status !== 'pending' && r.status !== 'cancelled' && sessionStorage.getItem('kg-cart-pending') === String(r.id)) { cart.clear(); sessionStorage.removeItem('kg-cart-pending') } } catch { /* */ }
     }).catch((e: Error) => setErr(e.message))
   }, [ready, user, id])
 
-  if (err) return <PageShell title="سفارش فروشگاه"><Notice tone="err">{err}</Notice></PageShell>
+  if (err) return <PageShell title="Shop-Bestellung"><Notice tone="err">{err}</Notice></PageShell>
   if (!o) return <Spinner />
   const st = SHOP_STATUS[o.status]
   const ok = o.status !== 'cancelled' && o.status !== 'pending'
 
   return (
-    <PageShell eyebrow={`شاپ ${brand.shortName}`} title={ok ? 'سفارش ثبت شد' : o.status === 'pending' ? 'در انتظار پرداخت' : 'سفارش لغو شد'}
-      aside={<button type="button" onClick={() => window.print()} className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[3px] border border-steel-2 bg-white px-4 text-[14px] font-bold text-chalk hover:border-chalk print:hidden"><Printer className="size-4" aria-hidden />چاپ رسید</button>}>
+    <PageShell eyebrow={`Shop ${brand.shortName}`} title={ok ? 'Bestellung aufgegeben' : o.status === 'pending' ? 'Zahlung ausstehend' : 'Bestellung storniert'}
+      aside={<button type="button" onClick={() => window.print()} className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-[3px] border border-steel-2 bg-white px-4 text-[14px] font-bold text-chalk hover:border-chalk print:hidden"><Printer className="size-4" aria-hidden />Beleg drucken</button>}>
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px] [&>*]:min-w-0">
         <Panel>
           <div className="mb-5 flex items-center gap-3">
             {ok ? <CheckCircle2 className="size-10 text-[#1f9d55]" aria-hidden /> : <XCircle className="size-10 text-danger" aria-hidden />}
             <div>
               <p className="text-[18px] font-black text-chalk">{st.text}</p>
-              <p className="text-[14px] text-rubber">شمارهٔ سفارش <b dir="ltr">{faDigits(o.number ?? String(o.id))}</b> – {jalali(o.createdAtUtc, DT)}</p>
+              <p className="text-[14px] text-rubber">Bestellnummer <b dir="ltr">{faDigits(o.number ?? String(o.id))}</b> – {jalali(o.createdAtUtc, DT)}</p>
             </div>
           </div>
           <ul className="divide-y divide-steel-2 border-y border-steel-2">
@@ -49,24 +49,24 @@ export default function ShopOrderPage() {
                 <img src={i.imagePath} alt="" className="size-14 rounded-[6px] bg-[#EEF3F9] object-contain" />
                 <div className="min-w-0 flex-1"><p className="font-bold text-chalk">{i.productName}</p>{i.variantLabel && <p className="text-[13px] text-rubber">{i.variantLabel}</p>}</div>
                 <p className="text-[14px] text-rubber">{faNum(i.quantity)} ×</p>
-                <p className="w-32 text-left font-bold">{toman(i.unitPriceToman * i.quantity)}</p>
+                <p className="w-32 text-right font-bold">{toman(i.unitPriceToman * i.quantity)}</p>
               </li>
             ))}
           </ul>
           <dl className="mt-4 grid gap-2 text-[14px]">
-            <div className="flex justify-between"><dt className="text-rubber">جمع کالاها</dt><dd className="font-bold">{toman(o.subtotalToman)}</dd></div>
-            {o.discountToman > 0 && <div className="flex justify-between"><dt className="text-rubber">تخفیف</dt><dd className="font-bold text-plate">− {toman(o.discountToman)}</dd></div>}
-            {o.fulfillment === 'delivery' && <div className="flex justify-between"><dt className="text-rubber">ارسال</dt><dd className="font-bold">{o.shippingToman ? toman(o.shippingToman) : 'رایگان'}</dd></div>}
-            <div className="flex justify-between border-t border-steel-2 pt-2 text-[16px]"><dt className="font-bold">مبلغ</dt><dd className="font-black">{toman(o.totalToman)}</dd></div>
-            <div className="flex justify-between"><dt className="text-rubber">پرداخت</dt><dd>{o.payMethod === 'wallet' ? 'کیف پول' : 'درگاه بانکی'}</dd></div>
+            <div className="flex justify-between"><dt className="text-rubber">Summe Artikel</dt><dd className="font-bold">{toman(o.subtotalToman)}</dd></div>
+            {o.discountToman > 0 && <div className="flex justify-between"><dt className="text-rubber">Rabatt</dt><dd className="font-bold text-plate">− {toman(o.discountToman)}</dd></div>}
+            {o.fulfillment === 'delivery' && <div className="flex justify-between"><dt className="text-rubber">Versand</dt><dd className="font-bold">{o.shippingToman ? toman(o.shippingToman) : 'Kostenlos'}</dd></div>}
+            <div className="flex justify-between border-t border-steel-2 pt-2 text-[16px]"><dt className="font-bold">Betrag</dt><dd className="font-black">{toman(o.totalToman)}</dd></div>
+            <div className="flex justify-between"><dt className="text-rubber">Zahlung</dt><dd>{o.payMethod === 'wallet' ? 'Guthaben' : 'Bank-Gateway'}</dd></div>
           </dl>
         </Panel>
         <Panel>
-          <p className="mb-2 flex items-center gap-2 text-[16px] font-black text-chalk">{o.fulfillment === 'pickup' ? <Store className="size-5 text-plate" /> : <Truck className="size-5 text-plate" />}{o.fulfillment === 'pickup' ? 'تحویل در باشگاه' : 'ارسال به نشانی'}</p>
-          <p className="text-[14px] leading-7 text-rubber">{o.fulfillment === 'pickup' ? <>به پذیرش {o.branchName} مراجعه کنید و شمارهٔ سفارش را بگویید.</> : o.address}</p>
+          <p className="mb-2 flex items-center gap-2 text-[16px] font-black text-chalk">{o.fulfillment === 'pickup' ? <Store className="size-5 text-plate" /> : <Truck className="size-5 text-plate" />}{o.fulfillment === 'pickup' ? 'Abholung im Studio' : 'Versand an'}</p>
+          <p className="text-[14px] leading-7 text-rubber">{o.fulfillment === 'pickup' ? <>Bitte am Empfang {o.branchName} melden und die Bestellnummer nennen.</> : o.address}</p>
           <div className="mt-6 flex flex-wrap gap-3 print:hidden">
-            <Link to="/shop" className="inline-flex h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white hover:bg-plate-hi">ادامهٔ خرید</Link>
-            <Link to="/profile" className="inline-flex h-11 items-center rounded-[3px] border border-steel-2 px-5 text-[14px] font-bold text-chalk hover:border-chalk">سفارش‌های من</Link>
+            <Link to="/shop" className="inline-flex h-11 items-center rounded-[3px] bg-plate px-5 text-[14px] font-bold text-white hover:bg-plate-hi">Weiter einkaufen</Link>
+            <Link to="/profile" className="inline-flex h-11 items-center rounded-[3px] border border-steel-2 px-5 text-[14px] font-bold text-chalk hover:border-chalk">Meine Bestellungen</Link>
           </div>
         </Panel>
       </div>

@@ -1,5 +1,5 @@
 import { Mail, MapPin, Phone } from 'lucide-react';
-// lucide-react جدید آیکون برندها را ندارد؛ از فایل محلی هم‌سبک
+// Das neue lucide-react hat keine Markenicons; aus einer lokalen Datei im gleichen Stil
 import { Dribbble, Facebook, Github, Instagram, Twitter } from '@/components/ui/brand-icons';
 import Link from 'next/link';
 

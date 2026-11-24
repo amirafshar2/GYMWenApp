@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace GymPlatform.Business.Services.Panel;
 
 /// <summary>
-/// شعبه‌ها و سؤالات پرتکرار (فقط مدیر کل). شعبه‌ای که عضو، مربی، سفارش یا ورود ثبت‌شده دارد حذف نمی‌شود؛
-/// به‌جایش «نمایش در سایت» خاموش می‌شود تا سوابق سالم بماند.
+/// Filialen und FAQ (nur Gesamtadmin). Eine Filiale mit Mitgliedern, Trainern, Bestellungen oder Check-ins wird nicht gelöscht;
+/// stattdessen wird „Auf der Seite zeigen“ ausgeschaltet, damit die Historie erhalten bleibt.
 /// </summary>
 public sealed partial class AdminService
 {
@@ -27,18 +27,18 @@ public sealed partial class AdminService
         var name = PersianText.CleanText(r.Name);
         var district = PersianText.CleanText(r.District);
         var address = PersianText.CleanText(r.Address);
-        if (name is null || name.Length > 80) e["name"] = ["نام شعبه را بنویسید (حداکثر ۸۰ حرف)."];
-        if (district is null || district.Length > 60) e["district"] = ["محله یا منطقه را بنویسید."];
-        if (address is null || address.Length > 300) e["address"] = ["آدرس را بنویسید."];
+        if (name is null || name.Length > 80) e["name"] = ["Bitte einen Filialnamen angeben (höchstens 80 Zeichen)."];
+        if (district is null || district.Length > 60) e["district"] = ["Bitte Stadtteil oder Gegend angeben."];
+        if (address is null || address.Length > 300) e["address"] = ["Bitte die Adresse angeben."];
         GenderSection? section = r.Section?.ToLowerInvariant() switch { "men" => GenderSection.Men, "women" => GenderSection.Women, "both" => GenderSection.Both, _ => null };
-        if (section is null) e["section"] = ["سالن: آقایان، بانوان یا هر دو."];
-        if (r.Latitude is < 24 or > 40 || r.Longitude is < 44 or > 64) e["location"] = ["موقعیت روی نقشه را درست وارد کنید (مثل ۲۹٫۶۱، ۵۲٫۵۳)."];
+        if (section is null) e["section"] = ["Bereich: Herren, Damen oder beide."];
+        if (r.Latitude is < 24 or > 40 || r.Longitude is < 44 or > 64) e["location"] = ["Bitte die Kartenposition korrekt eingeben (z. B. 48,78, 9,18)."];
         var phone = PersianText.ToLatinDigits(r.Phone).Replace(" ", "").Replace("-", "");
-        if (phone.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(phone, @"^0\d{9,10}$")) e["phone"] = ["تلفن را فقط با رقم بنویسید."];
+        if (phone.Length > 0 && !System.Text.RegularExpressions.Regex.IsMatch(phone, @"^0\d{9,10}$")) e["phone"] = ["Telefonnummer bitte nur mit Ziffern."];
         string? Hours(string? h, string key)
         {
             var s = PersianText.CleanText(h);
-            if (s is { Length: > 120 }) { e[key] = ["ساعت سانس حداکثر ۱۲۰ حرف."]; return null; }
+            if (s is { Length: > 120 }) { e[key] = ["Öffnungszeiten höchstens 120 Zeichen."]; return null; }
             return s;
         }
         var men = section is GenderSection.Men or GenderSection.Both ? Hours(r.MenHours, "menHours") : null;
@@ -50,7 +50,7 @@ public sealed partial class AdminService
         if (id is { } bid)
         {
             b = await db.Branches.FirstOrDefaultAsync(x => x.Id == bid, ct);
-            if (b is null) return Result<AdminBranchDto>.Fail("id", "شعبه پیدا نشد.", ErrorType.NotFound);
+            if (b is null) return Result<AdminBranchDto>.Fail("id", "Filiale nicht gefunden.", ErrorType.NotFound);
         }
         else
         {
@@ -62,7 +62,7 @@ public sealed partial class AdminService
         b.MenHours = men; b.WomenHours = women; b.Disciplines = disciplines; b.IsActive = r.IsActive; b.AddressConfirmed = true;
         await db.SaveChangesAsync(ct);
 
-        // شعبهٔ تازه: ردیف موجودی صفر برای همهٔ کالاها تا مدیر شعبه موجودی را وارد کند
+        // Neue Filiale: Bestandszeile 0 für alle Produkte, damit der Filialleiter den Bestand eintragen kann
         if (id is null)
         {
             foreach (var v in await db.ProductVariants.Select(v => v.Id).ToListAsync(ct))
@@ -76,11 +76,11 @@ public sealed partial class AdminService
     public async Task<Result<bool>> DeleteBranchAsync(int id, int staffId, CancellationToken ct)
     {
         var b = await db.Branches.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (b is null) return Result<bool>.Fail("id", "شعبه پیدا نشد.", ErrorType.NotFound);
+        if (b is null) return Result<bool>.Fail("id", "Filiale nicht gefunden.", ErrorType.NotFound);
         if (await db.Memberships.AnyAsync(x => x.BranchId == id, ct) || await db.Coaches.AnyAsync(x => x.BranchId == id, ct)
             || await db.CheckIns.AnyAsync(x => x.BranchId == id, ct) || await db.ShopOrders.AnyAsync(x => x.BranchId == id, ct)
             || await db.CanteenOrders.AnyAsync(x => x.BranchId == id, ct) || await db.AccessDevices.AnyAsync(x => x.BranchId == id, ct))
-            return Result<bool>.Fail("id", "این شعبه عضو، مربی، سفارش یا گیت ثبت‌شده دارد و حذف نمی‌شود؛ به‌جایش «نمایش در سایت» را خاموش کنید.", ErrorType.Conflict);
+            return Result<bool>.Fail("id", "Diese Filiale hat Mitglieder, Trainer, Bestellungen oder Gates und kann nicht gelöscht werden; stattdessen „Auf der Seite zeigen“ ausschalten.", ErrorType.Conflict);
         db.BranchStocks.RemoveRange(db.BranchStocks.Where(s => s.BranchId == id));
         db.StaffBranches.RemoveRange(db.StaffBranches.Where(s => s.BranchId == id));
         await db.ConsultationRequests.Where(c => c.BranchId == id).ExecuteUpdateAsync(s => s.SetProperty(c => c.BranchId, (int?)null), ct);
@@ -94,14 +94,14 @@ public sealed partial class AdminService
     {
         var list = await db.Branches.ToListAsync(ct);
         if (ids.Count != list.Count || ids.Distinct().Count() != ids.Count || list.Any(b => !ids.Contains(b.Id)))
-            return Result<bool>.Fail("ids", "فهرست شعبه‌ها کامل نیست.");
+            return Result<bool>.Fail("ids", "Die Filialliste ist unvollständig.");
         foreach (var b in list) b.SortOrder = ids.ToList().IndexOf(b.Id);
         Audit("branch.reordered", "Branch", 0, staffId, null);
         await db.SaveChangesAsync(ct);
         return Result<bool>.Ok(true);
     }
 
-    // ================================================================ سؤالات پرتکرار
+    // ================================================================ FAQ
     public async Task<IReadOnlyList<AdminFaqDto>> FaqAsync(CancellationToken ct) =>
         await db.FaqItems.AsNoTracking().OrderBy(f => f.SortOrder).Select(f => new AdminFaqDto(f.Id, f.Question, f.Answer, f.SortOrder)).ToListAsync(ct);
 
@@ -110,14 +110,14 @@ public sealed partial class AdminService
         var q = PersianText.CleanText(r.Question);
         var a = PersianText.CleanText(r.Answer);
         var e = new Dictionary<string, string[]>();
-        if (q is null || q.Length > 200) e["question"] = ["سؤال را بنویسید (حداکثر ۲۰۰ حرف)."];
-        if (a is null || a.Length > 1500) e["answer"] = ["جواب را بنویسید (حداکثر ۱۵۰۰ حرف)."];
+        if (q is null || q.Length > 200) e["question"] = ["Bitte die Frage angeben (höchstens 200 Zeichen)."];
+        if (a is null || a.Length > 1500) e["answer"] = ["Bitte die Antwort angeben (höchstens 1500 Zeichen)."];
         if (e.Count > 0) return Result<AdminFaqDto>.Fail(e);
         FaqItem? f;
         if (id is { } fid)
         {
             f = await db.FaqItems.FirstOrDefaultAsync(x => x.Id == fid, ct);
-            if (f is null) return Result<AdminFaqDto>.Fail("id", "سؤال پیدا نشد.", ErrorType.NotFound);
+            if (f is null) return Result<AdminFaqDto>.Fail("id", "Frage nicht gefunden.", ErrorType.NotFound);
             f.Question = q!; f.Answer = a!;
         }
         else
@@ -135,7 +135,7 @@ public sealed partial class AdminService
     public async Task<Result<bool>> DeleteFaqAsync(int id, int staffId, CancellationToken ct)
     {
         var f = await db.FaqItems.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (f is null) return Result<bool>.Fail("id", "سؤال پیدا نشد.", ErrorType.NotFound);
+        if (f is null) return Result<bool>.Fail("id", "Frage nicht gefunden.", ErrorType.NotFound);
         db.FaqItems.Remove(f);
         Audit("faq.deleted", "Faq", id, staffId, null);
         await db.SaveChangesAsync(ct);

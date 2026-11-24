@@ -20,7 +20,7 @@ interface FrequentlyAskedQuestionsProps {
   data?: FAQItem[];
   className?: string;
   supportEmail?: string;
-  /** تغییر برای پروژه: لینک تماس دلخواه (مثلاً tel:) به‌جای ایمیل */
+  /** Änderung fürs Projekt: beliebiger Kontaktlink (z. B. tel:) statt E-Mail */
   contactHref?: string;
   contactLabel?: string;
 }

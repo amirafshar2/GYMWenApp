@@ -28,7 +28,7 @@ interface CountUpProps {
   separator?: string;
   onStart?: () => void;
   onEnd?: () => void;
-  /** تغییر برای پروژه: زبان قالب‌بندی اعداد (مثلاً fa-IR برای ارقام فارسی؛ با digitEffect="none") */
+  /** Änderung fürs Projekt: Locale der Zahlenformatierung (z. B. de-DE; mit digitEffect="none") */
   locale?: string;
 }
 

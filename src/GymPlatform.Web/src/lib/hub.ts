@@ -6,8 +6,8 @@ import type { CanteenOrder } from './commerce'
 export type HubStatus = 'connecting' | 'live' | 'reconnecting' | 'offline'
 
 /**
- * اتصال لحظه‌ای به بوفه. `join` بعد از هر اتصال یا اتصال دوباره اجرا می‌شود (عضویت در گروه شعبه/سفارش).
- * اگر اتصال قطع شود، خودکار دوباره وصل می‌شود؛ صفحه هم هر ۲۰ ثانیه یک‌بار از API تازه می‌کند.
+ * Live-Verbindung zum Bistro. `join` Läuft nach jeder (Wieder-)Verbindung (Beitritt zur Filial-/Bestellgruppe).
+ * Bei Verbindungsabbruch automatische Wiederverbindung; die Seite lädt außerdem alle 20 Sekunden neu von der API.
  */
 export function useCanteenHub(join: ((c: HubConnection) => Promise<void>) | null, onOrder: (o: CanteenOrder) => void) {
   const [status, setStatus] = useState<HubStatus>('connecting')
@@ -45,7 +45,7 @@ export function useCanteenHub(join: ((c: HubConnection) => Promise<void>) | null
   return status
 }
 
-/** بوق کوتاه برای سفارش تازه / آماده شدن (بدون فایل صوتی) */
+/** Kurzer Piepton bei neuer / fertiger Bestellung (ohne Audiodatei) */
 export function beep(times = 1) {
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
@@ -58,5 +58,5 @@ export function beep(times = 1) {
       o.start(t); o.stop(t + 0.22)
     }
     setTimeout(() => void ctx.close(), times * 300 + 200)
-  } catch { /* مرورگر اجازه نداد */ }
+  } catch { /* Browser hat es nicht erlaubt */ }
 }

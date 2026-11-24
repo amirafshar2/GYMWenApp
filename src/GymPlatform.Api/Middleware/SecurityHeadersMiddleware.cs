@@ -1,21 +1,21 @@
 namespace GymPlatform.Api.Middleware;
 
-/// <summary>هدرهای امنیتی (OWASP Secure Headers). CSP فقط عکس‌های موقت مربیان را از Unsplash اجازه می‌دهد. دوربین فقط برای خود سایت (اسکن QR در پذیرش).</summary>
+/// <summary>Sicherheitsheader (OWASP Secure Headers). CSP erlaubt nur die vorläufigen Trainerfotos von Unsplash. Kamera nur für die Seite selbst (QR-Scan am Empfang).</summary>
 public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvironment env, IConfiguration config)
 {
-    /// <summary>صفحهٔ درگاه آزمایشی Parbad اسکریپت درون‌خطی دارد؛ CSP شل‌تر فقط برای همین مسیر.</summary>
+    /// <summary>Die Seite des Parbad-Test-Gateways hat ein Inline-Skript; die lockere CSP gilt nur für diesen Pfad.</summary>
     public const string SandboxPath = "/payment-sandbox";
 
-    // عکس‌های موقت مربیان تا رسیدن عکس واقعی؛ بعد از جایگزینی، این میزبان حذف شود
-    // trustseal.enamad.ir: تصویر نماد اعتماد الکترونیکی در فوتر
+    // Vorläufige Trainerfotos bis zu echten Fotos; danach diesen Host entfernen
+    // trustseal.enamad.ir: Bild des Vertrauenssiegels im Footer
     private const string ImageHosts = "https://images.unsplash.com https://trustseal.enamad.ir";
 
     private string? _csp;
     private string Csp => _csp ??= BuildCsp(config, InlineScriptHashes(env));
 
     /// <summary>
-    /// اسکریپت کوچک درون‌خطی index.html (پیش‌بارگذاری تصویر هیرو فقط در صفحهٔ اصلی) با hash مجاز می‌شود،
-    /// نه با 'unsafe-inline'. hash موقع اجرا از همان فایل ساخته می‌شود تا با هر بیلد درست بماند.
+    /// Das kleine Inline-Skript in index.html (Vorladen des Hero-Bildes nur auf der Startseite) wird per Hash erlaubt,
+    /// nicht mit 'unsafe-inline'. Der Hash wird zur Laufzeit aus derselben Datei erzeugt, damit er bei jedem Build stimmt.
     /// </summary>
     private static string InlineScriptHashes(IWebHostEnvironment env)
     {
@@ -32,7 +32,7 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
         "default-src 'self'", "script-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data:", "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'", "object-src 'none'");
 
-    // فرم پرداخت از سایت مستقیم به درگاه بانک (shaparak) ارسال می‌شود؛ میزبان‌ها از تنظیمات Payment:GatewayHosts
+    // Das Zahlungsformular wird direkt an das Bank-Gateway gesendet; Hosts aus der Einstellung Payment:GatewayHosts
     private static string BuildCsp(IConfiguration config, string scriptHashes)
     {
         var gateways = config.GetSection("Payment:GatewayHosts").Get<string[]>() ?? ["https://*.shaparak.ir"];
@@ -53,7 +53,7 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next, IWebHostEnvi
 
     public Task Invoke(HttpContext ctx)
     {
-        // تصمیم همین‌جا گرفته می‌شود: Parbad با Map مسیر را به PathBase منتقل می‌کند و در OnStarting دیگر دیده نمی‌شود
+        // Die Entscheidung fällt hier: Parbad verschiebt den Pfad mit Map nach PathBase und in OnStarting ist er nicht mehr sichtbar
         var csp = ctx.Request.Path.StartsWithSegments(SandboxPath) ? SandboxCsp : Csp;
         ctx.Response.OnStarting(() =>
         {

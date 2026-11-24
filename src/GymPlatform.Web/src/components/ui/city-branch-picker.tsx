@@ -4,14 +4,14 @@ import * as React from "react";
 
 /* ----------------------------------------------------------------------------
  * City Branch Picker
- * بازسازی ساختار «Nepal Address Picker» (21st.dev) برای شعبه‌های یک شهر:
- * روی منطقه کلیک کن تا زوم شود، روی حوزهٔ شعبه کلیک کن تا انتخاب شود،
- * یا نام محله را بنویس تا نقشه روی شعبه‌های مطابق کوچک شود.
+ * Nachbau der Struktur von „Nepal Address Picker“ (21st.dev) für die Filialen einer Stadt:
+ * Auf ein Gebiet klicken zum Zoomen, auf das Einzugsgebiet einer Filiale klicken zum Auswählen,
+ * oder einen Stadtteil eintippen, damit die Karte die passenden Filialen zeigt.
  *
- * هندسه: طرح کلی شهر شماتیک است (نه مرز رسمی شهرداری). هر «حوزه» بخشی از
- * شهر است که به آن شعبه از همه نزدیک‌تر است (دیاگرام ورونوی روی مختصات شعبه‌ها).
- * فقط React لازم است؛ استایل‌ها زیر کلاس .sbp محدود شده‌اند و رنگ‌ها از
- * توکن‌های تم سایت (CSS variables) می‌آیند.
+ * Geometrie: Der Stadtumriss ist schematisch (keine amtliche Grenze). Jedes „Einzugsgebiet“ ist der Teil
+ * der Stadt, der dieser Filiale am nächsten liegt (Voronoi-Diagramm über die Filialkoordinaten).
+ * Nur React nötig; Styles sind unter der Klasse .sbp gekapselt und die Farben kommen aus
+ * den Theme-Tokens der Seite (CSS variables).
  * -------------------------------------------------------------------------- */
 
 type Point = [number, number];
@@ -39,18 +39,18 @@ export interface CityBranchPickerProps<B extends PickerBranch> {
   branches: B[];
   areas: PickerArea[];
   areaOf: (b: B) => string;
-  /** طرح کلی شهر به صورت [lat, lng] */
+  /** Stadtumriss als [lat, lng] */
   outline: [number, number][];
   cityName: string;
   selected: string | null;
   onSelect: (slug: string | null) => void;
-  /** شعبه‌هایی که با فیلتر فعلی (مثلاً بانوان) جور نیستند */
+  /** Filialen, die nicht zum aktuellen Filter passen (z. B. Damen) */
   dimmed?: Set<string>;
   user?: { lat: number; lng: number } | null;
   distanceOf?: (b: B) => number | null;
   nearestSlug?: string | null;
   formatDistance?: (km: number) => string;
-  /** محتوای پایین کارت برای شعبهٔ انتخاب‌شده */
+  /** Inhalt unten in der Karte für die gewählte Filiale */
   renderDetails?: (b: B | null) => React.ReactNode;
   className?: string;
 }
@@ -135,7 +135,7 @@ function useElementWidth<T extends Element>() {
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 const norm = (s: string) => s.replace(/[‌\s]/g, "").replace(/ي/g, "ی").replace(/ك/g, "ک");
 
-/* -- scoped styles (رنگ‌ها از توکن‌های سایت) -------------------------------- */
+/* -- scoped styles (Farben aus den Tokens der Seite) -------------------------------- */
 
 const CSS = `
 .sbp{--sbp-bg:#fff;--sbp-fg:var(--color-chalk,#2c2c2c);--sbp-muted:var(--color-steel,#f7f7f7);--sbp-muted-fg:var(--color-rubber,#6b6b6b);
@@ -269,7 +269,7 @@ export function CityBranchPicker<B extends PickerBranch>({
   const sel = selected ? cellBySlug.get(selected) ?? null : null;
   const hov = hovered ? cellBySlug.get(hovered) ?? null : null;
 
-  // انتخاب از بیرون (مثلاً «نزدیک‌ترین شعبه») منطقه‌اش را باز می‌کند
+  // Auswahl von außen (z. B. „Nächstes Studio“) öffnet das zugehörige Gebiet
   React.useEffect(() => { if (sel) setAreaId(sel.area); }, [sel]);
 
   const q = norm(query);
@@ -331,7 +331,7 @@ export function CityBranchPicker<B extends PickerBranch>({
   }, [zoomed, view.s, pxPerUnit, labelled, selected]);
 
   const listMode: "matches" | "area" | "overview" = matches.length ? "matches" : area ? "area" : "overview";
-  const status = searching ? (matches.length ? `${matches.length.toLocaleString("fa-IR")} شعبه با «${query.trim()}»` : `شعبه‌ای با «${query.trim()}» پیدا نشد`) : null;
+  const status = searching ? (matches.length ? `${matches.length.toLocaleString("de-DE")} Fil.n mit „${query.trim()}»` : `Keine Filiale mit „${query.trim()}“ gefunden`) : null;
   const crumbBranch = area && sel?.area === area.area.id ? sel : null;
   const userPt = user ? geo.proj(user.lat, user.lng) : null;
 
@@ -348,12 +348,12 @@ export function CityBranchPicker<B extends PickerBranch>({
           <span className="sbp-grow">
             <span className="sbp-block sbp-trunc">{c.b.name}</span>
             <span className="sbp-block sbp-sub sbp-trunc">
-              {[c.b.hasMen && "آقایان", c.b.hasWomen && "بانوان"].filter(Boolean).join(" – ")}
+              {[c.b.hasMen && "Herren", c.b.hasWomen && "Damen"].filter(Boolean).join(" – ")}
             </span>
           </span>
           {d !== null && formatDistance && (
             c.b.slug === nearestSlug
-              ? <span className="sbp-near">نزدیک‌ترین، {formatDistance(d)}</span>
+              ? <span className="sbp-near">Am nächsten, {formatDistance(d)}</span>
               : <span className="sbp-num">{formatDistance(d)}</span>
           )}
         </button>
@@ -362,26 +362,26 @@ export function CityBranchPicker<B extends PickerBranch>({
   };
 
   return (
-    <div className={cx("sbp", className)} dir="rtl"
+    <div className={cx("sbp", className)}
       onKeyDown={(e) => { if (e.key !== "Escape") return; if (searching) setQuery(""); else if (area) showAll(); }}>
       <style>{CSS}</style>
 
       <div className="sbp-header">
-        <nav aria-label="مکان روی نقشه" className="sbp-crumbs">
+        <nav aria-label="Ort auf der Karte" className="sbp-crumbs">
           <button type="button" className="sbp-crumb" aria-current={!area ? "location" : undefined} onClick={showAll}>{cityName}</button>
           {area && (<><Chevron /><button type="button" className="sbp-crumb" aria-current={!crumbBranch ? "location" : undefined} onClick={() => pickArea(area.area.id)}>{area.area.name}</button></>)}
           {crumbBranch && (<><Chevron /><span className="sbp-crumb" aria-current="location">{crumbBranch.b.name}</span></>)}
         </nav>
         <label htmlFor={`${uid}-q`} className="sbp-inline">
-          <span className="sbp-label">محله</span>
-          <input id={`${uid}-q`} className="sbp-input" type="search" placeholder="نام محله یا شعبه" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <span className="sbp-label">Stadtteil</span>
+          <input id={`${uid}-q`} className="sbp-input" type="search" placeholder="Stadtteil oder Filiale" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>
       </div>
 
       <div className="sbp-body">
         <div className="sbp-map">
           <svg ref={svgRef} viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} role="img" className="sbp-svg"
-            aria-label={area ? `نقشهٔ منطقهٔ ${area.area.name}` : `نقشهٔ شعبه‌ها در ${cityName}`}
+            aria-label={area ? `Karte des Gebiets ${area.area.name}` : `Filialkarte ${cityName}`}
             onMouseLeave={() => setHovered(null)}>
             <g className="sbp-zoom" style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.s})`, transformOrigin: "0 0" }}>
               <path d={geo.cityPath} fill="var(--sbp-bg)" stroke="none" />
@@ -394,7 +394,7 @@ export function CityBranchPicker<B extends PickerBranch>({
                     onMouseEnter={() => setHovered(c.b.slug)} onClick={() => clickCell(c)} />
                 ) : null;
               })}
-              {/* مرز مناطق */}
+              {/* Gebietsgrenzen */}
               {geo.cells.map((c) => (
                 <path key={c.b.slug + "-b"} d={c.border} aria-hidden fill="none" pointerEvents="none" vectorEffect="non-scaling-stroke"
                   strokeLinecap="round" strokeWidth={area?.area.id === c.area && !matches.length ? 1.5 : 2.5}
@@ -405,7 +405,7 @@ export function CityBranchPicker<B extends PickerBranch>({
                 <path d={sel.d} aria-hidden fill="none" pointerEvents="none" vectorEffect="non-scaling-stroke" strokeWidth={2} strokeLinejoin="round" className="sbp-stroke-fg" />
               )}
 
-              {/* نام مناطق در نمای کلی */}
+              {/* Gebietsnamen in der Übersicht */}
               {!zoomed && pxPerUnit >= 0.45 && [...geo.areaGeo.values()].filter((a) => a.cells.length).map((a) => (
                 <text key={a.area.id} x={a.label[0]} y={a.label[1]} textAnchor="middle" dominantBaseline="middle" pointerEvents="none"
                   fill="#fff" fontWeight={800} fontSize={15 * unit} style={{ textShadow: "0 1px 3px rgba(0,0,0,.45)" }}>
@@ -413,7 +413,7 @@ export function CityBranchPicker<B extends PickerBranch>({
                 </text>
               ))}
 
-              {/* پین شعبه‌ها */}
+              {/* Filial-Pins */}
               {geo.cells.map((c) => {
                 const isSel = c.b.slug === selected;
                 const off = dimmed?.has(c.b.slug) || (matches.length > 0 && !matchSet.has(c.b.slug)) || (area && area.area.id !== c.area);
@@ -436,7 +436,7 @@ export function CityBranchPicker<B extends PickerBranch>({
                 </g>
               )}
 
-              {/* نام شعبه‌ها در نمای زوم‌شده */}
+              {/* Filialnamen in der Zoomansicht */}
               {zoomed && labelled.filter((c) => labelLayout.has(c.b.slug) || c.b.slug === hovered)
                 .sort((a, b) => Number(a.b.slug === hovered) - Number(b.b.slug === hovered))
                 .map((c) => (
@@ -459,7 +459,7 @@ export function CityBranchPicker<B extends PickerBranch>({
           </div>
 
           {zoomed && (
-            <button type="button" className="sbp-inset" onClick={showAll} aria-label={`نمایش کل ${cityName}`} title={`نمایش کل ${cityName}`}>
+            <button type="button" className="sbp-inset" onClick={showAll} aria-label={`Ganz ${cityName}`} title={`Ganz ${cityName}`}>
               <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} aria-hidden>
                 {geo.cells.map((c) => {
                   const on = matches.length ? matchSet.has(c.b.slug) : area?.area.id === c.area;
@@ -473,7 +473,7 @@ export function CityBranchPicker<B extends PickerBranch>({
 
         <div className="sbp-list">
           <div className="sbp-list-head">
-            <h3>{listMode === "matches" ? `محله‌های «${query.trim()}»` : listMode === "area" ? `منطقهٔ ${area!.area.name}` : "منطقه را انتخاب کن"}</h3>
+            <h3>{listMode === "matches" ? `Stadtteile von „${query.trim()}»` : listMode === "area" ? `Gebiet ${area!.area.name}` : "Gebiet wählen"}</h3>
             {listMode === "area" && <span className="sbp-label">{area!.area.sub}</span>}
           </div>
           <ul className="sbp-ul" role="list">
@@ -489,7 +489,7 @@ export function CityBranchPicker<B extends PickerBranch>({
                         <span className="sbp-block sbp-strong">{a.area.name}</span>
                         <span className="sbp-block sbp-sub">{a.area.sub}</span>
                       </span>
-                      <span className="sbp-num">{a.cells.filter((c) => !dimmed?.has(c.b.slug)).length.toLocaleString("fa-IR")} شعبه</span>
+                      <span className="sbp-num">{a.cells.filter((c) => !dimmed?.has(c.b.slug)).length.toLocaleString("de-DE")} Fil.</span>
                     </button>
                   </li>
                   {a.cells.filter((c) => !dimmed?.has(c.b.slug)).map(item)}
@@ -501,7 +501,7 @@ export function CityBranchPicker<B extends PickerBranch>({
       </div>
 
       <div className="sbp-footer">
-        {renderDetails ? renderDetails(sel?.b ?? null) : <p className="sbp-empty">یک شعبه را روی نقشه یا از فهرست انتخاب کن.</p>}
+        {renderDetails ? renderDetails(sel?.b ?? null) : <p className="sbp-empty">Wähle eine Filiale auf der Karte oder aus der Liste.</p>}
       </div>
     </div>
   );

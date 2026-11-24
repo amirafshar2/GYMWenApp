@@ -11,7 +11,7 @@ namespace GymPlatform.Api.Controllers;
 [Route("api/v1")]
 public sealed class ConsultationsController(IConsultationService service, IAntiforgery antiforgery) : ControllerBase
 {
-    /// <summary>توکن CSRF: کوکی را ست می‌کند و توکن را برای هدر X-XSRF-TOKEN برمی‌گرداند.</summary>
+    /// <summary>CSRF-Token: setzt das Cookie und gibt das Token für den Header X-XSRF-TOKEN zurück.</summary>
     [HttpGet("security/csrf")]
     public IActionResult Csrf()
     {

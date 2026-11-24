@@ -11,22 +11,20 @@ import { cn } from '@/lib/utils'
 import CityBranchPicker, { type PickerArea } from '@/components/ui/city-branch-picker'
 
 const AREA_COLORS = ['#2C2C2C', 'var(--color-plate)', 'var(--color-sun)', '#8A8A8A']
-const AREA_NAMES: Record<string, string> = { nw: 'شمال‌غرب', ne: 'شمال‌شرق', sw: 'جنوب‌غرب', se: 'جنوب‌شرق' }
+const AREA_NAMES: Record<string, string> = { nw: 'Nordwest', ne: 'Nordost', sw: 'Südwest', se: 'Südost' }
 const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)] }
 
-/** طرح ساده‌شدهٔ مرز ایران [عرض، طول] — شماتیک، نه نقشهٔ رسمی؛ وقتی شعبه‌ها در چند شهر پخش‌اند */
-const IRAN_OUTLINE: [number, number][] = [
-  [39.78, 44.6], [39.0, 44.3], [38.3, 44.3], [37.1, 44.8], [36.6, 45.0], [35.8, 46.0], [35.1, 46.2], [34.5, 45.6],
-  [33.7, 45.9], [33.0, 46.2], [32.0, 47.6], [31.0, 47.7], [30.0, 48.0], [29.9, 48.6], [29.0, 50.6], [27.8, 51.5],
-  [27.4, 52.6], [26.6, 54.6], [26.8, 55.6], [27.1, 56.3], [26.0, 57.2], [25.6, 57.8], [25.3, 59.5], [25.2, 61.6],
-  [26.2, 61.9], [26.6, 63.2], [27.2, 62.8], [28.3, 62.0], [29.4, 60.9], [29.9, 60.9], [31.0, 61.8], [31.4, 60.9],
-  [33.5, 60.6], [34.6, 61.0], [35.6, 61.3], [36.6, 61.2], [37.3, 60.0], [37.6, 59.0], [38.2, 57.3], [37.9, 55.5],
-  [37.3, 54.0], [36.8, 53.9], [36.7, 52.5], [36.9, 50.6], [37.5, 49.5], [38.4, 48.9], [39.4, 48.3], [39.7, 47.9],
-  [39.15, 47.0], [38.9, 46.5], [39.0, 45.6], [39.65, 44.8],
+/** Vereinfachter Umriss Deutschlands [Breite, Länge] — schematisch, keine amtliche Karte; wenn Filialen auf mehrere Städte verteilt sind */
+const GERMANY_OUTLINE: [number, number][] = [
+  [54.9, 8.6], [54.8, 9.9], [54.4, 11.0], [54.2, 12.4], [54.6, 13.4], [53.9, 14.2], [53.3, 14.4], [52.6, 14.6],
+  [51.8, 14.7], [51.0, 15.0], [50.8, 14.3], [50.3, 12.3], [49.9, 12.5], [49.4, 12.9], [48.8, 13.8], [48.4, 13.4],
+  [47.7, 13.0], [47.5, 12.2], [47.6, 10.5], [47.5, 9.6], [47.7, 8.6], [47.6, 7.6], [48.1, 7.6], [49.0, 8.2],
+  [49.2, 6.6], [49.6, 6.4], [50.1, 6.1], [50.8, 6.0], [51.4, 6.2], [51.9, 6.8], [52.3, 7.0], [53.2, 7.2],
+  [53.6, 7.0], [53.7, 8.0], [54.1, 8.8],
 ]
 const isNationwide = (lats: number[], lngs: number[]) => Math.max(...lats) - Math.min(...lats) > 2 || Math.max(...lngs) - Math.min(...lngs) > 2
 
-/** هر شهری: منطقه‌ها چهار ربع اطراف میانهٔ شعبه‌ها، و طرح شهر پوستهٔ محدب شعبه‌ها با کمی حاشیه (شماتیک، نه نقشهٔ رسمی) */
+/** Jede Stadt: Gebiete sind vier Viertel um die Mitte der Filialen, der Stadtumriss ist die konvexe Hülle der Filialen mit etwas Rand (schematisch, keine amtliche Karte) */
 function cityLayout(branches: Branch[]) {
   const lat0 = median(branches.map((b) => b.latitude)), lng0 = median(branches.map((b) => b.longitude))
   const areaOf = (b: Branch) => (b.latitude >= lat0 ? 'n' : 's') + (b.longitude <= lng0 ? 'w' : 'e')
@@ -34,12 +32,12 @@ function cityLayout(branches: Branch[]) {
   branches.forEach((b) => groups.set(areaOf(b), [...(groups.get(areaOf(b)) ?? []), b]))
   const areas: PickerArea[] = [...groups.entries()].map(([id, list], k) => ({
     id, name: AREA_NAMES[id], color: AREA_COLORS[k % AREA_COLORS.length],
-    sub: [...new Set(list.map((b) => b.district))].slice(0, 3).join('، '),
+    sub: [...new Set(list.map((b) => b.district))].slice(0, 3).join(', '),
   }))
-  // طرح شهر: بیضی کمی موج‌دار دور همهٔ شعبه‌ها (هر شعبه داخلش می‌افتد؛ با یک شعبهٔ دور هم تیز نمی‌شود)
+  // Stadtumriss: leicht gewellte Ellipse um alle Filialen (jede Filiale liegt innen; eine weit entfernte macht ihn nicht spitz)
   const lats = branches.map((b) => b.latitude), lngs = branches.map((b) => b.longitude)
-  // شعبه‌ها در چند شهر: همان نقشهٔ شماتیک، ولی روی طرح کل ایران
-  if (isNationwide(lats, lngs)) return { areas, areaOf, outline: IRAN_OUTLINE }
+  // Filialen in mehreren Städten: dieselbe schematische Karte, aber auf dem Umriss Deutschlands
+  if (isNationwide(lats, lngs)) return { areas, areaOf, outline: GERMANY_OUTLINE }
   const cLat = (Math.min(...lats) + Math.max(...lats)) / 2, cLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
   const rLat = Math.max(0.01, (Math.max(...lats) - Math.min(...lats)) / 2) * 1.3 + 0.008
   const rLng = Math.max(0.01, (Math.max(...lngs) - Math.min(...lngs)) / 2) * 1.3 + 0.008
@@ -52,15 +50,15 @@ function cityLayout(branches: Branch[]) {
 
 type Filter = 'all' | 'men' | 'women'
 const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'همه' }, { key: 'men', label: 'آقایان' }, { key: 'women', label: 'بانوان' },
+  { key: 'all', label: 'Alle' }, { key: 'men', label: 'Herren' }, { key: 'women', label: 'Damen' },
 ]
 const routes = (b: Branch) => [
-  { label: 'نشان', href: `https://neshan.org/maps/@${b.latitude},${b.longitude},16z,0p` },
-  { label: 'بلد', href: `https://balad.ir/location?latitude=${b.latitude}&longitude=${b.longitude}&zoom=16` },
-  { label: 'گوگل‌مپ', href: `https://www.google.com/maps/dir/?api=1&destination=${b.latitude},${b.longitude}` },
+  { label: 'Apple Karten', href: `https://maps.apple.com/?daddr=${b.latitude},${b.longitude}` },
+  { label: 'OpenStreetMap', href: `https://www.openstreetmap.org/?mlat=${b.latitude}&mlon=${b.longitude}#map=16/${b.latitude}/${b.longitude}` },
+  { label: 'Google Maps', href: `https://www.google.com/maps/dir/?api=1&destination=${b.latitude},${b.longitude}` },
 ]
 
-/** «هرکجا هستی، یک سالن نزدیکته» — نقشهٔ شماتیک شهر + فهرست شعبه‌ها (کمتر از سه شعبه یا نقشهٔ خاموش: فهرست ساده) */
+/** „Wo du auch bist, ein Studio ist in deiner Nähe“ — schematische Stadtkarte + Filialliste (unter drei Filialen oder Karte aus: einfache Liste) */
 export default function SiteBranches() {
   const { data: branches = [], error } = useData('branches', api.branches)
   const [filter, setFilter] = useState<Filter>('all')
@@ -86,22 +84,22 @@ export default function SiteBranches() {
   const nearest = user ? ranked.find(({ b }) => matches(b))?.b.slug ?? null : null
 
   const locate = () => {
-    if (!('geolocation' in navigator)) return setGeo({ status: 'error', msg: 'مرورگر شما موقعیت‌یابی را پشتیبانی نمی‌کند. شعبه را از روی نقشه انتخاب کنید.' })
+    if (!('geolocation' in navigator)) return setGeo({ status: 'error', msg: 'Ihr Browser unterstützt keine Standortbestimmung. Bitte die Filiale auf der Karte wählen.' })
     setGeo({ status: 'locating' })
     navigator.geolocation.getCurrentPosition(
       (p) => {
-        const u = { lat: p.coords.latitude, lng: p.coords.longitude } // فقط در مرورگر؛ به سرور ارسال نمی‌شود
+        const u = { lat: p.coords.latitude, lng: p.coords.longitude } // Nur im Browser; wird nicht an den Server gesendet
         setUser(u)
         const near = branches.filter(matches).map((b) => ({ b, d: distanceKm(u, { lat: b.latitude, lng: b.longitude }) })).sort((a, b) => a.d - b.d)[0]
         if (near) setActive(near.b.slug)
-        setGeo({ status: 'done', msg: near && near.d > 60 ? `به نظر می‌رسد بیرون از ${brand.city} هستید؛ شعبه‌ها بر اساس فاصله مرتب شدند.` : 'شعبه‌ها بر اساس فاصله از شما مرتب شدند.' })
+        setGeo({ status: 'done', msg: near && near.d > 60 ? `Du scheinst außerhalb von ${brand.city} zu sein; die Filialen sind nach Entfernung sortiert.` : 'Die Filialen sind nach Entfernung zu dir sortiert.' })
       },
-      (err) => setGeo({ status: 'error', msg: err.code === err.PERMISSION_DENIED ? 'اجازهٔ موقعیت داده نشد. از تنظیمات مرورگر اجازه دهید یا شعبه را از روی نقشه انتخاب کنید.' : 'موقعیت شما پیدا نشد. دوباره امتحان کنید.' }),
+      (err) => setGeo({ status: 'error', msg: err.code === err.PERMISSION_DENIED ? 'Standortfreigabe verweigert. Bitte in den Browsereinstellungen erlauben oder die Filiale auf der Karte wählen.' : 'Standort nicht gefunden. Bitte erneut versuchen.' }),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     )
   }
 
-  // دکمهٔ «نزدیک‌ترین شعبه» در هیرو همین تابع را صدا می‌زند
+  // Der Button „Nächstes Studio“ im Hero ruft dieselbe Funktion auf
   const locateRef = useRef(locate)
   locateRef.current = locate
   useEffect(() => {
@@ -118,16 +116,16 @@ export default function SiteBranches() {
       <SectionHead
         id="branches-title"
         eyebrow={fillCount(sec.eyebrow)}
-        title={fill(sec.title) || fill(brand.nearSlogan) || 'شعبه‌ها'}
-        body={`${fill(sec.text)} موقعیت فقط در مرورگر خودت می‌ماند.`.trim()}
+        title={fill(sec.title) || fill(brand.nearSlogan) || 'Filialen'}
+        body={`${fill(sec.text)} Dein Standort bleibt nur in deinem Browser.`.trim()}
         aside={
           <div className="flex flex-wrap items-center gap-3">
             <button onClick={locate} disabled={geo.status === 'locating'}
               className="inline-flex h-[52px] cursor-pointer items-center gap-2.5 rounded-[3px] bg-plate px-7 text-[15px] font-bold text-white transition-colors duration-300 hover:bg-plate-hi disabled:opacity-60">
               <LocateFixed className="size-4" aria-hidden />
-              {geo.status === 'locating' ? 'در حال پیدا کردن…' : 'نزدیک‌ترین شعبه به من'}
+              {geo.status === 'locating' ? 'Wird gesucht…' : 'Nächstes Studio finden'}
             </button>
-            <div role="radiogroup" aria-label="نوع سالن" className="flex rounded-[3px] border-2 border-chalk/15 bg-white p-1">
+            <div role="radiogroup" aria-label="Bereich" className="flex rounded-[3px] border-2 border-chalk/15 bg-white p-1">
               {FILTERS.map((f) => (
                 <button key={f.key} role="radio" aria-checked={filter === f.key} onClick={() => setFilter(f.key)}
                   className={cn('h-10 min-w-11 cursor-pointer rounded-[2px] px-4 text-sm font-bold transition-colors duration-200', filter === f.key ? 'bg-chalk text-white' : 'text-rubber hover:text-chalk')}>
@@ -141,7 +139,7 @@ export default function SiteBranches() {
 
       <div aria-live="polite" className="mt-6 min-h-6 text-sm">
         {geo.msg && <p className={geo.status === 'error' ? 'text-danger' : 'text-plate'}>{geo.msg}</p>}
-        {error && <p className="text-danger">فهرست شعبه‌ها بارگذاری نشد. صفحه را دوباره بارگذاری کنید.</p>}
+        {error && <p className="text-danger">Filialliste konnte nicht geladen werden. Bitte die Seite neu laden.</p>}
       </div>
 
       <div className="mt-4">
@@ -159,7 +157,7 @@ export default function SiteBranches() {
           nearestSlug={nearest}
           formatDistance={formatDistance}
           renderDetails={(b) => b ? <BranchDetails b={b} /> : (
-            <p className="text-[14px] text-rubber">یک منطقه را روی نقشه باز کن و شعبه را انتخاب کن؛ ساعت سانس‌ها، تلفن و مسیریابی همین‌جا می‌آید.</p>
+            <p className="text-[14px] text-rubber">Öffne ein Gebiet auf der Karte und wähle eine Filiale; Öffnungszeiten, Telefon und Route erscheinen hier.</p>
           )}
         /> : <BranchList ranked={ranked.filter(({ b }) => matches(b))} active={active} onSelect={setActive} nearest={nearest} />}
       </div>
@@ -168,9 +166,9 @@ export default function SiteBranches() {
   )
 }
 
-/** فهرست ساده (بدون نقشه): کارت هر شعبه، با کلیک جزئیات باز می‌شود */
+/** Einfache Liste (ohne Karte): Karte je Filiale, Details per Klick */
 function BranchList({ ranked, active, onSelect, nearest }: { ranked: { b: Branch; d: number | null }[]; active: string | null; onSelect: (s: string | null) => void; nearest: string | null }) {
-  if (ranked.length === 0) return <p className="rounded-[3px] bg-white p-6 text-center text-[15px] text-rubber">به‌زودی شعبه‌ها این‌جا معرفی می‌شوند.</p>
+  if (ranked.length === 0) return <p className="rounded-[3px] bg-white p-6 text-center text-[15px] text-rubber">Bald stellen wir hier unsere Filialen vor.</p>
   return (
     <ul className="grid gap-3">
       {ranked.map(({ b, d }) => (
@@ -178,7 +176,7 @@ function BranchList({ ranked, active, onSelect, nearest }: { ranked: { b: Branch
           <button type="button" onClick={() => onSelect(active === b.slug ? null : b.slug)} aria-expanded={active === b.slug}
             className="flex w-full cursor-pointer items-center justify-between gap-3 p-5 text-start">
             <span><span className="block text-[17px] font-bold text-chalk">{b.name}</span><span className="text-[14px] text-rubber">{b.district}</span></span>
-            <span className="shrink-0 text-[13px] font-bold text-plate">{nearest === b.slug ? 'نزدیک‌ترین' : d != null ? formatDistance(d) : ''}</span>
+            <span className="shrink-0 text-[13px] font-bold text-plate">{nearest === b.slug ? 'Am nächsten' : d != null ? formatDistance(d) : ''}</span>
           </button>
           {active === b.slug && <div className="border-t border-steel-2 p-5"><BranchDetails b={b} /></div>}
         </li>
@@ -187,17 +185,17 @@ function BranchList({ ranked, active, onSelect, nearest }: { ranked: { b: Branch
   )
 }
 
-/** جزئیات شعبهٔ انتخاب‌شده در پایین کارت نقشه */
+/** Details der gewählten Filiale unten in der Kartenansicht */
 function BranchDetails({ b }: { b: Branch }) {
   return (
     <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
       <div className="min-w-0">
         <p className="text-[17px] font-bold text-chalk">{b.name}</p>
-        <p className="mt-1 text-[14px] text-rubber">{b.address}{!b.addressConfirmed && ' — آدرس دقیق به‌زودی'}</p>
+        <p className="mt-1 text-[14px] text-rubber">{b.address}{!b.addressConfirmed && ' — genaue Adresse folgt'}</p>
         <div className="mt-3 grid gap-1 text-[14px]">
-          {b.menHours && <p><span className="text-rubber">سانس آقایان: </span>{faDigits(b.menHours)}</p>}
-          {b.womenHours && <p><span className="text-rubber">سانس بانوان: </span>{faDigits(b.womenHours)}</p>}
-          {b.disciplines.length > 0 && <p><span className="text-rubber">رشته‌ها: </span>{b.disciplines.join('، ')}</p>}
+          {b.menHours && <p><span className="text-rubber">Herren: </span>{faDigits(b.menHours)}</p>}
+          {b.womenHours && <p><span className="text-rubber">Damen: </span>{faDigits(b.womenHours)}</p>}
+          {b.disciplines.length > 0 && <p><span className="text-rubber">Angebote: </span>{b.disciplines.join(', ')}</p>}
         </div>
       </div>
       <div className="flex flex-wrap gap-2">

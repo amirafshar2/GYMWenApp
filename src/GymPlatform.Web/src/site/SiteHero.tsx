@@ -3,20 +3,20 @@ import { brand } from '@/lib/brand'
 import { fill, fillCount, site } from '@/lib/site'
 
 /**
- * هیرو: Liquid Sculpture Hero از 21st.dev (guglielmogiannattasio.it) زیر هدر سفید سایت.
- * دمبل از ~۱۰۰ هزار ذرهٔ GPU ساخته می‌شود؛ با حرکت ماوس مایع می‌شود و دوباره شکل می‌گیرد.
- * منوی خود کامپوننت خاموش است (showNav=false) چون هدر قالب جدید بالای آن است.
+ * Hero: Liquid Sculpture Hero von 21st.dev (guglielmogiannattasio.it) unter dem weißen Header der Seite.
+ * Die Hantel besteht aus ~100.000 GPU-Partikeln; bei Mausbewegung wird sie flüssig und formt sich neu.
+ * Das eigene Menü der Komponente ist aus (showNav=false), weil der Header der neuen Vorlage darüber liegt.
  */
 export default function SiteHero() {
   const h = site.home.hero
-  // تصویر پیش‌فرض: مجسمهٔ دمبل (رشته‌های فلزی و ذرات)، ساخته‌شده با Canva AI؛ مالک می‌تواند عوضش کند
+  // Standardbild: Hantelskulptur (Metallstränge und Partikel), mit Canva AI erstellt; der Inhaber kann es ändern
   const img = h.imageUrl, mobile = h.mobileImageUrl || h.imageUrl
-  const [first, ...rest] = (brand.slogan || brand.name).split('؛').map((s) => s.trim())
+  const [first, ...rest] = (brand.slogan || brand.name).split(';').map((s) => s.trim())
   const accent = rest.join(' ')
   const near = () => setTimeout(() => window.dispatchEvent(new Event('kg:locate')), 700)
 
   return (
-    <div id="top" dir="rtl" className="kg-hero bg-[#EBE9E5]" onClickCapture={(e) => {
+    <div id="top" className="kg-hero bg-[#EBE9E5]" onClickCapture={(e) => {
       if ((e.target as HTMLElement).closest('.sh-btn')) near()
     }}>
       <SculptureHero
@@ -24,16 +24,16 @@ export default function SiteHero() {
         darkSrc={img}
         mobileSrc={mobile}
         mobileDarkSrc={mobile}
-        imageAlt={`تصویر اصلی ${brand.name}`}
+        imageAlt={`Hauptbild ${brand.name}`}
         showNav={false}
         eyebrow={fillCount(h.eyebrow)}
-        headline={accent ? `${first}؛\n${accent}` : first}
+        headline={accent ? `${first}\n${accent}` : first}
         headlineAccent={accent}
         body={fill(h.body)}
         primaryCta={{ label: h.primaryCta, href: '#branches' }}
         secondaryCta={{ label: h.secondaryCta, href: '#packages' }}
-        hint="ماوس را روی دمبل حرکت بده"
-        hintTouch="دمبل را لمس کن"
+        hint="Bewege die Maus über die Hantel"
+        hintTouch="Tippe auf die Hantel"
         backdropText={(brand.latinName.split(' ')[0] || '').toLowerCase()}
         headingFont="'Vazirmatn Variable', Tahoma, sans-serif"
         bodyFont="'Vazirmatn Variable', Tahoma, sans-serif"

@@ -4,8 +4,8 @@ using Microsoft.Net.Http.Headers;
 namespace GymPlatform.Api.Middleware;
 
 /// <summary>
-/// فایل‌های /assets (هش‌دار و تغییرناپذیر) را اگر نسخهٔ .br یا .gz ساخته‌شده هنگام بیلد موجود باشد همان را می‌فرستد
-/// (Brotli با کیفیت ۱۱ حدود ۲۰٪ کوچک‌تر از فشرده‌سازی لحظه‌ای سرور است و CPU سرور هم مصرف نمی‌شود).
+/// Liefert für /assets (mit Hash, unveränderlich) die beim Build erzeugte .br- oder .gz-Version, falls vorhanden
+/// (Brotli mit Qualität 11 ist etwa 20 % kleiner als die Live-Kompression und spart Server-CPU).
 /// </summary>
 public sealed class PrecompressedStaticFilesMiddleware(RequestDelegate next, IWebHostEnvironment env)
 {

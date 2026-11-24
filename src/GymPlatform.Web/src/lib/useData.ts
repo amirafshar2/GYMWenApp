@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 const cache = new Map<string, Promise<unknown>>()
 
-/** بارگذاری ساده با کش در حافظه (هر endpoint یک بار در هر بازدید). */
+/** Einfaches Laden mit Speicher-Cache (jeder Endpoint einmal pro Besuch). */
 export function useData<T>(key: string, load: () => Promise<T>) {
   const [data, setData] = useState<T | undefined>()
   const [error, setError] = useState<Error | null>(null)

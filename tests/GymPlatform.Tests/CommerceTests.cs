@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>فاز ۳: کیف پول، شاپ (موجودی شعبه‌ای) و بوفهٔ لحظه‌ای</summary>
+/// <summary>Phase 3: Guthaben, Shop (Bestand je Filiale) und Live-Bistro</summary>
 public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     private static string Key() => Guid.NewGuid().ToString("N");
@@ -61,13 +61,13 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     public async Task Wallet_topup_credits_once_and_cancel_does_not_credit()
     {
         var b = await MemberAsync();
-        await TopUpAsync(b, 500_000);
-        await TopUpAsync(b, 300_000, pay: false);
+        await TopUpAsync(b, 5_000);
+        await TopUpAsync(b, 3_000, pay: false);
         var w = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, "/api/v1/me/wallet"));
 
-        Assert.Equal(500_000, w.GetProperty("balanceToman").GetInt64());
+        Assert.Equal(5_000, w.GetProperty("balanceToman").GetInt64());
         Assert.Single(w.GetProperty("transactions").EnumerateArray());
-        // زمان‌ها با Z (UTC) می‌روند تا مرورگر به وقت تهران تبدیل کند
+        // Zeiten gehen mit Z (UTC), damit der Browser sie in Ortszeit umrechnet
         Assert.EndsWith("Z", w.GetProperty("transactions")[0].GetProperty("createdAtUtc").GetString());
     }
 
@@ -75,7 +75,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     public async Task Topup_amount_outside_limits_is_rejected()
     {
         var b = await MemberAsync();
-        var res = await b.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 50_000_000, idempotencyKey = Key() });
+        var res = await b.SendAsync(HttpMethod.Post, "/api/v1/me/wallet/topups", new { amountToman = 500_000, idempotencyKey = Key() });
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
@@ -98,19 +98,19 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 
         var poor = await b.SendAsync(HttpMethod.Post, "/api/v1/shop/orders", Order(variant, branch, "wallet", Key()));
         var afterPoor = await StockAsync(variant, branch);
-        await TopUpAsync(b, 1_000_000);
+        await TopUpAsync(b, 10_000);
         var key = Key();
         var ok = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/shop/orders", Order(variant, branch, "wallet", key, qty: 2)));
         var again = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/shop/orders", Order(variant, branch, "wallet", key, qty: 2)));
         var order = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Get, $"/api/v1/me/shop-orders/{ok.GetProperty("orderId").GetInt32()}"));
 
         Assert.Equal(HttpStatusCode.BadRequest, poor.StatusCode);
-        Assert.Equal(before, afterPoor); // برداشت ناموفق موجودی را برگرداند
+        Assert.Equal(before, afterPoor); // fehlgeschlagene Abbuchung hat den Saldo nicht verändert
         Assert.True(ok.GetProperty("completed").GetBoolean());
         Assert.Equal(ok.GetProperty("orderId").GetInt32(), again.GetProperty("orderId").GetInt32());
         Assert.Equal(before - 2, await StockAsync(variant, branch));
-        Assert.Equal(1_000_000 - 2 * 380_000, await BalanceAsync(b));
-        Assert.Equal("ready", order.GetProperty("status").GetString()); // تحویل حضوری
+        Assert.Equal(10_000 - 2 * 990, await BalanceAsync(b));
+        Assert.Equal("ready", order.GetProperty("status").GetString()); // Abholung
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         var q = await b.JsonAsync<JsonElement>(await b.SendAsync(HttpMethod.Post, "/api/v1/shop/quote",
             new { items = new[] { new { variantId = variant, quantity = 1 } }, branchSlug = branch, fulfillment = "delivery", discountCode = "MEMBER15" }));
         Assert.Equal(JsonValueKind.String, q.GetProperty("discountCodeError").ValueKind);
-        Assert.Equal(150_000, q.GetProperty("shippingToman").GetInt64());
+        Assert.Equal(490, q.GetProperty("shippingToman").GetInt64());
     }
 
     [Fact]
@@ -165,10 +165,10 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
             await scope.ServiceProvider.GetRequiredService<IShopService>().ReleaseStaleAsync(CancellationToken.None);
         }
         var released = await StockAsync(variant, branch);
-        await CheckoutFlowTests.PayInSandboxAsync(b, r.GetProperty("gateway"), pay: true); // کاربر دیر پرداخت کرد
+        await CheckoutFlowTests.PayInSandboxAsync(b, r.GetProperty("gateway"), pay: true); // der Benutzer hat verspätet bezahlt
 
         Assert.Equal(before, released);
-        Assert.Equal(690_000, await BalanceAsync(b));
+        Assert.Equal(1_790, await BalanceAsync(b));
     }
 
     private async Task<Browser> CanteenStaffAsync()
@@ -180,7 +180,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
             var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var u = await users.Users.FirstAsync(x => x.PhoneNumber == phone);
             await users.AddToRoleAsync(u, Roles.CanteenStaff);
-            // کارمند بوفه فقط تابلوی شعبهٔ خودش را می‌بیند
+            // Bistro-Mitarbeiter sehen nur die Tafel ihrer eigenen Filiale
             var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             db.StaffBranches.Add(new StaffBranch { UserId = u.Id, BranchId = await db.Branches.Where(x => x.Slug == "markazi").Select(x => x.Id).FirstAsync() });
             await db.SaveChangesAsync();
@@ -208,9 +208,9 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     public async Task Canteen_order_flows_live_from_member_to_staff_board_and_back()
     {
         var member = await MemberAsync();
-        await TopUpAsync(member, 1_000_000);
+        await TopUpAsync(member, 10_000);
         var staff = await CanteenStaffAsync();
-        var menu = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/markazi/menu?table=میز ۴"));
+        var menu = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Get, "/api/v1/canteen/markazi/menu?table=Tisch 4"));
         var shake = menu.GetProperty("items").EnumerateArray().First(i => i.GetProperty("slug").GetString() == "shake-chocolate").GetProperty("id").GetInt32();
 
         await using var staffHub = await HubAsync(staff);
@@ -219,7 +219,7 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         await staffHub.InvokeAsync("WatchBranch", "markazi");
 
         var placed = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/canteen/orders",
-            new { branchSlug = "markazi", tableCode = "میز ۴", items = new[] { new { itemId = shake, quantity = 2 } }, note = "بدون شکر", payMethod = "wallet", idempotencyKey = Key() }));
+            new { branchSlug = "markazi", tableCode = "Tisch 4", items = new[] { new { itemId = shake, quantity = 2 } }, note = "Ohne Zucker", payMethod = "wallet", idempotencyKey = Key() }));
         var orderId = placed.GetProperty("orderId").GetInt32();
         var live = await staffSaw.Task.WaitAsync(TimeSpan.FromSeconds(10));
 
@@ -237,19 +237,19 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.True(placed.GetProperty("completed").GetBoolean());
         Assert.Equal(orderId, live.Id);
         Assert.Equal("queued", live.Status);
-        Assert.Equal("میز ۴", live.TableCode);
+        Assert.Equal("Tisch 4", live.TableCode);
         Assert.Equal(HttpStatusCode.Conflict, badJump.StatusCode);
         Assert.Equal("ready", ready.Status);
         Assert.Null(ready.CustomerName);
         Assert.Equal(HttpStatusCode.Forbidden, memberCannotManage.StatusCode);
-        Assert.Equal(1_000_000 - 2 * 285_000, await BalanceAsync(member));
+        Assert.Equal(10_000 - 2 * 490, await BalanceAsync(member));
     }
 
     [Fact]
     public async Task Staff_cancel_refunds_to_wallet_and_member_cannot_watch_others_orders()
     {
         var member = await MemberAsync();
-        await TopUpAsync(member, 300_000);
+        await TopUpAsync(member, 3_000);
         var placed = await member.JsonAsync<JsonElement>(await member.SendAsync(HttpMethod.Post, "/api/v1/canteen/orders",
             new { branchSlug = "markazi", items = new[] { new { itemId = 1, quantity = 1 } }, payMethod = "wallet", idempotencyKey = Key() }));
         var orderId = placed.GetProperty("orderId").GetInt32();
@@ -259,6 +259,6 @@ public class CommerceTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         var other = await MemberAsync();
         await using var otherHub = await HubAsync(other);
         await Assert.ThrowsAsync<HubException>(() => otherHub.InvokeAsync("WatchOrder", orderId));
-        Assert.Equal(300_000, await BalanceAsync(member));
+        Assert.Equal(3_000, await BalanceAsync(member));
     }
 }

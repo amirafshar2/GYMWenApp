@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- فونت Vazirmatn (لایسنس OFL، Pdf/Fonts/OFL.txt) برای PDF فارسی -->
+    <!-- Schrift Vazirmatn (OFL-Lizenz, Pdf/Fonts/OFL.txt) für PDFs -->
     <EmbeddedResource Include="Pdf\Fonts\*.ttf" />
   </ItemGroup>
 

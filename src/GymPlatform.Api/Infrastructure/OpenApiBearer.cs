@@ -3,7 +3,7 @@ using Microsoft.OpenApi;
 
 namespace GymPlatform.Api.Infrastructure;
 
-/// <summary>طرح امنیتی Bearer (JWT) در سند OpenAPI.</summary>
+/// <summary>Sicherheitsschema Bearer (JWT) im OpenAPI-Dokument.</summary>
 public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken ct)
@@ -15,7 +15,7 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            Description = "توکن دسترسی از POST /api/v1/auth/verify",
+            Description = "Zugriffstoken aus POST /api/v1/auth/verify",
         };
         document.Info.Title = "Gym Platform API";
         document.Info.Version = "v1";

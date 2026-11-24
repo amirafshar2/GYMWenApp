@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>آمادگی برای حجم بالای داده: فهرست‌های بزرگ در کوئری و پاک‌سازی داده‌های موقت.</summary>
+/// <summary>Bereit für große Datenmengen: große Listen in Abfragen und Aufräumen temporärer Daten.</summary>
 public class ScaleTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     [Fact]
@@ -15,7 +15,7 @@ public class ScaleTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
     {
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
-        var ids = Enumerable.Range(1, 5000).ToList(); // SQL Server بیش از ۲۱۰۰ پارامتر نمی‌پذیرد
+        var ids = Enumerable.Range(1, 5000).ToList(); // SQL Server akzeptiert höchstens 2100 Parameter
 
         var sql = db.Users.Where(u => ids.Contains(u.Id)).ToQueryString();
         var count = await db.Users.CountAsync(u => ids.Contains(u.Id));
@@ -31,12 +31,12 @@ public class ScaleTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<GymDbContext>();
         var now = DateTime.UtcNow;
-        var user = new AppUser { UserName = "09359990001", PhoneNumber = "09359990001" };
+        var user = new AppUser { UserName = "01569990001", PhoneNumber = "01569990001" };
         db.Users.Add(user);
         await db.SaveChangesAsync();
         db.OtpCodes.AddRange(
-            new OtpCode { PhoneNumber = "09359990001", Purpose = OtpPurpose.Login, CodeHash = "old", ExpiresAtUtc = now.AddDays(-5), CreatedAtUtc = now.AddDays(-5) },
-            new OtpCode { PhoneNumber = "09359990001", Purpose = OtpPurpose.Login, CodeHash = "new", ExpiresAtUtc = now.AddMinutes(2), CreatedAtUtc = now });
+            new OtpCode { PhoneNumber = "01569990001", Purpose = OtpPurpose.Login, CodeHash = "old", ExpiresAtUtc = now.AddDays(-5), CreatedAtUtc = now.AddDays(-5) },
+            new OtpCode { PhoneNumber = "01569990001", Purpose = OtpPurpose.Login, CodeHash = "new", ExpiresAtUtc = now.AddMinutes(2), CreatedAtUtc = now });
         db.RefreshTokens.AddRange(
             new RefreshToken { UserId = user.Id, TokenHash = "expired-" + Guid.NewGuid(), ExpiresAtUtc = now.AddDays(-3) },
             new RefreshToken { UserId = user.Id, TokenHash = "valid-" + Guid.NewGuid(), ExpiresAtUtc = now.AddDays(20), RevokedAtUtc = now.AddDays(-2) });
@@ -50,8 +50,8 @@ public class ScaleTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
         Assert.True(r.OtpCodes >= 1 && r.RefreshTokens >= 1 && r.IntegrationEvents >= 1);
         Assert.True(await db.OtpCodes.AnyAsync(o => o.CodeHash == "new"));
         Assert.False(await db.OtpCodes.AnyAsync(o => o.CodeHash == "old"));
-        // توکن باطل‌شده‌ای که هنوز منقضی نشده می‌ماند تا استفادهٔ دوباره‌اش تشخیص داده شود
+        // Ein widerrufenes, noch nicht abgelaufenes Token bleibt, damit seine Wiederverwendung erkannt wird
         Assert.True(await db.RefreshTokens.AnyAsync(t => t.TokenHash.StartsWith("valid-") && t.UserId == user.Id));
-        Assert.True(await db.IntegrationEvents.AnyAsync(e => e.ProcessedAtUtc == null)); // ارسال‌نشده هرگز پاک نمی‌شود
+        Assert.True(await db.IntegrationEvents.AnyAsync(e => e.ProcessedAtUtc == null)); // Ungesendetes wird nie gelöscht
     }
 }

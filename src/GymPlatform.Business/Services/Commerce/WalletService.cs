@@ -15,8 +15,8 @@ public interface IWalletService
 }
 
 /// <summary>
-/// کیف پول: موجودی فقط با به‌روزرسانی شرطی تغییر می‌کند (UPDATE … WHERE Balance &gt;= مبلغ) تا دو خرید هم‌زمان
-/// موجودی را منفی نکنند؛ هر تغییر یک ردیف دفتر دارد. این متدها باید داخل تراکنشِ صاحب خرید صدا زده شوند.
+/// Guthaben: Der Saldo ändert sich nur per bedingtem Update (UPDATE … WHERE Balance &gt;= Betrag), damit zwei gleichzeitige Käufe
+/// den Saldo nicht negativ machen; jede Änderung hat eine Buchungszeile. Diese Methoden müssen in der Transaktion des Kaufs aufgerufen werden.
 /// </summary>
 public static class WalletLedger
 {
@@ -28,7 +28,7 @@ public static class WalletLedger
         catch (DbUpdateException) { db.ChangeTracker.Entries<Wallet>().Where(e => e.Entity.UserId == userId).ToList().ForEach(e => e.State = EntityState.Detached); }
     }
 
-    /// <summary>برداشت؛ اگر موجودی کافی نباشد false و هیچ تغییری نمی‌دهد.</summary>
+    /// <summary>Abbuchung; reicht der Saldo nicht, false und keine Änderung.</summary>
     public static async Task<bool> TryDebitAsync(GymDbContext db, int userId, long amount, WalletTxType type, string description, string reference, DateTime now, CancellationToken ct)
     {
         if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
@@ -75,9 +75,9 @@ public sealed class WalletService(GymDbContext db, IClock clock, IOptions<Commer
     {
         var o = options.Value;
         var key = (request.IdempotencyKey ?? "").Trim();
-        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "شناسهٔ درخواست نامعتبر است.");
-        if (request.AmountToman < o.MinTopUpToman || request.AmountToman > o.MaxTopUpToman || request.AmountToman % 1000 != 0)
-            return Result<PurchaseStartedDto>.Fail("amountToman", $"مبلغ شارژ باید بین {PersianText.FaDigits(o.MinTopUpToman.ToString("N0"))} و {PersianText.FaDigits(o.MaxTopUpToman.ToString("N0"))} تومان و مضرب هزار باشد.");
+        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "Ungültige Anfrage-ID.");
+        if (request.AmountToman < o.MinTopUpToman || request.AmountToman > o.MaxTopUpToman || request.AmountToman % 100 != 0)
+            return Result<PurchaseStartedDto>.Fail("amountToman", $"Der Aufladebetrag muss zwischen {PersianText.FaDigits(o.MinTopUpToman.ToString("N0"))} und {PersianText.FaDigits(o.MaxTopUpToman.ToString("N0"))} € liegen und ein ganzer Euro-Betrag sein.");
 
         var existing = await db.Payments.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId && p.IdempotencyKey == key, ct);
         if (existing is not null)
@@ -86,7 +86,7 @@ public sealed class WalletService(GymDbContext db, IClock clock, IOptions<Commer
         var payment = new Payment
         {
             UserId = userId, Purpose = PaymentPurpose.WalletTopUp, IdempotencyKey = key, BaseAmountToman = request.AmountToman,
-            AmountToman = request.AmountToman, Description = "شارژ کیف پول", TrackingNumber = await TrackingNumbers.NewAsync(db, ct), CreatedAtUtc = clock.UtcNow,
+            AmountToman = request.AmountToman, Description = "Guthaben aufladen", TrackingNumber = await TrackingNumbers.NewAsync(db, ct), CreatedAtUtc = clock.UtcNow,
         };
         db.Payments.Add(payment);
         await db.SaveChangesAsync(ct);

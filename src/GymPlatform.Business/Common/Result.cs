@@ -1,9 +1,9 @@
 namespace GymPlatform.Business.Common;
 
-/// <summary>نوع خطای کسب‌وکار؛ لایهٔ API آن را به کد HTTP و ProblemDetails نگاشت می‌کند.</summary>
+/// <summary>Art des Geschäftsfehlers; die API-Schicht übersetzt ihn in HTTP-Code und ProblemDetails.</summary>
 public enum ErrorType { Validation, NotFound, Conflict, Unauthorized, Forbidden, TooManyRequests }
 
-/// <summary>نتیجهٔ استاندارد سرویس‌ها به‌جای پرتاب Exception برای خطاهای کسب‌وکار.</summary>
+/// <summary>Standardergebnis der Services statt Exceptions für Geschäftsfehler.</summary>
 public sealed class Result<T>
 {
     public bool Succeeded { get; private init; }
@@ -20,6 +20,6 @@ public sealed class Result<T>
     public static Result<T> Fail(string field, string message, ErrorType type = ErrorType.Validation) =>
         Fail(new Dictionary<string, string[]> { [field] = [message] }, type);
 
-    /// <summary>اولین پیام خطا (برای نمایش ساده).</summary>
+    /// <summary>Erste Fehlermeldung (für einfache Anzeige).</summary>
     public string? FirstError => Errors.Values.SelectMany(v => v).FirstOrDefault();
 }

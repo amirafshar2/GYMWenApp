@@ -49,7 +49,7 @@ internal sealed class ShopOrderConfiguration : IEntityTypeConfiguration<ShopOrde
 {
     public void Configure(EntityTypeBuilder<ShopOrder> e)
     {
-        // گزارش درآمد هر شعبه بر اساس زمان پرداخت
+        // Umsatzbericht je Filiale nach Zahlungszeitpunkt
         e.HasIndex(x => new { x.BranchId, x.PaidAtUtc });
         e.Property(x => x.Number).HasMaxLength(30);
         e.Property(x => x.RecipientName).HasMaxLength(100);
@@ -92,7 +92,7 @@ internal sealed class CanteenOrderConfiguration : IEntityTypeConfiguration<Cante
 {
     public void Configure(EntityTypeBuilder<CanteenOrder> e)
     {
-        // گزارش درآمد هر شعبه بر اساس زمان پرداخت
+        // Umsatzbericht je Filiale nach Zahlungszeitpunkt
         e.HasIndex(x => new { x.BranchId, x.PaidAtUtc });
         e.Property(x => x.TableCode).HasMaxLength(30);
         e.Property(x => x.Note).HasMaxLength(200);
@@ -127,7 +127,7 @@ internal sealed class WalletTransactionConfiguration : IEntityTypeConfiguration<
         e.Property(x => x.Description).HasMaxLength(150);
         e.Property(x => x.Reference).HasMaxLength(40);
         e.HasIndex(x => new { x.UserId, x.CreatedAtUtc });
-        // پشتیبان در برابر شارژ/بازگشت وجه تکراری: هر مرجع (payment:7، canteen:40…) برای هر نوع فقط یک ردیف
+        // Schutz gegen doppelte Aufladung/Erstattung: jede Referenz (payment:7, canteen:40…) pro Art nur eine Zeile
         e.HasIndex(x => new { x.UserId, x.Reference, x.Type }).IsUnique().HasFilter("[Reference] IS NOT NULL");
     }
 }
@@ -147,7 +147,7 @@ internal sealed class CoachAssignmentConfiguration : IEntityTypeConfiguration<Co
     public void Configure(EntityTypeBuilder<CoachAssignment> e)
     {
         e.HasIndex(x => new { x.CoachId, x.MemberUserId }).IsUnique();
-        e.HasOne(x => x.Coach).WithMany().HasForeignKey(x => x.CoachId).OnDelete(DeleteBehavior.Restrict); // SQL Server: مسیر دوم حذف از AspNetUsers (از طریق Coaches.UserId) ممنوع است
+        e.HasOne(x => x.Coach).WithMany().HasForeignKey(x => x.CoachId).OnDelete(DeleteBehavior.Restrict); // SQL Server: ein zweiter Löschpfad von AspNetUsers (über Coaches.UserId) ist verboten
         e.HasOne(x => x.Member).WithMany().HasForeignKey(x => x.MemberUserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

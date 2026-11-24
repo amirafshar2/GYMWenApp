@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test'
 
-test('فرم مشاوره با CSRF ثبت می‌شود', async ({ page }) => {
+test('Beratungsformular wird mit CSRF gesendet', async ({ page }) => {
   await page.goto('/#consult')
-  await page.locator('#consult').getByLabel('نام و نام خانوادگی').fill('سارا رضایی')
-  await page.locator('#consult').getByLabel('شمارهٔ موبایل').fill(`0917${Math.floor(1000000 + Math.random() * 8999999)}`)
-  await page.getByRole('button', { name: 'ثبت درخواست مشاوره' }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'ثبت شد' })).toBeVisible()
+  await page.locator('#consult').getByLabel('Vor- und Nachname').fill('Sarah Becker')
+  await page.locator('#consult').getByLabel('Handynummer').fill(`0917${Math.floor(1000000 + Math.random() * 8999999)}`)
+  await page.getByRole('button', { name: 'Beratung anfragen' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Gesendet' })).toBeVisible()
 })
 
-test('درخواست بدون توکن CSRF رد می‌شود', async ({ request }) => {
-  const res = await request.post('/api/v1/consultations', { data: { fullName: 'سارا رضایی', mobile: '09171234567' } })
+test('Anfrage ohne CSRF-Token wird abgelehnt', async ({ request }) => {
+  const res = await request.post('/api/v1/consultations', { data: { fullName: 'Sarah Becker', mobile: '09171234567' } })
   expect(res.status()).toBe(400)
 })

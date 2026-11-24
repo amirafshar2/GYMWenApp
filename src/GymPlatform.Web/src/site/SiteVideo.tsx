@@ -3,16 +3,16 @@ import { brand } from '@/lib/brand'
 import { fill, site } from '@/lib/site'
 
 /**
- * بخش ویدیو وسط صفحه. دو حالت (از «تنظیمات سایت»):
- * - scrub: ویدیو با اسکرول جلو و عقب می‌رود (نسخه‌های ‎-scrub با هر ۴ فریم یک keyframe، متناسب با توان دستگاه)
- * - loop: پخش خودکار، بی‌صدا و تکراری
- * عکس فریم اول همیشه زیر ویدیو است؛ صفحه هیچ‌وقت خالی نمی‌ماند.
+ * Videobereich in der Seitenmitte. Zwei Modi (aus den „Website-Einstellungen“):
+ * - scrub: Das Video läuft beim Scrollen vor und zurück (-scrub-Versionen mit Keyframe alle 4 Frames, passend zur Geräteleistung)
+ * - loop: automatisch, stumm und in Schleife
+ * Das Bild des ersten Frames liegt immer unter dem Video; die Seite ist nie leer.
  */
 
 type Conn = { saveData?: boolean; effectiveType?: string }
 export type Variant = 'image' | '540' | '720' | '1080'
 
-/** انتخاب نسخه بر اساس دستگاه و اینترنت (جدول اندازه‌گیری‌شده) */
+/** Version nach Gerät und Internet wählen (gemessene Tabelle) */
 export function pickVariant(): Variant {
   if (typeof window === 'undefined') return 'image'
   const nav = navigator as Navigator & { connection?: Conn; deviceMemory?: number }
@@ -26,12 +26,12 @@ export function pickVariant(): Variant {
   return '1080'
 }
 
-/** فایل‌های پیش‌فرض قالب ?v= می‌گیرند تا کش قدیمی مرورگرها دور زده شود */
+/** Standarddateien der Vorlage bekommen ?v=, um alte Browser-Caches zu umgehen */
 const BUILTIN_VERSION = 'scrub-4'
 const withVersion = (u: string) => (u.startsWith('/media/video/') ? `${u}?v=${BUILTIN_VERSION}` : u)
 const photoVersion = (u: string) => (u.startsWith('/media/video/') ? `${u}?v=photo-1` : u)
 
-/** آدرس نسخه‌ها؛ اگر ویدیو بهینه نشده باشد، همه همان فایل اصلی */
+/** Adressen der Versionen; ist das Video nicht optimiert, überall die Originaldatei */
 export function videoUrls(url: string, optimized: boolean) {
   const clean = url.split('?')[0]
   const base = clean.replace(/\.mp4$/, '')
@@ -49,7 +49,7 @@ function cfg() {
   const posterPhoto = v.posterUrl || '/media/video/gym-poster.webp'
   const urls = v.videoUrl ? videoUrls(v.videoUrl, v.optimized !== false) : null
   const small = typeof window !== 'undefined' && window.innerWidth < 960
-  // پشت ویدیو: فریم اول خود ویدیو (بی‌پرش)؛ اگر نیست، عکسی که مالک انتخاب کرده
+  // Hinter dem Video: erster Frame des Videos (ohne Sprung); sonst das vom Inhaber gewählte Bild
   const frame = (small ? urls?.frameSmall : urls?.frame) ?? photoVersion(posterPhoto)
   return { urls, frame, posterPhoto, posterMobile: v.mobilePosterUrl || posterPhoto, title: fill(v.title), mode: v.mode === 'loop' ? 'loop' : 'scrub' }
 }
@@ -61,15 +61,15 @@ export default function SiteVideo() {
   return c.mode === 'loop' ? <LoopVideo src={c.urls.loop} frame={c.frame} title={c.title} /> : <ScrubVideo src={c.urls.scrub[variant]} frame={c.frame} title={c.title} />
 }
 
-/** هدر ثابت (۷۸ پیکسل + خط ۱ پیکسلی) + نوار جشنواره/دمو؛ قاب ویدیو دقیقاً زیر آن‌ها و به اندازهٔ بقیهٔ صفحه */
+/** Fester Header (78 px + 1 px Linie) + Aktions-/Demoleiste; der Videorahmen sitzt genau darunter und füllt den Rest */
 const BAR = 'calc(79px + var(--festival-h, 0px))'
 const STAGE = { top: BAR, height: `calc(100vh - ${BAR})` }
 
 const clamp = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
 
 /**
- * ویدیوی اسکرولی: بخش 320vh با فرزند sticky به ارتفاع صفحه. حلقهٔ requestAnimationFrame (نه رویداد scroll)
- * زمان هدف را از موقعیت اسکرول می‌گیرد، نرم می‌کند و در هر لحظه فقط یک seek می‌فرستد.
+ * Scroll-Video: Bereich 320vh mit sticky-Kind in Bildschirmhöhe. Eine requestAnimationFrame-Schleife (kein scroll-Event)
+ * holt die Zielzeit aus der Scrollposition, glättet sie und sendet jeweils nur ein seek.
  */
 function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: string }) {
   const section = useRef<HTMLElement>(null)
@@ -79,7 +79,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
   const [blobSrc, setBlobSrc] = useState<string | null>(null)
   const [near, setNear] = useState(false)
 
-  // دانلود وقتی کاربر به این بخش نزدیک شد (نه با باز شدن صفحه)
+  // Download erst, wenn der Nutzer sich dem Bereich nähert (nicht beim Öffnen der Seite)
   useEffect(() => {
     const el = section.current
     if (!el || near) return
@@ -88,7 +88,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
     return () => io.disconnect()
   }, [near])
 
-  // کل فایل در حافظه (blob) تا seek به شبکه وابسته نباشد؛ اگر نشد، خود آدرس
+  // Ganze Datei im Speicher (blob), damit seek nicht vom Netz abhängt; sonst die Adresse selbst
   useEffect(() => {
     if (!near) return
     let url: string | null = null
@@ -104,7 +104,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
     const v = video.current, el = section.current
     if (!v || !el || !blobSrc) return
     let raf = 0, visible = false, current = 0, seekAt = 0, ready = false
-    // گرم کردن دیکدر: بدون یک play/pause کوتاه، seekهای بعدی در بعضی مرورگرها گیر می‌کند
+    // Decoder aufwärmen: ohne kurzes play/pause hängen spätere seeks in manchen Browsern
     const warm = () => { const p = v.play(); if (p) p.then(() => v.pause()).catch(() => {}) }
     const onData = () => { ready = true; warm() }
     v.addEventListener('loadeddata', onData)
@@ -116,7 +116,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
     const tick = () => {
       raf = 0
       if (!visible) return
-      // قاب ویدیو زیر هدر ثابت می‌چسبد (نه زیر آن): ابتدای اسکرول وقتی است که بالای بخش به پایین هدر برسد
+      // Der Videorahmen haftet unter dem festen Header: der Scrollbeginn ist, wenn die Bereichsoberkante den Header-Boden erreicht
       const r = el.getBoundingClientRect()
       const stage = stick.current
       const offset = stage ? parseFloat(getComputedStyle(stage).top) || 0 : 0
@@ -132,10 +132,10 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
         const target = progress * (d - 0.04)
         current += (target - current) * 0.22
         if (Math.abs(target - current) < 0.002) current = target
-        v.dataset.target = target.toFixed(3) // برای اندازه‌گیری فاصله در تست
+        v.dataset.target = target.toFixed(3) // zum Messen des Abstands im Test
         const now = performance.now()
         if (!v.seeking && Math.abs(v.currentTime - current) > 0.012) { v.currentTime = current; seekAt = now }
-        else if (v.seeking && now - seekAt > 700) { warm(); seekAt = now } // نگهبان: seek گیر کرده
+        else if (v.seeking && now - seekAt > 700) { warm(); seekAt = now } // Wächter: seek hängt
       }
       raf = requestAnimationFrame(tick)
     }
@@ -148,7 +148,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
   }, [blobSrc])
 
   return (
-    <section ref={section} aria-label={`ویدیوی تمرین در سالن ${brand.shortName}`} className="relative h-[320vh] bg-[#151514]">
+    <section ref={section} aria-label={`Trainingsvideo im Studio ${brand.shortName}`} className="relative h-[320vh] bg-[#151514]">
       <div ref={stick} className="sticky overflow-hidden" style={STAGE}>
         <img src={frame} alt="" decoding="async" className="absolute inset-0 size-full object-cover" />
         {blobSrc && (
@@ -157,7 +157,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#151514]/80 via-transparent to-[#151514]/30" aria-hidden />
       </div>
-      {/* متن روی ویدیو در لایهٔ جدا با sticky خودش */}
+      {/* Text über dem Video in eigener Ebene mit eigenem sticky */}
       <div className="pointer-events-none absolute inset-0">
         <div className="sticky flex items-end justify-center px-6 pb-[12vh] text-center" style={STAGE}>
           <div ref={text} style={{ opacity: 0 }}>
@@ -170,7 +170,7 @@ function ScrubVideo({ src, frame, title }: { src: string; frame: string; title: 
   )
 }
 
-/** پخش خودکار، بی‌صدا و تکراری؛ فقط وقتی دیده می‌شود */
+/** Automatisch, stumm und in Schleife; nur wenn sichtbar */
 function LoopVideo({ src, frame, title }: { src: string; frame: string; title: string }) {
   const box = useRef<HTMLElement>(null)
   const video = useRef<HTMLVideoElement>(null)
@@ -187,7 +187,7 @@ function LoopVideo({ src, frame, title }: { src: string; frame: string; title: s
     return () => io.disconnect()
   }, [])
   return (
-    <section ref={box} aria-label={`ویدیوی تمرین در سالن ${brand.shortName}`} className="relative h-[78svh] min-h-[460px] overflow-hidden bg-[#151514]">
+    <section ref={box} aria-label={`Trainingsvideo im Studio ${brand.shortName}`} className="relative h-[78svh] min-h-[460px] overflow-hidden bg-[#151514]">
       <img src={frame} alt="" decoding="async" loading="lazy" className="absolute inset-0 size-full object-cover" />
       {on && <video ref={video} src={src} muted playsInline autoPlay loop preload="auto" disablePictureInPicture aria-hidden className="absolute inset-0 size-full object-cover" />}
       <div className="absolute inset-0 bg-gradient-to-t from-[#151514] via-[#151514]/30 to-transparent" aria-hidden />
@@ -199,14 +199,14 @@ function LoopVideo({ src, frame, title }: { src: string; frame: string; title: s
   )
 }
 
-/** بدون ویدیو (حالت کم‌مصرف، 2G یا کاهش حرکت): عکسی که مالک انتخاب کرده، با شعار */
+/** Ohne Video (Sparmodus, 2G oder reduzierte Bewegung): das vom Inhaber gewählte Bild mit Slogan */
 function PosterSection() {
   const { posterPhoto, posterMobile, title } = cfg()
   return (
-    <section aria-label={`تمرین در سالن ${brand.shortName}`} className="relative h-[78svh] min-h-[460px] overflow-hidden bg-[#151514]">
+    <section aria-label={`Training im Studio ${brand.shortName}`} className="relative h-[78svh] min-h-[460px] overflow-hidden bg-[#151514]">
       <picture>
         <source media="(max-width: 760px)" srcSet={photoVersion(posterMobile)} />
-        <img src={photoVersion(posterPhoto)} alt={`تمرین در سالن ${brand.shortName}`} loading="lazy" decoding="async"
+        <img src={photoVersion(posterPhoto)} alt={`Training im Studio ${brand.shortName}`} loading="lazy" decoding="async"
           className="absolute inset-0 size-full object-cover" style={{ objectPosition: '50% 22%' }} />
       </picture>
       <div className="absolute inset-0 bg-gradient-to-t from-[#151514] via-[#151514]/30 to-transparent" aria-hidden />

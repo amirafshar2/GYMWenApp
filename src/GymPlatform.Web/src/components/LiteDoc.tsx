@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { fill } from '@/lib/site'
 
 /**
- * متن ساده‌ای که مالک در پنل می‌نویسد → HTML امن (بدون dangerouslySetInnerHTML):
- * «## » تیتر، «- » بند فهرست، [[…]] جای خالی که باید تکمیل شود (زرد)، و {name} {city} {phone} … جایگزین می‌شوند.
+ * Einfacher Text, den der Inhaber im Panel schreibt → sicheres HTML (ohne dangerouslySetInnerHTML):
+ * „## “ Überschrift, „- “ Listenpunkt, [[…]] auszufüllende Lücke (gelb), und {name} {city} {phone} … werden ersetzt.
  */
 export default function LiteDoc({ text, showBlanks = true }: { text: string; showBlanks?: boolean }) {
   const out: ReactNode[] = []
@@ -25,7 +25,7 @@ function inline(s: string, showBlanks: boolean): ReactNode[] {
     const m = /^\[\[([^\]]*)\]\]$/.exec(part)
     if (!m) return part
     return showBlanks
-      ? <mark key={k} className="rounded bg-sun/30 px-1 text-chalk" title="باید توسط باشگاه تکمیل شود">{m[1]}</mark>
+      ? <mark key={k} className="rounded bg-sun/30 px-1 text-chalk" title="Vom Studio zu ergänzen">{m[1]}</mark>
       : <span key={k}>…</span>
   })
 }

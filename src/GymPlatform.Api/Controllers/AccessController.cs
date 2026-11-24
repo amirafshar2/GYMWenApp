@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace GymPlatform.Api.Controllers;
 
 /// <summary>
-/// API گیت و ترنستایل (نسخهٔ ۱). هر دستگاه یک کلید جدا در هدر <c>X-Device-Key</c> دارد.
-/// سه حالت اتصال پشتیبانی می‌شود: پرسش آنلاین (check)، فهرست سفید برای کار آفلاین (whitelist)
-/// و ارسال دسته‌ای رویدادهای ثبت‌شده در حالت آفلاین (events).
+/// Gate- und Drehkreuz-API (Version 1). Jedes Gerät hat einen eigenen Schlüssel im Header <c>X-Device-Key</c> .
+/// Drei Anbindungsarten: Online-Abfrage (check), Whitelist für Offline-Betrieb (whitelist)
+/// und Sammelversand der offline erfassten Ereignisse (events).
 /// </summary>
 [ApiController]
 [Route("api/v1/access")]
@@ -23,23 +23,23 @@ public sealed class AccessController(IAccessControlService access) : ControllerB
 {
     private DeviceInfo Device => (DeviceInfo)HttpContext.Items[DeviceKeyFilter.ItemKey]!;
 
-    /// <summary>بررسی اتصال و صحت کلید</summary>
+    /// <summary>Verbindung und Schlüssel prüfen</summary>
     [HttpGet("ping")]
     public IActionResult Ping() => Ok(new { device = Device.Name, branchId = Device.BranchId, section = Device.Section.ToString().ToLowerInvariant(), serverTimeUtc = DateTime.UtcNow });
 
-    /// <summary>کارت/دستبند زده شد: اجازهٔ ورود؟ (پاسخ زیر ۲۰۰ میلی‌ثانیه برای باز کردن گیت)</summary>
+    /// <summary>Karte/Armband gescannt: Zutritt erlaubt? (Antwort unter 200 ms zum Öffnen des Gates)</summary>
     [HttpPost("check")]
     [RequestSizeLimit(1024)]
     [ProducesResponseType<AccessCheckResult>(200)]
     public async Task<IActionResult> Check([FromBody] AccessCheckRequest request, CancellationToken ct) =>
         Ok(await access.CheckAsync(Device, request, ct));
 
-    /// <summary>رویدادهای ثبت‌شده در زمان قطعی اینترنت (حداکثر ۵۰۰ در هر درخواست)</summary>
+    /// <summary>Während eines Internetausfalls erfasste Ereignisse (höchstens 500 pro Anfrage)</summary>
     [HttpPost("events")]
     [RequestSizeLimit(128 * 1024)]
     public async Task<IActionResult> Events([FromBody] IReadOnlyList<AccessCheckRequest> events, CancellationToken ct)
     {
-        if (events.Count > 500) return Problem(statusCode: 413, title: "حداکثر ۵۰۰ رویداد در هر درخواست.");
+        if (events.Count > 500) return Problem(statusCode: 413, title: "Höchstens 500 Ereignisse pro Anfrage.");
         var results = new List<object>(events.Count);
         foreach (var e in events)
         {
@@ -49,7 +49,7 @@ public sealed class AccessController(IAccessControlService access) : ControllerB
         return Ok(new { received = events.Count, results });
     }
 
-    /// <summary>فهرست سفید وسیله‌های مجاز همین شعبه/سالن، برای گیت‌هایی که تصمیم را محلی می‌گیرند</summary>
+    /// <summary>Whitelist der erlaubten Zutrittsmittel dieser Filiale/dieses Bereichs, für Gates mit lokaler Entscheidung</summary>
     [HttpGet("whitelist")]
     [ProducesResponseType<WhitelistDto>(200)]
     public async Task<IActionResult> Whitelist(CancellationToken ct)
@@ -59,7 +59,7 @@ public sealed class AccessController(IAccessControlService access) : ControllerB
     }
 }
 
-/// <summary>کلید دستگاه را بررسی می‌کند؛ کلید اشتباه = 401 بدون توضیح اضافه.</summary>
+/// <summary>Prüft den Geräteschlüssel; falscher Schlüssel = 401 ohne weitere Erklärung.</summary>
 public sealed class DeviceKeyFilter(IAccessControlService access) : IAsyncActionFilter
 {
     public const string Header = "X-Device-Key";
@@ -75,7 +75,7 @@ public sealed class DeviceKeyFilter(IAccessControlService access) : IAsyncAction
 }
 
 /// <summary>
-/// پذیرش: دادن و پس گرفتن دستبند/کارت. نقش از دیتابیس (PanelAccess) و فقط برای اعضای شعبه‌های خود کارمند.
+/// Empfang: Ausgabe und Rücknahme von Armband/Karte. Rolle aus der Datenbank (PanelAccess) und nur für Mitglieder der eigenen Filialen.
 /// </summary>
 [ApiController]
 [Route("api/v1/staff/members/{userId:int}/credentials")]

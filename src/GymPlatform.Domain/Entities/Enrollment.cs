@@ -2,7 +2,7 @@ using GymPlatform.Domain.Enums;
 
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>عضویت یک کاربر در یک شعبه با یک پکیج.</summary>
+/// <summary>Mitgliedschaft eines Benutzers in einer Filiale mit einem Paket.</summary>
 public class Membership : BaseEntity
 {
     public int UserId { get; set; }
@@ -12,7 +12,7 @@ public class Membership : BaseEntity
     public int PackageId { get; set; }
     public MembershipPackage? Package { get; set; }
 
-    /// <summary>سالن آقایان یا بانوان (یک مقدار، نه ترکیب).</summary>
+    /// <summary>Herren- oder Damenbereich (ein Wert, keine Kombination).</summary>
     public GenderSection Section { get; set; }
     public MembershipStatus Status { get; set; } = MembershipStatus.PendingPayment;
     public DateTime? StartsAtUtc { get; set; }
@@ -20,7 +20,7 @@ public class Membership : BaseEntity
     public int? SessionsTotal { get; set; }
     public int SessionsUsed { get; set; }
 
-    /// <summary>توکن تصادفی کارت عضویت (QR)؛ قابل حدس نیست و به شناسه ربطی ندارد.</summary>
+    /// <summary>Zufälliges Token der Mitgliedskarte (QR); nicht erratbar und ohne Bezug zur ID.</summary>
     public required string CardToken { get; set; }
 
     public ICollection<Payment> Payments { get; set; } = [];
@@ -40,7 +40,7 @@ public class Payment : BaseEntity
     public ShopOrder? ShopOrder { get; set; }
     public int? CanteenOrderId { get; set; }
     public CanteenOrder? CanteenOrder { get; set; }
-    /// <summary>شرح خوانا برای فهرست پرداخت‌ها (نام پکیج، «سفارش فروشگاه KS-…»، «شارژ کیف پول»)</summary>
+    /// <summary>Lesbare Beschreibung für die Zahlungsliste (Paketname, „Shop-Bestellung KS-…“, „Guthaben aufladen“)</summary>
     public string? Description { get; set; }
 
     public long BaseAmountToman { get; set; }
@@ -52,13 +52,13 @@ public class Payment : BaseEntity
 
     public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 
-    /// <summary>شمارهٔ پیگیری یکتا برای درگاه (Parbad TrackingNumber).</summary>
+    /// <summary>Eindeutige Referenznummer für das Gateway (Parbad TrackingNumber).</summary>
     public long TrackingNumber { get; set; }
     public string Gateway { get; set; } = "ParbadVirtual";
     public string? TransactionCode { get; set; }
     public string? GatewayMessage { get; set; }
 
-    /// <summary>کلید یکتای درخواست کاربر؛ تکرار درخواست با همین کلید پرداخت تازه نمی‌سازد.</summary>
+    /// <summary>Eindeutiger Schlüssel der Benutzeranfrage; eine Wiederholung mit demselben Schlüssel erzeugt keine neue Zahlung.</summary>
     public required string IdempotencyKey { get; set; }
     public DateTime? PaidAtUtc { get; set; }
     public string? InvoiceNumber { get; set; }
@@ -73,7 +73,7 @@ public class DiscountCode : BaseEntity
     public DateTime? ExpiresAtUtc { get; set; }
     public bool IsActive { get; set; } = true;
     public DiscountScope Scope { get; set; } = DiscountScope.Membership;
-    /// <summary>فقط اعضای دارای عضویت فعال</summary>
+    /// <summary>Nur Mitglieder mit aktiver Mitgliedschaft</summary>
     public bool MembersOnly { get; set; }
 
     public bool AppliesTo(DiscountScope s) => Scope == DiscountScope.Any || Scope == s;

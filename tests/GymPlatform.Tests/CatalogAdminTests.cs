@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GymPlatform.Tests;
 
-/// <summary>ساخت و ویرایش منو، کالا و پکیج: فقط مدیر کل؛ آپلود فقط عکس واقعی.</summary>
+/// <summary>Anlegen und Bearbeiten von Karte, Produkten und Paketen: nur Gesamtadmin; Upload nur echter Bilder.</summary>
 public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFactory>
 {
     private async Task<Browser> StaffAsync(string role, params string[] branches)
@@ -46,7 +46,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/canteen-items", new
         {
-            name = "شیک خرما و بادام", description = "با شیر کم‌چرب", category = "shake", priceToman = 210_000, kcal = 380, proteinG = 22, imagePath = path, isAvailable = true,
+            name = "Dattel-Mandel-Shake", description = "Mit fettarmer Milch", category = "shake", priceToman = 2_100, kcal = 380, proteinG = 22, imagePath = path, isAvailable = true,
         });
         var item = await admin.JsonAsync<JsonElement>(created);
         var menu = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/canteen/azadi/menu"));
@@ -56,7 +56,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         Assert.Equal(HttpStatusCode.OK, image.StatusCode);
         Assert.StartsWith("/media/uploads/", path);
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
-        Assert.Contains(menu.GetProperty("items").EnumerateArray(), i => i.GetProperty("name").GetString() == "شیک خرما و بادام" && i.GetProperty("priceToman").GetInt64() == 210_000);
+        Assert.Contains(menu.GetProperty("items").EnumerateArray(), i => i.GetProperty("name").GetString() == "Dattel-Mandel-Shake" && i.GetProperty("priceToman").GetInt64() == 2_100);
         Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
     }
 
@@ -69,7 +69,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var fake = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/images", content: File("not really a png"u8.ToArray(), "x.png", "image/png"));
         var badPath = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/canteen-items", new
         {
-            name = "آیتم", description = (string?)null, category = "snack", priceToman = 50_000, kcal = (int?)null, proteinG = (int?)null, imagePath = "https://evil.example/x.png", isAvailable = true,
+            name = "Posten", description = (string?)null, category = "snack", priceToman = 500, kcal = (int?)null, proteinG = (int?)null, imagePath = "https://evil.example/x.png", isAvailable = true,
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, svg.StatusCode);
@@ -87,8 +87,8 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var price = first.GetProperty("priceToman").GetInt64();
 
         var toggle = await mgr.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/canteen-items/{id}", new { priceToman = price, isAvailable = false });
-        var reprice = await mgr.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/canteen-items/{id}", new { priceToman = price + 10_000, isAvailable = false });
-        var add = await mgr.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/canteen-items", new { name = "x", category = "snack", priceToman = 50_000, imagePath = "/media/canteen/water.svg", isAvailable = true });
+        var reprice = await mgr.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/canteen-items/{id}", new { priceToman = price + 100, isAvailable = false });
+        var add = await mgr.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/canteen-items", new { name = "x", category = "snack", priceToman = 500, imagePath = "/media/canteen/water.svg", isAvailable = true });
         var upload = await mgr.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/images", content: File(Png, "a.png", "image/png"));
         await mgr.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/canteen-items/{id}", new { priceToman = price, isAvailable = true });
 
@@ -104,12 +104,12 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
         var admin = await StaffAsync(Roles.SuperAdmin);
         var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/products", new
         {
-            name = "هودی زمستانی تست", brandName = "برند باشگاه", kind = "apparel", category = "هودی", description = (string?)null, priceToman = 1_450_000,
-            imagePath = "/media/shop/bottle-1l.svg", isActive = true, highlights = new[] { "پنبهٔ ضخیم" },
+            name = "Test-Winterhoodie", brandName = "Studiomarke", kind = "apparel", category = "Hoodie", description = (string?)null, priceToman = 14_500,
+            imagePath = "/media/shop/bottle-1l.svg", isActive = true, highlights = new[] { "Dicke Baumwolle" },
             variants = new[]
             {
-                new { id = (int?)null, size = "M", color = "مشکی", colorHex = "#111111", flavor = (string?)null, priceToman = (long?)null },
-                new { id = (int?)null, size = "L", color = "مشکی", colorHex = "#111111", flavor = (string?)null, priceToman = (long?)1_550_000 },
+                new { id = (int?)null, size = "M", color = "Schwarz", colorHex = "#111111", flavor = (string?)null, priceToman = (long?)null },
+                new { id = (int?)null, size = "L", color = "Schwarz", colorHex = "#111111", flavor = (string?)null, priceToman = (long?)15_500 },
             },
         });
         var p = await admin.JsonAsync<JsonElement>(created);
@@ -117,8 +117,8 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         var pkg = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/packages", new
         {
-            name = "دوماهه — ۲۴ جلسه", tagline = (string?)null, category = "Gym", durationMonths = 2, sessions = 24, priceToman = 3_400_000,
-            features = new[] { "دسترسی به همهٔ دستگاه‌ها" }, isActive = true, isFeatured = false,
+            name = "2 Monate — 24 Einheiten", tagline = (string?)null, category = "Gym", durationMonths = 2, sessions = 24, priceToman = 34_000,
+            features = new[] { "Zugang zu allen Geräten" }, isActive = true, isFeatured = false,
         });
         var packages = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/packages"));
         int boughtId;
@@ -138,9 +138,9 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         Assert.Equal(2, detail.GetProperty("variants").GetArrayLength());
-        Assert.Contains(detail.GetProperty("variants").EnumerateArray(), v => v.GetProperty("priceToman").GetInt64() == 1_550_000);
+        Assert.Contains(detail.GetProperty("variants").EnumerateArray(), v => v.GetProperty("priceToman").GetInt64() == 15_500);
         Assert.Equal(HttpStatusCode.Created, pkg.StatusCode);
-        Assert.Contains(packages.EnumerateArray(), x => x.GetProperty("name").GetString() == "دوماهه — ۲۴ جلسه");
+        Assert.Contains(packages.EnumerateArray(), x => x.GetProperty("name").GetString() == "2 Monate — 24 Einheiten");
         Assert.Equal(HttpStatusCode.Conflict, delBought.StatusCode);
     }
 
@@ -148,11 +148,11 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
     public async Task Super_admin_adds_coach_with_login_phone_who_then_gets_coach_panel_and_hiding_removes_from_site()
     {
         var admin = await StaffAsync(Roles.SuperAdmin);
-        var coachPhone = "0913" + Random.Shared.Next(1_000_000, 9_999_999);
+        var coachPhone = "0159" + Random.Shared.Next(1_000_000, 9_999_999);
         var created = await admin.SendAsync(HttpMethod.Post, "/api/v1/panel/admin/coaches", new
         {
-            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
-            photoUrl = (string?)null, achievements = new[] { "مربی درجهٔ ۲ فدراسیون" }, isActive = true, linkedPhone = coachPhone,
+            fullName = "Laura Hahn", specialty = "Pilates und Functional", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
+            photoUrl = (string?)null, achievements = new[] { "B-Lizenz Fitnesstrainerin" }, isActive = true, linkedPhone = coachPhone,
         });
         var coach = await admin.JsonAsync<JsonElement>(created);
         Assert.True(created.StatusCode == HttpStatusCode.Created, coach.ToString());
@@ -165,7 +165,7 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         var hide = await admin.SendAsync(HttpMethod.Put, $"/api/v1/panel/admin/coaches/{coach.GetProperty("id").GetInt32()}", new
         {
-            fullName = "نسترن کامیاب", specialty = "پیلاتس و فانکشنال", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
+            fullName = "Laura Hahn", specialty = "Pilates und Functional", bio = (string?)null, yearsOfExperience = 6, section = "women", branchSlug = "bahar-women",
             photoUrl = (string?)null, achievements = Array.Empty<string>(), isActive = false, linkedPhone = (string?)null,
         });
         var afterHide = await admin.JsonAsync<JsonElement>(await admin.SendAsync(HttpMethod.Get, "/api/v1/coaches"));
@@ -173,11 +173,11 @@ public class CatalogAdminTests(GymApiFactory factory) : IClassFixture<GymApiFact
 
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         Assert.Equal(coachPhone, coach.GetProperty("linkedPhone").GetString());
-        Assert.Contains(onSite.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "نسترن کامیاب");
+        Assert.Contains(onSite.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "Laura Hahn");
         Assert.Equal(coach.GetProperty("id").GetInt32(), me.GetProperty("coachId").GetInt32());
         Assert.Equal(HttpStatusCode.OK, trainees.StatusCode);
         Assert.Equal(HttpStatusCode.OK, hide.StatusCode);
-        Assert.DoesNotContain(afterHide.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "نسترن کامیاب");
-        Assert.Equal(HttpStatusCode.Forbidden, lostPanel.StatusCode); // شماره برداشته شد ← نقش مربی همان لحظه گرفته شد
+        Assert.DoesNotContain(afterHide.EnumerateArray(), x => x.GetProperty("fullName").GetString() == "Laura Hahn");
+        Assert.Equal(HttpStatusCode.Forbidden, lostPanel.StatusCode); // Nummer entfernt → Trainerrolle sofort entzogen
     }
 }

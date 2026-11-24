@@ -4,14 +4,14 @@ public sealed class OtpOptions
 {
     public const string Section = "Otp";
     public int CodeLength { get; set; } = 5;
-    /// <summary>انقضای ۲ دقیقه‌ای (الزام سند امنیت).</summary>
+    /// <summary>Ablauf nach 2 Minuten (Sicherheitsvorgabe).</summary>
     public int LifetimeSeconds { get; set; } = 120;
     public int MaxAttempts { get; set; } = 5;
     public int ResendCooldownSeconds { get; set; } = 60;
     public int MaxPerHour { get; set; } = 5;
-    /// <summary>فقط حالت دمو: کد در پاسخ API هم برگردانده شود. در production همیشه false.</summary>
+    /// <summary>Nur Demo-Modus: Code auch in der API-Antwort zurückgeben. In Production immer false.</summary>
     public bool ExposeCodeInResponse { get; set; }
-    /// <summary>کلید HMAC برای هش کد؛ از User Secrets / متغیر محیطی Otp__Pepper.</summary>
+    /// <summary>HMAC-Schlüssel für den Code-Hash; aus User Secrets / Umgebungsvariable Otp__Pepper.</summary>
     public string Pepper { get; set; } = "";
 }
 
@@ -20,8 +20,8 @@ public sealed class AuthOptions
     public const string Section = "Auth";
     public int RefreshTokenDays { get; set; } = 30;
     /// <summary>
-    /// مهلت کوتاه برای حالتی که پاسخِ تازه‌سازی به مرورگر نرسیده (رفرش صفحه وسط درخواست):
-    /// اگر توکن قبلی چند ثانیه پیش چرخانده شده، از همان IP آمده و توکن جانشین هنوز استفاده نشده، سرقت حساب نمی‌شود.
+    /// Kurze Kulanzzeit, falls die Refresh-Antwort den Browser nicht erreicht hat (Neuladen während der Anfrage):
+    /// Wurde das vorige Token vor wenigen Sekunden rotiert, kommt von derselben IP und der Nachfolger ist noch ungenutzt, gilt das nicht als Diebstahl.
     /// </summary>
     public int ReuseGraceSeconds { get; set; } = 30;
 }

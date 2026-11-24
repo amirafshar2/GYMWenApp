@@ -10,10 +10,10 @@ using Microsoft.Extensions.Options;
 
 namespace GymPlatform.Business.Services.Access;
 
-// ---- قراردادهای API گیت (نسخهٔ ۱). سازندهٔ گیت فقط همین‌ها را لازم دارد. ----
-/// <param name="Credential">مقدار خوانده‌شده: UID دستبند/کارت RFID یا متن QR کارت عضویت (KG1:...)</param>
-/// <param name="EventId">شناسهٔ یکتای رویداد از طرف دستگاه (اختیاری؛ برای جلوگیری از ثبت دوباره)</param>
-/// <param name="OccurredAtUtc">زمان واقعی زدن کارت (برای رویدادهای آفلاین)؛ خالی یعنی همین الان</param>
+// ---- Gate-API-Verträge (Version 1). Der Gate-Hersteller braucht nur diese. ----
+/// <param name="Credential">Gelesener Wert: UID des RFID-Armbands/der Karte oder QR-Text der Mitgliedskarte (KG1:...)</param>
+/// <param name="EventId">Eindeutige Ereignis-ID vom Gerät (optional; verhindert doppelte Erfassung)</param>
+/// <param name="OccurredAtUtc">Tatsächlicher Zeitpunkt des Scans (für Offline-Ereignisse); leer = jetzt</param>
 public sealed record AccessCheckRequest(string Credential, string? EventId = null, DateTime? OccurredAtUtc = null);
 
 public sealed record AccessCheckResult(
@@ -29,9 +29,9 @@ public sealed record CredentialDto(int Id, string Type, string ValueHint, string
 public sealed class AccessOptions
 {
     public const string Section = "Access";
-    /// <summary>عضویت یک شعبه در شعبه‌های دیگر هم معتبر باشد؟ (سیاست باشگاه)</summary>
+    /// <summary>Gilt die Mitgliedschaft einer Filiale auch in den anderen? (Studio-Regel)</summary>
     public bool AllowAllBranches { get; set; }
-    /// <summary>کلید گیت نمایشی؛ فقط در محیط غیر production ساخته می‌شود.</summary>
+    /// <summary>Demo-Gate-Schlüssel; wird nur außerhalb von Production erzeugt.</summary>
     public string? DemoDeviceKey { get; set; }
 }
 
@@ -44,14 +44,14 @@ public interface IAccessControlService
     Task<bool> RevokeAsync(int userId, int credentialId, CancellationToken ct);
     Task<IReadOnlyList<CredentialDto>> ListAsync(int userId, CancellationToken ct);
     Task EnsureDemoDeviceAsync(string rawKey, CancellationToken ct);
-    /// <summary>«دستگاه» مجازی پذیرش هر شعبه (اسکن QR با دوربین/اسکنر پشت پیشخوان)</summary>
+    /// <summary>Virtuelles „Gerät“ am Empfang jeder Filiale (QR-Scan mit Kamera/Scanner am Tresen)</summary>
     Task<DeviceInfo> ReceptionDeviceAsync(int branchId, CancellationToken ct);
     static string HashKey(string raw) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
 }
 
 /// <summary>
-/// تصمیم ورود سمت سرور: وسیلهٔ ورود ← عضو ← عضویت فعال در همین شعبه و سالن ← جلسهٔ باقی‌مانده.
-/// هر زدن کارت ثبت می‌شود؛ در پکیج‌های جلسه‌ای، روزی یک جلسه کم می‌شود (ورود دوباره در همان روز رایگان است).
+/// Zutrittsentscheidung auf dem Server: Zugangsmittel → Mitglied → aktive Mitgliedschaft in dieser Filiale und diesem Bereich → verbleibende Einheiten.
+/// Jeder Scan wird erfasst; bei Einheitenpaketen wird pro Tag eine Einheit abgezogen (erneuter Eintritt am selben Tag ist frei).
 /// </summary>
 public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions<AccessOptions> options) : IAccessControlService
 {
@@ -63,7 +63,7 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         var hash = IAccessControlService.HashKey(rawKey.Trim());
         var d = await db.AccessDevices.FirstOrDefaultAsync(x => x.KeyHash == hash && x.IsActive, ct);
         if (d is null) return null;
-        // ثبت «آخرین تماس» حداکثر هر دقیقه یک‌بار تا هر زدن کارت یک نوشتن اضافه نداشته باشد
+        // „Letzter Kontakt“ höchstens einmal pro Minute schreiben, damit nicht jeder Scan einen zusätzlichen Schreibvorgang auslöst
         if (d.LastSeenAtUtc is null || clock.UtcNow - d.LastSeenAtUtc > TimeSpan.FromMinutes(1))
         {
             d.LastSeenAtUtc = clock.UtcNow;
@@ -85,7 +85,7 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         var at = request.OccurredAtUtc is { } t && t <= now.AddMinutes(5) && t > now.AddDays(-7) ? DateTime.SpecifyKind(t, DateTimeKind.Utc) : now;
         var eventId = string.IsNullOrWhiteSpace(request.EventId) ? null : request.EventId.Trim()[..Math.Min(64, request.EventId.Trim().Length)];
 
-        // همان رویداد دوباره رسید (قطعی شبکه و ارسال مجدد): همان نتیجهٔ قبلی
+        // Dasselbe Ereignis kam erneut (Netzausfall, erneutes Senden): gleiches Ergebnis wie vorher
         if (eventId is not null)
         {
             var prev = await db.CheckIns.AsNoTracking().FirstOrDefaultAsync(c => c.DeviceId == device.Id && c.ExternalEventId == eventId, ct);
@@ -139,7 +139,7 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
             }
         }
 
-        // پکیج جلسه‌ای: اولین ورود هر روز (به وقت تهران) یک جلسه کم می‌کند
+        // Einheitenpaket: der erste Eintritt pro Tag (Berliner Zeit) zieht eine Einheit ab
         var counted = false;
         if (reason == AccessDenyReason.None && membership!.SessionsTotal is { } total)
         {
@@ -164,7 +164,7 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException) when (eventId is not null)
         {
-            // دو ارسال هم‌زمانِ یک رویداد
+            // Zwei gleichzeitige Sendungen desselben Ereignisses
             db.ChangeTracker.Clear();
             var prev = await db.CheckIns.AsNoTracking().FirstAsync(c => c.DeviceId == device.Id && c.ExternalEventId == eventId, ct);
             return Replay(prev);
@@ -186,20 +186,20 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         int? sessionsLeft = m?.SessionsTotal is { } t ? Math.Max(0, t - m.SessionsUsed) : null;
         var msg = reason switch
         {
-            AccessDenyReason.None => name is null ? "خوش آمدید" : $"خوش آمدی {name}",
-            AccessDenyReason.UnknownCredential => "این کارت/دستبند ثبت نشده است. به پذیرش مراجعه کنید.",
-            AccessDenyReason.CredentialRevoked => "این کارت/دستبند غیرفعال شده است.",
-            AccessDenyReason.NoActiveMembership => "عضویت فعال ندارید. برای تمدید به پذیرش یا سایت مراجعه کنید.",
-            AccessDenyReason.WrongBranch => "عضویت شما مربوط به شعبهٔ دیگری است.",
-            AccessDenyReason.WrongSection => "این ورودی مربوط به سالن دیگری است.",
-            AccessDenyReason.NoSessionsLeft => "جلسات پکیج شما تمام شده است.",
-            _ => "ورود مجاز نیست.",
+            AccessDenyReason.None => name is null ? "Willkommen" : $"Willkommen {name}",
+            AccessDenyReason.UnknownCredential => "Diese Karte/dieses Armband ist nicht registriert. Bitte am Empfang melden.",
+            AccessDenyReason.CredentialRevoked => "Diese Karte/dieses Armband wurde deaktiviert.",
+            AccessDenyReason.NoActiveMembership => "Keine aktive Mitgliedschaft. Zum Verlängern bitte Empfang oder Website nutzen.",
+            AccessDenyReason.WrongBranch => "Ihre Mitgliedschaft gilt für eine andere Filiale.",
+            AccessDenyReason.WrongSection => "Dieser Eingang gehört zu einem anderen Bereich.",
+            AccessDenyReason.NoSessionsLeft => "Die Einheiten Ihres Pakets sind aufgebraucht.",
+            _ => "Zutritt nicht erlaubt.",
         };
         var code = reason == AccessDenyReason.None ? "ok" : JsonNamingPolicy.SnakeCaseLower.ConvertName(reason.ToString());
         return new AccessCheckResult(allowed, code, msg, name, daysLeft, sessionsLeft, counted);
     }
 
-    /// <summary>فهرست سفید برای گیت‌هایی که آفلاین تصمیم می‌گیرند (هر چند دقیقه یک‌بار دریافت کنند).</summary>
+    /// <summary>Whitelist für Gates, die offline entscheiden (alle paar Minuten abrufen).</summary>
     public async Task<WhitelistDto> WhitelistAsync(DeviceInfo device, CancellationToken ct)
     {
         var now = clock.UtcNow;
@@ -241,14 +241,14 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
     public async Task<Result<CredentialDto>> AssignAsync(int userId, AssignCredentialRequest request, int staffUserId, CancellationToken ct)
     {
         var type = ParseType(request.Type);
-        if (type is null) return Result<CredentialDto>.Fail("type", "نوع باید wristband، card یا external باشد.");
+        if (type is null) return Result<CredentialDto>.Fail("type", "Typ muss wristband, card oder external sein.");
         var value = Normalize(request.Value ?? "");
         if (value.Length is < 4 or > 64 || value.StartsWith(QrPrefix) || !value.All(char.IsAsciiLetterOrDigit))
-            return Result<CredentialDto>.Fail("value", "شناسهٔ دستبند/کارت معتبر نیست (۴ تا ۶۴ حرف یا رقم لاتین).");
+            return Result<CredentialDto>.Fail("value", "Ungültige Armband-/Karten-ID (4 bis 64 lateinische Buchstaben oder Ziffern).");
         if (!await db.Users.AnyAsync(u => u.Id == userId, ct))
-            return Result<CredentialDto>.Fail("user", "عضو پیدا نشد.", ErrorType.NotFound);
+            return Result<CredentialDto>.Fail("user", "Mitglied nicht gefunden.", ErrorType.NotFound);
         if (await db.AccessCredentials.AnyAsync(c => c.Value == value && c.RevokedAtUtc == null, ct))
-            return Result<CredentialDto>.Fail("value", "این دستبند/کارت به عضو دیگری داده شده است. اول آن را غیرفعال کنید.", ErrorType.Conflict);
+            return Result<CredentialDto>.Fail("value", "Dieses Armband/diese Karte gehört einem anderen Mitglied. Bitte zuerst deaktivieren.", ErrorType.Conflict);
 
         var label = PersianText.CleanText(request.Label);
         var extRef = request.ExternalRef?.Trim();
@@ -289,8 +289,8 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         var d = await db.AccessDevices.FirstOrDefaultAsync(x => x.BranchId == branchId && x.Vendor == "reception", ct);
         if (d is null)
         {
-            // کلید تصادفی که هیچ‌جا استفاده نمی‌شود: این دستگاه فقط از داخل پنل پذیرش (با ورود کارمند) صدا زده می‌شود
-            d = new AccessDevice { Name = "پذیرش", BranchId = branchId, Section = GenderSection.Both, Vendor = "reception",
+            // Zufälliger Schlüssel, der nirgends genutzt wird: dieses Gerät wird nur aus dem Empfangspanel (mit Mitarbeiter-Login) angesprochen
+            d = new AccessDevice { Name = "Empfang", BranchId = branchId, Section = GenderSection.Both, Vendor = "reception",
                 KeyHash = IAccessControlService.HashKey(Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))) };
             db.AccessDevices.Add(d);
             await db.SaveChangesAsync(ct);
@@ -304,12 +304,12 @@ public sealed class AccessControlService(GymDbContext db, IClock clock, IOptions
         if (await db.AccessDevices.AnyAsync(d => d.KeyHash == hash, ct)) return;
         var branch = await db.Branches.OrderBy(b => b.Id).FirstOrDefaultAsync(ct);
         if (branch is null) return;
-        db.AccessDevices.Add(new AccessDevice { Name = "گیت نمایشی", BranchId = branch.Id, Section = GenderSection.Both, KeyHash = hash, Vendor = "demo" });
+        db.AccessDevices.Add(new AccessDevice { Name = "Demo-Gate", BranchId = branch.Id, Section = GenderSection.Both, KeyHash = hash, Vendor = "demo" });
         await db.SaveChangesAsync(ct);
     }
 }
 
-/// <summary>ثبت رویداد در صف خروجی؛ همراه همان SaveChanges/تراکنش صاحب رویداد ذخیره می‌شود.</summary>
+/// <summary>Ereignis in die Ausgangswarteschlange; wird mit demselben SaveChanges/derselben Transaktion des Auslösers gespeichert.</summary>
 public static class IntegrationEvents
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);

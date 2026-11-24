@@ -9,41 +9,41 @@ using Microsoft.EntityFrameworkCore;
 namespace GymPlatform.Business.Services.Panel;
 
 /// <summary>
-/// ساخت، ویرایش و حذف پکیج، کالای شاپ و آیتم منوی بوفه (فقط مدیر کل؛ این‌ها برای همهٔ شعبه‌ها یکی‌اند).
-/// چیزی که سابقهٔ خرید دارد حذف نمی‌شود تا فاکتورها و گزارش‌ها خراب نشوند؛ به‌جایش غیرفعال می‌شود.
+/// Anlegen, Bearbeiten und Löschen von Paketen, Shop-Produkten und Bistro-Posten (nur Gesamtadmin; gelten für alle Filialen).
+/// Was bereits gekauft wurde, wird nicht gelöscht, damit Rechnungen und Berichte intakt bleiben; stattdessen deaktiviert.
 /// </summary>
 public sealed partial class AdminService
 {
     private static readonly string[] ImageFolders = ["/media/canteen/", "/media/shop/", "/media/coaches/", "/media/uploads/"];
 
-    /// <summary>عکس فقط از کتابخانهٔ خود سایت یا آپلودهای بررسی‌شده (نه آدرس دلخواه)</summary>
+    /// <summary>Bilder nur aus der eigenen Mediathek oder geprüften Uploads (keine beliebige URL)</summary>
     private static bool ValidImage(string? path) =>
         path is { Length: > 10 and < 200 } && ImageFolders.Any(f => path.StartsWith(f, StringComparison.Ordinal)) && !path.Contains("..") &&
         System.Text.RegularExpressions.Regex.IsMatch(path, @"^/media/[a-z]+/[A-Za-z0-9._-]+$");
 
     private static string NewSlug(string prefix) => prefix + "-" + RandomNumberGenerator.GetString("abcdefghijkmnpqrstuvwxyz23456789", 6);
 
-    private static bool ValidPrice(long p, long max) => p >= 1000 && p <= max && p % 1000 == 0;
+    private static bool ValidPrice(long p, long max) => p >= 10 && p <= max && p % 10 == 0;
 
-    // ================================================================ پکیج
+    // ================================================================ Paket
     public async Task<Result<AdminPackageDto>> SavePackageAsync(int? id, SavePackageRequest r, int staffId, CancellationToken ct)
     {
         var errors = new Dictionary<string, string[]>();
         var name = PersianText.CleanText(r.Name);
-        if (name is null || name.Length > 80) errors["name"] = ["نام پکیج را بنویسید (حداکثر ۸۰ حرف)."];
-        if (!Enum.TryParse<PackageCategory>(r.Category, true, out var cat)) errors["category"] = ["دسته‌بندی نامعتبر است."];
-        if (r.DurationMonths is < 1 or > 24) errors["durationMonths"] = ["مدت بین ۱ تا ۲۴ ماه."];
-        if (r.Sessions is < 1 or > 365) errors["sessions"] = ["تعداد جلسه بین ۱ تا ۳۶۵ (یا خالی برای نامحدود)."];
-        if (!ValidPrice(r.PriceToman, 2_000_000_000)) errors["priceToman"] = ["قیمت باید مضرب هزار تومان باشد."];
+        if (name is null || name.Length > 80) errors["name"] = ["Bitte einen Paketnamen angeben (höchstens 80 Zeichen)."];
+        if (!Enum.TryParse<PackageCategory>(r.Category, true, out var cat)) errors["category"] = ["Ungültige Kategorie."];
+        if (r.DurationMonths is < 1 or > 24) errors["durationMonths"] = ["Laufzeit zwischen 1 und 24 Monaten."];
+        if (r.Sessions is < 1 or > 365) errors["sessions"] = ["Anzahl Einheiten zwischen 1 und 365 (oder leer für unbegrenzt)."];
+        if (!ValidPrice(r.PriceToman, 1_000_000)) errors["priceToman"] = ["Der Preis muss ein Vielfaches von 10 Cent sein."];
         var features = (r.Features ?? []).Select(PersianText.CleanText).Where(f => f is not null).Cast<string>().Take(12).ToList();
-        if (features.Any(f => f.Length > 120)) errors["features"] = ["هر ویژگی حداکثر ۱۲۰ حرف."];
+        if (features.Any(f => f.Length > 120)) errors["features"] = ["Jedes Merkmal höchstens 120 Zeichen."];
         if (errors.Count > 0) return Result<AdminPackageDto>.Fail(errors);
 
         MembershipPackage? p;
         if (id is { } pid)
         {
             p = await db.Packages.FirstOrDefaultAsync(x => x.Id == pid, ct);
-            if (p is null) return Result<AdminPackageDto>.Fail("id", "پکیج پیدا نشد.", ErrorType.NotFound);
+            if (p is null) return Result<AdminPackageDto>.Fail("id", "Paket nicht gefunden.", ErrorType.NotFound);
             Audit("package.updated", "Package", p.Id, staffId, $"price {p.PriceToman}->{r.PriceToman};active={r.IsActive}");
         }
         else
@@ -62,16 +62,16 @@ public sealed partial class AdminService
     public async Task<Result<bool>> DeletePackageAsync(int id, int staffId, CancellationToken ct)
     {
         var p = await db.Packages.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (p is null) return Result<bool>.Fail("id", "پکیج پیدا نشد.", ErrorType.NotFound);
+        if (p is null) return Result<bool>.Fail("id", "Paket nicht gefunden.", ErrorType.NotFound);
         if (await db.Memberships.AnyAsync(m => m.PackageId == id, ct))
-            return Result<bool>.Fail("id", "این پکیج خریدار دارد و حذف نمی‌شود؛ به‌جایش «فروش فعال» را خاموش کنید.", ErrorType.Conflict);
+            return Result<bool>.Fail("id", "Dieses Paket wurde bereits gekauft und kann nicht gelöscht werden; stattdessen „Verkauf aktiv“ ausschalten.", ErrorType.Conflict);
         db.Packages.Remove(p);
         Audit("package.deleted", "Package", id, staffId, p.Name);
         await db.SaveChangesAsync(ct);
         return Result<bool>.Ok(true);
     }
 
-    // ================================================================ کالای شاپ
+    // ================================================================ Shop-Produkt
     private static AdminProductDto ToDto(Product p, StaffScope scope) => new(p.Id, p.Slug, p.Name, ShopService.KindName(p.Kind), p.Category, p.ImagePath, p.PriceToman, p.IsActive,
         p.Variants.OrderBy(v => v.Id).Select(v => new AdminVariantDto(v.Id, v.Sku, v.Label, v.PriceToman,
             v.Stocks.Where(s => scope.Can(s.BranchId)).OrderBy(s => s.Branch!.SortOrder).Select(s => new AdminStockDto(s.Branch!.Slug, s.Branch.Name, s.Quantity)).ToList())).ToList(),
@@ -84,28 +84,28 @@ public sealed partial class AdminService
         var name = PersianText.CleanText(r.Name);
         var brandName = PersianText.CleanText(r.BrandName);
         var category = PersianText.CleanText(r.Category);
-        if (name is null || name.Length > 120) errors["name"] = ["نام کالا را بنویسید (حداکثر ۱۲۰ حرف)."];
-        if (brandName is null || brandName.Length > 60) errors["brandName"] = ["برند را بنویسید."];
-        if (category is null || category.Length > 40) errors["category"] = ["زیرگروه را بنویسید (مثل پروتئین، تیشرت)."];
+        if (name is null || name.Length > 120) errors["name"] = ["Bitte einen Produktnamen angeben (höchstens 120 Zeichen)."];
+        if (brandName is null || brandName.Length > 60) errors["brandName"] = ["Bitte die Marke angeben."];
+        if (category is null || category.Length > 40) errors["category"] = ["Bitte die Untergruppe angeben (z. B. Protein, T-Shirt)."];
         ProductKind? kind = r.Kind?.ToLowerInvariant() switch { "supplement" => ProductKind.Supplement, "apparel" => ProductKind.Apparel, "gear" => ProductKind.Gear, _ => null };
-        if (kind is null) errors["kind"] = ["نوع کالا: مکمل، پوشاک یا لوازم."];
-        if (!ValidPrice(r.PriceToman, 1_000_000_000)) errors["priceToman"] = ["قیمت باید مضرب هزار تومان باشد."];
-        if (!ValidImage(r.ImagePath)) errors["imagePath"] = ["یک عکس انتخاب یا آپلود کنید."];
+        if (kind is null) errors["kind"] = ["Produktart: Supplement, Bekleidung oder Zubehör."];
+        if (!ValidPrice(r.PriceToman, 1_000_000)) errors["priceToman"] = ["Der Preis muss ein Vielfaches von 10 Cent sein."];
+        if (!ValidImage(r.ImagePath)) errors["imagePath"] = ["Bitte ein Bild auswählen oder hochladen."];
         var variants = (r.Variants ?? []).Take(60).Select(v => v with
         {
             Size = Clip(v.Size, 20), Color = Clip(v.Color, 30), Flavor = Clip(v.Flavor, 40),
             ColorHex = v.ColorHex is { } h && System.Text.RegularExpressions.Regex.IsMatch(h, "^#[0-9A-Fa-f]{6}$") ? h : null,
         }).ToList();
-        if (variants.Any(v => v.PriceToman is { } vp && !ValidPrice(vp, 1_000_000_000))) errors["variants"] = ["قیمت هر مدل باید مضرب هزار تومان باشد."];
-        if (variants.GroupBy(v => (v.Size, v.Color, v.Flavor)).Any(g => g.Count() > 1)) errors["variants"] = ["دو مدل با سایز/رنگ/طعم یکسان تعریف شده است."];
+        if (variants.Any(v => v.PriceToman is { } vp && !ValidPrice(vp, 1_000_000))) errors["variants"] = ["Der Preis jeder Variante muss ein Vielfaches von 10 Cent sein."];
+        if (variants.GroupBy(v => (v.Size, v.Color, v.Flavor)).Any(g => g.Count() > 1)) errors["variants"] = ["Zwei Varianten mit gleicher Größe/Farbe/Geschmack angelegt."];
         if (errors.Count > 0) return Result<AdminProductDto>.Fail(errors);
-        if (variants.Count == 0) variants.Add(new SaveVariantDto(null, null, null, null, null, null)); // کالای تک‌مدلی
+        if (variants.Count == 0) variants.Add(new SaveVariantDto(null, null, null, null, null, null)); // Produkt ohne Varianten
 
         Product? p;
         if (id is { } pid)
         {
             p = await db.Products.Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == pid, ct);
-            if (p is null) return Result<AdminProductDto>.Fail("id", "کالا پیدا نشد.", ErrorType.NotFound);
+            if (p is null) return Result<AdminProductDto>.Fail("id", "Produkt nicht gefunden.", ErrorType.NotFound);
             Audit("product.updated", "Product", p.Id, scope.UserId, $"price {p.PriceToman}->{r.PriceToman};active={r.IsActive}");
         }
         else
@@ -118,16 +118,16 @@ public sealed partial class AdminService
         p.PriceToman = r.PriceToman; p.ImagePath = r.ImagePath; p.IsActive = r.IsActive;
         p.Highlights = (r.Highlights ?? []).Select(PersianText.CleanText).Where(x => x is not null).Cast<string>().Select(x => x.Length > 80 ? x[..80] : x).Take(8).ToList();
 
-        // مدل‌ها: ویرایش موجودها، افزودن تازه‌ها (حذف نمی‌شوند)
+        // Varianten: bestehende bearbeiten, neue hinzufügen (werden nicht gelöscht)
         foreach (var v in variants)
         {
             var existing = v.Id is { } vid ? p.Variants.FirstOrDefault(x => x.Id == vid) : null;
-            if (v.Id is not null && existing is null) return Result<AdminProductDto>.Fail("variants", "مدل نامعتبر است.");
+            if (v.Id is not null && existing is null) return Result<AdminProductDto>.Fail("variants", "Ungültige Variante.");
             existing ??= AddVariant(p);
             existing.Size = v.Size; existing.Color = v.Color; existing.ColorHex = v.ColorHex; existing.Flavor = v.Flavor; existing.PriceToman = v.PriceToman;
         }
         await db.SaveChangesAsync(ct);
-        // SKU با شناسهٔ واقعی؛ برای مدل‌های تازه موجودی صفر در همهٔ شعبه‌ها
+        // SKU mit echter ID; neue Varianten starten in allen Filialen mit Bestand 0
         var branchIds = await db.Branches.Select(b => b.Id).ToListAsync(ct);
         foreach (var v in p.Variants.Where(v => v.Sku.StartsWith("new-")))
         {
@@ -150,7 +150,7 @@ public sealed partial class AdminService
 
     private static string? Clip(string? s, int max) { var c = PersianText.CleanText(s); return c is null ? null : c.Length > max ? c[..max] : c; }
 
-    // ================================================================ منوی بوفه
+    // ================================================================ Bistro-Karte
     private static AdminCanteenItemDto ToDto(CanteenItem i) =>
         new(i.Id, i.Name, CanteenService.CategoryName(i.Category), i.PriceToman, i.IsAvailable, i.ImagePath, i.Description, i.Kcal, i.ProteinG);
 
@@ -158,16 +158,16 @@ public sealed partial class AdminService
     {
         var errors = new Dictionary<string, string[]>();
         var name = PersianText.CleanText(r.Name);
-        if (name is null || name.Length > 60) errors["name"] = ["نام آیتم را بنویسید (حداکثر ۶۰ حرف)."];
+        if (name is null || name.Length > 60) errors["name"] = ["Bitte einen Namen angeben (höchstens 60 Zeichen)."];
         CanteenCategory? cat = r.Category?.ToLowerInvariant() switch
         {
             "coffee" => CanteenCategory.Coffee, "shake" => CanteenCategory.Shake, "drink" => CanteenCategory.Drink, "snack" => CanteenCategory.Snack, "meal" => CanteenCategory.Meal, _ => null,
         };
-        if (cat is null) errors["category"] = ["دسته را انتخاب کنید."];
-        if (!ValidPrice(r.PriceToman, 50_000_000)) errors["priceToman"] = ["قیمت باید مضرب هزار تومان باشد."];
-        if (r.Kcal is < 0 or > 3000) errors["kcal"] = ["کالری بین ۰ تا ۳۰۰۰."];
-        if (r.ProteinG is < 0 or > 300) errors["proteinG"] = ["پروتئین بین ۰ تا ۳۰۰ گرم."];
-        if (!ValidImage(r.ImagePath)) errors["imagePath"] = ["یک عکس انتخاب یا آپلود کنید."];
+        if (cat is null) errors["category"] = ["Bitte eine Kategorie wählen."];
+        if (!ValidPrice(r.PriceToman, 100_000)) errors["priceToman"] = ["Der Preis muss ein Vielfaches von 10 Cent sein."];
+        if (r.Kcal is < 0 or > 3000) errors["kcal"] = ["Kalorien zwischen 0 und 3000."];
+        if (r.ProteinG is < 0 or > 300) errors["proteinG"] = ["Protein zwischen 0 und 300 Gramm."];
+        if (!ValidImage(r.ImagePath)) errors["imagePath"] = ["Bitte ein Bild auswählen oder hochladen."];
         var desc = Clip(r.Description, 200);
         if (errors.Count > 0) return Result<AdminCanteenItemDto>.Fail(errors);
 
@@ -175,7 +175,7 @@ public sealed partial class AdminService
         if (id is { } iid)
         {
             i = await db.CanteenItems.FirstOrDefaultAsync(x => x.Id == iid, ct);
-            if (i is null) return Result<AdminCanteenItemDto>.Fail("id", "آیتم پیدا نشد.", ErrorType.NotFound);
+            if (i is null) return Result<AdminCanteenItemDto>.Fail("id", "Posten nicht gefunden.", ErrorType.NotFound);
         }
         else
         {
@@ -193,8 +193,8 @@ public sealed partial class AdminService
     public async Task<Result<bool>> DeleteCanteenItemAsync(int id, int staffId, CancellationToken ct)
     {
         var i = await db.CanteenItems.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (i is null) return Result<bool>.Fail("id", "آیتم پیدا نشد.", ErrorType.NotFound);
-        // سفارش‌های قبلی نام و قیمت را جدا نگه داشته‌اند، پس حذف آیتم فاکتورها را خراب نمی‌کند
+        if (i is null) return Result<bool>.Fail("id", "Posten nicht gefunden.", ErrorType.NotFound);
+        // Frühere Bestellungen speichern Name und Preis separat, das Löschen eines Postens beschädigt keine Rechnungen
         db.CanteenItems.Remove(i);
         Audit("canteen.item_deleted", "CanteenItem", id, staffId, i.Name);
         await db.SaveChangesAsync(ct);

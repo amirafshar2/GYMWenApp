@@ -1,14 +1,14 @@
 namespace GymPlatform.Business.Dtos;
 
-// ---- کیف پول ----
+// ---- Guthaben ----
 public sealed record WalletTxDto(int Id, long AmountToman, long BalanceAfterToman, string Type, string Description, DateTime CreatedAtUtc);
 public sealed record WalletDto(long BalanceToman, IReadOnlyList<WalletTxDto> Transactions, IReadOnlyList<long> TopUpPresets, long MinTopUpToman, long MaxTopUpToman);
 public sealed record TopUpRequest(long AmountToman, string IdempotencyKey);
 
-/// <summary>نتیجهٔ شروع خرید: اگر از کیف پول پرداخت شد، کامل است؛ وگرنه شمارهٔ پرداخت برای رفتن به درگاه.</summary>
+/// <summary>Ergebnis des Kaufstarts: Wurde mit Guthaben bezahlt, ist er abgeschlossen; sonst die Zahlungsnummer für das Gateway.</summary>
 public sealed record PurchaseStartedDto(int? PaymentId, long TrackingNumber, long AmountToman, bool Completed, int OrderId, string? RedirectPath);
 
-// ---- شاپ ----
+// ---- Shop ----
 public sealed record ShopFilter(string? Kind, string? Category, string? Q, string? Branch, bool? InStock, string? Sort);
 public sealed record ProductCardDto(
     int Id, string Slug, string Name, string BrandName, string Kind, string Category, string ImagePath, long PriceToman,
@@ -35,7 +35,7 @@ public sealed record ShopOrderDto(
     int Id, string? Number, string Status, string Fulfillment, string BranchName, string? Address, long SubtotalToman, long DiscountToman,
     long ShippingToman, long TotalToman, string PayMethod, DateTime CreatedAtUtc, DateTime? PaidAtUtc, IReadOnlyList<ShopOrderItemDto> Items);
 
-// ---- بوفه ----
+// ---- Bistro ----
 public sealed record CanteenMenuItemDto(int Id, string Slug, string Name, string? Description, string Category, long PriceToman, int? Kcal, int? ProteinG, string ImagePath, bool IsAvailable);
 public sealed record CanteenMenuDto(string BranchSlug, string BranchName, string? TableCode, IReadOnlyList<CanteenMenuItemDto> Items);
 public sealed record CanteenLine(int ItemId, int Quantity);
@@ -46,5 +46,5 @@ public sealed record CanteenOrderDto(
     string? Note, DateTime CreatedAtUtc, DateTime? PaidAtUtc, DateTime? ReadyAtUtc, IReadOnlyList<CanteenOrderItemDto> Items);
 public sealed record CanteenStatusRequest(string Status);
 
-// ---- پروفایل ----
+// ---- Profil ----
 public sealed record OrdersSummaryDto(IReadOnlyList<ShopOrderDto> Shop, IReadOnlyList<CanteenOrderDto> Canteen);

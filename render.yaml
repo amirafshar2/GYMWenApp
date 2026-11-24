@@ -19,7 +19,7 @@ services:
         value: Staging
       - key: PORT
         value: "8080"
-      # Installationsmodus: fiktive Marke „Ahankooh“ + Demo-Daten (Blank = leere Vorlage, Content = Inhaltspaket)
+      # Installationsmodus: fiktive Marke „Eisenwerk Fitness“ + Demo-Daten (Blank = leere Vorlage, Content = Inhaltspaket)
       - key: Setup__Mode
         value: Demo
       - key: Database__Provider
@@ -35,7 +35,7 @@ services:
       - key: Payment__UseVirtualGateway
         value: "true"
       - key: Demo__StaffPhone
-        value: "09100000000"
+        value: "01510000000"
       - key: Demo__SeedMembers
         value: "true"
       - key: ReverseProxy__Enabled

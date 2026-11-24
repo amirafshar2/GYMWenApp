@@ -15,7 +15,7 @@ interface NavItem {
 interface NavBarProps {
   items: NavItem[]
   className?: string
-  /** تغییر برای پروژه: تب فعال کنترل‌شده (مثلاً بر اساس بخش در دید) */
+  /** Änderung fürs Projekt: aktiver Tab gesteuert (z. B. nach sichtbarem Bereich) */
   active?: string
 }
 

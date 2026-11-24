@@ -21,8 +21,8 @@ public interface IShopService
 }
 
 /// <summary>
-/// فروشگاه: موجودی به تفکیک شعبه. هنگام ثبت سفارش موجودی کنار گذاشته می‌شود (کم کردن شرطی)،
-/// با پرداخت موفق قطعی و با شکست/انقضا برمی‌گردد. قیمت‌ها فقط سمت سرور حساب می‌شوند.
+/// Shop: Bestand je Filiale. Beim Bestellen wird Bestand reserviert (bedingtes Abziehen),
+/// bei erfolgreicher Zahlung endgültig, bei Fehlschlag/Ablauf zurückgebucht. Preise werden nur serverseitig berechnet.
 /// </summary>
 public sealed class ShopService(GymDbContext db, IClock clock, IOptions<CommerceOptions> options, ILogger<ShopService> logger) : IShopService
 {
@@ -37,7 +37,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
     public async Task<ShopCatalogDto> CatalogAsync(ShopFilter f, CancellationToken ct)
     {
         var q = db.Products.AsNoTracking().Where(p => p.IsActive);
-        // «مکمل‌ها» یک بخش و «پوشاک و لوازم برند باشگاه» بخش دیگر
+        // „Supplements“ ist ein Bereich, „Bekleidung und Zubehör der Studiomarke“ ein anderer
         if (f.Kind == "merch") q = q.Where(p => p.Kind != ProductKind.Supplement);
         else if (ParseKind(f.Kind) is { } kind) q = q.Where(p => p.Kind == kind);
         var all = await q.Include(p => p.Variants).ThenInclude(v => v.Stocks).ThenInclude(s => s.Branch).AsSplitQuery()
@@ -92,12 +92,12 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
     {
         var errors = new Dictionary<string, string[]>();
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == branchSlug && b.IsActive, ct);
-        if (branch is null) errors["branchSlug"] = ["شعبهٔ تحویل یا ارسال را انتخاب کنید."];
+        if (branch is null) errors["branchSlug"] = ["Bitte die Abhol- oder Versandfiliale wählen."];
         Fulfillment? ful = fulfillment?.ToLowerInvariant() switch { "pickup" => Fulfillment.Pickup, "delivery" => Fulfillment.Delivery, _ => null };
-        if (ful is null) errors["fulfillment"] = ["روش تحویل را انتخاب کنید."];
+        if (ful is null) errors["fulfillment"] = ["Bitte die Lieferart wählen."];
         var merged = (items ?? []).Where(i => i.Quantity > 0).GroupBy(i => i.VariantId).Select(g => (Id: g.Key, Qty: g.Sum(x => x.Quantity))).ToList();
-        if (merged.Count == 0) errors["items"] = ["سبد خرید خالی است."];
-        else if (merged.Count > 30) errors["items"] = ["حداکثر ۳۰ کالای متفاوت در یک سفارش."];
+        if (merged.Count == 0) errors["items"] = ["Der Warenkorb ist leer."];
+        else if (merged.Count > 30) errors["items"] = ["Höchstens 30 verschiedene Produkte pro Bestellung."];
         if (errors.Count > 0) return Result<Priced>.Fail(errors);
 
         var ids = merged.Select(m => m.Id).ToList();
@@ -109,11 +109,11 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         foreach (var (id, qty) in merged)
         {
             var v = variants.FirstOrDefault(x => x.Id == id);
-            if (v is null) { lines.Add(new QuoteLineDto(id, "", "کالای نامعتبر", null, "", 0, qty, 0, 0, "این کالا دیگر موجود نیست.")); continue; }
+            if (v is null) { lines.Add(new QuoteLineDto(id, "", "Ungültiges Produkt", null, "", 0, qty, 0, 0, "Dieses Produkt ist nicht mehr verfügbar.")); continue; }
             var unit = v.PriceToman ?? v.Product!.PriceToman;
             var available = v.Stocks.Where(s => s.BranchId == branch!.Id).Sum(s => s.Quantity);
-            string? problem = qty > O.MaxQuantityPerLine ? $"حداکثر {PersianText.FaDigits(O.MaxQuantityPerLine.ToString())} عدد از هر کالا."
-                : available < qty ? (available == 0 ? "در این شعبه موجود نیست." : $"فقط {PersianText.FaDigits(available.ToString())} عدد در این شعبه موجود است.") : null;
+            string? problem = qty > O.MaxQuantityPerLine ? $"Höchstens {PersianText.FaDigits(O.MaxQuantityPerLine.ToString())} Stück pro Produkt."
+                : available < qty ? (available == 0 ? "In dieser Filiale nicht vorrätig." : $"Nur {PersianText.FaDigits(available.ToString())} Stück in dieser Filiale vorrätig.") : null;
             lines.Add(new QuoteLineDto(v.Id, v.Product!.Slug, v.Product.Name, v.Label.Length > 0 ? v.Label : null, v.Product.ImagePath, unit, qty, unit * qty, available, problem));
             if (problem is null) priced.Add((v, qty, unit));
         }
@@ -125,13 +125,13 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         {
             var now = clock.UtcNow;
             dc = await db.DiscountCodes.AsNoTracking().FirstOrDefaultAsync(d => d.Code == code, ct);
-            if (dc is null || !dc.IsUsableAt(now) || !dc.AppliesTo(DiscountScope.Shop)) { codeError = "کد تخفیف برای فروشگاه معتبر نیست."; dc = null; }
+            if (dc is null || !dc.IsUsableAt(now) || !dc.AppliesTo(DiscountScope.Shop)) { codeError = "Der Rabattcode gilt nicht für den Shop."; dc = null; }
             else if (dc.MembersOnly)
             {
                 var isMember = userId is not null && await db.Memberships.AnyAsync(m => m.UserId == userId && m.Status == MembershipStatus.Active && m.StartsAtUtc <= now && m.EndsAtUtc > now, ct);
-                if (!isMember) { codeError = userId is null ? "این کد مخصوص اعضای باشگاه است؛ اول وارد شوید." : "این کد فقط برای اعضای دارای عضویت فعال است."; dc = null; }
+                if (!isMember) { codeError = userId is null ? "Dieser Code ist nur für Mitglieder; bitte zuerst anmelden." : "Dieser Code gilt nur für Mitglieder mit aktiver Mitgliedschaft."; dc = null; }
             }
-            if (dc is not null) discount = subtotal * dc.Percent / 100 / 1000 * 1000;
+            if (dc is not null) discount = subtotal * dc.Percent / 100 / 10 * 10;
         }
         var afterDiscount = subtotal - discount;
         var shipping = ful == Fulfillment.Delivery && afterDiscount > 0 && afterDiscount < O.FreeShippingFromToman ? O.ShippingFeeToman : 0;
@@ -149,17 +149,17 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
     public async Task<Result<PurchaseStartedDto>> CheckoutAsync(int userId, ShopCheckoutRequest r, CancellationToken ct)
     {
         var key = (r.IdempotencyKey ?? "").Trim();
-        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "شناسهٔ درخواست نامعتبر است.");
+        if (key.Length is < 8 or > 64) return Result<PurchaseStartedDto>.Fail("idempotencyKey", "Ungültige Anfrage-ID.");
         var existing = await db.ShopOrders.AsNoTracking().FirstOrDefaultAsync(o => o.UserId == userId && o.IdempotencyKey == key, ct);
         if (existing is not null) return await ExistingAsync(existing, ct);
 
         PayMethod? method = r.PayMethod?.ToLowerInvariant() switch { "wallet" => PayMethod.Wallet, "gateway" => PayMethod.Gateway, _ => null };
-        if (method is null) return Result<PurchaseStartedDto>.Fail("payMethod", "روش پرداخت را انتخاب کنید.");
+        if (method is null) return Result<PurchaseStartedDto>.Fail("payMethod", "Bitte eine Zahlungsart wählen.");
 
         var priced = await PriceAsync(userId, r.Items, r.BranchSlug, r.Fulfillment, r.DiscountCode, ct);
         if (!priced.Succeeded) return Result<PurchaseStartedDto>.Fail(priced.Errors.ToDictionary(), priced.ErrorType);
         var p = priced.Value!;
-        if (!p.Quote.CanCheckout) return Result<PurchaseStartedDto>.Fail("items", p.Quote.Lines.FirstOrDefault(l => l.Problem is not null)?.Problem ?? "سبد خرید معتبر نیست.");
+        if (!p.Quote.CanCheckout) return Result<PurchaseStartedDto>.Fail("items", p.Quote.Lines.FirstOrDefault(l => l.Problem is not null)?.Problem ?? "Ungültiger Warenkorb.");
         if (p.Quote.DiscountCodeError is not null) return Result<PurchaseStartedDto>.Fail("discountCode", p.Quote.DiscountCodeError);
         if (p.Code is not null && await DiscountGuard.CodeErrorAsync(db, p.Code, userId, clock.UtcNow, ct) is { } codeLimit)
             return Result<PurchaseStartedDto>.Fail("discountCode", codeLimit, ErrorType.Conflict);
@@ -172,10 +172,10 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
             phone = PersianText.NormalizeMobile(r.RecipientPhone);
             address = PersianText.CleanText(r.Address);
             postal = PersianText.ToLatinDigits(r.PostalCode ?? "").Replace(" ", "").Replace("-", "");
-            if (name is null || name.Length is < 3 or > 100) errors["recipientName"] = ["نام گیرنده را کامل بنویسید."];
-            if (!PersianText.IsValidMobile(phone)) errors["recipientPhone"] = ["موبایل گیرنده معتبر نیست."];
-            if (address is null || address.Length is < 10 or > 400) errors["address"] = ["نشانی کامل را بنویسید (حداقل ۱۰ حرف)."];
-            if (postal.Length != 10 || !postal.All(char.IsAsciiDigit)) errors["postalCode"] = ["کد پستی ۱۰ رقمی است."];
+            if (name is null || name.Length is < 3 or > 100) errors["recipientName"] = ["Bitte den vollständigen Namen des Empfängers angeben."];
+            if (!PersianText.IsValidMobile(phone)) errors["recipientPhone"] = ["Ungültige Handynummer des Empfängers."];
+            if (address is null || address.Length is < 10 or > 400) errors["address"] = ["Bitte die vollständige Adresse angeben (mindestens 10 Zeichen)."];
+            if (postal.Length != 10 || !postal.All(char.IsAsciiDigit)) errors["postalCode"] = ["Die Postleitzahl hat 5 Ziffern."];
             if (errors.Count > 0) return Result<PurchaseStartedDto>.Fail(errors);
         }
 
@@ -185,7 +185,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
             await using var tx = await db.Database.BeginTransactionAsync(ct);
             var now = clock.UtcNow;
 
-            // کنار گذاشتن موجودی: اگر هم‌زمان کس دیگری آخرین عدد را برداشته باشد، به‌روزرسانی شرطی صفر ردیف برمی‌گرداند
+            // Bestand reservieren: hat gleichzeitig jemand das letzte Stück genommen, liefert das bedingte Update 0 Zeilen
             foreach (var (v, qty, _) in p.Lines)
             {
                 var rows = await db.BranchStocks.Where(s => s.VariantId == v.Id && s.BranchId == p.Branch.Id && s.Quantity >= qty)
@@ -193,7 +193,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
                 if (rows == 0)
                 {
                     await tx.RollbackAsync(ct);
-                    return Result<PurchaseStartedDto>.Fail("items", $"موجودی «{v.Product!.Name}» همین الان تمام شد. سبد را دوباره بررسی کنید.", ErrorType.Conflict);
+                    return Result<PurchaseStartedDto>.Fail("items", $"„{v.Product!.Name}“ ist gerade ausverkauft. Bitte den Warenkorb prüfen.", ErrorType.Conflict);
                 }
             }
 
@@ -214,10 +214,10 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
 
             if (method == PayMethod.Wallet)
             {
-                if (!await WalletLedger.TryDebitAsync(db, userId, order.TotalToman, WalletTxType.ShopPurchase, $"سفارش فروشگاه {order.Number}", $"shop:{order.Id}", now, ct))
+                if (!await WalletLedger.TryDebitAsync(db, userId, order.TotalToman, WalletTxType.ShopPurchase, $"Shop-Bestellung {order.Number}", $"shop:{order.Id}", now, ct))
                 {
                     await tx.RollbackAsync(ct);
-                    return Result<PurchaseStartedDto>.Fail("payMethod", "موجودی کیف پول کافی نیست. کیف پول را شارژ کنید یا با درگاه پرداخت کنید.");
+                    return Result<PurchaseStartedDto>.Fail("payMethod", "Guthaben reicht nicht aus. Bitte Guthaben aufladen oder per Gateway bezahlen.");
                 }
                 MarkPaid(order, now);
                 await IncrementCodeAsync(order.DiscountCode, ct);
@@ -231,7 +231,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
             {
                 UserId = userId, Purpose = PaymentPurpose.ShopOrder, ShopOrderId = order.Id, IdempotencyKey = "shop-" + key[..Math.Min(58, key.Length)],
                 BaseAmountToman = order.SubtotalToman, CodeDiscountToman = order.DiscountToman, AmountToman = order.TotalToman, DiscountCode = order.DiscountCode,
-                Description = $"سفارش فروشگاه {order.Number}", TrackingNumber = await TrackingNumbers.NewAsync(db, ct), CreatedAtUtc = now,
+                Description = $"Shop-Bestellung {order.Number}", TrackingNumber = await TrackingNumbers.NewAsync(db, ct), CreatedAtUtc = now,
             };
             db.Payments.Add(payment);
             await db.SaveChangesAsync(ct);
@@ -251,13 +251,13 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
     {
         o.Status = o.Fulfillment == Fulfillment.Pickup ? OrderStatus.ReadyForPickup : OrderStatus.Paid;
         o.PaidAtUtc = now;
-        o.StockReserved = false; // قطعی شد
+        o.StockReserved = false; // endgültig
     }
 
     private Task IncrementCodeAsync(string? code, CancellationToken ct) => code is null ? Task.CompletedTask :
         db.DiscountCodes.Where(d => d.Code == code).ExecuteUpdateAsync(s => s.SetProperty(d => d.UsedCount, d => d.UsedCount + 1), ct);
 
-    /// <summary>برگرداندن موجودی کنارگذاشته‌شده (پرداخت ناموفق یا منقضی)</summary>
+    /// <summary>Reservierten Bestand zurückbuchen (Zahlung fehlgeschlagen oder abgelaufen)</summary>
     internal static async Task ReleaseStockAsync(GymDbContext db, ShopOrder o, CancellationToken ct)
     {
         if (!o.StockReserved) return;
@@ -268,7 +268,7 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         o.StockReserved = false;
     }
 
-    /// <summary>پرداخت درگاهِ سفارش فروشگاه نهایی شد (داخل تراکنش PaymentService)</summary>
+    /// <summary>Gateway-Zahlung der Shop-Bestellung abgeschlossen (innerhalb der PaymentService-Transaktion)</summary>
     internal static async Task OnPaymentCompletedAsync(GymDbContext db, Payment payment, bool succeeded, DateTime now, CancellationToken ct)
     {
         var o = await db.ShopOrders.FirstAsync(x => x.Id == payment.ShopOrderId, ct);
@@ -281,8 +281,8 @@ public sealed class ShopService(GymDbContext db, IClock clock, IOptions<Commerce
         }
         if (o.Status == OrderStatus.Cancelled)
         {
-            // سفارش منقضی شده بود ولی کاربر بعداً در درگاه پرداخت کرد: مبلغ به کیف پول برمی‌گردد
-            await WalletLedger.CreditAsync(db, o.UserId, payment.AmountToman, WalletTxType.Refund, $"بازگشت وجه سفارش منقضی‌شدهٔ {o.Number}", $"shop:{o.Id}", now, ct);
+            // Bestellung war abgelaufen, aber der Kunde zahlte später im Gateway: Betrag geht aufs Guthaben
+            await WalletLedger.CreditAsync(db, o.UserId, payment.AmountToman, WalletTxType.Refund, $"Erstattung der abgelaufenen Bestellung {o.Number}", $"shop:{o.Id}", now, ct);
             return;
         }
         MarkPaid(o, now);

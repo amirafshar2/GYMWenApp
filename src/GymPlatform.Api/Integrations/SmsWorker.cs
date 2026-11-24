@@ -3,8 +3,8 @@ using GymPlatform.Business.Services.Panel;
 namespace GymPlatform.Api.Integrations;
 
 /// <summary>
-/// صف پیامک: هر دقیقه ارسال (خوش‌آمد فوری، بقیه فقط ۹ صبح تا ۹ شب)،
-/// هر ۱۵ دقیقه بررسی یادآوری‌های ۷ و ۱ روز مانده و تولدها (تکراری‌ها با DedupeKey حذف می‌شوند).
+/// SMS-Warteschlange: jede Minute Versand (Willkommen sofort, sonst nur 9 bis 21 Uhr),
+/// alle 15 Minuten Prüfung der Erinnerungen für 7 und 1 Resttag sowie der Geburtstage (Duplikate per DedupeKey entfernt).
 /// </summary>
 public sealed class SmsWorker(IServiceScopeFactory scopes, ILogger<SmsWorker> logger) : BackgroundService
 {

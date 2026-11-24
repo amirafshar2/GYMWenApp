@@ -3,9 +3,9 @@ import { brand } from './brand'
 import { faNum, faDigits } from './fa'
 
 /**
- * تنظیمات سایت که مالک از پنل («تنظیمات سایت») عوض می‌کند: نام و لوگو، رنگ، تماس، متن و عکس بخش‌ها، ماژول‌ها.
- * پیش از اولین نمایش از /api/v1/site خوانده می‌شود (نسخهٔ قبلی از حافظهٔ مرورگر، تا صفحه منتظر نماند)
- * و هر جا لازم است با site.home.… یا fill(…) استفاده می‌شود.
+ * Seiteneinstellungen, die der Inhaber im Panel („Website-Einstellungen“) ändert: Name und Logo, Farben, Kontakt, Texte und Bilder der Bereiche, Module.
+ * Wird vor dem ersten Rendern aus /api/v1/site gelesen (vorherige Version aus dem Browserspeicher, damit die Seite nicht wartet)
+ * und überall per site.home.… oder fill(…) verwendet.
  */
 export interface CardItem { title: string; text?: string | null; imageUrl?: string | null; icon?: string | null; href?: string | null }
 export interface SimpleSection { eyebrow: string; title: string; text: string }
@@ -53,7 +53,7 @@ const listeners = new Set<() => void>()
 
 export const site = new Proxy({} as SiteInfo, { get: (_, k) => (current as unknown as Record<string | symbol, unknown> | null)?.[k] })
 
-/** رنگ ‎#RRGGBB را روشن/تیره می‌کند (amount مثبت = روشن‌تر) */
+/** Hellt eine Farbe #RRGGBB auf/dunkelt sie ab (positives amount = heller) */
 function shade(hex: string, amount: number) {
   const n = parseInt(hex.slice(1), 16)
   const ch = (s: number) => {
@@ -66,10 +66,10 @@ function shade(hex: string, amount: number) {
 function apply(s: SiteInfo) {
   current = s
   version++
-  // برند (نام، لوگو، تماس) — همان شیئی که همهٔ اجزا از آن می‌خوانند
+  // Marke (Name, Logo, Kontakt) — dasselbe Objekt, aus dem alle Teile lesen
   Object.assign(brand, {
-    name: s.brand.name || s.brand.shortName || 'باشگاه',
-    shortName: s.brand.shortName || s.brand.name || 'باشگاه',
+    name: s.brand.name || s.brand.shortName || 'Studio',
+    shortName: s.brand.shortName || s.brand.name || 'Studio',
     latinName: s.brand.latinName || '',
     logo: s.brand.logoUrl || '/brand/placeholder-logo.svg',
     logoFull: s.brand.logoFullUrl || s.brand.logoUrl || '/brand/placeholder-logo.svg',
@@ -103,47 +103,47 @@ async function fetchSite(): Promise<SiteInfo> {
   return r.json()
 }
 
-/** قبل از اولین نمایش: نسخهٔ ذخیره‌شده فوراً، نسخهٔ تازه از سرور (اگر فرق کرد، صفحه به‌روز می‌شود) */
+/** Vor dem ersten Rendern: gespeicherte Version sofort, neue vom Server (bei Unterschied wird die Seite aktualisiert) */
 export async function loadSite(): Promise<void> {
   let cached: SiteInfo | null = null
-  try { cached = JSON.parse(localStorage.getItem(KEY) || 'null') } catch { /* بی‌اهمیت */ }
+  try { cached = JSON.parse(localStorage.getItem(KEY) || 'null') } catch { /* unwichtig */ }
   const fresh = fetchSite().then((s) => {
-    try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* حالت خصوصی */ }
+    try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* privater Modus */ }
     if (JSON.stringify(s) !== JSON.stringify(current)) apply(s)
     return s
   })
   if (cached?.home?.sections) { apply(cached); fresh.catch(() => {}); return }
   try { await fresh } catch {
-    // سرور در دسترس نیست: با مقدارهای خالی بالا بیاید تا صفحهٔ خطا دیده شود
+    // Server nicht erreichbar: mit leeren Werten starten, damit die Fehlerseite sichtbar wird
     apply(EMPTY)
   }
 }
 
-/** بعد از ذخیره در پنل: تنظیمات تازه همان لحظه روی سایت */
+/** Nach dem Speichern im Panel: neue Einstellungen sofort auf der Seite */
 export async function reloadSite() {
   const s = await fetchSite()
-  try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* حالت خصوصی */ }
+  try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* privater Modus */ }
   apply(s)
 }
 
-/** هر بار تنظیمات عوض شود اجزایی که این را صدا می‌زنند دوباره رسم می‌شوند */
+/** Bei jeder Änderung der Einstellungen werden aufrufende Komponenten neu gezeichnet */
 export function useSiteVersion() {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l) }, () => version)
 }
 
-/** جایگزینی {name} {short} {city} {branches} {phone} در متن‌های تنظیمات */
+/** Ersetzung von {name} {short} {city} {branches} {phone} in den Einstellungstexten */
 export function fill(text: string | null | undefined): string {
   if (!text) return ''
   const s = current
   return text
     .replaceAll('{name}', brand.name)
     .replaceAll('{short}', brand.shortName)
-    .replaceAll('{city}', brand.city || 'شهر')
+    .replaceAll('{city}', brand.city || 'Stadt')
     .replaceAll('{branches}', faNum(s?.branches ?? 0))
     .replaceAll('{phone}', faDigits(brand.phone || ''))
 }
 
-/** برچسب‌هایی مثل «{branches} شعبه در {city}» تا شعبه‌ای ثبت نشده نمایش داده نمی‌شوند */
+/** Labels wie „{branches} Filialen in {city}“ werden erst angezeigt, wenn eine Filiale angelegt ist */
 export const fillCount = (text: string | null | undefined) => (text?.includes('{branches}') && !current?.branches ? '' : fill(text))
 
 export const sectionOn = (k: SectionKey) => current?.home.sections.find((s) => s.key === k)?.enabled ?? true
@@ -155,7 +155,7 @@ const EMPTY: SiteInfo = {
   theme: { primary: '#0B5FB0', accent: '#FFB400', dark: '#181818' },
   home: {
     sections: [],
-    hero: { eyebrow: '', body: '', primaryCta: 'شعبه‌ها', secondaryCta: 'پکیج‌ها', imageUrl: '/media/hero/dumbbell.webp', mobileImageUrl: '/media/hero/dumbbell-mobile.webp' },
+    hero: { eyebrow: '', body: '', primaryCta: 'Filialen', secondaryCta: 'Pakete', imageUrl: '/media/hero/dumbbell.webp', mobileImageUrl: '/media/hero/dumbbell-mobile.webp' },
     intro: { eyebrow: '', title: '', cards: [] },
     why: { title: '', text: '', imageUrl: '', imageCta: '', points: [] },
     video: { title: '', posterUrl: '' },
@@ -170,8 +170,8 @@ const EMPTY: SiteInfo = {
   modules: { shop: true, canteen: true, wallet: true, festival: true, coaches: true, consultation: true, cityMap: true },
 }
 
-/** «تیتر؛ ادامهٔ رنگی» → [تیتر, ادامه] (بدون «؛» ادامه خالی است) */
+/** „Überschrift; farbiger Teil“ → [Überschrift, Rest] (ohne „;“ ist der Rest leer) */
 export function splitAccent(text: string): [string, string] {
-  const [a, ...b] = fill(text).split('؛')
-  return [a.trim(), b.join('؛').trim()]
+  const [a, ...b] = fill(text).split(';')
+  return [a.trim(), b.join(';').trim()]
 }

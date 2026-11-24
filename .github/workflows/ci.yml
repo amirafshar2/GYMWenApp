@@ -1,4 +1,4 @@
-# بیلد، تست و بررسی کتابخانه‌های آسیب‌پذیر روی هر push و pull request
+# Build, Tests und Prüfung auf verwundbare Bibliotheken bei jedem Push und Pull Request
 name: ci
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
       - run: dotnet test --no-build -c Release
-      # اگر کتابخانه‌ای آسیب‌پذیری شناخته‌شده داشته باشد، بیلد شکست می‌خورد
+      # Hat eine Bibliothek eine bekannte Schwachstelle, schlägt der Build fehl
       - name: vulnerable packages
         run: |
           dotnet list package --vulnerable --include-transitive | tee vuln.txt

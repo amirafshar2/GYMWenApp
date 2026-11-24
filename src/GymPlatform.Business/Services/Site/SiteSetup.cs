@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymPlatform.Business.Services.Site;
 
-/// <summary>دستیار راه‌اندازی: هر مرحله تا جای ممکن از خود داده تشخیص داده می‌شود</summary>
+/// <summary>Einrichtungsassistent: jeder Schritt wird möglichst aus den Daten selbst erkannt</summary>
 public sealed partial class SiteService
 {
     public static readonly string[] StepKeys = ["brand", "theme", "contact", "branches", "packages", "coaches", "home", "contract", "legal", "staff", "publish"];
@@ -24,18 +24,18 @@ public sealed partial class SiteService
 
         var steps = new List<SetupStepDto>
         {
-            S("brand", "نام و لوگو", "نام باشگاه، نام کوتاه کنار لوگو، شهر و فایل لوگو.", "/panel/site?tab=brand",
+            S("brand", "Name und Logo", "Name des Studios, Kurzname neben dem Logo, Stadt und Logodatei.", "/panel/site?tab=brand",
                 c.Brand.Name.Length > 0 && c.Brand.ShortName.Length > 0 && c.Brand.LogoUrl is not null),
-            S("theme", "رنگ‌ها", "رنگ اصلی و رنگ تأکید را با رنگ لوگو هماهنگ کنید.", "/panel/site?tab=theme", false, optional: true),
-            S("contact", "اطلاعات تماس", "تلفن پشتیبانی، اینستاگرام و آدرس دفتر.", "/panel/site?tab=contact", c.Contact.Phone.Length > 0),
-            S("branches", "شعبه‌ها", "دست‌کم یک شعبه با آدرس، ساعت سانس و سالن آقایان/بانوان.", "/panel/branches", branches > 0),
-            S("packages", "پکیج‌های عضویت", "قیمت و مدت پکیج‌ها؛ هر پکیج به یک یا همهٔ شعبه‌ها.", "/panel/packages", packages > 0),
-            S("coaches", "مربیان", "عکس، رشته و شعبهٔ هر مربی.", "/panel/coaches", coaches > 0, optional: !c.Modules.Coaches),
-            S("home", "متن و عکس صفحهٔ اصلی", "تیترها، عکس‌ها و بخش‌هایی که نمایش داده می‌شوند.", "/panel/site?tab=home", false, optional: true),
-            S("contract", "قرارداد عضویت", "بندهای قرارداد و پرسش‌های فرم سلامت.", "/panel/contract", contract),
-            S("legal", "صفحه‌های قانونی", "جاهای خالیِ زرد در «درباره ما»، «قوانین» و «بازگشت وجه» را پر کنید.", "/panel/site?tab=legal", !legalTodo),
-            S("staff", "کارکنان", "پذیرش، مدیر شعبه و مربی‌ها را با شمارهٔ موبایل اضافه کنید.", "/panel/staff", staff, optional: true),
-            new("publish", "انتشار سایت", "وقتی همه‌چیز آماده شد، سایت را برای همه باز کنید.", "/panel/setup", c.Setup.Published, false),
+            S("theme", "Farben", "Haupt- und Akzentfarbe passend zum Logo wählen.", "/panel/site?tab=theme", false, optional: true),
+            S("contact", "Kontaktdaten", "Service-Telefon, Instagram und Büroadresse.", "/panel/site?tab=contact", c.Contact.Phone.Length > 0),
+            S("branches", "Filialen", "Mindestens eine Filiale mit Adresse, Öffnungszeiten und Herren-/Damenbereich.", "/panel/branches", branches > 0),
+            S("packages", "Mitgliedschaftspakete", "Preis und Laufzeit der Pakete; jedes Paket für eine oder alle Filialen.", "/panel/packages", packages > 0),
+            S("coaches", "Trainer", "Foto, Fachgebiet und Filiale jedes Trainers.", "/panel/coaches", coaches > 0, optional: !c.Modules.Coaches),
+            S("home", "Texte und Bilder der Startseite", "Überschriften, Bilder und sichtbare Bereiche.", "/panel/site?tab=home", false, optional: true),
+            S("contract", "Mitgliedsvertrag", "Vertragsklauseln und Fragen des Gesundheitsfragebogens.", "/panel/contract", contract),
+            S("legal", "Rechtsseiten", "Die gelben Lücken in „Über uns“, „AGB“ und „Erstattung“ ausfüllen.", "/panel/site?tab=legal", !legalTodo),
+            S("staff", "Mitarbeiter", "Empfang, Filialleitung und Trainer mit Handynummer hinzufügen.", "/panel/staff", staff, optional: true),
+            new("publish", "Seite veröffentlichen", "Wenn alles bereit ist, die Seite für alle öffnen.", "/panel/setup", c.Setup.Published, false),
         };
         return new SetupStatusDto(c.Setup.Mode, c.Setup.Published, c.Setup.GuideHidden, steps,
             steps.Count(s => s.Done && !s.Optional), steps.Count(s => !s.Optional));
@@ -47,7 +47,7 @@ public sealed partial class SiteService
         var s = c.Setup;
         if (r.Step is { } step)
         {
-            if (!StepKeys.Contains(step) || step == "publish") return Result<SetupStatusDto>.Fail("step", "مرحله نامعتبر است.");
+            if (!StepKeys.Contains(step) || step == "publish") return Result<SetupStatusDto>.Fail("step", "Ungültiger Schritt.");
             s.DoneSteps = (r.StepDone == false ? s.DoneSteps.Where(x => x != step) : s.DoneSteps.Append(step)).Distinct().ToList();
         }
         if (r.GuideHidden is { } gh) s.GuideHidden = gh;
@@ -57,7 +57,7 @@ public sealed partial class SiteService
             {
                 var st = await GetSetupStatusAsync(ct);
                 var missing = st.Steps.Where(x => !x.Optional && !x.Done && x.Key is not ("publish" or "legal")).Select(x => x.Title).ToList();
-                if (missing.Count > 0) return Result<SetupStatusDto>.Fail("publish", "پیش از انتشار این‌ها را کامل کنید: " + string.Join("، ", missing));
+                if (missing.Count > 0) return Result<SetupStatusDto>.Fail("publish", "Vor der Veröffentlichung bitte vervollständigen: " + string.Join(", ", missing));
                 s.PublishedAtUtc ??= clock.UtcNow;
             }
             s.Published = pub;

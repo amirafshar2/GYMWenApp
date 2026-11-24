@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// پیش از اجرا: بک‌اند را با `dotnet run` بالا بیاورید (فرانت بیلدشده از wwwroot سرو می‌شود)
+// Vor dem Start: Backend mit `dotnet run` starten (das gebaute Frontend wird aus wwwroot ausgeliefert)
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,

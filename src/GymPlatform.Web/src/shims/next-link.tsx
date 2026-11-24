@@ -1,4 +1,4 @@
-// جایگزین next/link برای کامپوننت‌های 21st.dev که برای Next.js نوشته شده‌اند (این پروژه Vite + React Router است)
+// Ersatz für next/link in 21st.dev-Komponenten, die für Next.js geschrieben wurden (dieses Projekt nutzt Vite + React Router)
 import { forwardRef, type AnchorHTMLAttributes } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 

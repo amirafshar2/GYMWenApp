@@ -1,5 +1,5 @@
-// تصویرهای برداری ساده و یکدست برای کالاهای شاپ و آیتم‌های بوفه (بدون عکس و برند واقعی).
-// اجرا: node scripts/make-shop-images.mjs  → src/GymPlatform.Web/public/media/{shop,canteen}/*.svg
+// Einfache, einheitliche Vektorbilder für Shop-Produkte und Bistro-Posten (ohne Fotos und echte Marken).
+// Ausführen: node scripts/make-shop-images.mjs  → src/GymPlatform.Web/public/media/{shop,canteen}/*.svg
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -8,7 +8,7 @@ const out = (dir) => { const d = path.join(root, 'src/GymPlatform.Web/public/med
 const shopDir = out('shop'), canteenDir = out('canteen')
 
 const BLUE = '#0B5FB0', NAVY = '#0B2F57', INK = '#2C2C2C'
-const shade = (hex, k) => { // k<0 تیره‌تر، k>0 روشن‌تر
+const shade = (hex, k) => { // k<0 dunkler, k>0 heller
   const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255
   const f = (c) => Math.round(k < 0 ? c * (1 + k) : c + (255 - c) * k)
   return '#' + [f(r), f(g), f(b)].map((c) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0')).join('')
@@ -21,7 +21,7 @@ const label = (x, y, t, size, color = '#fff', weight = 800, ls = 2) =>
   `<text x="${x}" y="${y}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="${weight}" font-size="${size}" letter-spacing="${ls}" fill="${color}">${t}</text>`
 const dumbbell = (cx, cy, s, c) => `<g transform="translate(${cx} ${cy}) scale(${s})" fill="${c}"><rect x="-34" y="-4" width="68" height="8" rx="3"/><rect x="-46" y="-16" width="10" height="32" rx="3"/><rect x="36" y="-16" width="10" height="32" rx="3"/><rect x="-56" y="-11" width="8" height="22" rx="3"/><rect x="48" y="-11" width="8" height="22" rx="3"/></g>`
 
-// ---------------- شکل‌ها
+// ---------------- Formen
 const tub = ({ color, brand, name, sub = '', big = true }) => {
   const w = big ? 280 : 220, h = big ? 300 : 230, x = 300 - w / 2, y = 510 - h
   return frame(`<rect x="${x + 10}" y="${y - 34}" width="${w - 20}" height="46" rx="14" fill="${shade(color, -0.35)}"/>
@@ -76,7 +76,7 @@ const belt = ({ color }) => frame(`<path d="M120 320 q180 -110 360 0 v110 q-180 
 const bag = ({ color }) => frame(`<path d="M230 240 q0 -80 70 -80 q70 0 70 80" fill="none" stroke="${shade(color, -0.3)}" stroke-width="16"/>
 <rect x="140" y="240" width="320" height="250" rx="40" fill="${color}"/><rect x="140" y="300" width="320" height="16" fill="${shade(color, -0.3)}"/>${dumbbell(300, 400, 0.9, '#fff')}`)
 
-// ---- بوفه
+// ---- Bistro
 const cup = ({ color, small }) => frame(`${small ? '' : `<path d="M260 200 q-20 -40 10 -70" stroke="#C7CDD6" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M320 200 q-20 -40 10 -70" stroke="#C7CDD6" stroke-width="8" fill="none" stroke-linecap="round"/>`}
 <ellipse cx="300" cy="490" rx="150" ry="24" fill="#E9EDF2"/><path d="M${small ? 220 : 190} ${small ? 330 : 240} h${small ? 160 : 220} l-${small ? 18 : 24} ${small ? 150 : 250} q-2 12 -14 12 h-${small ? 100 : 148} q-12 0 -14 -12z" fill="#fff" stroke="#D5DBE3" stroke-width="4"/>
 <path d="M${small ? 380 : 410} ${small ? 360 : 290} q60 0 50 60 q-8 40 -60 40" fill="none" stroke="#D5DBE3" stroke-width="14"/>
@@ -93,7 +93,7 @@ const bowl = ({ fill }) => frame(`<ellipse cx="300" cy="330" rx="180" ry="44" fi
 const bar = ({ color }) => frame(`<g transform="rotate(-14 300 320)"><rect x="140" y="270" width="320" height="100" rx="18" fill="${color}"/><path d="M140 290 l-24 -10 v80 l24 -10z" fill="${shade(color, -0.3)}"/><path d="M460 290 l24 -10 v80 l-24 -10z" fill="${shade(color, -0.3)}"/>
 ${label(300, 334, 'PROTEIN', 34, '#fff', 900, 4)}</g>`, '#F1F5F9')
 
-// ---------------- فهرست
+// ---------------- Liste
 const S = (slug, fn, o) => [slug, fn(o)]
 const shop = [
   S('whey-2kg', tub, { color: BLUE, brand: 'IRONLAB', name: 'WHEY', sub: '2 KG' }),

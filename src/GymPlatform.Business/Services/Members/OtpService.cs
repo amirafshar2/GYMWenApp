@@ -14,13 +14,13 @@ namespace GymPlatform.Business.Services.Members;
 public interface IOtpService
 {
     Task<Result<OtpSentDto>> SendAsync(string phoneNumber, OtpPurpose purpose, RequestContext rc, CancellationToken ct);
-    /// <summary>کد را بررسی و در صورت درستی مصرف می‌کند (هر کد فقط یک بار).</summary>
+    /// <summary>Prüft den Code und verbraucht ihn, wenn er stimmt (jeder Code nur einmal).</summary>
     Task<Result<bool>> VerifyAsync(string phoneNumber, OtpPurpose purpose, string code, CancellationToken ct);
 }
 
 /// <summary>
-/// کد یکبارمصرف: تصادفی رمزنگاری‌امن، ذخیرهٔ فقط HMAC، انقضای ۲ دقیقه، حداکثر ۵ تلاش،
-/// فاصلهٔ ۶۰ ثانیه بین ارسال‌ها و سقف ۵ ارسال در ساعت برای هر شماره.
+/// Einmalcode: kryptografisch zufällig, nur HMAC gespeichert, 2 Minuten gültig, höchstens 5 Versuche,
+/// 60 Sekunden Abstand zwischen Sendungen und höchstens 5 Sendungen pro Stunde und Nummer.
 /// </summary>
 public sealed class OtpService(
     GymDbContext db, ISmsSender sms, IClock clock, IOptions<OtpOptions> options, ILogger<OtpService> logger) : IOtpService
@@ -31,7 +31,7 @@ public sealed class OtpService(
     {
         var phone = PersianText.NormalizeMobile(phoneNumber);
         if (!PersianText.IsValidMobile(phone))
-            return Result<OtpSentDto>.Fail("phoneNumber", "شمارهٔ موبایل را مثل ۰۹۱۲۳۴۵۶۷۸۹ وارد کنید.");
+            return Result<OtpSentDto>.Fail("phoneNumber", "Bitte die Handynummer im Format 01512 3456789 eingeben.");
 
         var now = clock.UtcNow;
         var recent = await db.OtpCodes.AsNoTracking()
@@ -44,12 +44,12 @@ public sealed class OtpService(
         {
             var wait = _o.ResendCooldownSeconds - (int)(now - recent[0]).TotalSeconds;
             if (wait > 0)
-                return Result<OtpSentDto>.Fail("phoneNumber", $"برای ارسال دوبارهٔ کد {PersianText.FaDigits(wait.ToString())} ثانیه صبر کنید.", ErrorType.TooManyRequests);
+                return Result<OtpSentDto>.Fail("phoneNumber", $"Zum erneuten Senden des Codes {PersianText.FaDigits(wait.ToString())} Sekunden warten.", ErrorType.TooManyRequests);
         }
         if (recent.Count >= _o.MaxPerHour)
-            return Result<OtpSentDto>.Fail("phoneNumber", "تعداد درخواست کد برای این شماره زیاد است. یک ساعت دیگر امتحان کنید.", ErrorType.TooManyRequests);
+            return Result<OtpSentDto>.Fail("phoneNumber", "Zu viele Code-Anfragen für diese Nummer. Bitte in einer Stunde erneut versuchen.", ErrorType.TooManyRequests);
 
-        // کدهای قبلی همین هدف باطل می‌شوند تا فقط آخرین کد معتبر باشد
+        // Frühere Codes für denselben Zweck werden widerrufen, damit nur der letzte gilt
         await db.OtpCodes
             .Where(o => o.PhoneNumber == phone && o.Purpose == purpose && o.ConsumedAtUtc == null && o.ExpiresAtUtc > now)
             .ExecuteUpdateAsync(s => s.SetProperty(o => o.ConsumedAtUtc, now), ct);
@@ -62,7 +62,7 @@ public sealed class OtpService(
         });
         await db.SaveChangesAsync(ct);
 
-        await sms.SendOtpAsync(phone, code, purpose == OtpPurpose.Login ? "ورود" : "امضای قرارداد", ct);
+        await sms.SendOtpAsync(phone, code, purpose == OtpPurpose.Login ? "Anmeldung" : "Vertragsunterschrift", ct);
         logger.LogInformation("OTP issued for {Phone} ({Purpose})", Mask(phone), purpose);
 
         return Result<OtpSentDto>.Ok(new OtpSentDto(_o.LifetimeSeconds, _o.ResendCooldownSeconds, _o.ExposeCodeInResponse ? code : null));
@@ -73,7 +73,7 @@ public sealed class OtpService(
         var phone = PersianText.NormalizeMobile(phoneNumber);
         var digits = PersianText.ToLatinDigits(code ?? "").Trim();
         var now = clock.UtcNow;
-        const string invalid = "کد واردشده درست نیست یا منقضی شده است.";
+        const string invalid = "Der eingegebene Code ist falsch oder abgelaufen.";
 
         var otp = await db.OtpCodes
             .Where(o => o.PhoneNumber == phone && o.Purpose == purpose && o.ConsumedAtUtc == null)
@@ -83,19 +83,19 @@ public sealed class OtpService(
         if (otp is null || otp.ExpiresAtUtc <= now)
             return Result<bool>.Fail("code", invalid);
         if (otp.Attempts >= _o.MaxAttempts)
-            return Result<bool>.Fail("code", "تعداد تلاش‌ها تمام شد. کد تازه بگیرید.", ErrorType.TooManyRequests);
+            return Result<bool>.Fail("code", "Keine Versuche mehr. Bitte einen neuen Code anfordern.", ErrorType.TooManyRequests);
 
-        // شمارش تلاش با به‌روزرسانی شرطی و اتمی: درخواست‌های هم‌زمان نمی‌توانند بیش از MaxAttempts بار حدس بزنند
+        // Versuche per bedingtem, atomarem Update zählen: gleichzeitige Anfragen können nicht öfter als MaxAttempts raten
         var id = otp.Id;
         var claimed = await db.OtpCodes.Where(o => o.Id == id && o.Attempts < _o.MaxAttempts && o.ConsumedAtUtc == null)
             .ExecuteUpdateAsync(s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1), ct);
         if (claimed == 0)
-            return Result<bool>.Fail("code", "تعداد تلاش‌ها تمام شد. کد تازه بگیرید.", ErrorType.TooManyRequests);
+            return Result<bool>.Fail("code", "Keine Versuche mehr. Bitte einen neuen Code anfordern.", ErrorType.TooManyRequests);
 
         var ok = digits.Length == _o.CodeLength &&
                  CryptographicOperations.FixedTimeEquals(
                      Encoding.ASCII.GetBytes(otp.CodeHash), Encoding.ASCII.GetBytes(Hash(phone, purpose, digits)));
-        // هر کد فقط یک بار مصرف می‌شود (حتی اگر دو درخواست هم‌زمان کد درست را بفرستند)
+        // Jeder Code wird nur einmal verbraucht (auch wenn zwei gleichzeitige Anfragen den richtigen Code senden)
         if (ok && await db.OtpCodes.Where(o => o.Id == id && o.ConsumedAtUtc == null)
                 .ExecuteUpdateAsync(s => s.SetProperty(o => o.ConsumedAtUtc, now), ct) == 0)
             ok = false;

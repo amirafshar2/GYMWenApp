@@ -20,8 +20,8 @@ public interface IContractService
 }
 
 /// <summary>
-/// قرارداد نسخه‌دار: عضو متن و فرم سلامت را می‌خواند، تیک می‌زند و با کد پیامکی (هدف SignContract) تأیید می‌کند.
-/// زمان، IP، User-Agent، نسخه و هش متن امضاشده ثبت و PDF بیرون از wwwroot ذخیره می‌شود.
+/// Versionierter Vertrag: Das Mitglied liest Text und Gesundheitsfragebogen, hakt ab und bestätigt per SMS-Code (Zweck SignContract).
+/// Zeit, IP, User-Agent, Version und Hash des unterschriebenen Textes werden gespeichert, das PDF außerhalb von wwwroot.
 /// </summary>
 public sealed class ContractService(
     GymDbContext db, IOtpService otp, IPdfService pdf, IPrivateFileStore files, Site.ISiteService site, IClock clock) : IContractService
@@ -36,7 +36,7 @@ public sealed class ContractService(
     public async Task<Result<OtpSentDto>> SendSignCodeAsync(int userId, RequestContext rc, CancellationToken ct)
     {
         var phone = await db.Users.Where(u => u.Id == userId).Select(u => u.PhoneNumber).FirstOrDefaultAsync(ct);
-        if (phone is null) return Result<OtpSentDto>.Fail("user", "کاربر پیدا نشد.", ErrorType.Unauthorized);
+        if (phone is null) return Result<OtpSentDto>.Fail("user", "Benutzer nicht gefunden.", ErrorType.Unauthorized);
         return await otp.SendAsync(phone, OtpPurpose.SignContract, rc, ct);
     }
 
@@ -44,20 +44,20 @@ public sealed class ContractService(
     {
         var Brand = await BrandAsync(ct);
         var template = await db.ContractTemplates.AsNoTracking().Where(t => t.IsActive).OrderByDescending(t => t.Version).FirstOrDefaultAsync(ct);
-        if (template is null) return Result<SignedContractDto>.Fail("contract", "قرارداد فعالی وجود ندارد.", ErrorType.NotFound);
+        if (template is null) return Result<SignedContractDto>.Fail("contract", "Kein aktiver Vertrag vorhanden.", ErrorType.NotFound);
 
         var errors = new Dictionary<string, string[]>();
         var name = PersianText.CleanText(r.FullName);
-        if (r.Version != template.Version) errors["version"] = ["نسخهٔ قرارداد تغییر کرده است؛ صفحه را دوباره بارگذاری کنید."];
-        if (!r.Accepted) errors["accepted"] = ["برای ادامه باید متن قرارداد را بپذیرید."];
-        if (name is null || name.Length is < 3 or > 100) errors["fullName"] = ["نام و نام خانوادگی را کامل بنویسید."];
-        if (r.HealthAnswers is null || r.HealthAnswers.Count != template.HealthQuestions.Count) errors["healthAnswers"] = ["به همهٔ پرسش‌های فرم سلامت پاسخ دهید."];
+        if (r.Version != template.Version) errors["version"] = ["Die Vertragsversion hat sich geändert; bitte die Seite neu laden."];
+        if (!r.Accepted) errors["accepted"] = ["Zum Fortfahren müssen Sie den Vertragstext akzeptieren."];
+        if (name is null || name.Length is < 3 or > 100) errors["fullName"] = ["Bitte Vor- und Nachnamen vollständig angeben."];
+        if (r.HealthAnswers is null || r.HealthAnswers.Count != template.HealthQuestions.Count) errors["healthAnswers"] = ["Bitte alle Fragen des Gesundheitsfragebogens beantworten."];
         var notes = PersianText.CleanText(r.HealthNotes);
-        if (notes?.Length > 1000) errors["healthNotes"] = ["توضیح حداکثر ۱۰۰۰ حرف است."];
+        if (notes?.Length > 1000) errors["healthNotes"] = ["Die Erläuterung darf höchstens 1000 Zeichen haben."];
         if (errors.Count > 0) return Result<SignedContractDto>.Fail(errors);
 
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
-        if (user?.PhoneNumber is null) return Result<SignedContractDto>.Fail("user", "کاربر پیدا نشد.", ErrorType.Unauthorized);
+        if (user?.PhoneNumber is null) return Result<SignedContractDto>.Fail("user", "Benutzer nicht gefunden.", ErrorType.Unauthorized);
 
         var verified = await otp.VerifyAsync(user.PhoneNumber, OtpPurpose.SignContract, r.Code, ct);
         if (!verified.Succeeded) return Result<SignedContractDto>.Fail(verified.Errors.ToDictionary(), verified.ErrorType);
@@ -125,16 +125,16 @@ public sealed class ContractService(
             case PaymentPurpose.ShopOrder when p.ShopOrder is { } o:
                 return new InvoicePdfModel(Brand, no, at, name, phone, o.Number ?? "", o.Branch?.Name ?? "", "shop", null, null,
                     o.SubtotalToman, 0, o.DiscountToman, o.DiscountCode, p.AmountToman, p.TrackingNumber, p.TransactionCode,
-                    $"فاکتور فروشگاه — سفارش {PersianText.FaDigits(o.Number ?? "")}",
+                    $"Shop-Rechnung — Bestellung {PersianText.FaDigits(o.Number ?? "")}",
                     o.Items.Select(i => new InvoiceLine(i.VariantLabel is null ? i.ProductName : $"{i.ProductName} ({i.VariantLabel})", i.Quantity, i.UnitPriceToman)).ToList(),
-                    o.ShippingToman, o.Fulfillment == Fulfillment.Pickup ? $"تحویل حضوری — {o.Branch?.Name}" : "ارسال به نشانی");
+                    o.ShippingToman, o.Fulfillment == Fulfillment.Pickup ? $"Abholung — {o.Branch?.Name}" : "Versand an");
             case PaymentPurpose.CanteenOrder when p.CanteenOrder is { } c:
                 return new InvoicePdfModel(Brand, no, at, name, phone, "", c.Branch?.Name ?? "", "canteen", null, null,
                     c.TotalToman, 0, 0, null, p.AmountToman, p.TrackingNumber, p.TransactionCode,
-                    $"رسید بوفه — {c.Branch?.Name}", c.Items.Select(i => new InvoiceLine(i.Name, i.Quantity, i.UnitPriceToman)).ToList());
+                    $"Bistro-Beleg — {c.Branch?.Name}", c.Items.Select(i => new InvoiceLine(i.Name, i.Quantity, i.UnitPriceToman)).ToList());
             case PaymentPurpose.WalletTopUp:
-                return new InvoicePdfModel(Brand, no, at, name, phone, "شارژ کیف پول", "", "wallet", null, null,
-                    p.AmountToman, 0, 0, null, p.AmountToman, p.TrackingNumber, p.TransactionCode, "رسید شارژ کیف پول");
+                return new InvoicePdfModel(Brand, no, at, name, phone, "Guthaben aufladen", "", "wallet", null, null,
+                    p.AmountToman, 0, 0, null, p.AmountToman, p.TrackingNumber, p.TransactionCode, "Beleg Guthaben-Aufladung");
             default:
                 return null;
         }

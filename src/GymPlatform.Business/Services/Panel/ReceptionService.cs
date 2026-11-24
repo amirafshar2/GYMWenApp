@@ -12,13 +12,13 @@ public interface IReceptionService
 {
     Task<IReadOnlyList<MemberSearchRowDto>> SearchAsync(StaffScope scope, string q, CancellationToken ct);
     Task<MemberSummaryDto?> SummaryAsync(StaffScope scope, int userId, CancellationToken ct);
-    /// <summary>کارمند فقط اعضای شعبه‌های خودش را می‌بیند: کسی که در یکی از این شعبه‌ها عضویت (فعلی یا قبلی) دارد.</summary>
+    /// <summary>Mitarbeiter sehen nur Mitglieder ihrer Filialen: wer in einer dieser Filialen eine (aktuelle oder frühere) Mitgliedschaft hat.</summary>
     Task<bool> CanSeeMemberAsync(StaffScope scope, int userId, CancellationToken ct);
     Task<Result<AccessCheckResult>> CheckInAsync(StaffScope scope, ReceptionCheckInRequest request, CancellationToken ct);
     Task<Result<IReadOnlyList<CheckInRowDto>>> TodayAsync(StaffScope scope, string branchSlug, CancellationToken ct);
 }
 
-/// <summary>پذیرش: جست‌وجوی عضو، خلاصهٔ پرونده، ثبت ورود با اسکن QR/دستبند در پیشخوان (همان منطق گیت).</summary>
+/// <summary>Empfang: Mitgliedersuche, Aktenübersicht, Check-in per QR/Armband am Tresen (gleiche Logik wie das Gate).</summary>
 public sealed class ReceptionService(GymDbContext db, IAccessControlService access, IClock clock) : IReceptionService
 {
     private IQueryable<int> VisibleMemberIds(StaffScope scope)
@@ -61,7 +61,7 @@ public sealed class ReceptionService(GymDbContext db, IAccessControlService acce
         var ms = await db.Memberships.AsNoTracking().Include(m => m.Branch).Include(m => m.Package)
             .Where(m => m.UserId == userId && m.Status != MembershipStatus.PendingPayment && m.Status != MembershipStatus.Cancelled)
             .OrderByDescending(m => m.StartsAtUtc).AsSplitQuery().ToListAsync(ct);
-        // توکن کارت (QR) هرگز به کارمند داده نمی‌شود؛ با آن می‌شد به‌جای عضو وارد شد
+        // Das Karten-Token (QR) bekommt der Mitarbeiter nie; damit könnte man sich als Mitglied ausgeben
         var dtos = ms.Select(m => MemberService.ToDto(m, now) with { CardToken = "" }).ToList();
         var checkIns = await db.CheckIns.AsNoTracking().Where(c => c.UserId == userId).OrderByDescending(c => c.Id).Take(10)
             .Select(c => new { c.Id, c.OccurredAtUtc, c.BranchId, c.Decision, c.Reason, c.CredentialType }).ToListAsync(ct);
@@ -79,20 +79,20 @@ public sealed class ReceptionService(GymDbContext db, IAccessControlService acce
     public async Task<Result<AccessCheckResult>> CheckInAsync(StaffScope scope, ReceptionCheckInRequest r, CancellationToken ct)
     {
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == r.BranchSlug, ct);
-        if (branch is null) return Result<AccessCheckResult>.Fail("branchSlug", "شعبه پیدا نشد.", ErrorType.NotFound);
-        if (!scope.Can(branch.Id)) return Result<AccessCheckResult>.Fail("branchSlug", "به این شعبه دسترسی ندارید.", ErrorType.Forbidden);
+        if (branch is null) return Result<AccessCheckResult>.Fail("branchSlug", "Filiale nicht gefunden.", ErrorType.NotFound);
+        if (!scope.Can(branch.Id)) return Result<AccessCheckResult>.Fail("branchSlug", "Kein Zugriff auf diese Filiale.", ErrorType.Forbidden);
         var credential = r.Credential;
         if (r.UserId is { } memberId)
         {
-            // ورود دستی از پروندهٔ عضو: توکن کارت فقط سمت سرور خوانده می‌شود
-            if (!await CanSeeMemberAsync(scope, memberId, ct)) return Result<AccessCheckResult>.Fail("userId", "عضو پیدا نشد.", ErrorType.NotFound);
+            // Manueller Check-in aus der Mitgliederakte: das Karten-Token wird nur serverseitig gelesen
+            if (!await CanSeeMemberAsync(scope, memberId, ct)) return Result<AccessCheckResult>.Fail("userId", "Mitglied nicht gefunden.", ErrorType.NotFound);
             var now = clock.UtcNow;
             var token = await db.Memberships.Where(m => m.UserId == memberId && m.Status == MembershipStatus.Active && m.StartsAtUtc <= now && m.EndsAtUtc > now)
                 .OrderBy(m => m.BranchId == branch.Id ? 0 : 1).ThenBy(m => m.EndsAtUtc).Select(m => m.CardToken).FirstOrDefaultAsync(ct);
-            if (token is null) return Result<AccessCheckResult>.Fail("userId", "این عضو عضویت فعال ندارد.");
+            if (token is null) return Result<AccessCheckResult>.Fail("userId", "Dieses Mitglied hat keine aktive Mitgliedschaft.");
             credential = AccessControlService.QrPrefix + token;
         }
-        if (string.IsNullOrWhiteSpace(credential)) return Result<AccessCheckResult>.Fail("credential", "QR یا شمارهٔ دستبند را اسکن کنید.");
+        if (string.IsNullOrWhiteSpace(credential)) return Result<AccessCheckResult>.Fail("credential", "Bitte QR-Code oder Armbandnummer scannen.");
         var device = await access.ReceptionDeviceAsync(branch.Id, ct);
         return Result<AccessCheckResult>.Ok(await access.CheckAsync(device, new AccessCheckRequest(credential), ct));
     }
@@ -100,8 +100,8 @@ public sealed class ReceptionService(GymDbContext db, IAccessControlService acce
     public async Task<Result<IReadOnlyList<CheckInRowDto>>> TodayAsync(StaffScope scope, string branchSlug, CancellationToken ct)
     {
         var branch = await db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.Slug == branchSlug, ct);
-        if (branch is null) return Result<IReadOnlyList<CheckInRowDto>>.Fail("branch", "شعبه پیدا نشد.", ErrorType.NotFound);
-        if (!scope.Can(branch.Id)) return Result<IReadOnlyList<CheckInRowDto>>.Fail("branch", "به این شعبه دسترسی ندارید.", ErrorType.Forbidden);
+        if (branch is null) return Result<IReadOnlyList<CheckInRowDto>>.Fail("branch", "Filiale nicht gefunden.", ErrorType.NotFound);
+        if (!scope.Can(branch.Id)) return Result<IReadOnlyList<CheckInRowDto>>.Fail("branch", "Kein Zugriff auf diese Filiale.", ErrorType.Forbidden);
         var start = Jalali.TehranDayStartUtc(clock.UtcNow);
         var rows = await db.CheckIns.AsNoTracking().Where(c => c.BranchId == branch.Id && c.OccurredAtUtc >= start)
             .OrderByDescending(c => c.Id).Take(100)

@@ -2,12 +2,12 @@ using GymPlatform.Business.Common;
 
 namespace GymPlatform.Api.Infrastructure;
 
-/// <summary>دمو: پیامک واقعی فرستاده نمی‌شود؛ کد در لاگ چاپ می‌شود (الزام سند برای دمو).</summary>
+/// <summary>Demo: Es wird keine echte SMS gesendet; der Code steht im Log.</summary>
 public sealed class LogSmsSender(ILogger<LogSmsSender> logger) : ISmsSender
 {
     public Task SendOtpAsync(string phoneNumber, string code, string purposeLabel, CancellationToken ct)
     {
-        logger.LogWarning("[SMS-DEMO] کد {Purpose} برای {Phone}: {Code}", purposeLabel, phoneNumber, code);
+        logger.LogWarning("[SMS-DEMO] Code {Purpose} Für {Phone}: {Code}", purposeLabel, phoneNumber, code);
         return Task.CompletedTask;
     }
 
@@ -21,11 +21,11 @@ public sealed class LogSmsSender(ILogger<LogSmsSender> logger) : ISmsSender
 public sealed class KavenegarOptions
 {
     public string ApiKey { get; set; } = "";
-    /// <summary>نام الگوی Verify Lookup در پنل کاوه‌نگار.</summary>
+    /// <summary>Name der Verify-Lookup-Vorlage im Kavenegar-Panel.</summary>
     public string Template { get; set; } = "gym-otp";
 }
 
-/// <summary>ارسال واقعی با Verify Lookup کاوه‌نگار. کلید فقط از User Secrets / متغیر محیطی Sms__Kavenegar__ApiKey.</summary>
+/// <summary>Echter Versand mit Kavenegar Verify Lookup. Schlüssel nur aus User Secrets / Umgebungsvariable Sms__Kavenegar__ApiKey.</summary>
 public sealed class KavenegarSmsSender(HttpClient http, Microsoft.Extensions.Options.IOptions<KavenegarOptions> options, ILogger<KavenegarSmsSender> logger) : ISmsSender
 {
     public async Task SendOtpAsync(string phoneNumber, string code, string purposeLabel, CancellationToken ct)
@@ -39,7 +39,7 @@ public sealed class KavenegarSmsSender(HttpClient http, Microsoft.Extensions.Opt
         res.EnsureSuccessStatusCode();
     }
 
-    /// <summary>الگوهای کاوه‌نگار حداکثر ۳ توکن بدون فاصله دارند (فاصله‌ها از قبل با نیم‌فاصله جایگزین شده‌اند).</summary>
+    /// <summary>Kavenegar-Vorlagen haben höchstens 3 Tokens ohne Leerzeichen (Leerzeichen wurden vorab ersetzt).</summary>
     public async Task SendTemplateAsync(string phoneNumber, string template, IReadOnlyList<string> tokens, string preview, CancellationToken ct)
     {
         var o = options.Value;

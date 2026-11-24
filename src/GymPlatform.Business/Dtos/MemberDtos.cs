@@ -1,16 +1,16 @@
 namespace GymPlatform.Business.Dtos;
 
-// ---- احراز هویت ----
+// ---- Authentifizierung ----
 public sealed record OtpRequest(string PhoneNumber);
 public sealed record OtpSentDto(int ExpiresInSeconds, int ResendInSeconds, string? DemoCode);
 public sealed record VerifyOtpRequest(string PhoneNumber, string Code);
 public sealed record UserDto(int Id, string PhoneNumber, string? FullName, string? Gender, IReadOnlyList<string> Roles);
 public sealed record AuthResultDto(string AccessToken, DateTime AccessTokenExpiresAtUtc, UserDto User);
-/// <summary>نتیجهٔ داخلی ورود: توکن تازه‌سازی خام فقط به کوکی می‌رود، نه به بدنهٔ پاسخ.</summary>
+/// <summary>Internes Login-Ergebnis: Das rohe Refresh-Token geht nur ins Cookie, nicht in den Antwort-Body.</summary>
 public sealed record AuthSession(AuthResultDto Auth, string RefreshToken, DateTime RefreshExpiresAtUtc);
 public sealed record UpdateProfileRequest(string FullName, string? Gender);
 
-// ---- ثبت‌نام و پرداخت ----
+// ---- Anmeldung und Zahlung ----
 public sealed record QuoteRequest(string BranchSlug, string PackageSlug, string Section, string? DiscountCode);
 public sealed record QuoteDto(
     string BranchName, string PackageName, string Section, int DurationMonths, int? Sessions,
@@ -24,7 +24,7 @@ public sealed record PaymentResultDto(
     string? DiscountCode, string? TransactionCode, string? InvoiceNumber, DateTime CreatedAtUtc, DateTime? PaidAtUtc,
     string PackageName, string BranchName, string Section, string? GatewayMessage, MembershipDto? Membership);
 
-// ---- عضویت و پروفایل ----
+// ---- Mitgliedschaft und Profil ----
 public sealed record MembershipDto(
     int Id, string Status, string BranchName, string BranchSlug, string PackageName, string PackageSlug, string Section,
     DateTime? StartsAtUtc, DateTime? EndsAtUtc, int? DaysLeft, int TotalDays, int? SessionsTotal, int SessionsUsed,
@@ -35,7 +35,7 @@ public sealed record ProfileDto(
     UserDto User, MembershipDto? Active, IReadOnlyList<MembershipDto> Memberships, IReadOnlyList<PaymentRowDto> Payments,
     IReadOnlyList<SignedContractRowDto> Contracts, bool HasSignedLatestContract);
 
-// ---- قرارداد ----
+// ---- Vertrag ----
 public sealed record ContractDto(int Id, int Version, string Title, IReadOnlyList<string> Clauses, IReadOnlyList<string> HealthQuestions);
 public sealed record SignContractRequest(int Version, string FullName, bool Accepted, IReadOnlyList<bool> HealthAnswers, string? HealthNotes, string Code);
 public sealed record SignedContractDto(int Id, int Version, DateTime SignedAtUtc, string ContentHash, bool HealthWarning);

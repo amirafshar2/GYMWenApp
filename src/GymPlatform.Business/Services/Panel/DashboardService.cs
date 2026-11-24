@@ -11,7 +11,7 @@ public interface IStaffScopeService
 {
     Task<StaffScope> ResolveAsync(int userId, IReadOnlyList<string> roles, CancellationToken ct);
     Task<PanelMeDto> MeAsync(StaffScope scope, CancellationToken ct);
-    /// <summary>نقش‌ها از پایگاه داده (نه از توکن) تا گرفتن دسترسی کارمند فوراً اعمال شود.</summary>
+    /// <summary>Rollen aus der Datenbank (nicht aus dem Token), damit entzogene Rechte sofort gelten.</summary>
     Task<StaffScope> ResolveFromDbAsync(int userId, CancellationToken ct);
     Task<int?> BranchIdAsync(string slug, CancellationToken ct);
     Task<int?> CanteenOrderBranchAsync(int orderId, CancellationToken ct);
@@ -55,9 +55,9 @@ public interface IDashboardService
 }
 
 /// <summary>
-/// داشبورد مدیر: درآمد بر اساس زمان پرداخت (به وقت تهران) و شعبه.
-/// عضویت از پرداخت‌های موفق، فروشگاه و بوفه از سفارش‌های پرداخت‌شده (چه درگاه چه کیف پول).
-/// شارژ کیف پول درآمد حساب نمی‌شود (پیش‌پرداخت است)؛ خرج آن در بوفه/فروشگاه حساب می‌شود.
+/// Admin-Dashboard: Umsatz nach Zahlungszeitpunkt (Berliner Zeit) und Filiale.
+/// Mitgliedschaften aus erfolgreichen Zahlungen, Shop und Bistro aus bezahlten Bestellungen (Gateway oder Guthaben).
+/// Guthaben-Aufladung zählt nicht als Umsatz (Vorauszahlung); erst die Ausgabe im Bistro/Shop zählt.
 /// </summary>
 public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboardService
 {
@@ -75,8 +75,8 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
         if (!string.IsNullOrEmpty(branchSlug))
         {
             var b = branches.FirstOrDefault(x => x.Slug == branchSlug);
-            if (b is null) return Result<DashboardDto>.Fail("branch", "شعبه پیدا نشد.", ErrorType.NotFound);
-            if (!scope.Can(b.Id)) return Result<DashboardDto>.Fail("branch", "به این شعبه دسترسی ندارید.", ErrorType.Forbidden);
+            if (b is null) return Result<DashboardDto>.Fail("branch", "Filiale nicht gefunden.", ErrorType.NotFound);
+            if (!scope.Can(b.Id)) return Result<DashboardDto>.Fail("branch", "Kein Zugriff auf diese Filiale.", ErrorType.Forbidden);
             ids = [b.Id];
         }
         else ids = branches.Where(b => scope.Can(b.Id)).Select(b => b.Id).ToList();
@@ -86,8 +86,8 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
         var periodStart = todayStart.AddDays(-(days - 1));
         var prevStart = periodStart.AddDays(-days);
 
-        // ---- درآمد: جمع روزانه در خود دیتابیس (نه آوردن تک‌تک سفارش‌ها) تا با چند سال داده هم سریع بماند.
-        // روز به وقت تهران = UTC + ۳:۳۰ (ایران از ۱۴۰۱ ساعت تابستانی ندارد)
+        // ---- Umsatz: Tagessummen direkt in der Datenbank (nicht jede Bestellung laden), damit es auch mit Jahren an Daten schnell bleibt.
+        // Tag in Berliner Zeit (Winterzeit UTC+1; vereinfacht ohne Sommerzeit-Wechsel)
         const int tehranMinutes = 210;
         var mem = await db.Payments.AsNoTracking()
             .Where(p => p.Purpose == PaymentPurpose.Membership && p.Status == PaymentStatus.Succeeded && p.PaidAtUtc >= prevStart && ids.Contains(p.Membership!.BranchId))
@@ -104,7 +104,7 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
         var all = mem.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 0))
             .Concat(shop.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 1)))
             .Concat(cafe.Select(x => new Rev(x.BranchId, x.Day, x.Amount, 2))).ToList();
-        // از اینجا «At» روزِ تهران است؛ مرزها هم به روز تهران
+        // Ab hier ist „At“ der Berliner Tag; die Grenzen ebenfalls
         var todayDay = Jalali.ToTehran(now).Date;
         var periodDay = todayDay.AddDays(-(days - 1));
 
@@ -121,21 +121,21 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
             return new DailyRevenueDto(DateOnly.FromDateTime(d), sp.Membership, sp.Shop, sp.Canteen);
         }).ToList();
 
-        // ---- اعضا: فقط عضویت‌های مرتبط (فعال، تمام‌شده در ۹۰ روز اخیر، یا شروع در همین بازه)
+        // ---- Mitglieder: nur relevante Mitgliedschaften (aktiv, in den letzten 90 Tagen beendet oder im Zeitraum gestartet)
         var recentEnd = now.AddDays(-90);
         var ms = await db.Memberships.AsNoTracking()
             .Where(m => Paid.Contains(m.Status) && ids.Contains(m.BranchId) && (m.EndsAtUtc > recentEnd || m.StartsAtUtc >= periodStart))
             .Select(m => new { m.Id, m.UserId, m.BranchId, m.StartsAtUtc, m.EndsAtUtc, Package = m.Package!.Name }).ToListAsync(ct);
         var active = ms.Where(m => m.StartsAtUtc <= now && m.EndsAtUtc > now).ToList();
 
-        // عضو جدید: اولین عضویتش در همین بازه شروع شده
+        // Neues Mitglied: seine erste Mitgliedschaft begann in diesem Zeitraum
         var candidates = ms.Where(m => m.StartsAtUtc >= periodStart).Select(m => m.UserId).Distinct().ToList();
         var returning = (await db.Memberships.AsNoTracking()
             .Where(m => Paid.Contains(m.Status) && candidates.Contains(m.UserId) && m.StartsAtUtc < periodStart)
             .Select(m => m.UserId).Distinct().ToListAsync(ct)).ToHashSet();
         var newMembers = candidates.Where(u => !returning.Contains(u)).ToHashSet();
 
-        // نرخ تمدید و «در آستانهٔ پایان»: عضویت‌های بعدی همین افراد (گروه‌بندی‌شده، نه جست‌وجوی تو در تو)
+        // Verlängerungsquote und „kurz vor Ablauf“: Folgemitgliedschaften derselben Personen (gruppiert, keine verschachtelte Suche)
         var ended = ms.Where(m => m.EndsAtUtc <= now && m.EndsAtUtc > recentEnd).ToList();
         var soonCandidates = active.Where(m => m.EndsAtUtc <= now.AddDays(7)).ToList();
         var watch = ended.Select(m => m.UserId).Concat(soonCandidates.Select(m => m.UserId)).Distinct().ToList();
@@ -152,7 +152,7 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
         var expiring = soon.Select(m => new ExpiringMemberDto(m.UserId, users[m.UserId].FullName, users[m.UserId].PhoneNumber ?? "",
             branches.First(b => b.Id == m.BranchId).Name, m.Package, m.EndsAtUtc!.Value, Math.Max(0, (int)Math.Ceiling((m.EndsAtUtc.Value - now).TotalDays)))).ToList();
 
-        // ---- ورودها: شمارش بر حسب شعبه و ساعت در خود دیتابیس
+        // ---- Check-ins: Zählung nach Filiale und Stunde direkt in der Datenbank
         var checkIns = await db.CheckIns.AsNoTracking()
             .Where(c => c.Decision == AccessDecision.Allowed && c.OccurredAtUtc >= periodStart && ids.Contains(c.BranchId))
             .GroupBy(c => new { c.BranchId, Hour = c.OccurredAtUtc.AddMinutes(tehranMinutes).Hour })
@@ -166,7 +166,7 @@ public sealed class DashboardService(GymDbContext db, IClock clock) : IDashboard
             checkIns.Where(c => c.BranchId == b.Id).Sum(c => c.Count), ms.Where(m => m.BranchId == b.Id && m.StartsAtUtc >= periodStart && newMembers.Contains(m.UserId)).Select(m => m.UserId).Distinct().Count()))
             .OrderByDescending(s => s.Revenue.Total).ToList();
 
-        // ---- اثر جشنواره‌ها
+        // ---- Wirkung der Aktionen
         var camps = await db.Campaigns.AsNoTracking().OrderByDescending(c => c.StartsAtUtc).Take(6).ToListAsync(ct);
         var campIds = camps.Select(c => c.Id).ToList();
         var campPays = await db.Payments.AsNoTracking()

@@ -4,7 +4,7 @@ public enum MembershipStatus { PendingPayment = 0, Active = 1, Expired = 2, Canc
 
 public enum PaymentStatus { Pending = 0, Succeeded = 1, Failed = 2, Cancelled = 3 }
 
-/// <summary>هدف کد یکبارمصرف؛ کد ورود برای امضای قرارداد پذیرفته نمی‌شود و برعکس.</summary>
+/// <summary>Zweck des Einmalcodes; ein Login-Code wird für die Vertragsunterschrift nicht akzeptiert und umgekehrt.</summary>
 public enum OtpPurpose { Login = 0, SignContract = 1 }
 
 public enum Gender { Male = 1, Female = 2 }
@@ -24,7 +24,7 @@ public enum AccessDenyReason
     NoSessionsLeft = 6,
 }
 
-// ---- فاز ۳ ----
+// ---- Phase 3 ----
 public enum PaymentPurpose { Membership = 0, ShopOrder = 1, CanteenOrder = 2, WalletTopUp = 3 }
 
 public enum PayMethod { Gateway = 0, Wallet = 1 }
@@ -41,10 +41,10 @@ public enum CanteenOrderStatus { PendingPayment = 0, Queued = 1, Preparing = 2, 
 
 public enum WalletTxType { TopUp = 0, ShopPurchase = 1, CanteenPurchase = 2, Refund = 3, Adjustment = 4 }
 
-/// <summary>کد تخفیف برای کدام خرید معتبر است.</summary>
+/// <summary>Für welchen Kauf der Rabattcode gilt.</summary>
 public enum DiscountScope { Membership = 0, Shop = 1, Any = 2 }
 
-// ---- فاز ۴ ----
+// ---- Phase 4 ----
 public enum SmsKind { Welcome = 0, Reminder7 = 1, Reminder1 = 2, Birthday = 3, Campaign = 4, Custom = 5 }
 
 public enum SmsStatus { Queued = 0, Sent = 1, Failed = 2 }

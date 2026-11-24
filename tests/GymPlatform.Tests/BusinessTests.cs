@@ -14,11 +14,11 @@ namespace GymPlatform.Tests;
 public class PersianTextTests
 {
     [Theory]
-    [InlineData("۰۹۱۲۳۴۵۶۷۸۹", "09123456789")]
-    [InlineData("+989123456789", "09123456789")]
-    [InlineData("00989123456789", "09123456789")]
-    [InlineData("9123456789", "09123456789")]
-    [InlineData("0912 345 6789", "09123456789")]
+    [InlineData("01512 3456789", "015123456789")]
+    [InlineData("+49 1512 3456789", "015123456789")]
+    [InlineData("004915123456789", "015123456789")]
+    [InlineData("15123456789", "015123456789")]
+    [InlineData("0151-234 5678", "01512345678")]
     public void NormalizeMobile_handles_common_formats(string input, string expected) =>
         Assert.Equal(expected, PersianText.NormalizeMobile(input));
 
@@ -33,13 +33,13 @@ public class PricingTests
 
     [Fact]
     public void ApplyDiscount_rounds_down_to_thousand() =>
-        Assert.Equal(19_120_000, _p.ApplyDiscount(23_900_000, 20));
+        Assert.Equal(191_200, _p.ApplyDiscount(239_000, 20));
 
     [Theory]
     [InlineData(-1)]
     [InlineData(91)]
     public void ApplyDiscount_rejects_invalid_percent(int percent) =>
-        Assert.Throws<ArgumentOutOfRangeException>(() => _p.ApplyDiscount(1_000_000, percent));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _p.ApplyDiscount(10_000, percent));
 
     [Fact]
     public void BestCampaign_picks_highest_running_eligible()
@@ -62,18 +62,18 @@ public class ConsultationValidatorTests
 
     [Fact]
     public void Valid_request_passes() =>
-        Assert.True(_v.Validate(new CreateConsultationRequest("مریم احمدی", "۰۹۱۷۱۲۳۴۵۶۷", "کاهش وزن", null, null)).IsValid);
+        Assert.True(_v.Validate(new CreateConsultationRequest("Julia Fischer", "0171 2345678", "Abnehmen", null, null)).IsValid);
 
     [Theory]
-    [InlineData("<script>", "09171234567")]
-    [InlineData("مریم", "0217123456")]
-    [InlineData("", "09171234567")]
+    [InlineData("<script>", "01712345678")]
+    [InlineData("Marie", "07111234567")]
+    [InlineData("", "01712345678")]
     public void Invalid_request_fails(string name, string mobile) =>
         Assert.False(_v.Validate(new CreateConsultationRequest(name, mobile, null, null, null)).IsValid);
 
     [Fact]
     public void Unknown_goal_fails() =>
-        Assert.False(_v.Validate(new CreateConsultationRequest("مریم احمدی", "09171234567", "DROP TABLE", null, null)).IsValid);
+        Assert.False(_v.Validate(new CreateConsultationRequest("Julia Fischer", "01712345678", "DROP TABLE", null, null)).IsValid);
 }
 
 public sealed class FixedClock(DateTime now) : IClock { public DateTime UtcNow => now; }
@@ -93,7 +93,7 @@ public sealed class ServiceTests : IDisposable
             new Branch { Slug = "a", Name = "A", District = "x", Address = "x", Sections = GenderSection.Both },
             new Branch { Slug = "m", Name = "M", District = "x", Address = "x", Sections = GenderSection.Men },
             new Branch { Slug = "w", Name = "W", District = "x", Address = "x", Sections = GenderSection.Women });
-        _db.Packages.Add(new MembershipPackage { Slug = "yearly", Name = "Y", DurationMonths = 12, PriceToman = 24_000_000 });
+        _db.Packages.Add(new MembershipPackage { Slug = "yearly", Name = "Y", DurationMonths = 12, PriceToman = 240_000 });
         _db.Campaigns.Add(new Campaign { Title = "c", DiscountPercent = 25, StartsAtUtc = _now.AddDays(-1), EndsAtUtc = _now.AddDays(3) });
         _db.SaveChanges();
     }
@@ -114,8 +114,8 @@ public sealed class ServiceTests : IDisposable
     public async Task Packages_include_campaign_discount()
     {
         var p = Assert.Single(await Catalog().GetPackagesAsync(default));
-        Assert.Equal(18_000_000, p.DiscountedPriceToman);
-        Assert.Equal(1_500_000, p.MonthlyEquivalentToman);
+        Assert.Equal(180_000, p.DiscountedPriceToman);
+        Assert.Equal(15_000, p.MonthlyEquivalentToman);
     }
 
     [Fact]
@@ -123,14 +123,14 @@ public sealed class ServiceTests : IDisposable
     {
         var svc = new ConsultationService(new Repository<ConsultationRequest>(_db), new Repository<Branch>(_db),
             new CreateConsultationValidator(), new FixedClock(_now));
-        var req = new CreateConsultationRequest("سارا رضایی", "+989171234567", null, "سلام", null);
+        var req = new CreateConsultationRequest("Sarah Becker", "+49 171 2345678", null, "Hallo", null);
 
         var first = await svc.CreateAsync(req, default);
         var second = await svc.CreateAsync(req, default);
 
         Assert.True(first.Succeeded && second.Succeeded);
         Assert.Equal(1, await _db.ConsultationRequests.CountAsync());
-        Assert.Equal("09171234567", (await _db.ConsultationRequests.SingleAsync()).Mobile);
+        Assert.Equal("01712345678", (await _db.ConsultationRequests.SingleAsync()).Mobile);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class ServiceTests : IDisposable
     {
         var svc = new ConsultationService(new Repository<ConsultationRequest>(_db), new Repository<Branch>(_db),
             new CreateConsultationValidator(), new FixedClock(_now));
-        var r = await svc.CreateAsync(new CreateConsultationRequest("سارا رضایی", "09171234567", null, null, 999), default);
+        var r = await svc.CreateAsync(new CreateConsultationRequest("Sarah Becker", "01712345678", null, null, 999), default);
         Assert.False(r.Succeeded);
         Assert.Contains("BranchId", r.Errors.Keys);
     }

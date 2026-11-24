@@ -1,4 +1,4 @@
-// صفحهٔ آزمایشی برای دیدن دموی کامپوننت‌های 21st.dev — فقط در توسعه (/lab?c=slug)
+// Testseite für Demos der 21st.dev-Komponenten — nur in der Entwicklung (/lab?c=slug)
 import { lazy, Suspense } from 'react'
 
 const demos = import.meta.glob('./demos/*.tsx')

@@ -6,10 +6,10 @@ using System.Threading.Channels;
 namespace GymPlatform.Api.Video;
 
 /// <summary>
-/// صف پس‌زمینهٔ بهینه‌سازی ویدیو: فقط یک کار در آن واحد، ffmpeg تک‌رشته‌ای با اولویت پایین CPU
-/// (اوج رم ffmpeg حدود ۱۵۰ مگ برای منبع 1080 و ۱۷۰ مگ برای 4K؛ کل سرور زیر ۵۱۲ مگ).
-/// هر خروجی اول در فایل موقت ساخته و بعد با rename اتمی جایگزین می‌شود؛ در آخر {id}.ready.
-/// بدون ffmpeg برنامه خراب نمی‌شود: ویدیو با دلیل «failed» علامت می‌خورد و همان فایل اصلی پخش می‌شود.
+/// Hintergrund-Warteschlange zur Videooptimierung: nur ein Auftrag gleichzeitig, ffmpeg einsträngig mit niedriger CPU-Priorität
+/// (RAM-Spitze von ffmpeg etwa 150 MB bei 1080er Quelle und 170 MB bei 4K; der ganze Server unter 512 MB).
+/// Jede Ausgabe entsteht erst in einer temporären Datei und wird dann per atomarem Rename ersetzt; am Ende {id}.ready.
+/// Ohne ffmpeg geht die App nicht kaputt: das Video wird mit Grund „failed“ markiert und die Originaldatei abgespielt.
 /// </summary>
 public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> logger, IConfiguration config) : BackgroundService
 {
@@ -20,7 +20,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
 
     public void Enqueue(string id) => _queue.Writer.TryWrite(id);
 
-    /// <summary>جدول خروجی‌ها: پسوند، عرض حداکثر، crf، profile، اسکرولی؟</summary>
+    /// <summary>Tabelle der Ausgaben: Endung, maximale Breite, crf, profile, Scroll-Version?</summary>
     private static readonly (string Suffix, int Width, int Crf, string Profile, bool Scrub)[] Videos =
     [
         ("-scrub.mp4", 1920, 24, "high", true),
@@ -31,10 +31,10 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
 
     protected override async Task ExecuteAsync(CancellationToken stop)
     {
-        // آپلودهای ناقص و فایل‌های موقت اجرای قبلی
+        // Unvollständige Uploads und temporäre Dateien vom letzten Lauf
         foreach (var f in Directory.EnumerateFiles(store.Root, "*.upload").Concat(Directory.EnumerateFiles(store.Root, ".*.part.*")))
             try { File.Delete(f); } catch (IOException) { }
-        // کارهای نیمه‌تمام از اجرای قبلی (مثلاً ری‌استارت وسط پردازش)
+        // Halbfertige Aufträge vom letzten Lauf (z. B. Neustart mitten in der Verarbeitung)
         foreach (var f in Directory.EnumerateFiles(store.Root, "*.mp4"))
         {
             var name = Path.GetFileName(f);
@@ -49,7 +49,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
             catch (Exception e)
             {
                 logger.LogError(e, "Video {Id} failed", id);
-                Fail(id, "بهینه‌سازی ویدیو انجام نشد.");
+                Fail(id, "Videooptimierung fehlgeschlagen.");
             }
         }
     }
@@ -71,17 +71,17 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
             File.Move(orig + ".part", orig, overwrite: true);
         }
 
-        // ---- بررسی با ffprobe
+        // ---- Prüfung mit ffprobe
         if (Which(_ffmpeg) is null || Which(_ffprobe) is null)
         {
-            Fail(id, "ffmpeg روی سرور نصب نیست؛ ویدیو بدون بهینه‌سازی (کندتر) پخش می‌شود.");
+            Fail(id, "ffmpeg ist auf dem Server nicht installiert; das Video wird unoptimiert (langsamer) abgespielt.");
             return;
         }
         var probe = await ProbeAsync(orig, stop);
-        if (probe.Width <= 0) { Fail(id, "در این فایل تصویر ویدیویی پیدا نشد."); return; }
+        if (probe.Width <= 0) { Fail(id, "In dieser Datei wurde kein Videobild gefunden."); return; }
         if (Math.Max(probe.Width, probe.Height) > 3840 || Math.Min(probe.Width, probe.Height) > 2160)
-        { Fail(id, $"کیفیت ویدیو بالاتر از 4K است ({probe.Width}×{probe.Height}). حداکثر 3840×2160."); return; }
-        if (probe.Duration > 60.5) { Fail(id, $"ویدیو {probe.Duration:0} ثانیه است؛ حداکثر ۶۰ ثانیه."); return; }
+        { Fail(id, $"Die Videoauflösung liegt über 4K ({probe.Width}×{probe.Height}). Maximal 3840×2160."); return; }
+        if (probe.Duration > 60.5) { Fail(id, $"Video {probe.Duration:0} Sekunden lang; höchstens 60 Sekunden."); return; }
 
         var sw = Stopwatch.StartNew();
         foreach (var v in Videos)
@@ -103,7 +103,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
         logger.LogInformation("Video {Id} optimized in {Seconds:0}s ({W}x{H}, {D:0.0}s)", id, sw.Elapsed.TotalSeconds, probe.Width, probe.Height, probe.Duration);
     }
 
-    /// <summary>مسیر کامل برنامه در PATH (یا خود مسیر اگر کامل داده شده)</summary>
+    /// <summary>Vollständiger Programmpfad in PATH (oder der Pfad selbst, falls vollständig angegeben)</summary>
     public static string? Which(string exe)
     {
         if (Path.IsPathRooted(exe)) return File.Exists(exe) ? exe : null;
@@ -121,7 +121,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
         "-x264-params", "threads=1:lookahead-threads=1:rc-lookahead=4:ref=1",
     ];
 
-    /// <summary>هرگز بزرگ‌نمایی نمی‌شود؛ ارتفاع زوج و هم‌نسبت</summary>
+    /// <summary>Nie hochskaliert; gerade Höhe und gleiches Seitenverhältnis</summary>
     private static string Scale(int max) => $"scale='min({max},iw)':-2:flags=lanczos";
 
     private async Task RenderAsync(string id, string suffix, List<string> args, CancellationToken stop)
@@ -135,7 +135,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
             try { File.Delete(tmp); } catch (IOException) { }
             throw new InvalidOperationException($"ffmpeg {suffix} exit {code}: {err}");
         }
-        File.Move(tmp, final, overwrite: true); // جایگزینی اتمی؛ هیچ‌وقت فایل نیمه‌کاره سرو نمی‌شود
+        File.Move(tmp, final, overwrite: true); // atomarer Ersatz; nie wird eine halbfertige Datei ausgeliefert
     }
 
     private sealed record ProbeResult(int Width, int Height, double Duration);
@@ -155,7 +155,7 @@ public sealed class VideoOptimizer(VideoStore store, ILogger<VideoOptimizer> log
         return new(st.GetProperty("width").GetInt32(), st.GetProperty("height").GetInt32(), duration);
     }
 
-    /// <summary>اجرای ffmpeg/ffprobe با اولویت پایین (nice روی لینوکس) و سقف زمانی</summary>
+    /// <summary>ffmpeg/ffprobe mit niedriger Priorität (nice unter Linux) und Zeitlimit ausführen</summary>
     private static async Task<(int Code, string Output)> RunAsync(string exe, List<string> args, TimeSpan timeout, CancellationToken stop, bool captureStdout = false)
     {
         var psi = new ProcessStartInfo { RedirectStandardError = true, RedirectStandardOutput = true, UseShellExecute = false };

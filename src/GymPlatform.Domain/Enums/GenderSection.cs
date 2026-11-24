@@ -1,6 +1,6 @@
 namespace GymPlatform.Domain.Enums;
 
-/// <summary>سالن‌های یک شعبه. شعبه می‌تواند هر دو سالن را داشته باشد.</summary>
+/// <summary>Bereiche einer Filiale. Eine Filiale kann beide Bereiche haben.</summary>
 [Flags]
 public enum GenderSection
 {

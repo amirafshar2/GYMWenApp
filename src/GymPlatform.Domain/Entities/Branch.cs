@@ -13,7 +13,7 @@ public class Branch : BaseEntity
     public double Longitude { get; set; }
     public GenderSection Sections { get; set; }
 
-    /// <summary>false یعنی آدرس/مختصات هنوز تأیید نشده (دادهٔ تقریبی دمو).</summary>
+    /// <summary>false = Adresse/Koordinaten noch nicht bestätigt (ungefähre Demodaten).</summary>
     public bool AddressConfirmed { get; set; }
 
     public string? MenHours { get; set; }

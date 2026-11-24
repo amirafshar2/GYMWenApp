@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 namespace GymPlatform.Business.Common;
 
 /// <summary>
-/// سقف استفاده از کد تخفیف و ظرفیت جشنواره در لحظهٔ شروع پرداخت.
-/// شمارنده‌ها بعد از پرداخت موفق زیاد می‌شوند؛ برای اینکه کسی با باز کردن چند پرداخت هم‌زمان از سقف رد نشود،
-/// پرداخت‌ها/سفارش‌های در انتظارِ همین کد هم جزو ظرفیت حساب می‌شوند (سفارش‌های رهاشده بعد از ۳۰ دقیقه آزاد می‌شوند).
-/// کدهای سقف‌دار (مثل کد تولد) برای هر نفر فقط یک بار قابل استفاده‌اند.
+/// Nutzungslimit des Rabattcodes und Kapazität der Aktion zum Zeitpunkt des Zahlungsstarts.
+/// Zähler steigen erst nach erfolgreicher Zahlung; damit niemand das Limit mit mehreren gleichzeitigen Zahlungen umgeht,
+/// zählen offene Zahlungen/Bestellungen mit demselben Code mit (abgebrochene Bestellungen werden nach 30 Minuten frei).
+/// Codes mit Limit (z. B. Geburtstagscode) sind pro Person nur einmal nutzbar.
 /// </summary>
 public static class DiscountGuard
 {
@@ -23,11 +23,11 @@ public static class DiscountGuard
         var pending = await db.Payments.CountAsync(p => p.DiscountCode == code && p.Status == PaymentStatus.Pending && p.Purpose == PaymentPurpose.Membership && p.CreatedAtUtc > since, ct)
                     + await db.ShopOrders.CountAsync(o => o.DiscountCode == code && o.Status == OrderStatus.PendingPayment, ct);
         var used = await db.DiscountCodes.Where(d => d.Id == dc.Id).Select(d => d.UsedCount).FirstAsync(ct);
-        if (used + pending >= max) return "ظرفیت این کد تخفیف تمام شده است.";
+        if (used + pending >= max) return "Dieser Rabattcode ist ausgeschöpft.";
         var mine = await db.Payments.AnyAsync(p => p.UserId == userId && p.DiscountCode == code && p.Purpose == PaymentPurpose.Membership
                        && (p.Status == PaymentStatus.Succeeded || (p.Status == PaymentStatus.Pending && p.CreatedAtUtc > since)), ct)
                    || await db.ShopOrders.AnyAsync(o => o.UserId == userId && o.DiscountCode == code && o.Status != OrderStatus.Cancelled, ct);
-        return mine ? "این کد تخفیف را قبلاً استفاده کرده‌اید." : null;
+        return mine ? "Sie haben diesen Rabattcode bereits genutzt." : null;
     }
 
     public static async Task<string?> CampaignErrorAsync(GymDbContext db, int campaignId, DateTime now, CancellationToken ct)
@@ -36,7 +36,7 @@ public static class DiscountGuard
         if (c?.MaxRedemptions is not { } max) return null;
         var since = now - PendingWindow;
         var pending = await db.Payments.CountAsync(p => p.CampaignId == campaignId && p.Status == PaymentStatus.Pending && p.CreatedAtUtc > since, ct);
-        return c.RedemptionCount + pending >= max ? "ظرفیت جشنواره همین الان تکمیل شد؛ صفحه را تازه کنید تا قیمت بدون تخفیف را ببینید." : null;
+        return c.RedemptionCount + pending >= max ? "Die Aktion ist gerade ausgebucht; bitte die Seite neu laden, um den Preis ohne Rabatt zu sehen." : null;
     }
 
     public static Task<bool> IsActiveMemberAsync(GymDbContext db, int userId, DateTime now, CancellationToken ct) =>

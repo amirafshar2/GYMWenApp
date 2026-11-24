@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GymPlatform.Domain.Entities;
 
-/// <summary>کاربر سیستم (ASP.NET Core Identity). نام کاربری همان شمارهٔ موبایل نرمال‌شده است.</summary>
+/// <summary>Systembenutzer (ASP.NET Core Identity). Der Benutzername ist die normalisierte Handynummer.</summary>
 public class AppUser : IdentityUser<int>
 {
     public string? FullName { get; set; }
     public Gender? Gender { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAtUtc { get; set; }
-    /// <summary>برای پیامک تبریک تولد (اختیاری؛ خود عضو وارد می‌کند)</summary>
+    /// <summary>Für die Geburtstags-SMS (optional; das Mitglied trägt es selbst ein)</summary>
     public DateOnly? BirthDate { get; set; }
-    /// <summary>رضایت صریح برای پیامک تبلیغاتی (جشنواره). پیش‌فرض خاموش.</summary>
+    /// <summary>Ausdrückliche Einwilligung in Werbe-SMS (Aktionen). Standard aus.</summary>
     public bool MarketingSmsOptIn { get; set; }
 
     public ICollection<Membership> Memberships { get; set; } = [];
@@ -24,7 +24,7 @@ public class AppRole : IdentityRole<int>
     public AppRole(string name) : base(name) { }
 }
 
-/// <summary>نام نقش‌ها (فاز ۴ پنل‌ها از این‌ها استفاده می‌کنند).</summary>
+/// <summary>Rollennamen (die Panels aus Phase 4 nutzen diese).</summary>
 public static class Roles
 {
     public const string SuperAdmin = nameof(SuperAdmin);

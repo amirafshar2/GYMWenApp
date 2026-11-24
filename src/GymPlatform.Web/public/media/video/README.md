@@ -1,7 +1,7 @@
-ویدیوی پیش‌فرض قالب (هر کدام با همان تنظیمات بهینه‌سازی خودکار آپلودهای پنل):
-- gym-scrub.mp4 / gym-scrub-720.mp4 / gym-scrub-540.mp4 — اسکرولی (هر ۴ فریم یک keyframe)؛ مرورگر بسته به دستگاه یکی را برمی‌دارد
-- gym.mp4 — پخش خودکار و تکراری
-- gym.jpg / gym-960.jpg — فریم اول (تا ویدیو برسد صفحه خالی نمی‌ماند)
-- gym-poster.webp / gym-poster-mobile.webp — عکس سالن برای دستگاه‌هایی که ویدیو نمی‌گیرند
-برای عوض کردن: فایل خام را با نام gym-source.mp4 این‌جا بگذارید و scripts/make-scrub-video را اجرا کنید.
-مدیر سایت می‌تواند از پنل (تنظیمات سایت ← صفحهٔ اصلی ← ویدیو) ویدیوی خودش را آپلود کند؛ همین نسخه‌ها خودکار ساخته می‌شوند.
+Standardvideo der Vorlage (jeweils mit denselben Optimierungseinstellungen wie Panel-Uploads):
+- gym-scrub.mp4 / gym-scrub-720.mp4 / gym-scrub-540.mp4 — Scroll-Versionen (Keyframe alle 4 Frames); der Browser wählt je nach Gerät eine
+- gym.mp4 — automatische Wiedergabe in Schleife
+- gym.jpg / gym-960.jpg — erster Frame (damit die Seite nicht leer ist, bis das Video da ist)
+- gym-poster.webp / gym-poster-mobile.webp — Studiobild für Geräte ohne Video
+Zum Austauschen: Rohdatei als gym-source.mp4 hier ablegen und scripts/make-scrub-video ausführen.
+Der Seitenadmin kann im Panel (Website-Einstellungen → Startseite → Video) ein eigenes Video hochladen; dieselben Versionen werden automatisch erzeugt.

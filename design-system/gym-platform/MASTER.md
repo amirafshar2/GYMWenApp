@@ -1,42 +1,42 @@
-# سیستم طراحی سایت (MASTER)
+# Designsystem der Seite (MASTER)
 
-منبع: صفحهٔ مرجعی که کارفرما انتخاب کرد (قالب «GYM Store — Sports Complex»)؛ فقط چیدمان و سبک بازسازی شده، نه کد یا محتوای آن.
+Quelle: die vom Auftraggeber gewählte Referenzseite (Vorlage „GYM Store — Sports Complex“); nachgebaut wurden nur Layout und Stil, nicht Code oder Inhalt.
 
-## رنگ‌ها (توکن‌ها در `src/GymPlatform.Web/src/index.css`)
-| نقش | مقدار | توکن |
+## Farben (Tokens in `src/GymPlatform.Web/src/index.css`)
+| Rolle | Wert | Token |
 |---|---|---|
-| پس‌زمینهٔ صفحه | `#FFFFFF` | `--color-iron` |
-| بخش متناوب / کارت | `#F7F7F7` | `--color-steel` |
-| خط مویی | `#E5E5E5` | `--color-steel-2` |
-| متن اصلی و تیترها | `#2C2C2C` | `--color-chalk` |
-| متن ثانویه | `#6B6B6B` (۵٫۳:۱) | `--color-rubber` |
-| تأکید و دکمهٔ اصلی (آبی لوگو) | `#0B5FB0` (متن سفید ۶٫۳:۱) | `--color-plate` |
-| فقط پیام خطا | `#D32F3C` | `--color-danger` |
-| دکمهٔ «شروع کن» | `#FFB400` با متن تیره | `--color-sun` |
-| فوتر | `#181818` | `--color-night` |
+| Seitenhintergrund | `#FFFFFF` | `--color-iron` |
+| Wechselbereich / Karte | `#F7F7F7` | `--color-steel` |
+| Haarlinie | `#E5E5E5` | `--color-steel-2` |
+| Haupttext und Überschriften | `#2C2C2C` | `--color-chalk` |
+| Sekundärtext | `#6B6B6B` (5,3:1) | `--color-rubber` |
+| Akzent und Hauptbutton (Logoblau) | `#0B5FB0` (weißer Text 6,3:1) | `--color-plate` |
+| Nur Fehlermeldungen | `#D32F3C` | `--color-danger` |
+| „Los geht’s“-Button | `#FFB400` mit dunklem Text | `--color-sun` |
+| Footer | `#181818` | `--color-night` |
 
-برای برگشت به آبی لوگو کافی است `--color-plate` و `--color-plate-hi` عوض شوند.
+Für die Rückkehr zum Logoblau genügt es, `--color-plate` und `--color-plate-hi` zu ändern.
 
-## تایپوگرافی
-- Vazirmatn؛ تیتر هیرو ۹۰۰، تیتر بخش‌ها ۷۰۰، برچسب بالای تیتر ۱۳px پررنگ
-- نام برند در هدر: ۹۰۰ با کجی ۸ درجه (معادل لوگوی ایتالیک مرجع)
+## Typografie
+- Vazirmatn; Hero-Überschrift 900, Bereichsüberschriften 700, Label über Überschriften 13px fett
+- Markenname im Header: 900 mit 8 Grad Neigung (entspricht dem kursiven Logo der Referenz)
 
-## چیدمان
-- ظرف «boxed» با حداکثر ۱۲۹۰px (`wrap` در `site/ui/SectionHead.tsx`)
-- هدر سفید ۷۸px چسبان؛ زیر لینک فعال خط ۲px
-- دکمه‌ها مستطیلی با گوشهٔ ۳px، ارتفاع ۵۲px
-- بخش‌ها یکی در میان سفید / `#F7F7F7`؛ ویدیو و فوتر تیره
+## Layout
+- „boxed“-Container mit maximal 1290px (`wrap` in `site/ui/SectionHead.tsx`)
+- Weißer fixierter Header 78px; unter dem aktiven Link 2px Linie
+- Rechteckige Buttons mit 3px-Ecken, Höhe 52px
+- Bereiche abwechselnd weiß / `#F7F7F7`; Video und Footer dunkel
 
-## حرکت
-- ورود بخش‌ها: fade-in-up (۴۰px، ۸۰۰ms)، یک بار
-- هیرو: Liquid Sculpture Hero (21st.dev) زیر هدر سفید؛ دمبل ذره‌ای با ماوس مایع می‌شود و دوباره شکل می‌گیرد
-- تصویرهای بخش جشنواره و «چرا سایت» با اسکرول پارالاکس دارند
-- ویدیوی وسط صفحه قفل اسکرول دارد و هنگام پخش، هدر کنار می‌رود
-- با `prefers-reduced-motion` همهٔ این‌ها خاموش می‌شوند
+## Bewegung
+- Einblenden der Bereiche: fade-in-up (40px, 800ms), einmalig
+- Hero: Liquid Sculpture Hero (21st.dev) unter dem weißen Header; die Partikelhantel wird bei Mausbewegung flüssig und formt sich neu
+- Bilder im Aktions- und „Warum wir“-Bereich haben Parallax beim Scrollen
+- Das Video in der Seitenmitte sperrt den Scroll; beim Abspielen fährt der Header weg
+- Mit `prefers-reduced-motion` wird all das abgeschaltet
 
-## چک‌لیست
-- [x] آیکون SVG (lucide)، بدون ایموجی
-- [x] کنتراست متن ≥ ۴٫۵:۱
-- [x] حداقل اندازهٔ لمس ۴۴px
-- [x] فوکوس قابل‌دیدن، برچسب برای همهٔ فیلدها
-- [x] واکنش‌گرا در ۳۷۵، ۷۶۸، ۱۰۲۴، ۱۴۴۰
+## Checkliste
+- [x] SVG-Icons (lucide), keine Emojis
+- [x] Textkontrast ≥ 4,5:1
+- [x] Mindestgröße für Touch 44px
+- [x] Sichtbarer Fokus, Labels für alle Felder
+- [x] Responsiv bei 375, 768, 1024, 1440

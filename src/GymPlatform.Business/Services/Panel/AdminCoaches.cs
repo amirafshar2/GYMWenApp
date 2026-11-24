@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace GymPlatform.Business.Services.Panel;
 
 /// <summary>
-/// مربیان (فقط مدیر کل): پروفایل نمایش‌داده‌شده در سایت + حساب ورود به پنل مربی.
-/// وصل کردن موبایل به مربی، نقش «مربی» را هم به آن حساب می‌دهد؛ برداشتنش نقش را پس می‌گیرد.
-/// مربی‌ای که شاگرد یا برنامه دارد حذف نمی‌شود (سابقه می‌ماند)؛ به‌جایش غیرفعال می‌شود.
+/// Trainer (nur Gesamtadmin): Profil auf der Website + Login-Konto für das Trainerpanel.
+/// Eine mit dem Trainer verknüpfte Handynummer erhält die Rolle „Trainer“; beim Entfernen wird sie wieder entzogen.
+/// Ein Trainer mit Schülern oder Plänen wird nicht gelöscht (Historie bleibt); stattdessen deaktiviert.
 /// </summary>
 public sealed partial class AdminService
 {
@@ -30,23 +30,23 @@ public sealed partial class AdminService
         var errors = new Dictionary<string, string[]>();
         var name = PersianText.CleanText(r.FullName);
         var specialty = PersianText.CleanText(r.Specialty);
-        if (name is null || name.Length > 80) errors["fullName"] = ["نام مربی را بنویسید."];
-        if (specialty is null || specialty.Length > 80) errors["specialty"] = ["تخصص را بنویسید (مثل بدنسازی و حجم)."];
-        if (r.YearsOfExperience is < 0 or > 60) errors["yearsOfExperience"] = ["سابقه بین ۰ تا ۶۰ سال."];
+        if (name is null || name.Length > 80) errors["fullName"] = ["Bitte den Namen des Trainers angeben."];
+        if (specialty is null || specialty.Length > 80) errors["specialty"] = ["Bitte das Fachgebiet angeben (z. B. Muskelaufbau)."];
+        if (r.YearsOfExperience is < 0 or > 60) errors["yearsOfExperience"] = ["Erfahrung zwischen 0 und 60 Jahren."];
         GenderSection? section = r.Section?.ToLowerInvariant() switch { "men" => GenderSection.Men, "women" => GenderSection.Women, "both" => GenderSection.Both, _ => null };
-        if (section is null) errors["section"] = ["سالن: آقایان، بانوان یا هر دو."];
+        if (section is null) errors["section"] = ["Bereich: Herren, Damen oder beide."];
         var branch = await db.Branches.FirstOrDefaultAsync(b => b.Slug == r.BranchSlug, ct);
-        if (branch is null) errors["branchSlug"] = ["شعبه را انتخاب کنید."];
-        if (r.PhotoUrl is { Length: > 0 } photo && !ValidImage(photo)) errors["photoUrl"] = ["عکس را آپلود یا از عکس‌های سایت انتخاب کنید."];
+        if (branch is null) errors["branchSlug"] = ["Bitte eine Filiale wählen."];
+        if (r.PhotoUrl is { Length: > 0 } photo && !ValidImage(photo)) errors["photoUrl"] = ["Bitte ein Foto hochladen oder aus den Bildern der Seite wählen."];
         string? phone = null;
         if (!string.IsNullOrWhiteSpace(r.LinkedPhone))
         {
             phone = PersianText.NormalizeMobile(r.LinkedPhone);
-            if (!PersianText.IsValidMobile(phone)) errors["linkedPhone"] = ["شمارهٔ موبایل معتبر نیست."];
+            if (!PersianText.IsValidMobile(phone)) errors["linkedPhone"] = ["Ungültige Handynummer."];
         }
         if (errors.Count > 0) return Result<AdminCoachDto>.Fail(errors);
 
-        // حساب ورود به پنل مربی (قبل از افزودن مربی به context؛ UserManager همین context را ذخیره می‌کند)
+        // Login-Konto für das Trainerpanel (vor dem Hinzufügen zum Context; UserManager speichert denselben Context)
         int? userId = null;
         if (phone is not null)
         {
@@ -58,7 +58,7 @@ public sealed partial class AdminService
                 await users.AddToRoleAsync(user, Roles.Member);
             }
             if (await db.Coaches.AnyAsync(x => x.UserId == user.Id && x.Id != (id ?? 0), ct))
-                return Result<AdminCoachDto>.Fail("linkedPhone", "این شماره به مربی دیگری وصل است.", ErrorType.Conflict);
+                return Result<AdminCoachDto>.Fail("linkedPhone", "Diese Nummer ist bereits mit einem anderen Trainer verknüpft.", ErrorType.Conflict);
             if (!await users.IsInRoleAsync(user, Roles.Coach)) await users.AddToRoleAsync(user, Roles.Coach);
             userId = user.Id;
         }
@@ -67,7 +67,7 @@ public sealed partial class AdminService
         if (id is { } cid)
         {
             c = await db.Coaches.FirstOrDefaultAsync(x => x.Id == cid, ct);
-            if (c is null) return Result<AdminCoachDto>.Fail("id", "مربی پیدا نشد.", ErrorType.NotFound);
+            if (c is null) return Result<AdminCoachDto>.Fail("id", "Trainer nicht gefunden.", ErrorType.NotFound);
         }
         else
         {
@@ -81,7 +81,7 @@ public sealed partial class AdminService
         c.Achievements = (r.Achievements ?? []).Select(PersianText.CleanText).Where(x => x is not null).Cast<string>().Select(x => x.Length > 120 ? x[..120] : x).Take(8).ToList();
         await db.SaveChangesAsync(ct);
 
-        // حساب قبلی که دیگر به هیچ مربی‌ای وصل نیست، نقش مربی را از دست می‌دهد
+        // Ein früheres Konto ohne verknüpften Trainer verliert die Trainerrolle
         if (previousUserId is { } prev && prev != userId && !await db.Coaches.AnyAsync(x => x.UserId == prev, ct)
             && await users.FindByIdAsync(prev.ToString()) is { } old && await users.IsInRoleAsync(old, Roles.Coach))
             await users.RemoveFromRoleAsync(old, Roles.Coach);
@@ -95,9 +95,9 @@ public sealed partial class AdminService
     public async Task<Result<bool>> DeleteCoachAsync(int id, int staffId, CancellationToken ct)
     {
         var c = await db.Coaches.FirstOrDefaultAsync(x => x.Id == id, ct);
-        if (c is null) return Result<bool>.Fail("id", "مربی پیدا نشد.", ErrorType.NotFound);
+        if (c is null) return Result<bool>.Fail("id", "Trainer nicht gefunden.", ErrorType.NotFound);
         if (await db.CoachAssignments.AnyAsync(a => a.CoachId == id, ct) || await db.TrainingPlans.AnyAsync(p => p.CoachId == id, ct))
-            return Result<bool>.Fail("id", "این مربی شاگرد یا برنامهٔ ثبت‌شده دارد و حذف نمی‌شود؛ به‌جایش «نمایش در سایت» را خاموش کنید.", ErrorType.Conflict);
+            return Result<bool>.Fail("id", "Dieser Trainer hat Schüler oder Pläne und kann nicht gelöscht werden; stattdessen „Auf der Seite zeigen“ ausschalten.", ErrorType.Conflict);
         var userId = c.UserId;
         db.Coaches.Remove(c);
         Audit("coach.deleted", "Coach", id, staffId, c.FullName);

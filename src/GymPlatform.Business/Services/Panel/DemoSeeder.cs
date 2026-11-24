@@ -13,20 +13,20 @@ using Microsoft.Extensions.Logging;
 namespace GymPlatform.Business.Services.Panel;
 
 /// <summary>
-/// فقط برای دمو و پرزنت (هرگز در production): ۲۰۰ عضو ساختگی با ۶ ماه سابقه
-/// (عضویت و تمدید، پرداخت، ورود، خرید شاپ و بوفه، مربی، وزن) تا داشبورد خالی نباشد.
-/// شماره‌ها در بازهٔ 09391000000 به بعد هستند و نام‌ها ساختگی‌اند.
+/// Nur für Demo und Präsentation (niemals in Production): 200 fiktive Mitglieder mit 6 Monaten Verlauf
+/// (Mitgliedschaft und Verlängerung, Zahlung, Check-in, Shop- und Bistrokäufe, Trainer, Gewicht), damit das Dashboard nicht leer ist.
+/// Die Nummern beginnen bei 01521000000 und die Namen sind erfunden.
 /// </summary>
 public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClock clock, ILogger<DemoSeeder> logger)
 {
-    public const string PhonePrefix = "0939100";
-    public const string ManagerPhone = "09100000001";
+    public const string PhonePrefix = "0152100";
+    public const string ManagerPhone = "01510000001";
 
-    private static readonly string[] MaleNames = ["علی", "محمد", "رضا", "حسین", "امیر", "مهدی", "سجاد", "آرش", "پویا", "کیان", "سینا", "میلاد", "بهراد", "فرهاد", "نیما", "پارسا", "عرفان", "یاسین", "کوروش", "داریوش"];
-    private static readonly string[] FemaleNames = ["زهرا", "فاطمه", "مریم", "سارا", "نرگس", "الهام", "نازنین", "آیدا", "مهسا", "ریحانه", "شیما", "پریسا", "هانیه", "یاسمن", "مینا", "ترانه", "بهاره", "نگار", "سمیرا", "کیمیا"];
-    private static readonly string[] LastNames = ["محمدی", "حسینی", "احمدی", "رضایی", "کریمی", "موسوی", "جعفری", "صادقی", "رحیمی", "نیکخواه", "کاظمی", "فرهادی", "دهقان", "نوروزی", "قاسمی", "زارع", "بهرامی", "افشار", "اکبری", "طاهری", "یزدانی", "نیک‌نام", "سعادت", "پاکزاد"];
+    private static readonly string[] MaleNames = ["Lukas", "Leon", "Finn", "Jonas", "Paul", "Felix", "Elias", "Noah", "Ben", "Luis", "Tim", "Jan", "Moritz", "David", "Niklas", "Max", "Tom", "Julian", "Simon", "Erik"];
+    private static readonly string[] FemaleNames = ["Anna", "Lena", "Marie", "Sarah", "Laura", "Julia", "Lea", "Emma", "Sophie", "Hannah", "Mia", "Lisa", "Clara", "Nina", "Jana", "Paula", "Johanna", "Katharina", "Melanie", "Carla"];
+    private static readonly string[] LastNames = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Koch", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann", "Braun", "Krüger", "Hofmann", "Hartmann", "Lange", "Werner"];
 
-    /// <param name="members">تعداد عضو ساختگی (برای تست حجم بالا می‌شود چند هزار گذاشت)</param>
+    /// <param name="members">Anzahl fiktiver Mitglieder (für Lasttests auch mehrere Tausend möglich)</param>
     public async Task SeedAsync(string staffPhone, int members = 200, int days = 182, CancellationToken ct = default)
     {
         await EnsureStaffAsync(staffPhone, ct);
@@ -43,21 +43,21 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
         var template = await db.ContractTemplates.AsNoTracking().FirstOrDefaultAsync(t => t.IsActive, ct);
         if (branches.Count == 0 || packages.Count == 0) return;
 
-        // جشنوارهٔ گذشته برای نمایش «اثر جشنواره»
+        // Vergangene Aktion, damit der „Aktionseffekt“ sichtbar ist
         var summer = new Campaign
         {
-            Title = "جشنوارهٔ تابستانی", Description = "۱۵٪ تخفیف پکیج‌های سه و شش‌ماهه",
+            Title = "Sommeraktion", Description = "15 % Rabatt auf 3- und 6-Monats-Pakete",
             StartsAtUtc = now.AddDays(-95).Date, EndsAtUtc = now.AddDays(-80).Date, DiscountPercent = 15,
             EligiblePackageSlugs = ["quarter", "half-year"], IsActive = true, CreatedAtUtc = now.AddDays(-100),
         };
         db.Campaigns.Add(summer);
         await db.SaveChangesAsync(ct);
 
-        // یک گیت نمایشی برای هر شعبه (ورودهای ساختگی به آن ثبت می‌شوند)
+        // Ein Demo-Gate pro Filiale (fiktive Check-ins laufen darüber)
         var gate = new Dictionary<int, int>();
         foreach (var b in branches)
         {
-            var d = new AccessDevice { Name = "گیت ورودی (نمایشی)", BranchId = b.Id, Section = b.Sections, Vendor = "demo-seed",
+            var d = new AccessDevice { Name = "Eingangs-Gate (Demo)", BranchId = b.Id, Section = b.Sections, Vendor = "demo-seed",
                 KeyHash = IAccessControlService.HashKey(Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))) };
             db.AccessDevices.Add(d);
             await db.SaveChangesAsync(ct);
@@ -68,10 +68,10 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
         var roleMember = await db.Roles.FirstAsync(r => r.Name == Roles.Member, ct);
         long tracking = 9_100_000_000;
         var dailyNo = new Dictionary<(int, DateTime), int>();
-        var pc = new PersianCalendar();
+        var pc = new GregorianCalendar();
         var todayTehran = Jalali.ToTehran(now);
 
-        // پکیج‌های رایج بیشتر فروخته می‌شوند
+        // Beliebte Pakete werden öfter verkauft
         var weighted = new List<MembershipPackage>();
         foreach (var p in packages)
             weighted.AddRange(Enumerable.Repeat(p, p.Slug switch { "month-unlimited" => 6, "quarter" => 6, "month-12" => 4, "half-year" => 3, "yearly" => 1, _ => 1 }));
@@ -87,7 +87,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
             var joined = start.AddDays(rnd.Next(0, Math.Max(1, days - 7))).AddHours(rnd.Next(8, 21));
 
             DateOnly? birth = rnd.NextDouble() < 0.65 ? DateOnly.FromDateTime(now.AddYears(-rnd.Next(18, 50)).AddDays(-rnd.Next(0, 365))) : null;
-            if (i < 2) // دو نفر امروز (به تقویم شمسی) تولدشان است تا پیامک تولد در دمو دیده شود
+            if (i < 2) // zwei Personen haben heute Geburtstag, damit die Geburtstags-SMS in der Demo sichtbar ist
                 birth = DateOnly.FromDateTime(pc.ToDateTime(pc.GetYear(todayTehran) - 25 - i, pc.GetMonth(todayTehran), pc.GetDayOfMonth(todayTehran), 12, 0, 0, 0));
 
             var user = new AppUser
@@ -98,7 +98,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                 BirthDate = birth, MarketingSmsOptIn = rnd.NextDouble() < 0.72,
             };
             db.Users.Add(user);
-            await db.SaveChangesAsync(ct); // شناسه لازم است
+            await db.SaveChangesAsync(ct); // ID wird benötigt
             db.UserRoles.Add(new IdentityUserRole<int> { UserId = user.Id, RoleId = roleMember.Id });
 
             if (template is not null)
@@ -108,7 +108,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                     HealthAnswers = template.HealthQuestions.Select(_ => false).ToList(), ContentHash = "demo-seed", CreatedAtUtc = joined,
                 });
 
-            // ---- زنجیرهٔ عضویت و تمدید
+            // ---- Kette aus Mitgliedschaft und Verlängerung
             var memberships = new List<Membership>();
             var at = joined;
             while (at < now)
@@ -126,24 +126,24 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                 var paidAt = memberships.Count == 1 ? at : at.AddDays(-rnd.Next(0, 3)).AddHours(rnd.Next(-5, 5));
                 if (paidAt > now) paidAt = now.AddMinutes(-rnd.Next(10, 600));
                 var useCampaign = paidAt >= summer.StartsAtUtc && paidAt < summer.EndsAtUtc && summer.EligiblePackageSlugs.Contains(pkg.Slug) && rnd.NextDouble() < 0.8;
-                var discount = useCampaign ? pkg.PriceToman * 15 / 100 / 1000 * 1000 : 0;
+                var discount = useCampaign ? pkg.PriceToman * 15 / 100 / 10 * 10 : 0;
                 db.Payments.Add(new Payment
                 {
-                    UserId = user.Id, Purpose = PaymentPurpose.Membership, Membership = m, Description = $"عضویت {pkg.Name}",
+                    UserId = user.Id, Purpose = PaymentPurpose.Membership, Membership = m, Description = $"Mitgliedschaft {pkg.Name}",
                     BaseAmountToman = pkg.PriceToman, CampaignDiscountToman = discount, AmountToman = pkg.PriceToman - discount, CampaignId = useCampaign ? summer.Id : null,
                     Status = PaymentStatus.Succeeded, TrackingNumber = tracking++, Gateway = "DemoSeed", TransactionCode = "DEMO", IdempotencyKey = $"demo-{tracking}",
                     PaidAtUtc = paidAt, CreatedAtUtc = paidAt,
                 });
                 if (useCampaign) summer.RedemptionCount++;
 
-                // تمدید یا ریزش
+                // Verlängerung oder Abwanderung
                 if (m.EndsAtUtc >= now || rnd.NextDouble() > 0.68) break;
                 at = m.EndsAtUtc!.Value.AddDays(rnd.NextDouble() < 0.7 ? 0 : rnd.Next(3, 20));
             }
             await db.SaveChangesAsync(ct);
 
-            // ---- ورودها، بوفه و شاپ
-            var habit = 0.25 + rnd.NextDouble() * 0.45;      // احتمال آمدن در هر روز
+            // ---- Check-ins, Bistro und Shop
+            var habit = 0.25 + rnd.NextDouble() * 0.45;      // Wahrscheinlichkeit pro Tag
             var morning = rnd.NextDouble() < 0.3;
             var cafeFan = rnd.NextDouble() * 0.5;
             foreach (var m in memberships)
@@ -182,7 +182,7 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                 m.SessionsUsed = used;
             }
 
-            // شاپ: هر نفر به‌طور میانگین یک خرید در ۶ ماه
+            // Shop: im Schnitt ein Kauf pro Person in 6 Monaten
             if (variants.Count > 0)
                 for (var k = 0; k < (rnd.NextDouble() < 0.55 ? rnd.Next(1, 3) : 0); k++)
                 {
@@ -196,22 +196,22 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                     {
                         Number = $"KS-D-{tracking % 100000:D5}", UserId = user.Id, BranchId = branch.Id, Fulfillment = pickup ? Fulfillment.Pickup : Fulfillment.Delivery,
                         Status = paid < now.AddDays(-4) ? OrderStatus.Completed : pickup ? OrderStatus.ReadyForPickup : OrderStatus.Paid,
-                        RecipientName = name, RecipientPhone = phone, Address = pickup ? null : "آدرس نمایشی", SubtotalToman = price * qty,
-                        ShippingToman = pickup ? 0 : 150_000, TotalToman = price * qty + (pickup ? 0 : 150_000), PayMethod = PayMethod.Gateway,
+                        RecipientName = name, RecipientPhone = phone, Address = pickup ? null : "Demo-Adresse", SubtotalToman = price * qty,
+                        ShippingToman = pickup ? 0 : 490, TotalToman = price * qty + (pickup ? 0 : 490), PayMethod = PayMethod.Gateway,
                         IdempotencyKey = $"demo-shop-{tracking++}", PaidAtUtc = paid, CreatedAtUtc = paid,
                         Items = [new ShopOrderItem { VariantId = v.Id, ProductName = v.Product!.Name, VariantLabel = v.Label, ImagePath = v.Product.ImagePath, UnitPriceToman = price, Quantity = qty, CreatedAtUtc = paid }],
                     });
                 }
 
-            // کیف پول
+            // Guthaben
             if (rnd.NextDouble() < 0.5)
             {
-                var bal = rnd.Next(1, 20) * 50_000L;
+                var bal = rnd.Next(1, 20) * 500L;
                 db.Wallets.Add(new Wallet { UserId = user.Id, BalanceToman = bal, UpdatedAtUtc = joined });
-                db.WalletTransactions.Add(new WalletTransaction { UserId = user.Id, AmountToman = bal, BalanceAfterToman = bal, Type = WalletTxType.TopUp, Description = "شارژ کیف پول (نمایشی)", Reference = "demo", CreatedAtUtc = joined });
+                db.WalletTransactions.Add(new WalletTransaction { UserId = user.Id, AmountToman = bal, BalanceAfterToman = bal, Type = WalletTxType.TopUp, Description = "Guthaben aufgeladen (Demo)", Reference = "demo", CreatedAtUtc = joined });
             }
 
-            // مربی، برنامه و وزن
+            // Trainer, Plan und Gewicht
             var coach = coaches.Where(c => c.BranchId == branch.Id && c.Section.HasFlag(section)).FirstOrDefault()
                         ?? coaches.FirstOrDefault(c => c.Section.HasFlag(section));
             if (coach is not null && rnd.NextDouble() < 0.4)
@@ -229,9 +229,9 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
                 if (rnd.NextDouble() < 0.7)
                     db.TrainingPlans.Add(new TrainingPlan
                     {
-                        MemberUserId = user.Id, CoachId = coach.Id, Title = "برنامهٔ چربی‌سوزی و قدرت", IsActive = true, UpdatedAtUtc = now.AddDays(-rnd.Next(1, 40)), CreatedAtUtc = joined,
+                        MemberUserId = user.Id, CoachId = coach.Id, Title = "Fettabbau- und Kraftplan", IsActive = true, UpdatedAtUtc = now.AddDays(-rnd.Next(1, 40)), CreatedAtUtc = joined,
                         DaysJson = JsonSerializer.Serialize(SamplePlan, Web),
-                        Nutrition = "صبحانه: جو دوسر و تخم‌مرغ — ناهار: برنج کم، مرغ یا ماهی، سالاد — بعد از تمرین: شیک پروتئین — شام سبک. روزانه ۲ تا ۳ لیتر آب.",
+                        Nutrition = "Frühstück: Haferflocken und Eier — Mittag: wenig Reis, Hähnchen oder Fisch, Salat — nach dem Training: Proteinshake — leichtes Abendessen. Täglich 2 bis 3 Liter Wasser.",
                     });
             }
             db.ChangeTracker.DetectChanges();
@@ -249,26 +249,26 @@ public sealed class DemoSeeder(GymDbContext db, UserManager<AppUser> users, IClo
     private static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
     private static readonly object[] SamplePlan =
     [
-        new { day = "شنبه", focus = "سینه و پشت بازو", items = new[] { "پرس سینه هالتر ۴×۱۰", "پرس بالا سینه دمبل ۳×۱۲", "قفسه سیم‌کش ۳×۱۵", "پشت بازو طناب ۴×۱۲" } },
-        new { day = "دوشنبه", focus = "پشت و جلو بازو", items = new[] { "بارفیکس ۴×حداکثر", "زیربغل سیم‌کش ۴×۱۰", "روئینگ دمبل ۳×۱۲", "جلو بازو هالتر ۳×۱۰" } },
-        new { day = "چهارشنبه", focus = "پا و شکم", items = new[] { "اسکوات ۵×۸", "پرس پا ۴×۱۲", "ددلیفت رومانیایی ۳×۱۰", "پلانک ۳×۴۵ ثانیه" } },
-        new { day = "پنج‌شنبه", focus = "هوازی", items = new[] { "تردمیل شیب‌دار ۲۵ دقیقه", "طناب ۵×۱ دقیقه" } },
+        new { day = "Montag", focus = "Brust und Trizeps", items = new[] { "Bankdrücken Langhantel 4×10", "Schrägbankdrücken Kurzhantel 3×12", "Butterfly am Kabelzug 3×15", "Trizepsdrücken am Seil 4×12" } },
+        new { day = "Dienstag", focus = "Rücken und Bizeps", items = new[] { "Klimmzüge 4×max.", "Latzug 4×10", "Kurzhantelrudern 3×12", "Langhantel-Curls 3×10" } },
+        new { day = "Donnerstag", focus = "Beine und Bauch", items = new[] { "Kniebeugen 5×8", "Beinpresse 4×12", "Rumänisches Kreuzheben 3×10", "Unterarmstütz 3×45 Sekunden" } },
+        new { day = "Freitag", focus = "Ausdauer", items = new[] { "Laufband mit Steigung 25 Minuten", "Seilspringen 5×1 Minute" } },
     ];
 
     /// <summary>
-    /// کارمند نمایشی (همهٔ نقش‌ها و مدیر کل، مربی اول) + یک مدیر شعبه که فقط یک شعبه را می‌بیند
-    /// تا محدودیت شعبه در پرزنت قابل نشان دادن باشد.
+    /// Demo-Mitarbeiter (alle Rollen und Gesamtadmin, erster Trainer) + ein Filialleiter, der nur eine Filiale sieht,
+    /// damit die Filialbeschränkung in der Präsentation gezeigt werden kann.
     /// </summary>
     public async Task EnsureStaffAsync(string staffPhone, CancellationToken ct)
     {
-        var staff = await Ensure(staffPhone, "کارمند نمایشی", [Roles.Member, Roles.SuperAdmin, Roles.BranchManager, Roles.Reception, Roles.Coach, Roles.CanteenStaff, Roles.ShopStaff]);
+        var staff = await Ensure(staffPhone, "Demo-Mitarbeiter", [Roles.Member, Roles.SuperAdmin, Roles.BranchManager, Roles.Reception, Roles.Coach, Roles.CanteenStaff, Roles.ShopStaff]);
         var firstCoach = await db.Coaches.OrderBy(c => c.SortOrder).FirstOrDefaultAsync(ct);
         if (firstCoach is not null && firstCoach.UserId is null && !await db.Coaches.AnyAsync(c => c.UserId == staff.Id, ct))
         {
             firstCoach.UserId = staff.Id;
             await db.SaveChangesAsync(ct);
         }
-        var manager = await Ensure(ManagerPhone, "مدیر شعبهٔ نمایشی", [Roles.Member, Roles.BranchManager, Roles.Reception, Roles.CanteenStaff]);
+        var manager = await Ensure(ManagerPhone, "Demo-Filialleiter", [Roles.Member, Roles.BranchManager, Roles.Reception, Roles.CanteenStaff]);
         if (!await db.StaffBranches.AnyAsync(s => s.UserId == manager.Id, ct) && await db.Branches.OrderBy(b => b.SortOrder).FirstOrDefaultAsync(ct) is { } b)
         {
             db.StaffBranches.Add(new StaffBranch { UserId = manager.Id, BranchId = b.Id });

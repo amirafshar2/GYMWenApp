@@ -3,7 +3,7 @@ import SiteHero from '../site/SiteHero'
 
 const HomeRest = lazy(() => import('./HomeRest'))
 
-/** ترتیب بخش‌ها از روی صفحهٔ مرجع (GYM Store / Sports Complex) + بخش‌های لازمِ پروژه */
+/** Reihenfolge der Bereiche nach der Referenzseite (GYM Store / Sports Complex) + nötige Projektbereiche */
 export default function Home() {
   return (
     <>

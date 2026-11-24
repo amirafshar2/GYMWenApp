@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { cn } from '@/lib/utils'
 
-/** انیمیشن ورود «fade in up» که در همهٔ بخش‌های صفحهٔ مرجع تکرار می‌شود */
+/** Einblendanimation „fade in up“, wie in allen Bereichen der Referenzseite */
 export function useFadeUp(delay = 0) {
   const reduced = useReducedMotion()
   return reduced ? {} : {
@@ -13,12 +13,12 @@ export function useFadeUp(delay = 0) {
   }
 }
 
-/** برچسب کوچک و پررنگ بالای تیترها («WHAT WE DO» در صفحهٔ مرجع) */
+/** Kleines fettes Label über Überschriften („WHAT WE DO“ auf der Referenzseite) */
 export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
   return <p className={cn('text-[13px] font-bold text-chalk', className)}>{children}</p>
 }
 
-/** سرتیتر بخش‌ها: برچسب + تیتر پررنگ + توضیح؛ وسط‌چین یا راست‌چین */
+/** Bereichskopf: Label + fette Überschrift + Beschreibung; zentriert oder bündig */
 export function SectionHead({ eyebrow, title, accent, body, id, align = 'start', aside, dark }: {
   eyebrow: string
   title: string
@@ -60,7 +60,7 @@ const tones: Record<Tone, string> = {
   'outline-dark': 'border-2 border-chalk text-chalk hover:bg-chalk hover:text-white',
 }
 
-/** دکمهٔ مستطیلی صفحهٔ مرجع (قرمز، زرد یا دورخط) */
+/** Rechteckiger Button der Referenzseite (rot, gelb oder Umriss) */
 export function Btn({ children, onClick, href, type = 'button', disabled, tone = 'red', className }: { children: ReactNode; onClick?: () => void; href?: string; type?: 'button' | 'submit'; disabled?: boolean; tone?: Tone; className?: string }) {
   const cls = cn('inline-flex h-[52px] cursor-pointer items-center justify-center gap-2 rounded-[3px] px-8 text-[15px] font-bold transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-60', tones[tone], className)
   return href
@@ -68,7 +68,7 @@ export function Btn({ children, onClick, href, type = 'button', disabled, tone =
     : <button type={type} onClick={onClick} disabled={disabled} className={cls}>{children}</button>
 }
 
-/** سازگاری با بخش‌های قبلی */
+/** Kompatibilität mit früheren Bereichen */
 export function InkButton(p: { children: ReactNode; onClick?: () => void; href?: string; type?: 'button' | 'submit'; disabled?: boolean }) {
   return <Btn {...p} tone="red" />
 }
@@ -78,5 +78,5 @@ export function TextLink({ children, href, onClick }: { children: ReactNode; hre
   return href ? <a href={href} className={cls}>{children}</a> : <button type="button" onClick={onClick} className={cls}>{children}</button>
 }
 
-/** ظرف عرض صفحه مثل «boxed» صفحهٔ مرجع */
+/** Container in Seitenbreite wie „boxed“ auf der Referenzseite */
 export const wrap = 'mx-auto w-full max-w-[1290px] px-5 sm:px-8'

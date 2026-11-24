@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-/** ادغام کلاس‌های Tailwind (الگوی shadcn که کامپوننت‌های 21st.dev لازم دارند) */
+/** Zusammenführen von Tailwind-Klassen (shadcn-Muster, das die 21st.dev-Komponenten brauchen) */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

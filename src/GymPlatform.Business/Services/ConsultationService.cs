@@ -26,16 +26,16 @@ public sealed class ConsultationService(
         if (request.BranchId is int bid && !await branches.AnyAsync(b => b.Id == bid && b.IsActive, ct))
             return Result<ConsultationCreatedDto>.Fail(new Dictionary<string, string[]>
             {
-                ["BranchId"] = ["شعبهٔ انتخاب‌شده وجود ندارد."]
+                ["BranchId"] = ["Die gewählte Filiale existiert nicht."]
             });
 
         var mobile = PersianText.NormalizeMobile(request.Mobile);
 
-        // جلوگیری از ثبت تکراری: هر شماره حداکثر یک درخواست در ۱۰ دقیقه.
+        // Doppelte Anfragen verhindern: höchstens eine Anfrage pro Nummer in 10 Minuten.
         var since = clock.UtcNow.AddMinutes(-10);
         if (await requests.AnyAsync(r => r.Mobile == mobile && r.CreatedAtUtc > since, ct))
             return Result<ConsultationCreatedDto>.Ok(new ConsultationCreatedDto(0,
-                "درخواست شما قبلاً ثبت شده است؛ به‌زودی با شما تماس می‌گیریم."));
+                "Ihre Anfrage ist bereits eingegangen; wir melden uns in Kürze."));
 
         var entity = new ConsultationRequest
         {
@@ -50,6 +50,6 @@ public sealed class ConsultationService(
         await requests.SaveChangesAsync(ct);
 
         return Result<ConsultationCreatedDto>.Ok(new ConsultationCreatedDto(entity.Id,
-            "درخواست مشاوره ثبت شد. همکاران ما به‌زودی با شما تماس می‌گیرند."));
+            "Beratungsanfrage gesendet. Unser Team meldet sich in Kürze bei Ihnen."));
     }
 }

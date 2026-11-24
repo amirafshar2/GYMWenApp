@@ -21,7 +21,7 @@ public sealed class ContractsController(IContractService contracts) : Controller
     public async Task<IActionResult> Active(CancellationToken ct) =>
         await contracts.GetActiveAsync(ct) is { } c ? Ok(c) : NoContent();
 
-    /// <summary>ارسال کد امضای قرارداد به موبایل کاربر واردشده.</summary>
+    /// <summary>Sendet den Code für die Vertragsunterschrift an das Handy des angemeldeten Benutzers.</summary>
     [Authorize]
     [HttpPost("sign/otp")]
     [ValidateCsrf]
@@ -41,7 +41,7 @@ public sealed class ContractsController(IContractService contracts) : Controller
             .ToActionResult(this, s => Created($"/api/v1/me/contracts/{s.Id}/pdf", s));
 }
 
-/// <summary>ثبت‌نام: قیمت‌گذاری سمت سرور، شروع پرداخت (idempotent) و بازگشت از درگاه با Verify سمت سرور.</summary>
+/// <summary>Anmeldung: serverseitige Preisberechnung, Zahlungsstart (idempotent) und Rückkehr vom Gateway mit serverseitigem Verify.</summary>
 [ApiController]
 [Route("api/v1")]
 [Produces("application/json")]
@@ -73,7 +73,7 @@ public sealed class CheckoutController(
         return redirect is not null ? Ok(redirect) : Problem(statusCode: status, title: error);
     }
 
-    /// <summary>بازگشت از درگاه. تأیید فقط سمت سرور (Fetch + Verify) و تطبیق مبلغ؛ کاربر به صفحهٔ نتیجه می‌رود.</summary>
+    /// <summary>Rückkehr vom Gateway. Bestätigung nur serverseitig (Fetch + Verify) mit Betragsabgleich; der Benutzer landet auf der Ergebnisseite.</summary>
     [HttpGet("payments/callback"), HttpPost("payments/callback")]
     [RequestSizeLimit(16 * 1024)]
     [IgnoreAntiforgeryToken]
@@ -95,10 +95,10 @@ public sealed class CheckoutController(
             return Redirect(back);
         }
 
-        // مبلغ برگشتی درگاه باید دقیقاً با مبلغ ثبت‌شده برابر باشد
-        if ((long)invoice.Amount != payment.AmountToman * 10)
+        // Der vom Gateway zurückgemeldete Betrag muss exakt dem gespeicherten entsprechen
+        if ((long)invoice.Amount != payment.AmountToman)
         {
-            await onlinePayment.CancelAsync(invoice, "مبلغ با سفارش مطابقت ندارد.", ct);
+            await onlinePayment.CancelAsync(invoice, "Betrag stimmt nicht mit der Bestellung überein.", ct);
             await payments.CompleteAsync(payment.TrackingNumber, false, null, "amount-mismatch", rc, ct);
             return Redirect(back);
         }
@@ -108,7 +108,7 @@ public sealed class CheckoutController(
         return Redirect(back);
     }
 
-    /// <summary>بعد از درگاه، کاربر به صفحهٔ نتیجهٔ همان نوع خرید برمی‌گردد</summary>
+    /// <summary>Nach dem Gateway kehrt der Benutzer zur Ergebnisseite der jeweiligen Kaufart zurück</summary>
     private static string ResultPath(GymPlatform.Domain.Entities.Payment p) => p.Purpose switch
     {
         GymPlatform.Domain.Enums.PaymentPurpose.ShopOrder => $"/shop/orders/{p.ShopOrderId}",

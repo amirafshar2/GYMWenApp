@@ -7,13 +7,13 @@ using Microsoft.Net.Http.Headers;
 namespace GymPlatform.Api.Video;
 
 /// <summary>
-/// ویدیوهای آپلودی مدیر (بیرون از wwwroot). آپلود مستقیم و تکه‌تکه روی دیسک نوشته می‌شود (نه در رم)،
-/// بعد در صف پس‌زمینه با ffmpeg نسخه‌های اسکرولی و عکس ساخته می‌شود.
+/// Vom Admin hochgeladene Videos (außerhalb von wwwroot). Der Upload wird direkt und stückweise auf die Platte geschrieben (nicht in den RAM),
+/// danach erzeugt eine Hintergrund-Warteschlange mit ffmpeg Scroll-Versionen und Bilder.
 /// <code>
-/// {id}.mp4            پخش تکراری (اول: همان فایل آپلودی، بعد از بهینه‌سازی: نسخهٔ 1080 با GOP 48)
-/// {id}-scrub.mp4      اسکرولی 1080 (هر ۴ فریم یک کلید)    {id}-scrub-720.mp4 / {id}-scrub-540.mp4
-/// {id}.jpg / {id}-960.jpg  فریم اول                         {id}.orig.mp4  نسخهٔ اصلی
-/// {id}.ready / {id}.failed  وضعیت
+/// {id}.mp4            Schleifenwiedergabe (zuerst die hochgeladene Datei, nach der Optimierung die 1080er-Version mit GOP 48)
+/// {id}-scrub.mp4      Scroll-Version 1080 (Keyframe alle 4 Frames)    {id}-scrub-720.mp4 / {id}-scrub-540.mp4
+/// {id}.jpg / {id}-960.jpg  erster Frame                         {id}.orig.mp4  Originalversion
+/// {id}.ready / {id}.failed  Status
 /// </code>
 /// </summary>
 public sealed partial class VideoStore : IVideoLibrary
@@ -45,7 +45,7 @@ public sealed partial class VideoStore : IVideoLibrary
     public bool IsOptimized(string url)
     {
         if (UploadUrl().Match(url) is { Success: true } m) return File.Exists(PathOf(m.Groups[1].Value, ".ready"));
-        // ویدیوی قالب: نسخه‌ها کنار خودش در wwwroot ساخته شده‌اند
+        // Video der Vorlage: die Versionen wurden daneben in wwwroot erzeugt
         if (BuiltInUrl().Match(url) is { Success: true } b)
             return Outputs.All(s => File.Exists(Path.Combine(_webRoot, "media", "video", b.Groups[1].Value + s)));
         return false;
@@ -62,12 +62,12 @@ public sealed partial class VideoStore : IVideoLibrary
 
     public bool Exists(string id) => File.Exists(PathOf(id, ".mp4")) || File.Exists(PathOf(id, ".orig.mp4"));
 
-    /// <summary>بدنهٔ multipart را مستقیم روی دیسک می‌نویسد؛ فقط MP4/MOV (بایت ۴ تا ۷ = ftyp) تا ۸۰ مگابایت</summary>
+    /// <summary>Schreibt den multipart-Body direkt auf die Platte; nur MP4/MOV (Bytes 4 bis 7 = ftyp) bis 80 MB</summary>
     public async Task<(string? Id, string? Error)> SaveAsync(HttpRequest request, CancellationToken ct)
     {
         var boundary = request.ContentType is { } ctype && MediaTypeHeaderValue.TryParse(ctype, out var mt)
             ? HeaderUtilities.RemoveQuotes(mt.Boundary).Value : null;
-        if (string.IsNullOrEmpty(boundary)) return (null, "فایلی ارسال نشده است.");
+        if (string.IsNullOrEmpty(boundary)) return (null, "Keine Datei gesendet.");
 
         var reader = new MultipartReader(boundary, request.Body) { BodyLengthLimit = MaxBytes + 1 };
         MultipartSection? section;
@@ -95,20 +95,20 @@ public sealed partial class VideoStore : IVideoLibrary
                     }
                 }
                 if (headLen < 8 || head[4] != 'f' || head[5] != 't' || head[6] != 'y' || head[7] != 'p')
-                    return (null, "فقط ویدیوی MP4 یا MOV پذیرفته می‌شود.");
+                    return (null, "Nur MP4- oder MOV-Videos werden akzeptiert.");
                 File.Move(part, PathOf(id, ".mp4"));
                 done = true;
                 return (id, null);
             }
-            catch (InvalidDataException) { return (null, "حجم ویدیو حداکثر ۸۰ مگابایت باشد."); }
-            catch (IOException) { return (null, "ذخیرهٔ ویدیو انجام نشد."); }
+            catch (InvalidDataException) { return (null, "Das Video darf höchstens 80 MB groß sein."); }
+            catch (IOException) { return (null, "Video konnte nicht gespeichert werden."); }
             finally { if (!done) try { File.Delete(part); } catch (IOException) { } }
         }
-        return (null, "فایلی ارسال نشده است.");
+        return (null, "Keine Datei gesendet.");
     }
 }
 
-/// <summary>MVC فرم را پیش از اکشن نخواند (بدنه را خود اکشن تکه‌تکه روی دیسک می‌نویسد)</summary>
+/// <summary>MVC liest das Formular nicht vor der Action (die Action schreibt den Body stückweise auf die Platte)</summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class DisableFormValueModelBindingAttribute : Attribute, Microsoft.AspNetCore.Mvc.Filters.IResourceFilter
 {

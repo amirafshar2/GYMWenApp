@@ -5,13 +5,13 @@ import { brand } from '@/lib/brand'
 import { faDigits } from '@/lib/fa'
 import { fill, site } from '@/lib/site'
 
-/** سؤالات متداول — FAQ Accordion از 21st.dev */
+/** Häufige Fragen — FAQ Accordion von 21st.dev */
 export default function SiteFaq() {
   const { data: faq = [] } = useData('faq', api.faq)
   if (!faq.length) return null
   return (
     <FrequentlyAskedQuestions
-      title={fill(site.home.faq.title) || 'سؤال‌های رایج'}
+      title={fill(site.home.faq.title) || 'Häufige Fragen'}
       description={brand.phone ? fill(site.home.faq.text) : ''}
       contactHref={brand.phone ? `tel:${brand.phone}` : ''}
       contactLabel={faDigits(brand.phone)}

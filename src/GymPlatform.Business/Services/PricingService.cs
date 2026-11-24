@@ -4,10 +4,10 @@ namespace GymPlatform.Business.Services;
 
 public interface IPricingService
 {
-    /// <summary>قیمت پس از تخفیف کمپین، گرد به پایین تا هزار تومان.</summary>
+    /// <summary>Preis nach Aktionsrabatt, auf volle 10 Cent abgerundet.</summary>
     long ApplyDiscount(long priceToman, int discountPercent);
     Campaign? BestCampaignFor(string packageSlug, IEnumerable<Campaign> campaigns, DateTime utcNow);
-    /// <summary>بیشترین تخفیف برای این پکیج (و در صورت مشخص بودن، این شعبه)، با درنظر گرفتن تخفیف درصدی یا مبلغ ثابت.</summary>
+    /// <summary>Höchster Rabatt für dieses Paket (und ggf. diese Filiale), prozentual oder als fester Betrag.</summary>
     Campaign? BestCampaignFor(string packageSlug, long basePriceToman, IEnumerable<Campaign> campaigns, DateTime utcNow, string? branchSlug);
     long MonthlyEquivalent(long priceToman, int durationMonths);
 }
@@ -18,9 +18,9 @@ public sealed class PricingService : IPricingService
     {
         ArgumentOutOfRangeException.ThrowIfNegative(priceToman);
         if (discountPercent is < 0 or > 90)
-            throw new ArgumentOutOfRangeException(nameof(discountPercent), "تخفیف باید بین ۰ تا ۹۰ درصد باشد.");
+            throw new ArgumentOutOfRangeException(nameof(discountPercent), "Der Rabatt muss zwischen 0 und 90 Prozent liegen.");
         var discounted = priceToman - (priceToman * discountPercent / 100);
-        return discounted / 1000 * 1000;
+        return discounted / 10 * 10;
     }
 
     public Campaign? BestCampaignFor(string packageSlug, IEnumerable<Campaign> campaigns, DateTime utcNow) =>
@@ -34,5 +34,5 @@ public sealed class PricingService : IPricingService
                  .FirstOrDefault();
 
     public long MonthlyEquivalent(long priceToman, int durationMonths) =>
-        durationMonths <= 0 ? priceToman : priceToman / durationMonths / 1000 * 1000;
+        durationMonths <= 0 ? priceToman : priceToman / durationMonths / 10 * 10;
 }

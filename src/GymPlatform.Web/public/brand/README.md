@@ -1,4 +1,4 @@
-آیکن‌های پیش‌فرض قالب (بی‌نام):
-- placeholder-logo.svg — لوگوی موقت تا مالک لوگوی خودش را در «تنظیمات سایت» آپلود کند
-- favicon.ico / favicon-64.png / apple-touch-icon.png — آیکن پیش‌فرض مرورگر (با آپلود لوگو، آیکن صفحه هم عوض می‌شود)
-- demo-logo.svg — لوگوی برند ساختگی نسخهٔ نمایشی
+Standardicons der Vorlage (ohne Namen):
+- placeholder-logo.svg — vorläufiges Logo, bis der Inhaber sein eigenes in den „Website-Einstellungen“ hochlädt
+- favicon.ico / favicon-64.png / apple-touch-icon.png — Standard-Browsericon (mit dem Logo-Upload ändert sich auch das Seitenicon)
+- demo-logo.svg — Logo der fiktiven Marke der Demo-Version
