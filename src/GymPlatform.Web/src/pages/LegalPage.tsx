@@ -4,6 +4,7 @@ import { brand } from '@/lib/brand'
 import { site } from '@/lib/site'
 import { cn } from '@/lib/utils'
 import LiteDoc from '@/components/LiteDoc'
+import { DEMO_DATENSCHUTZ, DEMO_IMPRESSUM } from '@/site/DemoLegal'
 
 /**
  * Rechtsseiten; Text aus „Website-Einstellungen → Rechtsseiten“.
@@ -44,6 +45,12 @@ export default function LegalPage() {
         </nav>
         <article className="rounded-[6px] border border-steel-2 bg-white p-6 sm:p-10 [&_a]:font-bold [&_a]:text-plate [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:text-[19px] [&_h2]:font-black [&_h2]:text-chalk [&_li]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ps-5 text-[15px] leading-8 text-chalk/90">
           <h1 className="mb-1 text-[28px] font-black text-chalk sm:text-[34px]">{doc.title}</h1>
+          {site.demo && (
+            <div role="note" className="mt-6 rounded-[4px] border border-plate/30 bg-plate/[.06] p-4 text-[14px] leading-7">
+              <b>Demo-Projekt:</b> „{brand.name}“ ist ein fiktives Unternehmen. Diese Website ist ein Portfolio-Projekt von Amir Reza Afshar; es werden keine Verträge geschlossen und keine persönlichen Daten erhoben.
+              Es gelten das <a href={DEMO_IMPRESSUM} target="_blank" rel="noopener noreferrer">Impressum</a> und die <a href={DEMO_DATENSCHUTZ} target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a> der Portfolio-Website. Der folgende Text ist ein Beispiel.
+            </div>
+          )}
           <div className="mt-8"><LiteDoc text={site.legal[doc.key]} /></div>
         </article>
       </div>

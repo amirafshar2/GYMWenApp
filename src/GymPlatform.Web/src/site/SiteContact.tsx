@@ -9,6 +9,7 @@ import { faDigits, faNum } from '@/lib/fa'
 import { fill, site, splitAccent } from '@/lib/site'
 import { cn } from '@/lib/utils'
 import { Eyebrow, useFadeUp, wrap } from './ui/SectionHead'
+import { DemoFormNotice } from './DemoLegal'
 
 /** Dieselbe erlaubte Liste wie auf dem Server (CreateConsultationValidator.AllowedGoals) */
 const GOALS = ['Abnehmen', 'Muskelaufbau', 'Fitness', 'Kraft', 'Klettern', 'Sonstiges']
@@ -104,7 +105,7 @@ export default function SiteContact() {
           </ul>
         </motion.div>
 
-        <motion.form {...fadeB} onSubmit={submit} noValidate
+        {site.demo ? <motion.div {...fadeB}><DemoFormNotice /></motion.div> : <motion.form {...fadeB} onSubmit={submit} noValidate
           className="rounded-[6px] bg-white p-6 text-chalk shadow-[0_40px_80px_-30px_rgb(0_0_0/.6)] sm:p-9">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-[22px] font-black">Beratungsformular</h3>
@@ -171,7 +172,7 @@ export default function SiteContact() {
             {st.s === 'ok' && <p role="status" className="flex items-center gap-2 font-bold text-[#178a4c]"><Check className="size-4" aria-hidden />{st.msg}</p>}
             {st.s === 'err' && <p role="alert" className="font-bold text-danger">{st.msg}</p>}
           </div>
-        </motion.form>
+        </motion.form>}
       </div>
     </section>
   )

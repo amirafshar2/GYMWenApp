@@ -9,6 +9,7 @@ import { fill, site } from '@/lib/site'
 import { Logo } from './SiteHeader'
 import { Link } from 'react-router-dom'
 import { wrap } from './ui/SectionHead'
+import { DEMO_DATENSCHUTZ, DEMO_IMPRESSUM } from './DemoLegal'
 
 const toLatin = (s: string) => s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\s|-/g, '')
 const mostCommon = (xs: (string | null)[]) => {
@@ -76,7 +77,9 @@ export default function SiteFooter() {
         </nav>
         <div>
           <h2 className={h}>Kontakt</h2>
-          <form onSubmit={subscribe} noValidate>
+          {site.demo ? (
+            <p className="text-[15px] leading-7 text-white/60">Demo-Projekt: Formulare sind abgeschaltet, es werden keine persönlichen Daten erhoben.</p>
+          ) : <form onSubmit={subscribe} noValidate>
             <label htmlFor="nl-mobile" className="text-[15px] text-white/60">Hinterlasse deine Nummer und wir schicken dir Aktionen zuerst per SMS.</label>
             <div className="mt-4 flex h-[52px] overflow-hidden rounded-[3px] bg-white/[.07] focus-within:ring-2 focus-within:ring-plate">
               <input id="nl-mobile" type="tel" inputMode="numeric" autoComplete="tel" dir="ltr" placeholder="01512 3456789"
@@ -86,7 +89,7 @@ export default function SiteFooter() {
                 className="grid w-[52px] shrink-0 cursor-pointer place-items-center bg-plate transition-colors hover:bg-plate-hi disabled:opacity-60"><Send className="size-5" aria-hidden /></button>
             </div>
             <p id="nl-msg" role="status" className={`mt-2 min-h-6 text-[14px] ${state.s === 'err' ? 'text-[#ff8a95]' : 'text-[#8ee3a6]'}`}>{state.msg}</p>
-          </form>
+          </form>}
           <div className="mt-3 flex gap-3">
             {brand.instagram && (
               <a href={brand.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"
@@ -101,7 +104,12 @@ export default function SiteFooter() {
         <div className={`${wrap} flex flex-wrap items-center justify-between gap-4 py-6`}>
           <Logo light />
           <nav aria-label="AGB" className="flex flex-wrap gap-x-5 gap-y-1 text-[13px]">
-            {[['/about', 'Über uns'], ['/terms', 'AGB'], ['/privacy', 'Datenschutz'], ['/refund', 'Kündigung und Erstattung']].map(([to, t]) => (
+            {site.demo ? <>
+              <span className="text-white/55">Demo-Projekt</span>
+              <a href={DEMO_IMPRESSUM} target="_blank" rel="noopener noreferrer" className="text-white/55 transition-colors hover:text-white">Impressum</a>
+              <a href={DEMO_DATENSCHUTZ} target="_blank" rel="noopener noreferrer" className="text-white/55 transition-colors hover:text-white">Datenschutz</a>
+              <Link to="/terms" className="text-white/55 transition-colors hover:text-white">AGB (Beispiel)</Link>
+            </> : [['/about', 'Über uns'], ['/terms', 'AGB'], ['/privacy', 'Datenschutz'], ['/refund', 'Kündigung und Erstattung']].map(([to, t]) => (
               <Link key={to} to={to} className="text-white/55 transition-colors hover:text-white">{t}</Link>
             ))}
           </nav>
