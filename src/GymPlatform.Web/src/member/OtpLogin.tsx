@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, MessageSquareText } from 'lucide-react'
 import { authApi, ApiError, type User } from '@/lib/api'
+import { site } from '@/lib/site'
 import { faDigits, faNum } from '@/lib/fa'
 import { Btn, inputCls, Notice, toLatinDigits } from './ui'
 
@@ -26,7 +27,31 @@ export function CodeField({ value, onChange, id, invalid, describedBy }: { value
 }
 
 /** Zweistufiger Login: Handy → SMS-Code. Im Demo-Modus wird der Code auf der Seite angezeigt. */
-export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => void; compact?: boolean }) {
+/** Demo-Version: keine Eingabe von Daten – Anmeldung als Demo-Mitglied mit einem Klick */
+export const DEMO_MEMBER_PHONE = '01521000001'
+function DemoMemberLogin({ onDone }: { onDone: (u: User) => void }) {
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const go = async () => {
+    setBusy(true); setErr(null)
+    try { onDone((await authApi.demoLogin(DEMO_MEMBER_PHONE)).user) }
+    catch (x) { setErr((x as Error).message); setBusy(false) }
+  }
+  return (
+    <div className="grid gap-3">
+      <p className="text-[13.5px] text-rubber">In der Demo-Version werden keine persönlichen Daten abgefragt. Sie melden sich mit einem Klick als Demo-Mitglied an.</p>
+      <Btn type="button" onClick={() => void go()} disabled={busy}>{busy ? 'Anmeldung läuft…' : 'Als Demo-Mitglied anmelden'}</Btn>
+      {err && <Notice tone="err">{err}</Notice>}
+    </div>
+  )
+}
+
+export default function OtpLogin(props: { onDone: (u: User) => void; compact?: boolean }) {
+  if (site.demo) return <DemoMemberLogin onDone={props.onDone} />
+  return <PhoneOtpLogin {...props} />
+}
+
+function PhoneOtpLogin({ onDone, compact }: { onDone: (u: User) => void; compact?: boolean }) {
   const uid = useId()
   const [step, setStep] = useState<'phone' | 'code'>('phone')
   const [phone, setPhone] = useState('')
@@ -40,7 +65,7 @@ export default function OtpLogin({ onDone, compact }: { onDone: (u: User) => voi
   const normalized = toLatinDigits(phone).replace(/[\s-]/g, '')
   const send = async (e?: FormEvent) => {
     e?.preventDefault()
-    if (!/^(\+98|0098|0)?9\d{9}$/.test(normalized)) return setErr('Bitte die Handynummer im Format 01512 3456789 eingeben.')
+    if (!/^(\+49|0049|0)?1[5-7]\d{8,9}$/.test(normalized)) return setErr('Bitte die Handynummer im Format 01512 3456789 eingeben.')
     setBusy(true); setErr(null)
     try {
       const r = await authApi.sendOtp(normalized)

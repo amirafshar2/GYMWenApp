@@ -37,7 +37,7 @@ export default function SiteFooter() {
   const subscribe = async (e: FormEvent) => {
     e.preventDefault()
     const m = toLatin(mobile)
-    if (!/^(\+98|0098|0)?9\d{9}$/.test(m)) return setState({ s: 'err', msg: 'Bitte die Handynummer im Format 01512 3456789 eingeben.' })
+    if (!/^(\+49|0049|0)?1[5-7]\d{8,9}$/.test(m)) return setState({ s: 'err', msg: 'Bitte die Handynummer im Format 01512 3456789 eingeben.' })
     setState({ s: 'busy' })
     try {
       await api.consult({ fullName: 'Newsletter abonnieren', mobile: m, goal: null, message: 'Newsletter für Aktionen abonnieren', branchId: null })

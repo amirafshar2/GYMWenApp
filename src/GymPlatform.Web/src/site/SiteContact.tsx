@@ -50,7 +50,7 @@ export default function SiteContact() {
     const fields: Record<string, string> = {}
     const m = toLatin(mobile)
     if (name.trim().length < 3) fields.name = 'Bitte Vor- und Nachnamen vollständig angeben.'
-    if (!/^(\+98|0098|0)?9\d{9}$/.test(m)) fields.mobile = 'Bitte die Handynummer im Format 01512 3456789 eingeben.'
+    if (!/^(\+49|0049|0)?1[5-7]\d{8,9}$/.test(m)) fields.mobile = 'Bitte die Handynummer im Format 01512 3456789 eingeben.'
     if (Object.keys(fields).length) return setSt({ s: 'err', msg: Object.values(fields)[0], fields })
     setSt({ s: 'busy' })
     try {

@@ -37,7 +37,7 @@ export default function LoginPage() {
         <Panel aria-labelledby="login-title" className="shadow-[0_20px_60px_rgb(0_0_0/0.06)]">
           <h2 id="login-title" className="mb-6 text-[22px] font-black text-chalk">Anmelden</h2>
           <DemoQuickLogin next={next} onPick={(to) => { dest.current = to }} />
-          <OtpLogin onDone={() => nav(dest.current ?? next, { replace: true })} />
+          {!site.demo && <OtpLogin onDone={() => nav(dest.current ?? next, { replace: true })} />}
           <p className="mt-6 flex items-start gap-2 text-[12.5px] leading-6 text-rubber">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-chalk" aria-hidden />
             Ihre Anmeldung wird mit einem sicheren Cookie gehalten. Mit der Anmeldung akzeptieren Sie die <Link to="/join" className="font-bold text-chalk underline">Mitgliedschaftsbedingungen</Link> .
